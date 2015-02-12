@@ -4,10 +4,10 @@
 \alias{Get.Pvalue.p}
 \title{Calculate empirical Pvalue}
 \usage{
-Get.Pvalue.p(zscore.Matrix, permu)
+Get.Pvalue.p(U.matrix, permu)
 }
 \arguments{
-\item{zscore.Matrix}{A data.frame of raw pvalue from U test. Output from .Stat.nonpara}
+\item{U.matrix}{A data.frame of raw pvalue from U test. Output from .Stat.nonpara}
 
 \item{permu}{data frame of permutation. Output from .Stat.nonpara.permu}
 }

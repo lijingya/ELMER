@@ -4,19 +4,17 @@
 \alias{GetNearGenes}
 \title{Collect nearby gene for one locus.}
 \usage{
-GetNearGenes(SampleSize = 20, Gene = NULL, TBed = NULL, TRange = NULL,
+GetNearGenes(geneNum = 20, geneAnnot = NULL, TRange = NULL,
   cores = NULL)
 }
 \arguments{
-\item{SampleSize}{A number determine how many gene will be collected from each side of target (number shoule be even) Default to 20.}
-
-\item{Gene}{A GRange object contains coordinates of promoters for human genome.}
+\item{geneNum}{A number determine how many gene will be collected from each side of target (number shoule be even) Default to 20.}
 
 \item{TRange}{A GRange object contains coordinate of a list targets.}
 
 \item{cores}{A number to specific how many cores to use to compute. Default to detectCores()/2.}
 
-\item{Tbed}{A bed format data.frame object contains coordinate of a list targets.}
+\item{Gene}{A GRange object contains coordinates of promoters for human genome.}
 }
 \value{
 A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
