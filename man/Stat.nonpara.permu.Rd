@@ -2,7 +2,7 @@
 % Please edit documentation in R/StatisticTest.R
 \name{Stat.nonpara.permu}
 \alias{Stat.nonpara.permu}
-\title{U test (non parameter test) for permutation. This is one probe vs multiple gene which is good for computing permutation for each probe.}
+\title{Stat.nonpara.permu}
 \usage{
 Stat.nonpara.permu(Probe, Gene, Top = 0.2, Meths = Meths, Exps = Exps,
   permu.dir = NULL)
@@ -17,11 +17,13 @@ Stat.nonpara.permu(Probe, Gene, Top = 0.2, Meths = Meths, Exps = Exps,
 \item{Meths}{A matrix contains methylation for each probe (row) and each sample (column).}
 
 \item{Exps}{A matrix contains Expression for each gene (row) and each sample (column).}
+
+\item{permu.dir}{A path to store permuation data.}
 }
 \value{
 U test results
 }
 \description{
-U test (non parameter test) for permutation. This is one probe vs multiple gene which is good for computing permutation for each probe.
+Stat.nonpara.permu
 }
 

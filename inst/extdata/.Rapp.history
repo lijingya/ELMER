@@ -1,0 +1,4 @@
+load("/Volumes/Macintosh HD 2/Dropbox/Lab/code/ELMER/inst/extdata/UCSC_gene_hg19.rda")
+getwd()
+ls()
+txs

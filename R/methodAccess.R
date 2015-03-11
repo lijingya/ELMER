@@ -30,7 +30,24 @@ setMethod (f="show","MEE.data",
            }
 )
 
+setMethod (f="summary","MEE.data",
+           function(object){
+             cat("*** Class MEE.data, method summary *** \n")
+             cat("* meth \n"); print(str(object@meth))
+             cat("* exp \n"); print(str(object@exp))
+             cat("* sample \n"); print(str(object@sample))
+             cat("* probeInfo \n"); print(object@probeInfo)
+             cat("* geneInfo \n"); print(object@geneInfo)
+             cat("******* End Print (MEE.data) ******* \n")
+           }
+)
+
 #Accessor Getter
+#' getMeth
+#' @param object MEE.data object
+#' @param probe A vector of probes' name. When specified, DNA methylation only for these probes will be output.
+#' @param ID A vector of sample ID. When specified, DNA methylation only for these samples will be output.
+#' @exportMethod getMeth
 setGeneric(name="getMeth",def=function(object,probe,ID){standardGeneric("getMeth")})
 setMethod(f="getMeth",signature="MEE.data",
           definition=function(object,probe,ID){
@@ -46,21 +63,33 @@ setMethod(f="getMeth",signature="MEE.data",
             return(meth)
           })
 
-setGeneric(name="getExp",def=function(object,GeneID,ID){standardGeneric("getExp")})
+#' getExp
+#' @param object MEE.data object
+#' @param geneID A vector of genes' id. When specified, gene expression only for these genes will be output.
+#' @param ID A vector of sample ID. When specified, gene expression only for these samples will be output.
+#' @exportMethod getExp
+
+setGeneric(name="getExp",def=function(object,geneID,ID){standardGeneric("getExp")})
 setMethod(f="getExp",signature="MEE.data",
-          function(object,GeneID,ID){
-            if(missing(GeneID) & missing(ID)){
+          function(object,geneID,ID){
+            if(missing(geneID) & missing(ID)){
               exp <- object@exp
-            }else if(missing(GeneID) & !missing(ID)){
+            }else if(missing(geneID) & !missing(ID)){
               exp <- object@exp[,ID]
-            }else if(!missing(GeneID) & missing(ID)){
-              exp <- object@exp[GeneID,]
-            }else if(!missing(GeneID) & !missing(ID)){
-              exp <- object@exp[GeneID,ID]
+            }else if(!missing(geneID) & missing(ID)){
+              exp <- object@exp[geneID,]
+            }else if(!missing(geneID) & !missing(ID)){
+              exp <- object@exp[geneID,ID]
             }
             return(exp)
           })
 
+#' getSample
+#' @param object MEE.data object
+#' @param ID A vector of sample ID. When specified, sample informtion only for these samples will be output.
+#' @param cols A vector of columns names of Sample slots of MEE.data object.
+#' @exportMethod getSample
+#' 
 setGeneric(name="getSample",def=function(object,ID,cols){standardGeneric("getSample")})
 setMethod(f="getSample",signature="MEE.data",
           function(object,ID,cols){
@@ -77,18 +106,16 @@ setMethod(f="getSample",signature="MEE.data",
           })
 
 
+
+
+
 ###Pair -------------------------------------------------------------------
 # initialize
 setMethod(f="initialize",signature="Pair",
           definition=function(.Object,pairInfo,probeInfo,geneInfo){
             cat("~~~ Pair: initializator ~~~ \n")
             # meth needs to be matrix
-            if(!missing(pairInfo)){
-              pairInfo <- data.frame(probe=as.character(pairInfo$probe),geneID=as.character(pairInfo$geneID),Symbol=as.character(pairInfo$geneName),
-                                     Distance = as.numeric(pairInfo$Distance),Side=as.character(pairInfo$Side),Raw.p=as.numeric(pairInfo$Raw.p),Pe=as.numeric(pairInfo$Pe),
-                                     stringsAsFactors=F)
-              .Object@pairInfo<-pairInfo
-            }
+            if(!missing(pairInfo)) .Object@pairInfo<-pairInfo
             #probeInfo needs to be GRanges
             if(!missing(probeInfo)) .Object@probeInfo <- probeInfo
             #geneInfo needs to be GRanges
@@ -104,64 +131,93 @@ setMethod (f="show","Pair",
              cat("* pair \n"); print(str(object@pairInfo))
              cat("* probeInfo \n"); print(head(object@probeInfo))
              cat("* geneInfo \n"); print(head(object@geneInfo))
+             cat("******* End Print (Pair) ******* \n")
+           }
+)
+
+setMethod (f="summary","Pair",
+           function(object){
+             cat("*** Class Pair, method summary *** \n")
+             cat("* pair \n"); print(str(object@pairInfo))
+             cat("* probeInfo \n"); print(head(object@probeInfo))
+             cat("* geneInfo \n"); print(head(object@geneInfo))
              cat("******* End Print (MEE.data) ******* \n")
            }
 )
 
+
 #Accessor Getter
-setGeneric(name="getPair",def=function(object,pair,cols){standardGeneric("getPair")})
+#' getPair
+#' @param object Pair object
+#' @param geneID A vector of genes' id. When specified, only the pair containing these genes will be output.
+#' @param probe A vector of probes' name. When specified, only the pair containing these probes will be output.
+#' @exportMethod getPair
+
+setGeneric(name="getPair",def=function(object,probe,geneID){standardGeneric("getPair")})
 setMethod(f="getPair",signature="Pair",
-          function(object,pair,cols){
-            if(missing(pair) & missing(cols)){
+          function(object,probe,geneID){
+            if(missing(geneID) & missing(probe)){
               pair <- object@pairInfo
-            }else if(missing(pair) & !missing(cols)){
-              pair <- object@pairInfo[,cols]
-            }else if(!missing(pair) & missing(cols)){
-              pair <- object@pairInfo[pair,]
-            }else if(!missing(pair) & !missing(cols)){
-              pair <- object@pairInfo[pair,cols]
+            }else if(missing(probe) & !missing(geneID)){
+              pair <- object@pairInfo[object@pairInfo$GeneID %in% geneID,]
+            }else if(!missing(probe) & missing(geneID)){
+              pair <- object@pairInfo[object@pairInfo$Probe %in% probe,]
+            }else if(!missing(probe) & !missing(geneID)){
+              pair <- object@pairInfo[object@pairInfo$Probe %in% probe & object@pairInfo$GeneID %in% geneID,]
             }
             return(pair)
           })
 
-setGeneric(name="getProbeInfo",def=function(object,chr,probe){standardGeneric("getProbeInfo")})
-setMethod(f="getProbeInfo",signature=c("MEE.data","Pair"),
-          function(object,chr,probe){
+#' getProbeInfo
+#' @param object MEE.data or Pair object
+#' @param probe A vector of probes' name. When specified, only the these probes' coordinate will be output.
+#' @param chr A vector of chromosome such chr1, chr2. When specified, only the probeInfo locating on these chromosome will be output.
+#' @param range A GRanges object. When specified, only the probeInfo locating within these loci will be output.
+#' @exportMethod getProbeInfo
+setGeneric(name="getProbeInfo",def=function(object,chr,probe,range){standardGeneric("getProbeInfo")})
+setMethod(f="getProbeInfo",signature="ANY",
+          function(object,chr,probe,range){
             if(missing(chr) & missing(probe)){
               probeInfo <- object@probeInfo
             }else if(missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[Object@probeInfo$name %in% probe]
+              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe]
             }else if(!missing(chr) & missing(probe)){
-              probeInfo <- object@probeInfo[seqnames(Object@probeInfo) %in% chr]
+              probeInfo <- object@probeInfo[seqnames(object@probeInfo) %in% chr]
             }else if(!missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[Object@probeInfo$name %in% probe & seqnames(Object@probeInfo) %in% chr]
+              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe & seqnames(object@probeInfo) %in% chr]
+            }
+            if(!missing(range)){
+              over <- findOverlaps(probeInfo,range)
+              probeInfo <- probeInfo[unique(queryHits(over))]
             }
             return(probeInfo)
           })
 
-setGeneric(name="getGeneInfo",def=function(object,GeneID,GeneName,Simple){standardGeneric("getGeneInfo")})
-setMethod(f="getGeneInfo",signature=c("MEE.data","Pair"),
-          function(object,GeneID,GeneName,Simple=FALSE){
-            if(missing(GeneID) & missing(GeneName)){
+#' getProbeInfo
+#' @param object MEE.data or Pair object
+#' @param geneID A vector of genes' id. When specified, only the these genes' coordinate will be output.
+#' @param symbol A vector of genes' symbols . When specified, only the these genes' coordinate will be output.
+#' @param range A GRanges object. When specified, only the geneInfo locating within these loci will be output.
+#' @exportMethod getGeneInfo
+setGeneric(name="getGeneInfo",def=function(object,geneID,symbol,range){standardGeneric("getGeneInfo")})
+setMethod(f="getGeneInfo",signature="ANY",
+          function(object,geneID,symbol,range){
+            if(missing(geneID) & missing(symbol)){
               out <- object@geneInfo
-            }else if(missing(GeneID) & !missing(GeneName)){
-              if(sample){
-                out <- unique(as.character(object@geneInfo$GENEID[object@geneInfo$SYMBOL %in% GeneName]))
-              }else{
-                out <- object@geneInfo[object@geneInfo$SYMBOL %in% GeneName]
-              }
-            }else if(!missing(GeneID) & missing(GeneName)){
-              if(Simple){
-                out <- unique(as.character(object@geneInfo$SYMBOL[object@geneInfo$GENEID %in% GeneID]))
-              }else{
-                out <- object@geneInfo[object@geneInfo$GENEID %in% GeneID]
-              }
+            }else if(missing(geneID) & !missing(symbol)){
+              out <- object@geneInfo[object@geneInfo$SYMBOL %in% symbol]
+            }else if(!missing(geneID) & missing(symbol)){
+              out <- object@geneInfo[object@geneInfo$GENEID %in% geneID]
+            }
+            if(!missing(range)){
+              over <- findOverlaps(out,range)
+              out <- out[unique(queryHits(over))]
             }
             return(out)
           })
 
-
 ## Construct data structure-----------------------------------------------------
+
 mee.data <- function(meth=NULL,exp=NULL,sample=NULL,probeInfo=NULL,geneInfo=NULL){
   args <- list(meth=meth,exp=exp,sample=sample,probeInfo=probeInfo,geneInfo=geneInfo)
   args <- args[!unlist(lapply(args,is.null))]

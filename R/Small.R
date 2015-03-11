@@ -66,18 +66,18 @@ standardizeTcgaId<-function(tcgaId){
 
 ##############-----------fetch data
 ## Construct MEE.data from load local data.
-#' tcgaSampleType.
+#' fetch.mee
 #' @param meth A matrix or path of rda file only containing a matrix of DNA methylation data.
 #' @param exp A matrix or path of rda file only containing a matrix of expression data.
 #' @param sample A data frame or path of rda file only containing sample information in data frame format.
 #' @param probeInfo A GRnage object or path of rda file only containing a GRange of probe information 
 #' @param geneInfo A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL) 
 #' @param probes A vector lists probes' name. If probes are specified, the methylation and probeInfo will only contain this list of probes.
-#' @param gene A vector lists genes' ID. If gene are specified, the methylation and probeInfo will only contain this list of probes.
+#' @param genes A vector lists genes' ID. If gene are specified, the methylation and probeInfo will only contain this list of probes.
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @return MEE.data object
 #' @export 
-fetch.data <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL,TCGA=FALSE){
+fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL,TCGA=FALSE){
   if(!missing(meth)){
     if(is.character(meth)){
       newenv <- new.env()
@@ -154,8 +154,8 @@ fetch.data <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL
     probeInfo <- probeInfo[as.character(probeInfo$name) %in% rownames(meth)]
   } 
   if(!is.null(geneInfo) & !is.null(exp)){
-    exp <- exp[sub("ID","",rownames(exp)) %in% as.character(geneInfo$GENEID),]
-    geneInfo <- geneInfo[as.character(geneInfo$GENEID) %in% sub("ID","",rownames(exp))]
+    exp <- exp[rownames(exp)%in% as.character(geneInfo$GENEID),]
+    geneInfo <- geneInfo[as.character(geneInfo$GENEID) %in% rownames(exp)]
   } 
   if(!is.null(meth) & !is.null(exp)){
     meth <- meth[,sample$meth.ID]
@@ -166,4 +166,191 @@ fetch.data <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL
 }
 
 
+#' fetch.pair
+#' @param pair A data.frame or path of csv file containing pair information.
+#' @param probeInfo A GRnage object or path of rda file only containing a GRange of probe information 
+#' @param geneInfo A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL) 
+#' @return pair.data object
+#' @export 
+fetch.pair <- function(pair,probeInfo,geneInfo){
+  if(!missing(pair)){
+    if(is.character(pair)){
+      pair <- read.csv(pair, stringsAsFactors=F)
+    }
+  }else{
+    pair <- NULL
+  }
+  if(!missing(probeInfo)){
+    if(is.character(probeInfo)){
+      newenv <- new.env()
+      load(probeInfo, envir=newenv)
+      probeInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    }
+  }else{
+    probeInfo <- NULL
+  }
+  
+  if(!missing(geneInfo)){
+    if(is.character(geneInfo)){
+      newenv <- new.env()
+      load(geneInfo, envir=newenv)
+      geneInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    }
+  }else{
+    geneInfo <- NULL
+  }
+  
+  pair <- pair.data(pair=pair,probeInfo=probeInfo,geneInfo=geneInfo)
+  return(pair)
+}
+
+#' splitmatix 
+#' @param x A matrix 
+#' @param by A character specify if split the matix by row or column.
+#' @export
+splitmatrix <- function(x,by="row") {
+  if(by %in% "row"){
+    out <- split(x, rownames(x))
+  }else if (by %in% "col"){
+    out <- split(x, colnames(x))
+  }
+  return(out)
+}
+
+#'getSymbol
+#'@param mee A MEE.data or Pair object.
+#'@param geneID A character which is the geneID
+#'@return gene symbol 
+#'@export
+getSymbol <- function(mee,geneID){
+  gene <- unique(values(getGeneInfo(mee,geneID=geneID))[,c("GENEID","SYMBOL")])
+  gene <- gene[match(geneID,gene$GENEID),"SYMBOL"]
+  return(gene)
+}
+
+#'getGeneID
+#'@param mee A MEE.data or Pair object.
+#'@param symbol A character which is the geneID
+#'@return gene symbol 
+#'@export
+getGeneID <- function(mee,symbol){
+  gene <- unique(values(getGeneInfo(mee,symbol=symbol))[,c("GENEID","SYMBOL")])
+  gene <- gene[match(symbol,gene$SYMBOL),"GENEID"]
+  return(gene)
+}
+
+
+## common colors
+jet.colors <-
+  colorRampPalette(c("#00007F", "blue", "#007FFF", "cyan",
+                     "#7FFF7F", "yellow", "#FF7F00", "red", "#7F0000"))
+redGreen <- colorRampPalette(c("green","black","red"))
+
+
+#' Normalization to 0 to 1
+#' @param x A matrix.
+#' @param col A boolean to determine normalize by column or not.
+#' @param row A boolean to determine normalize by row or not.
+#' @param na.rm A boolean to determine to remove na number or not.
+#' @return A normalized matrix.
+#' @export
+Normalize <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
+  if(col){
+    ColMax <- apply(x,2,max,na.rm=na.rm)
+    ColMin <- apply(x,2,min,na.rm=na.rm)
+    range <- ColMax-ColMin
+    x <- t((t(x)-ColMin)/range)
+  }
+  if(row){
+    RowMax <- apply(x,1,max,na.rm=na.rm)
+    RowMin <- apply(x,1,min,na.rm=na.rm)
+    range <- RowMax-RowMin
+    x <- (x-RowMin)/range
+  }
+  
+  return(x)
+}
+
+#' Normalization based on mean
+#' @param x A matrix.
+#' @param col A boolean to determine normalize by column or not.
+#' @param row A boolean to determine normalize by row or not.
+#' @param na.rm A boolean to determine to remove na number or not.
+#' @return A normalized matrix.
+NormalizeMean <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
+  
+  if(col){
+    Mean <- colMeans(x,na.rm=na.rm)
+    SD <- apply(x,2,sd,na.rm=na.rm)
+    x <- t((t(x)-Mean)/SD)
+    x[,SD==0] <- 0 
+  }
+  if(row){
+    Mean <- rowMeans(x,na.rm=na.rm)
+    SD <- apply(x,1,sd,na.rm=na.rm)
+    x <- (x-Mean)/SD
+    x[SD==0,] <- 0
+  }
+  
+  return(x)
+}
+
+#' Normalization based on median
+#' @param x A matrix.
+#' @param col A boolean to determine normalize by column or not.
+#' @param row A boolean to determine normalize by row or not.
+#' @param na.rm A boolean to determine to remove na number or not.
+#' @return A normalized matrix.
+#' @export
+NormalizeMedian <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
+  if(col){
+    Median <- apply(x,2,median,na.rm=na.rm)
+    x <- t((t(x)-Median))
+  }
+  if(row){
+    Median <- apply(x,1,median,na.rm=na.rm)  
+    x <- x-Median
+  }
+  
+  return(x)
+}
+
+#' binary data
+#' @param x A matrix.
+#' @param Break A value to binarize the data.
+#' @param Break2 A value to cut value to 3 categories.
+#' @return A binarized matrix.
+Binary <- function(x,Break=0.3,Break2=NULL){
+  if(!is.numeric(x)) stop("x need to be numeric") 
+  change <- x
+  if(is.null(Break2)){
+    change[x > Break] <- 1
+    change[x < Break | x== Break] <- 0
+  }else{
+    change[x < Break | x== Break] <- 0
+    change[x> Break & x < Break2] <- NA
+    change[x > Break2 | x== Break2] <-1 
+  }
+  
+  return(change)    
+}
+
+
+
+#' lable linear regression formula 
+#' @param df A data.frame object contains two variables: dependent variable (Dep) and explanation variable (Exp).
+#' @param Dep A character specify dependent variable. The first column will be dependent variable as default.
+#' @param Exp A character specify explanation variable. The second column will be explanation variable as default.
+#' @return a linear regression formula
+#' @export
+lm_eqn = function(df,Dep,Exp){
+  if(missing(Dep)) Dep <- colnames(df)[1]
+  if(missing(Exp)) Exp <- colnames(df)[2]
+  m = lm(df[,Dep] ~ df[,Exp]);
+  eq <- substitute(italic(y) == a + (b) %.% italic(x)*"\n"~~italic(r)^2~"="~r2, 
+                   list(a = format(coef(m)[1], digits = 2), 
+                        b = format(coef(m)[2], digits = 2), 
+                        r2 = format(summary(m)$r.squared, digits = 3)))
+  as.character(as.expression(eq));                 
+}
 
