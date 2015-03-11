@@ -2,3 +2,7 @@ load("/Volumes/Macintosh HD 2/Dropbox/Lab/code/ELMER/inst/extdata/UCSC_gene_hg19
 getwd()
 ls()
 txs
+load("/Volumes/Macintosh HD 2/Dropbox/Lab/code/ELMER/inst/extdata/motif.relavent.TFs.human.rda")
+ls
+ls()
+motif.relavent.TFs
