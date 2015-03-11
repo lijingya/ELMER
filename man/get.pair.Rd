@@ -21,7 +21,7 @@ get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 1000,
 
 \item{permu.dir}{A path where the output of permuation will be.}
 
-\item{Pe}{A number specify the empircal pvalue cutoff for defining signficant pairs.}
+\item{Pe}{A number specify the empircal pvalue cutoff for defining signficant pairs. Default is 0.01}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 

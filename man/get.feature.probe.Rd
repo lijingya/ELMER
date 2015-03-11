@@ -26,4 +26,12 @@ A GRange object containing probes that satisfy selecting critiria.
 \description{
 get.feature.probe
 }
+\examples{
+# get distal enhancer probe
+Probe <- get.feature.probe()
+# get distal enhancer probe which are 1kb away from the promoter regions
+Probe1 <- get.feature.probe(TSS.range=list(upstream=1000, downstream=1000))
+# get distal enhancer probe remove chrX chrY
+Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
+}
 

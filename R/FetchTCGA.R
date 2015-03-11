@@ -1,3 +1,12 @@
+#' getTCGA
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param Meth A logic if TRUE HM450K DNA methylation data will download.
+#' @param RNA A logic if TRUE RNA-seq Hiseq-V2 from TCGA level 3 will be download.
+#' @param Clinic A logic if TRUE clinic data will be download for that disease.
+#' @param basedir A path shows where the data will be stored.
+#' @param RNAtype A charactor to specify whether use isoform level or gene level. When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.
+#' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
+#' @export
 getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",RNAtype="gene",Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
   if(Meth){
@@ -22,10 +31,12 @@ getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",RNAt
   if(test.clinic=="error") warning(sprintf("Failed to download clinic data. Possible possibility:1. No clinical data for %s patients; 2.Wget doesn't work.",disease))
 }
 
-
+#' getRNAseq
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @export
 getRNAseq <- function(disease, basedir="./Data")
 {
-  require(stringr)
   wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
@@ -59,9 +70,12 @@ getRNAseq <- function(disease, basedir="./Data")
   } 
 }
 
+#' get450K
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @export
 get450K <- function(disease, basedir="./Data")
 {
-  require(stringr)
   wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
@@ -96,9 +110,12 @@ get450K <- function(disease, basedir="./Data")
   }
 }
 
+#' getClinic
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @export
 getClinic <- function(disease, basedir="./Data")
 {
-  require(stringr)
   wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
@@ -123,8 +140,12 @@ getClinic <- function(disease, basedir="./Data")
 }
 
 ## type is gene level expression, isoform level expression
+#' matrixRNA
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @param type A charactor to specify whether use isoform level or gene level. When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.
+#' @export
 matrixRNA <- function(disease,basedir="./Data",type="gene"){
-  library(parallel)
   if(missing(disease)) stop("disease should be specified.")
   wd <- getwd()
   disease <- tolower(disease)
@@ -150,9 +171,12 @@ matrixRNA <- function(disease,basedir="./Data",type="gene"){
   save(GeneExp,file=sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease)))
 }
 
-
+#' matrixMeth
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @param filter For each probe, the percentage of NA among the all the samples should smaller than filter.
+#' @export
 matrixMeth <- function(disease,basedir="./Data",filter=0.2){
-  library(parallel)
   if(missing(disease)) stop("disease should be specified.")
   wd <- getwd()
   disease <- tolower(disease)
@@ -172,6 +196,11 @@ matrixMeth <- function(disease,basedir="./Data",filter=0.2){
   save(Meth,file=sprintf("%s/%s_meth.rda",diseasedir,toupper(disease)))
 }
 
+
+#' matrixClinic
+#' @param disease A character to specify disease in TCGA such as BLCA
+#' @param basedir A path shows where the data will be stored.
+#' @export
 matrixClinic <- function(disease,basedir="./Data"){
   if(missing(disease)) stop("disease should be specified.")
   wd <- getwd()

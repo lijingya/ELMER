@@ -4,7 +4,6 @@
 #' @param geneNum A number determine how many gene will be collected from each side of target (number shoule be even).
 #' @param TRange A GRange object contains coordinate of targets.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
- 
 NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")
@@ -19,7 +18,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   }
   GeneIDs <-c()
   Distances <- c()
-  strand(Gene) <- "*"
+  BiocGenerics::strand(Gene) <- "*"
   Gene <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
   if(length(Gene)==0){
     warning(paste0(Target," don't have any nearby gene in the given gene list."))
@@ -27,7 +26,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   }else{
     Gene <- sort(Gene)
     #  Gene_subset <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
-    index <- follow(regionInfo,Gene)
+    index <- IRanges::follow(regionInfo,Gene)
     #left side
     Leftlimit <- geneNum/2
     Rightlimit <- geneNum/2
@@ -85,7 +84,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     Whole <- c(Left,Right)
     GeneIDs <- Gene$GENEID[Whole]
     Symbols <- Gene$SYMBOL[Whole]
-    Distances <-  suppressWarnings(distance(Gene[Whole],regionInfo))
+    Distances <-  suppressWarnings(IRanges::distance(Gene[Whole],regionInfo))
     if(Rightlimit < 1){
       Sides <- paste0("L",length(Left):1)
     }else if( Leftlimit < 1){
@@ -99,21 +98,16 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 }
 
 #' Collect nearby gene for one locus.
-#' @param Gene A GRange object contains coordinates of promoters for human genome.
+#' @param geneAnnot A GRange object contains coordinates of promoters for human genome.
 #' @param geneNum A number determine how many gene will be collected from each side of target (number shoule be even) Default to 20.
 #' @param TRange A GRange object contains coordinate of a list targets.
 #' @param cores A number to specific how many cores to use to compute. Default to detectCores()/2.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
 #' @export
-
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
-  require("snow")
   if(!is.null(cores)){
-    if(require(snow)){
-      require(parallel)
-      if(cores > detectCores()) cores <- detectCores()/2
-      cl <- makeCluster(cores,type = "SOCK")
-    }
+    if(cores > detectCores()) cores <- detectCores()/2
+    cl <- makeCluster(cores,type = "SOCK")
   }
   if(is.null(TRange)){
     stop( " TRange must be defined")

@@ -6,8 +6,8 @@
 #' @slot sample A data.frame contains sample information
 #' @slot probeInfo A GRange object contains probe information
 #' @slot geneInfo A GRange object contains gene information
-#' @import GenomicRanges
-#' @export
+#' @importClassesFrom GenomicRanges GRanges
+#' @exportClass MEE.data
 setClass("MEE.data",
          representation = representation(meth="matrix",exp="matrix",sample="data.frame",probeInfo="GRanges",geneInfo="GRanges"),
          validity=function(object){
@@ -16,8 +16,10 @@ setClass("MEE.data",
              if(any(!rownames(object@meth) %in% as.character(object@probeInfo$name)))
                warning("[MEE.data: validation] probeInfo doesn't contain all the information for the probes in the meth array.")
            }else if(!is.null(geneInfo)){
+             if(sum(rownames(object@exp) %in% as.character(object@geneInfo$GENEID))==0)
+               stop("[MEE.data: validation] GENEID in geneInfo isn't consistent with expression matrix rownames")
              if(any(!rownames(object@exp) %in% as.character(object@geneInfo$GENEID)))
-               warning("[MEE.data: validation] geneInfo doesn't contain all the information for the gene in the exp array.")
+               warning("[MEE.data: validation] geneInfo doesn't contain all the information for the gene in the expression matrix.")
            }
            return(TRUE)
          }
@@ -29,10 +31,10 @@ setClass("MEE.data",
 #' @slot pairInfo A data.frame
 #' @slot probeInfo A GRanges object.
 #' @slot geneInfo A GRanges object.
-#' @export
+#' @exportClass Pair
 setClass("Pair",
          representation = representation(pairInfo="data.frame",probeInfo="GRanges",geneInfo="GRanges"),
-         prototype = list(pairInfo=data.frame(probe=character(),geneID=character(),Symbol=character(),Distance=numeric(),Side=character(),Raw.p=numeric(),Pe=numeric(),stringsAsFactors=F),
+         prototype = list(pairInfo=data.frame(),
                           probeInfo=NULL,geneInfo=NULL),
          validity=function(object){
            cat("~~~ Pair: inspector ~~~\n")

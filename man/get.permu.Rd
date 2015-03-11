@@ -4,13 +4,13 @@
 \alias{get.permu}
 \title{get.permu}
 \usage{
-get.permu(mee, GeneID = GeneID, percentage = 0.2, rm.probes = NULL,
+get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL,
   permu.size = 1000, permu.dir = NULL, cores = NULL)
 }
 \arguments{
 \item{mee}{A MEE.data object containing at least meth, exp, probeInfo, geneInfo.}
 
-\item{GeneID}{A vector lists the genes' ID.}
+\item{geneID}{A vector lists the genes' ID.}
 
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.}
 

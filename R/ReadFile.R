@@ -10,7 +10,6 @@
 
 
 ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
-  require(GenomicRanges)
   if(is.null(cols)){
     x <- read.table(x,stringsAsFactors=FALSE,sep = "\t",skip=skip)
   }else{
@@ -34,11 +33,11 @@ ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
   }else{
     Bed<-GRanges( x[,1], IRanges(x[,2], x[,3]) )
     if(ncol(x)==4){
-      values(Bed) <- data.frame(name=x[,4])
+      values(Bed) <- data.frame(name=x[,4],stringsAsFactors = F)
     }else if(ncol(x)==5){
-      values(Bed) <- data.frame(name=x[,4],score = x[,5])
+      values(Bed) <- data.frame(name=x[,4],score = x[,5],stringsAsFactors = F)
     }else if(ncol(x)>=6){
-      values(Bed) <- data.frame(name=x[,4],score = x[,5],x[,setdiff(seq_len(ncol(x)),c(1:6))])
+      values(Bed) <- data.frame(name=x[,4],score = x[,5],x[,setdiff(seq_len(ncol(x)),c(1:6))],stringsAsFactors = F)
     }  
   }
   if(!is.null(seqLength)){
@@ -55,7 +54,6 @@ ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
 #' @return GRange object containning GFF file information.
 #' @export
 ReadGFF <- function(x,strand=FALSE,skip=0  ){
-  require(GenomicRanges)
   x <- read.table(x,stringsAsFactors=FALSE,sep = "\t",skip=skip)
   x[,1] <- sub("chrx","chrX",x[,1])
   x[,1] <- sub("chry","chrY",x[,1])
@@ -64,10 +62,10 @@ ReadGFF <- function(x,strand=FALSE,skip=0  ){
   x[,1] <- sub(" ","",x[,1])
   if(strand){
     GFF<-GRanges( x[,1], IRanges(x[,4], x[,5]) ,strand=x[,7])
-    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],frame = x[,8],name = x[,9],x[,setdiff(seq_len(ncol(x)),c(1:9))])
+    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],frame = x[,8],name = x[,9],x[,setdiff(seq_len(ncol(x)),c(1:9))],stringsAsFactors = F)
   }else{
     GFF<-GRanges( x[,1], IRanges(x[,4], x[,5]) )
-    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],frame = x[,8],name = x[,9],x[,setdiff(seq_len(ncol(x)),c(1:9))])
+    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],frame = x[,8],name = x[,9],x[,setdiff(seq_len(ncol(x)),c(1:9))],stringsAsFactors = F)
   }
   seqlengths(GFF) <- sequenceLen[seqlevels(GFF),2]
   return(GFF)
@@ -101,7 +99,6 @@ rownames(sequenceLen) <- sequenceLen$chr
 #' @return A data.frame bed object or save output bed file.
 #' @export
 WriteBed <-function(x,save=T,fn=NULL){
-  require(GenomicRanges)
   x <- as.data.frame(x,row.names=NULL)
   x$element=NULL
   if(ncol(x) >5){
@@ -117,7 +114,7 @@ WriteBed <-function(x,save=T,fn=NULL){
   rownames(out) <- NULL
   if(save){
     if(is.null(fn)) fn <- deparse(substitute(x))
-    write.table(out,file=fn,row.names=F,col.names=F,quot=F,sep="\t")
+    write.table(out,file=fn,row.names=F,col.names=F,quote=F,sep="\t")
   }else{
     return(out)
   }
@@ -130,7 +127,6 @@ WriteBed <-function(x,save=T,fn=NULL){
 #' @return GRange object.
 #' @export
 RandomLoci <- function(SampleSize=NULL,exclusion=NULL,regionWidth=0){
-  require(GenomicRanges)
   chr <- paste0("chr",c(1:22,"X","Y"))
   if(!is.null(exclusion)) chr <- chr[!chr %in% exclusion]
   LengthSum <- sum(sequenceLen[chr,2])
@@ -163,7 +159,6 @@ RandomLoci <- function(SampleSize=NULL,exclusion=NULL,regionWidth=0){
 #' @return GRange object which contains elements from x that doesn't overlap with TSS.range.
 #' @export
 Distal <- function(x,TSS.range,ignore.strand=F){
-  library(GenomicRanges)
   overlap <- findOverlaps(x,TSS.range,ignore.strand=ignore.strand)
   distal.index <- !1:length(x) %in% queryHits(overlap)
   distal <- x[distal.index]
@@ -177,7 +172,6 @@ Distal <- function(x,TSS.range,ignore.strand=F){
 #' @return GRange object which contains elements from x that overlap with TSS.range.
 #' @export
 Proximal <- function(x,TSS.range,ignore.strand=F){
-  library(GenomicRanges)
   overlap <- findOverlaps(x,TSS.range,ignore.strand=ignore.strand)
   proximal.index <- 1:length(x) %in% queryHits(overlap)
   proximal <- x[proximal.index]
