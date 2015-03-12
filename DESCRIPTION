@@ -7,3 +7,4 @@ Depends: R (>= 3.0.1), GenomicRanges, ggplot2,reshape,grid,parallel,IRanges,meth
 License: GPL-3
 LazyData: true
 import: GenomicRanges,ggplot2,reshape,grid,parallel,BiocGenerics,IRanges
+Suggests: BiocStyle
