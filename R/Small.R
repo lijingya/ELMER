@@ -115,19 +115,19 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
       sample <- data.frame(ID=standardizeTcgaId(colnames(meth)),
                            meth.ID=colnames(meth),
                            TN=sapply(colnames(meth),tcgaSampleType),
-                           stringsAsFactors = F)
+                           stringsAsFactors = FALSE)
     }else if(is.null(meth) & !is.null(exp)){
       sample <- data.frame(ID=standardizeTcgaId(colnames(exp)),
                            exp.ID=colnames(exp),
                            TN=sapply(colnames(exp),tcgaSampleType),
-                           stringsAsFactors = F)
+                           stringsAsFactors = FALSE)
     }else if(!is.null(meth) & !is.null(meth)){
       ID <- intersect(standardizeTcgaId(colnames(meth)),standardizeTcgaId(colnames(exp)))
       meth.ID <- colnames(meth)
       exp.ID <- colnames(exp)
       sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,standardizeTcgaId(meth.ID))],
                            exp.ID=exp.ID[match(ID,standardizeTcgaId(exp.ID))],
-                           TN=sapply(ID,tcgaSampleType),stringsAsFactors = F)
+                           TN=sapply(ID,tcgaSampleType),stringsAsFactors = FALSE)
       
     }
   }else{
@@ -137,7 +137,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
     meth.ID <- colnames(meth)
     exp.ID <- colnames(exp)
     sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,meth.ID)],
-                         exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = F)
+                         exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = FALSE)
   }
   if(!missing(probeInfo)){
     if(is.character(probeInfo)){
@@ -194,7 +194,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
 fetch.pair <- function(pair,probeInfo,geneInfo){
   if(!missing(pair)){
     if(is.character(pair)){
-      pair <- read.csv(pair, stringsAsFactors=F)
+      pair <- read.csv(pair, stringsAsFactors=FALSE)
     }
   }else{
     pair <- NULL
@@ -249,6 +249,7 @@ getSymbol <- function(mee,geneID){
 }
 
 #'getGeneID
+#'@importFrom S4Vectors values
 #'@param mee A MEE.data or Pair object.
 #'@param symbol A character which is the geneID
 #'@return gene symbol 

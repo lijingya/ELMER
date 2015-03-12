@@ -11,8 +11,8 @@
 Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
   meth <- meths[probe,]
   if(Top.m){
-    tumor.tmp <- sort(meth[TN %in% "Tumor"],decreasing=T)
-    normal.tmp <- sort(meth[TN %in% "Normal"],decreasing=T)
+    tumor.tmp <- sort(meth[TN %in% "Tumor"],decreasing=TRUE)
+    normal.tmp <- sort(meth[TN %in% "Normal"],decreasing=TRUE)
   }else{
     tumor.tmp <- sort(meth[TN %in% "Tumor"])
     normal.tmp <- sort(meth[TN %in% "Normal"])
@@ -33,9 +33,9 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
   
   ##this is to remove the situation that the normal or tumor are all NA (only one is value)
   meth_split <- split(meth,TN)
-  meth_split <- unlist(lapply(meth_split,function(x){!is.na(sd(x,na.rm=T))}))
+  meth_split <- unlist(lapply(meth_split,function(x){!is.na(sd(x,na.rm=TRUE))}))
   
-  if(sd(meth,na.rm=T)>0 & all(meth_split)){
+  if(sd(meth,na.rm=TRUE)>0 & all(meth_split)){
     if(!is.na(Top.m)){
       alternative <- ifelse(Top.m,"less","greater")
     }else{
@@ -45,9 +45,9 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
     TT <- test(meth~TN,df,alternative=alternative)
     MeanDiff <- TT$estimate[2]-TT$estimate[1]
     PP <- TT$p.value
-    out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = F)
+    out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
   }else{
-    out <- data.frame(probe=probe,PP=NA,MeanDiff=NA,stringsAsFactors = F)
+    out <- data.frame(probe=probe,PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
   }
   return(out)
 }
@@ -65,7 +65,7 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
   Exp <- Exps[Gene,]
   Meth <- Meths[Probe,]
   unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-  methy <- order(Meth,decreasing=T)[1:round(length(Meth)*Top)] 
+  methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
   Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
   Fa[unmethy] <- -1
   Fa[methy] <- 1
@@ -73,16 +73,16 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
   Fa <- Fa[!is.na(Fa)]
   test.p <- unlist(lapply(splitmatrix(Exp),
                           function(x,Factor) 
-                            {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],alternative = "greater",exact=F)$p.value},
-                          Factor=Fa))
+                            {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],alternative = "greater",exact=FALSE)$p.value},
+							Factor=Fa))
   out <- data.frame(GeneID=Gene,
                     Raw.p=test.p[match(Gene, names(test.p))], 
-                    stringsAsFactors = F) 
+                    stringsAsFactors = FALSE) 
   if(is.null(permu.dir)){
     return(out)
   }else{
     write.table(out,file=sprintf("%s/%s",permu.dir,Probe),
-                quote=F,sep="\t",row.names=F,col.names=F)
+                quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE)
   }
 }
 
@@ -101,12 +101,12 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,]
   Meth <- Meths[Probe,]
-  Meth_B <- mean(Binary(Meth,Break=K),na.rm = T)
+  Meth_B <- mean(Binary(Meth,Break=K),na.rm = TRUE)
   if( Meth_B >0.95 | Meth_B < 0.05 ){
     test.p <- NA
   }else{
     unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-    methy <- order(Meth,decreasing=T)[1:round(length(Meth)*Top)] 
+    methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
     Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
     Fa[unmethy] <- -1
     Fa[methy] <- 1
@@ -116,15 +116,15 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
                             function(x,Factor) 
                               {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],
                                            alternative = "greater",
-                                           exact=F)$p.value},
-                            Factor=Fa))
+                                           exact=FALSE)$p.value},
+							Factor=Fa))
   }
   out <- data.frame(Probe=rep(Probe,length(Gene)),
                     GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
                     Distance=NearGenes[[Probe]]$Distance, 
                     Sides=NearGenes[[Probe]]$Side,
                     Raw.p=test.p[match(Gene, names(test.p))], 
-                    stringsAsFactors = F)
+                    stringsAsFactors = FALSE)
   return(out)
 }
 
@@ -141,7 +141,7 @@ Get.Pvalue.p <- function(U.matrix,permu){
       out <- NA
     }else{
       out <- (sum(permu[as.character(Gene),]  < Raw.p | 
-                    permu[Gene,] == Raw.p,na.rm=T)+1)/(sum(!is.na(permu[Gene,])) + 1)
+                    permu[Gene,] == Raw.p,na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }

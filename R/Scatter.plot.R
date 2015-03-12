@@ -1,4 +1,5 @@
 #'scatter.plot
+#'@importFrom ggplot2 ggsave
 #'@param mee A MEE.data object includes DNA methylation data, expression data, 
 #'probeInfo and geneInfo.
 #'@param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
@@ -66,7 +67,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
   }
   
   if(length(byTF$TF)!=0){
-    meth <- colMeans(getMeth(mee,probe=byTF$probe),na.rm = T)
+    meth <- colMeans(getMeth(mee,probe=byTF$probe),na.rm = TRUE)
     gene <- getGeneID(mee,symbol=byTF$TF)
     exp <- getExp(mee,geneID=gene)
     if(nrow(exp)>1){
@@ -86,7 +87,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 
 #'scatter
 #'@importFrom reshape melt
-#'@importFrom ggplot2 geom_point
+#'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
 #'@param category A vector of sample labels.
