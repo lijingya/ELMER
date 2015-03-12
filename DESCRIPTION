@@ -8,5 +8,5 @@ Description: What the package does (one paragraph)
 Depends: R (>= 3.0.1), GenomicRanges
 License: GPL-3
 LazyData: true
-Imports: GenomicRanges,ggplot2,reshape,grid,IRanges
-Enhances: parallel, snow
+Imports: GenomicRanges,ggplot2,reshape,grid,IRanges,methods
+Suggests: parallel, snow
