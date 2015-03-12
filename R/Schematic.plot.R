@@ -100,19 +100,19 @@ schematic.plot <- function(pair, byProbe, byGene,
 #'@importFrom IRanges as.vector
 #'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle viewport gpar
 schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()),
-                      interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=T){
+                      interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=TRUE){
   if(!unique(seqnames(probe.range)) %in% unique(seqnames(gene.range))) 
     stop("probe and gene should be in the same chromosome.")
   Sequences <- data.frame(name = gene.range$SYMBOL, 
                           position=start(gene.range),
                           Type=rep("arrow",length(gene.range)),
                           dir=as.vector(strand(gene.range)), 
-                          stringsAsFactors = F )
+                          stringsAsFactors = FALSE )
   Sequences <- rbind(Sequences, data.frame(name = probe.range$name, 
                                            position=start(probe.range), 
                                            Type=rep("circle",length(probe.range)), 
                                            dir=as.vector(strand(probe.range)),
-                                           stringsAsFactors = F ))
+                                           stringsAsFactors = FALSE ))
   Sequences <- do.call(rbind,lapply(split(Sequences,Sequences$name), 
                                     function(x){return(x[1,])}))
   Sequences <- Sequences[order(Sequences$position),]

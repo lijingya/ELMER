@@ -99,7 +99,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     }
     Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,
                         Symbol=Symbols,Distance=Distances, Side=Sides, 
-                        stringsAsFactors = F)
+                        stringsAsFactors = FALSE)
   }
   return(Final)
 }
@@ -132,12 +132,12 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
 	  if(requireNamespace("snow", quietly=TRUE)) {
 		  snow::clusterEvalQ(cl, library(GenomicRanges))
 		  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
-								   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
+								   geneNum=geneNum,Gene=geneAnnot,TRange=TRUERange,
 								   simplify=FALSE)
 		  snow::stopCluster(cl)
 	  }else{
 		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-							  Gene=geneAnnot,TRange=TRange,simplify=FALSE)
+							  Gene=geneAnnot,TRange=TRUERange,simplify=FALSE)
 	  }
   }
   return(NearGenes)
