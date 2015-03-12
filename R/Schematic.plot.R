@@ -36,7 +36,7 @@ schematic.plot <- function(pair, byProbe, byGene,
                 gene.range=getGeneInfo(pair, geneID=nearGenes[[i]]$GeneID),
                 special=list(names= c(i,significant$Symbol), 
                              colors=c("blue",rep("red",length(significant$Symbol)))),
-                label=sprintf("%s/%s.schematic.byProbe.pdf",dir.out,i), save=save)
+                label=sprintf("%s/%s.schematic.byProbe",dir.out,i), save=save)
     }
   }
   if(!missing(byGene)){
@@ -49,7 +49,7 @@ schematic.plot <- function(pair, byProbe, byGene,
                   gene.range=getGeneInfo(pair, geneID=i),
                   special=list(names= c(getSymbol(pair,geneID=i),significant$Probe), 
                                colors=c("red",rep("blue",length(significant$Probe)))),
-                  label=sprintf("%s/%s.schematic.byGene.pdf",dir.out,i), save=save)
+                  label=sprintf("%s/%s.schematic.byGene",dir.out,i), save=save)
       }
     }
   }
@@ -66,7 +66,7 @@ schematic.plot <- function(pair, byProbe, byGene,
                 special=list(names= c(unique(significant$Symbol),unique(significant$Probe)), 
                              colors=c(rep("red",length(unique(significant$Symbol))),
                                       rep("blue",length(unique(significant$Probe))))),
-                label=sprintf("%s/%s_%s_%s.schematic.byCoordinate.pdf",
+                label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
                               dir.out,byCoordinate$chr[i],byCoordinate$start[i],
                               byCoordinate$end[i]), 
                 interaction=list(probe=significant$Probe, gene= significant$Symbol),save=save)
