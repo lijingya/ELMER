@@ -208,11 +208,19 @@ matrixRNA <- function(disease,basedir="./Data",type="gene"){
   Files <- paste0(subfolder,"/",Files[,2])
   names(Files) <- ID
   ##load data
-  GeneExp <- do.call(cbind,mclapply(Files, 
+  if(requireNamespace("parallel", quietly=TRUE)) {
+  GeneExp <- do.call(cbind,parallel::mclapply(Files, 
                                     function(x){
                                       read.table(x,stringsAsFactors = F, 
                                                  sep="\t",header=T)[,2]},
-                                    mc.cores=detectCores()/2))
+                                    mc.cores=parallel::detectCores()/2))
+  } else {
+  GeneExp <- do.call(cbind,lapply(Files, 
+								  function(x){
+									  read.table(x,stringsAsFactors = F, 
+												 sep="\t",header=T)[,2]}))
+  }
+
   GENEID <- read.table(Files[1], stringsAsFactors = F, sep="\t", header=T)[,1]
   rownames(GeneExp) <- GENEID
   GeneExp <- GeneIDName(GeneExp)
@@ -238,10 +246,16 @@ matrixMeth <- function(disease,basedir="./Data",filter=0.2){
   Files <- paste0(dir.meth,"/",paste(Files[,2],Files[,3],sep="/"))
   names(Files) <- ID
   ##load data
-  Meth <- do.call(cbind,mclapply(Files, 
-                                 function(x){
-                                   read.table(x,stringsAsFactors = F, sep="\t",header=T,skip=1)[,2]},
-                                 mc.cores=detectCores()/2))
+  if(requireNamespace("parallel", quietly=TRUE)) {
+	  Meth <- do.call(cbind,parallel::mclapply(Files, 
+											   function(x){
+												   read.table(x,stringsAsFactors = F, sep="\t",header=T,skip=1)[,2]},
+												   mc.cores=parallel::detectCores()/2))
+  } else {
+	  Meth <- do.call(cbind,lapply(Files, 
+								   function(x){
+									   read.table(x,stringsAsFactors = F, sep="\t",header=T,skip=1)[,2]}))
+  }
   Probe <- read.table(Files[1], stringsAsFactors = F, sep="\t", header=T,skip=1)[,1]
   rownames(Meth) <- Probe
   Meth <- Meth[rowMeans(is.na(Meth))<0.2,]

@@ -176,6 +176,7 @@ setMethod(f="getProbeInfo",signature="ANY",
 
 #' @rdname getGeneInfo
 #' @aliases getGeneInfo
+#'@importFrom GenomicRanges queryHits findOverlaps
 setMethod(f="getGeneInfo",signature="ANY",
           function(object,geneID,symbol,range){
             if(missing(geneID) & missing(symbol)){

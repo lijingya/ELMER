@@ -13,7 +13,7 @@
 #'@details significant A list used to select subset of motif.enrichment by the 
 #'cutoff of OR, lowerOR, upperOR. significant=list(OR=1). More than one cutoff 
 #'can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4) 
-#'@importFrom ggplot2 aes ggplot geom_point geom_errorbar
+#'@importFrom ggplot2 aes ggplot geom_point geom_errorbar coord_flip geom_abline
 #'@export
 motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
                                   dir.out ="./", save=TRUE,label=NULL){
@@ -46,6 +46,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 
 
 #'TF.rank.plot
+#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter
 #'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
 #'which is output of getTF. 
 #'@param motif A vector of charactor specify the motif to plot

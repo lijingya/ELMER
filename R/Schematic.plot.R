@@ -1,4 +1,6 @@
 #'schematicPlot
+#'@importFrom GenomicRanges GRanges findOverlaps
+#'@importFrom IRanges IRanges
 #'@param pair A pair object. All slots should be included
 #'@param byProbe A vector of probe names.
 #'@param byGene A vector of gene ID
@@ -96,7 +98,7 @@ schematic.plot <- function(pair, byProbe, byGene,
 #'genes and significantly linked probes in the range and the significant links.
 #'@importFrom GenomicRanges seqnames
 #'@importFrom IRanges as.vector
-#'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle
+#'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle viewport gpar
 schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()),
                       interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=T){
   if(!unique(seqnames(probe.range)) %in% unique(seqnames(gene.range))) 
