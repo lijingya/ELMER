@@ -21,7 +21,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
                                       "diffMeth","pair","motif","TF.search")
   disease <- toupper(disease)
   dir.out <- sprintf("%s/Result/%s",wd,disease)
-  if(!file.exists(dir.out)) dir.create(dir.out,recursive = T)
+  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE)
   args <- list(...)
   #Download 
   if("download" %in% analysis){
@@ -62,7 +62,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
       save(Meth,file= sprintf("%s/%s_meth_refined.rda",dir.out,disease))
       rm(Meth)
     }
-    mee <- fetch.mee(meth=meth.file,TCGA=T,
+    mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
                      probeInfo=sprintf("%s/probeInfo_feature.rda",dir.out))
     params <- args[names(args) %in% c("diff.dir","percentage","pvalue","sig.dif")]
     params <- c(params,list(dir.out=dir.out, cores=cores))
@@ -108,7 +108,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
     }
     distal.probe <- suppressWarnings(get.feature.probe(feature="distal"))
     mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
-                    geneInfo=geneAnnot,TCGA=T)
+                    geneInfo=geneAnnot,TCGA=TRUE)
     ## define diff.dir
     diff.dir <- args[names(args) %in% "diff.dir"]
     if(length(diff.dir)==0 || diff.dir[["diff.dir"]]=="both"){
@@ -122,7 +122,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
       message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff))
       #Construct data.
       Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff),
-                             stringsAsFactors=F)[,1]
+                             stringsAsFactors=FALSE)[,1]
       ## Get nearby genes-----------------------
       nearGenes.file <- args[names(args) %in% "nearGenes"]
       if(length(nearGenes.file)==0){
@@ -171,7 +171,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
       message(sprintf("Identify enriched motif for %smethylated probes",diff))
       if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff))){
         Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff), 
-                                      stringsAsFactors=F)$Probe)
+                                      stringsAsFactors=FALSE)$Probe)
       }else{
         stop(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff))
       }
@@ -199,7 +199,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
     exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
     probeInfo <- sprintf("%s/probeInfo_feature.rda",dir.out)
     geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
-    mee <- fetch.mee(meth=meth.file,exp=exp.file,TCGA=T,
+    mee <- fetch.mee(meth=meth.file,exp=exp.file,TCGA=TRUE,
                      probeInfo=probeInfo,geneInfo=geneAnnot)
     diff.dir <- args[names(args) %in% "diff.dir"]
     if(length(diff.dir)==0 || diff.dir[["diff.dir"]]=="both"){

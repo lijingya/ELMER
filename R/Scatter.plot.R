@@ -67,7 +67,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
   }
   
   if(length(byTF$TF)!=0){
-    meth <- colMeans(getMeth(mee,probe=byTF$probe),na.rm = T)
+    meth <- colMeans(getMeth(mee,probe=byTF$probe),na.rm = TRUE)
     gene <- getGeneID(mee,symbol=byTF$TF)
     exp <- getExp(mee,geneID=gene)
     if(nrow(exp)>1){
