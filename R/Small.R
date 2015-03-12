@@ -5,7 +5,6 @@
 #' tcgaSampleType.
 #' @param x A TCGA sample barcode.
 #' @return Tissue type: Tumor, Normal, Control, TRB, cell_line, XP, XCL
-#' @export 
 tcgaSampleType <- function(x){
   # "Code","Definition","Short Letter Code"
   # "01","Primary solid Tumor","TP"
@@ -51,7 +50,6 @@ tcgaSampleType <- function(x){
 #' tcgaSampleType.
 #' @param tcgaId A vector list TCGA sample barcode.
 #' @return standardized TCGA ID
-#' @export 
 standardizeTcgaId<-function(tcgaId){
   out<-substring(tcgaId,1,15)
   return(out)
@@ -67,17 +65,26 @@ standardizeTcgaId<-function(tcgaId){
 ##############-----------fetch data
 ## Construct MEE.data from load local data.
 #' fetch.mee
-#' @param meth A matrix or path of rda file only containing a matrix of DNA methylation data.
-#' @param exp A matrix or path of rda file only containing a matrix of expression data.
-#' @param sample A data frame or path of rda file only containing sample information in data frame format.
-#' @param probeInfo A GRnage object or path of rda file only containing a GRange of probe information 
-#' @param geneInfo A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL) 
-#' @param probes A vector lists probes' name. If probes are specified, the methylation and probeInfo will only contain this list of probes.
-#' @param genes A vector lists genes' ID. If gene are specified, the methylation and probeInfo will only contain this list of probes.
-#' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). TRUE indicates data is from TCGA and sample section will automatically filled in.
+#' @param meth A matrix or path of rda file only containing a matrix of 
+#' DNA methylation data.
+#' @param exp A matrix or path of rda file only containing a matrix of 
+#' expression data.
+#' @param sample A data frame or path of rda file only containing sample 
+#' information in data frame format.
+#' @param probeInfo A GRnage object or path of rda file only containing 
+#' a GRange of probe information 
+#' @param geneInfo A GRnage object or path of rda file only containing 
+#' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
+#' @param probes A vector lists probes' name. If probes are specified, 
+#' the methylation and probeInfo will only contain this list of probes.
+#' @param genes A vector lists genes' ID. If gene are specified, 
+#' the methylation and probeInfo will only contain this list of probes.
+#' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
+#' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @return MEE.data object
 #' @export 
-fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL,TCGA=FALSE){
+fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
+                      genes=NULL,TCGA=FALSE){
   if(!missing(meth)){
     if(is.character(meth)){
       newenv <- new.env()
@@ -105,23 +112,32 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL,
     }
   }else if(TCGA){
     if(!is.null(meth) & is.null(exp)){
-      sample <- data.frame(ID=standardizeTcgaId(colnames(meth)),meth.ID=colnames(meth),TN=sapply(colnames(meth),tcgaSampleType),stringsAsFactors = F)
+      sample <- data.frame(ID=standardizeTcgaId(colnames(meth)),
+                           meth.ID=colnames(meth),
+                           TN=sapply(colnames(meth),tcgaSampleType),
+                           stringsAsFactors = F)
     }else if(is.null(meth) & !is.null(exp)){
-      sample <- data.frame(ID=standardizeTcgaId(colnames(exp)),exp.ID=colnames(exp),TN=sapply(colnames(exp),tcgaSampleType),stringsAsFactors = F)
+      sample <- data.frame(ID=standardizeTcgaId(colnames(exp)),
+                           exp.ID=colnames(exp),
+                           TN=sapply(colnames(exp),tcgaSampleType),
+                           stringsAsFactors = F)
     }else if(!is.null(meth) & !is.null(meth)){
       ID <- intersect(standardizeTcgaId(colnames(meth)),standardizeTcgaId(colnames(exp)))
       meth.ID <- colnames(meth)
       exp.ID <- colnames(exp)
       sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,standardizeTcgaId(meth.ID))],
-                           exp.ID=exp.ID[match(ID,standardizeTcgaId(exp.ID))],TN=sapply(ID,tcgaSampleType),stringsAsFactors = F)
+                           exp.ID=exp.ID[match(ID,standardizeTcgaId(exp.ID))],
+                           TN=sapply(ID,tcgaSampleType),stringsAsFactors = F)
       
     }
   }else{
     ID <- intersect(colnames(meth),colnames(exp))
-    if(length(ID)==0) stop("Sample naming should consistant in methylation and expression data.")
+    if(length(ID)==0) 
+      stop("Sample naming should consistant in methylation and expression data.")
     meth.ID <- colnames(meth)
     exp.ID <- colnames(exp)
-    sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,meth.ID)],exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = F)
+    sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,meth.ID)],
+                         exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = F)
   }
   if(!missing(probeInfo)){
     if(is.character(probeInfo)){
@@ -161,15 +177,18 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,genes=NULL,
     meth <- meth[,sample$meth.ID]
     exp <- exp[,sample$exp.ID]
   }
-  mee <- mee.data(meth=meth,exp=exp,sample=sample,probeInfo=probeInfo,geneInfo=geneInfo)
+  mee <- mee.data(meth=meth,exp=exp,sample=sample,
+                  probeInfo=probeInfo,geneInfo=geneInfo)
   return(mee)
 }
 
 
 #' fetch.pair
 #' @param pair A data.frame or path of csv file containing pair information.
-#' @param probeInfo A GRnage object or path of rda file only containing a GRange of probe information 
-#' @param geneInfo A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL) 
+#' @param probeInfo A GRnage object or path of rda file only containing 
+#' a GRange of probe information 
+#' @param geneInfo A GRnage object or path of rda file only containing 
+#' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
 #' @return pair.data object
 #' @export 
 fetch.pair <- function(pair,probeInfo,geneInfo){
@@ -184,7 +203,8 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
     if(is.character(probeInfo)){
       newenv <- new.env()
       load(probeInfo, envir=newenv)
-      probeInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+      probeInfo <- get(ls(newenv)[1],envir=newenv)
+      # The data is in the one and only variable
     }
   }else{
     probeInfo <- NULL
@@ -194,7 +214,8 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
     if(is.character(geneInfo)){
       newenv <- new.env()
       load(geneInfo, envir=newenv)
-      geneInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+      geneInfo <- get(ls(newenv)[1],envir=newenv) 
+      # The data is in the one and only variable
     }
   }else{
     geneInfo <- NULL
@@ -207,7 +228,6 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
 #' splitmatix 
 #' @param x A matrix 
 #' @param by A character specify if split the matix by row or column.
-#' @export
 splitmatrix <- function(x,by="row") {
   if(by %in% "row"){
     out <- split(x, rownames(x))
@@ -253,7 +273,6 @@ redGreen <- colorRampPalette(c("green","black","red"))
 #' @param row A boolean to determine normalize by row or not.
 #' @param na.rm A boolean to determine to remove na number or not.
 #' @return A normalized matrix.
-#' @export
 Normalize <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
   if(col){
     ColMax <- apply(x,2,max,na.rm=na.rm)
@@ -301,7 +320,6 @@ NormalizeMean <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
 #' @param row A boolean to determine normalize by row or not.
 #' @param na.rm A boolean to determine to remove na number or not.
 #' @return A normalized matrix.
-#' @export
 NormalizeMedian <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
   if(col){
     Median <- apply(x,2,median,na.rm=na.rm)
@@ -338,11 +356,13 @@ Binary <- function(x,Break=0.3,Break2=NULL){
 
 
 #' lable linear regression formula 
-#' @param df A data.frame object contains two variables: dependent variable (Dep) and explanation variable (Exp).
-#' @param Dep A character specify dependent variable. The first column will be dependent variable as default.
-#' @param Exp A character specify explanation variable. The second column will be explanation variable as default.
+#' @param df A data.frame object contains two variables: dependent 
+#' variable (Dep) and explanation variable (Exp).
+#' @param Dep A character specify dependent variable. The first column 
+#' will be dependent variable as default.
+#' @param Exp A character specify explanation variable. The second column 
+#' will be explanation variable as default.
 #' @return a linear regression formula
-#' @export
 lm_eqn = function(df,Dep,Exp){
   if(missing(Dep)) Dep <- colnames(df)[1]
   if(missing(Exp)) Exp <- colnames(df)[2]

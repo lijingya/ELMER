@@ -10,15 +10,22 @@ get.diff.meth(mee, diff.dir = "both", cores = NULL, percentage = 0.2,
 \arguments{
 \item{mee}{A MEE.data object containing at least meth and probeInfo.}
 
-\item{diff.dir}{A character showing differential methylation dirction. It can be "hypo" which is only selecting hypomethylated probes; "hyper" which is only selecting hypermethylated probes; "both" which select both hypomethyalted and hypermethylated probes.}
+\item{diff.dir}{A character showing differential methylation dirction.
+It can be "hypo" which is only selecting hypomethylated probes;
+"hyper" which is only selecting hypermethylated probes;
+"both" which select both hypomethyalted and hypermethylated probes.}
 
-\item{cores}{A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.}
+\item{cores}{A interger which defines number of core to be used in parallel process.
+Default is NULL: don't use parallel process.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples used to identify the differential methylation. Default is 0.2.}
+\item{percentage}{A number ranges from 0 to 1 specifying the percentage of
+samples used to identify the differential methylation. Default is 0.2.}
 
-\item{pvalue}{A number specify the significant Pvalue cutoff for significant hypo/hyper-methylated probes. Default is current directory.}
+\item{pvalue}{A number specify the significant Pvalue cutoff for significant
+hypo/hyper-methylated probes. Default is current directory.}
 
-\item{sig.dif}{A number specify the significant methylation difference cutoff for significant hypo/hyper-methylated probes. Default is 0.3.}
+\item{sig.dif}{A number specify the significant methylation difference cutoff
+for significant hypo/hyper-methylated probes. Default is 0.3.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is is current directory.}
 }

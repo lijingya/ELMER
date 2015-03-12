@@ -1,10 +1,15 @@
 ##get.distal.en
 #' get.feature.probe
-#' @param probe A GRange object containing probes coordinate information. Default is Illumina-methyl-450K probes coordinates.
-#' @param distal A logical. If FALSE, function will output the all probes overlaping with features. If TRUE, function will ouput the distal probes overlaping with features.
-#' @param feature A GRange object containing biofeature coordinate such as enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
+#' @param probe A GRange object containing probes coordinate information. 
+#' Default is Illumina-methyl-450K probes coordinates.
+#' @param distal A logical. If FALSE, function will output the all 
+#' probes overlaping with features. If TRUE, function will ouput the distal probes 
+#' overlaping with features.
+#' @param feature A GRange object containing biofeature coordinate such as 
+#' enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
 #' @param TSS A GRange object containing the transcription start site. Default is UCSC gene TSS.
-#' @param TSS.range A list specify how to define promoter regions. Default is upstream =2000bp and downstream=2000bp.
+#' @param TSS.range A list specify how to define promoter regions. 
+#' Default is upstream =2000bp and downstream=2000bp.
 #' @param rm.chr A vector of chromosome need to be remove from probes such as chrX chrY or chrM
 #' @return A GRange object containing probes that satisfy selecting critiria.
 #' @export 
@@ -15,27 +20,33 @@
 #' Probe1 <- get.feature.probe(TSS.range=list(upstream=1000, downstream=1000))
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(probe,distal=TRUE,feature,TSS,TSS.range=list(upstream=2000,downstream=2000),rm.chr=NULL){
+get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
+                              TSS.range=list(upstream=2000,downstream=2000),rm.chr=NULL){
   if(missing(probe)){
     warning("Default probes coordinates are for HM450K DNA methylation array")
-    probe <- ReadBed(system.file("extdata","Illumina-methyl-450K-manifest.hg19.bed",package = "ELMER"))
+    probe <- ReadBed(system.file("extdata","Illumina-methyl-450K-manifest.hg19.bed",
+                                 package = "ELMER"))
   }
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(distal){
     if(missing(TSS)){
       newenv <- new.env()
-      load(system.file("extdata","GENCODE.UCSC.combined.TSS",package = "ELMER"),envir=newenv)
+      load(system.file("extdata","GENCODE.UCSC.combined.TSS",package = "ELMER"),
+           envir=newenv)
       txs <- get(ls(newenv)[1],envir=newenv)
-      TSS <- suppressWarnings(promoters(txs,upstream = TSS.range[["upstream"]], downstream = TSS.range[["downstream"]]))    
+      TSS <- suppressWarnings(promoters(txs,upstream = TSS.range[["upstream"]], 
+                                        downstream = TSS.range[["downstream"]]))    
     }else{
-      TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], downstream = TSS.range[["downstream"]]))
+      TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
+                                        downstream = TSS.range[["downstream"]]))
     }
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
   }
   
   
   if(missing(feature)){
-    feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed",package = "ELMER"))
+    feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed",
+                                   package = "ELMER"))
     probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
   }else if(is(feature,"GRange")){             
     probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
@@ -48,16 +59,25 @@ get.feature.probe <- function(probe,distal=TRUE,feature,TSS,TSS.range=list(upstr
 ## TCGA pipe don't specify dir.out
 #' get.diff.meth
 #' @param mee A MEE.data object containing at least meth and probeInfo.
-#' @param diff.dir A character showing differential methylation dirction. It can be "hypo" which is only selecting hypomethylated probes; "hyper" which is only selecting hypermethylated probes; "both" which select both hypomethyalted and hypermethylated probes.
-#' @param cores A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples used to identify the differential methylation. Default is 0.2.
-#' @param pvalue A number specify the significant Pvalue cutoff for significant hypo/hyper-methylated probes. Default is current directory.
-#' @param sig.dif A number specify the significant methylation difference cutoff for significant hypo/hyper-methylated probes. Default is 0.3.
+#' @param diff.dir A character showing differential methylation dirction. 
+#' It can be "hypo" which is only selecting hypomethylated probes; 
+#' "hyper" which is only selecting hypermethylated probes; 
+#' "both" which select both hypomethyalted and hypermethylated probes.
+#' @param cores A interger which defines number of core to be used in parallel process. 
+#' Default is NULL: don't use parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' samples used to identify the differential methylation. Default is 0.2.
+#' @param pvalue A number specify the significant Pvalue cutoff for significant 
+#' hypo/hyper-methylated probes. Default is current directory.
+#' @param sig.dif A number specify the significant methylation difference cutoff 
+#' for significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
-get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2, pvalue=0.01, sig.dif=0.3, dir.out="./"){
-  if(nrow(mee@meth)==0) stop("Cannot identify differential DNA methylation region without DNA methylation data.")
+get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
+                          pvalue=0.01, sig.dif=0.3, dir.out="./"){
+  if(nrow(mee@meth)==0) 
+    stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(getSample(mee))==0){
     stop("Sample information data to do differential analysis.")
   }else if(is.null(getSample(mee,cols="TN"))){
@@ -74,30 +94,43 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2, pvalue=
   }
   if("hyper" %in% diff.dir){
     if(!is.null(cores)){
-      out <- parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,percentage=percentage,meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
+      out <- parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
+                         percentage=percentage,meth=mee@meth,
+                         TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
     }else{
-      out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
+      out <- sapply(rownames(mee@meth),Stat.diff.meth,
+                    percentage=percentage,meth=mee@meth,
+                    TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
     }
     out <- do.call(rbind,out)
     out <- as.data.frame(out,stringsAsFactors = F)
     out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
     colnames(out) <- c("probe","pvalue","tumorMinNormal","adjust.p")
     write.csv(out,file=sprintf("%s/getMethdiff.hyper.probes.csv",dir.out), row.names=FALSE)
-    write.csv(out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,],file=sprintf("%s/getMethdiff.hyper.probes.significant.csv",dir.out), row.names=FALSE)
+    write.csv(out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,],
+              file=sprintf("%s/getMethdiff.hyper.probes.significant.csv",dir.out), 
+              row.names=FALSE)
     result[["hyper"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
   if("hypo" %in% diff.dir){
     if(!is.null(cores)){
-      out <- parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,percentage=percentage,meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
+      out <- parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
+                         percentage=percentage,meth=mee@meth,
+                         TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
     }else{
-      out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
+      out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
+                    meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
+                    simplify =F)
     }
     out <- do.call(rbind,out)
     out <- as.data.frame(out,stringsAsFactors = F)
     out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
     colnames(out) <- c("probe","pvalue","tumorMinNormal","adjust.p")
-    write.csv(out,file=sprintf("%s/getMethdiff.hypo.probes.csv",dir.out), row.names=FALSE)
-    write.csv(out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,],file=sprintf("%s/getMethdiff.hypo.probes.significant.csv",dir.out), row.names=FALSE)
+    write.csv(out,file=sprintf("%s/getMethdiff.hypo.probes.csv",dir.out), 
+              row.names=FALSE)
+    write.csv(out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,],
+              file=sprintf("%s/getMethdiff.hypo.probes.significant.csv",dir.out),
+              row.names=FALSE)
     result[["hypo"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
   
@@ -111,30 +144,38 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2, pvalue=
 
 
 ### pairing function--------------------
-#nearGenes : can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.
+#nearGenes : can be either a list containing output of GetNearGenes function or 
+#path of rda file containing output of GetNearGenes function.
 ## TCGA pipe don't specify dir.out
 #' get pair
 #' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo.
 #' @param probes A vector lists the probes' name that need to be linked to genes.
-#' @param nearGenes Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.
-#' @param cores A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.
+#' @param nearGenes Can be either a list containing output of GetNearGenes 
+#' function or path of rda file containing output of GetNearGenes function.
+#' @param cores A interger which defines number of core to be used in parallel process.
+#'  Default is NULL: don't use parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
-#' @param Pe A number specify the empircal pvalue cutoff for defining signficant pairs. Default is 0.01
+#' @param Pe A number specify the empircal pvalue cutoff for defining signficant pairs.
+#'  Default is 0.01
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @return Statistics for all pairs and significant pairs
 #' @export 
-get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,permu.dir=NULL, Pe=0.01,dir.out="./",cores=NULL,label=NULL){
+get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
+                     permu.dir=NULL, Pe=0.01,dir.out="./",cores=NULL,label=NULL){
   ## check data
-  if(!all(probes %in% rownames(mee@meth))) stop("Probes option should be subset of rownames of methylation matrix.")
+  if(!all(probes %in% rownames(mee@meth))) 
+    stop("Probes option should be subset of rownames of methylation matrix.")
   if(is.character(nearGenes)){
     newenv <- new.env()
     load(nearGenes, envir=newenv)
     nearGenes <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
   }else if(!is.list(nearGenes)){
-    stop("nearGene option must be a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.")
+    stop("nearGene option must be a list containing output of GetNearGenes function 
+         or path of rda file containing output of GetNearGenes function.")
   }
   if(is.null(permu.dir)) permu.dir <- paste0(dir.out,"/","permu")
   #get raw pvalue
@@ -142,11 +183,14 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,permu.d
   if(!is.null(cores)){
     if(cores > detectCores()) cores <- detectCores()/2
     cl <- makeCluster(cores,type = "SOCK")
-    Probe.gene<-parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), NearGenes=nearGenes,K=0.3,Top=percentage,
+    Probe.gene<-parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
+                            NearGenes=nearGenes,K=0.3,Top=percentage,
                             Exps=getExp(mee),simplify = F)
     stopCluster(cl)
   }else{
-    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,simplify = F)
+    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
+                       NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+                       simplify = F)
   }
   
   Probe.gene <- do.call(rbind,Probe.gene)
@@ -154,14 +198,17 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,permu.d
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
   # get permutation
-  permu <- get.permu(mee,geneID=GeneID, percentage=percentage, rm.probes=probes, permu.size=permu.size, permu.dir=permu.dir,cores=cores)
+  permu <- get.permu(mee,geneID=GeneID, percentage=percentage, rm.probes=probes, 
+                     permu.size=permu.size, permu.dir=permu.dir,cores=cores)
   #get empirical p-value
   message("Calculate empirical P value.\n")
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
-  write.csv(Probe.gene.Pe, file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),row.names=F)
+  write.csv(Probe.gene.Pe, file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",
+                                        dir.out, label),row.names=F)
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
-  write.csv(selected, file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),row.names=F)
+  write.csv(selected, file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
+            row.names=F)
   invisible(gc())
   return(selected)
 }
@@ -172,19 +219,24 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,permu.d
 #' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
-#' @param cores A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.
+#' @param cores A interger which defines number of core to be used in parallel process.
+#'  Default is NULL: don't use parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
 #' @return permutation
 #' @export 
-get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,permu.size=1000, permu.dir=NULL,cores=NULL){
+get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
+                      permu.size=1000, permu.dir=NULL,cores=NULL){
   set.seed(200)
   ## get usable probes
   binary.m <- rowMeans(Binary(mee@meth,0.3),na.rm = T)
   usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
-  if(length(usable.probes) < permu.size) stop(sprintf("There is no enough usable probes to perform %s time permutation, set a smaller permu.size.",permu.size))
+  if(length(usable.probes) < permu.size) 
+    stop(sprintf("There is no enough usable probes to perform %s time permutation, 
+                 set a smaller permu.size.",permu.size))
   usable.probes <- sample(usable.probes,size = permu.size,replace = F)
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = F)
@@ -198,15 +250,24 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,permu.size=10
     if(!is.null(cores)){
       if(cores > detectCores()) cores <- detectCores()/2
       suppressWarnings(cl <- makeCluster(cores,type = "SOCK"))
-      permu<-parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,Gene=unique(as.character(getGeneInfo(mee)$GENEID)),Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,simplify = F)
+      permu<-parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+                         Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                         Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
+                         simplify = F)
     }else{
-      permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,Gene=unique(as.character(getGeneInfo(mee)$GENEID)),Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,simplify=F)
+      permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+                    Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                    Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
+                    simplify=F)
     }
     stopCluster(cl)
   }
   permu.p <- paste0(permu.dir,"/",probes.permu)
-  permu <- sapply(permu.p,function(x,geneID){ tmp <- read.table(x,stringsAsFactors=F)
-                                              tmp <- tmp[match(geneID,tmp[,1]),2]},geneID=geneID,simplify=F)
+  permu <- sapply(permu.p,
+                  function(x,geneID){ 
+                    tmp <- read.table(x,stringsAsFactors=F)
+                    tmp <- tmp[match(geneID,tmp[,1]),2]},
+                  geneID=geneID,simplify=F)
 
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
@@ -219,19 +280,26 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,permu.size=10
 #' get.enriched.motif
 #' @param probes.motif A matrix contains motifs occurrence within probes regions. 
 #' @param probes A vector lists the probes' names in which motif enrichment will be calculated.
-#' @param background.probes A vector list of probes' names which are considered as background for motif.enrichment calculation.
-#' @param lower.OR A number specify the lower boundary of Odds ratio which defines the significant enriched motif. 1.1 is default.
-#' @param min.incidence A non-negative integer specify the minimum incidence of motif in the given probes set. 10 is default.
+#' @param background.probes A vector list of probes' names which are considered as 
+#' background for motif.enrichment calculation.
+#' @param lower.OR A number specify the lower boundary of Odds ratio which defines 
+#' the significant enriched motif. 1.1 is default.
+#' @param min.incidence A non-negative integer specify the minimum incidence of 
+#' motif in the given probes set. 10 is default.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @return A list contains enriched motifs with the probes regions harboring the motif.
 #' @export 
-get.enriched.motif <- function(probes.motif, probes, background.probes,lower.OR=1.1,min.incidence=10, dir.out="./",label=NULL){
+get.enriched.motif <- function(probes.motif, probes, background.probes,
+                               lower.OR=1.1,min.incidence=10, dir.out="./",
+                               label=NULL){
   if(missing(probes.motif)){
-    probes.motif <- system.file("extdata","Probesall.TF.matrix.200bp.rda",package = "ELMER")
+    probes.motif <- system.file("extdata","Probesall.TF.matrix.200bp.rda",
+                                package = "ELMER")
     newenv <- new.env()
     load(probes.motif, envir=newenv)
-    all.probes.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
+    # The data is in the one and only variable
   } 
   ## here need to be add motif search part.
   if(missing(probes)) stop("probes option should be specified.")
@@ -239,8 +307,9 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,lower.OR=
     if(file.exists(sprintf("%s/probeInfo_feature.rda",dir.out))){
       newenv <- new.env()
       load(sprintf("%s/probeInfo_feature.rda",dir.out), envir=newenv)
-      background.probes <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+      background.probes <- get(ls(newenv)[1],envir=newenv) 
       background.probes <- as.character(background.probes$name)
+      # The data is in the one and only variable
     }else{
       background.probes <- colnames(probes.motif)
     }
@@ -251,35 +320,52 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,lower.OR=
   probes.TF <- all.probes.TF[probes,]
   probes.TF.num <- colSums(probes.TF, na.rm=T)
   sub.enrich.TF <- colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-colMeans(probes.TF))
-  SE <- sqrt(1/colSums(probes.TF) + 1/(nrow(probes.TF)-colSums(probes.TF)) + 1/colSums(bg.probes.TF)+ 1/(nrow(bg.probes.TF)-colSums(bg.probes.TF)))
+  SE <- sqrt(1/colSums(probes.TF) + 1/(nrow(probes.TF)-colSums(probes.TF)) +
+               1/colSums(bg.probes.TF)+ 1/(nrow(bg.probes.TF)-colSums(bg.probes.TF)))
   sub.enrich.TF.lower <- exp(log(sub.enrich.TF)-1.96*SE)
   sub.enrich.TF.upper <- exp(log(sub.enrich.TF)+1.96*SE)
   ## summary
-  Summary <- data.frame(motif = colnames(probes.TF), NumOfProbes= probes.TF.num, OR=sub.enrich.TF, lowerOR=sub.enrich.TF.lower, upperOR=sub.enrich.TF.upper)
+  Summary <- data.frame(motif = colnames(probes.TF), NumOfProbes= probes.TF.num,
+                        OR=sub.enrich.TF, lowerOR=sub.enrich.TF.lower, 
+                        upperOR=sub.enrich.TF.upper)
   Summary <- Summary[order(Summary$lowerOR, decreasing = T),]
-  write.csv(Summary, file= sprintf("%s/getMotif.%s.motif.enrichment.csv",dir.out,label))
+  write.csv(Summary, file= sprintf("%s/getMotif.%s.motif.enrichment.csv",
+                                   dir.out,label))
   
   ## enriched motif and probes
-  en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR & !sub.enrich.TF.lower %in% "Inf" & probes.TF.num > min.incidence])
+  en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
+                                           !sub.enrich.TF.lower %in% "Inf" & 
+                                           probes.TF.num > min.incidence])
   cat(sprintf("%s motifs are enriched.\n",length(en.motifs)))
-  enriched.motif <- sapply(en.motifs, function(x, probes.TF){names(probes.TF[probes.TF[,x]==1,x])}, probes.TF=probes.TF)
+  enriched.motif <- sapply(en.motifs, 
+                           function(x, probes.TF)
+                             {names(probes.TF[probes.TF[,x]==1,x])},
+                           probes.TF=probes.TF)
   save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
 
   ## make plot----
-  motif.enrichment.plot(motif.enrichment=sprintf("%s/getMotif.%s.motif.enrichment.csv",dir.out,label), significant=list(OR=1.3), dir.out =dir.out,label=label, save=TRUE)
+  motif.enrichment.plot(motif.enrichment=sprintf("%s/getMotif.%s.motif.enrichment.csv",dir.out,label), 
+                        significant=list(OR=1.3), dir.out =dir.out,label=label, save=TRUE)
   
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
     sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label), stringsAsFactors=F)
     if(all(sig.Pairs$Probe %in% rownames(probes.TF))){
-      motif.Info <- sapply(sig.Pairs$Probe, function(x, probes.TF,en.motifs){TFs <- names(probes.TF[x,probes.TF[x,]==1])
-                                                                              non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
-                                                                              en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                                                                              out <- data.frame(non_enriched_motifs=non.en.motif, enriched_motifs=en.motif, stringsAsFactors = F)
-                                                                              return(out)},probes.TF=probes.TF, en.motifs=en.motifs,simplify=F)
+      motif.Info <- sapply(sig.Pairs$Probe,
+                           function(x, probes.TF,en.motifs)
+                             {TFs <- names(probes.TF[x,probes.TF[x,]==1])
+                              non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
+                              en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
+                              out <- data.frame(non_enriched_motifs=non.en.motif, 
+                                                enriched_motifs=en.motif, stringsAsFactors = F)
+                              return(out)},
+                           probes.TF=probes.TF, en.motifs=en.motifs,simplify=F)
+                                                                             
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
-      write.csv(sig.Pairs, file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label),row.names=F)
+      write.csv(sig.Pairs, 
+                file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label),
+                row.names=F)
     }
   }
   return(enriched.motif)
@@ -287,16 +373,25 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,lower.OR=
 
 #' get.TFs
 #' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo. 
-#' @param enriched.motif Can be either a list containing output of get.enriched.motif function or path of rda file containing output of get.enriched.motif function.
-#' @param TFs Can be either a data.frame containing TF GeneID and Symbol or path of csv file containing TF GeneID and Symbol. If missing, human TF list will be used. For detail information, refer reference paper.
-#' @param motif.relavent.TFs Can be either a list containing motif (list name) and relavent TF (content of list) or path of rda file containing a list containing motif (list name) and relavent TF (content of list). If missing, human TF list will be used. For detail information, refer reference paper.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.
-#' @param cores A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.
+#' @param enriched.motif Can be either a list containing output of 
+#' get.enriched.motif function or path of rda file containing output of get.enriched.motif function.
+#' @param TFs Can be either a data.frame containing TF GeneID and Symbol 
+#' or path of csv file containing TF GeneID and Symbol. If missing, 
+#' human TF list will be used. For detail information, refer reference paper.
+#' @param motif.relavent.TFs Can be either a list containing motif (list name) 
+#' and relavent TF (content of list) or path of rda file containing a list 
+#' containing motif (list name) and relavent TF (content of list). If missing,
+#'  human TF list will be used. For detail information, refer reference paper.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' samples used to link probes to genes. Default is 0.2.
+#' @param cores A interger which defines number of core to be used in parallel 
+#' process. Default is NULL: don't use parallel process.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @return potential responsible TFs will be reported.
 #' @export 
-get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,percentage=0.2,dir.out="./",label=NULL,cores=NULL){
+get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
+                    percentage=0.2,dir.out="./",label=NULL,cores=NULL){
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
@@ -308,7 +403,8 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,percentage=0.2,
   }
   
   if(missing(TFs)){
-    TFs <- read.csv(system.file("extdata","human.TF.list.csv",package = "ELMER"),stringsAsFactors=F)
+    TFs <- read.csv(system.file("extdata","human.TF.list.csv",package = "ELMER"),
+                    stringsAsFactors=F)
     TFs$GeneID <- paste0("ID",TFs$GeneID)
     TFs <- TFs[TFs$GeneID %in% rownames(getExp(mee)),]
   }else if(is.character(TFs)){
@@ -317,7 +413,8 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,percentage=0.2,
   
   if(missing(motif.relavent.TFs)){
     newenv <- new.env()
-    load(system.file("extdata","motif.relavent.TFs.human.rda",package = "ELMER"), envir=newenv)
+    load(system.file("extdata","motif.relavent.TFs.human.rda",package = "ELMER"), 
+         envir=newenv)
     motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
   }else if(is.character(motif.relavent.TFs)){
     newenv <- new.env()
@@ -325,35 +422,48 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,percentage=0.2,
     motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
   }
   
-  motif.meth <- lapply(enriched.motif, function(x,meth){if(length(x)<2){ return(meth[x,])
-                                                                         }else{
-                                                                           return(colMeans(meth[x,],na.rm = T))
-                                                                           }}, meth = getMeth(mee,probe=unique(unlist(enriched.motif))) )
+  motif.meth <- lapply(enriched.motif, 
+                       function(x,meth){if(length(x)<2)
+                         { return(meth[x,])
+                       }else{
+                         return(colMeans(meth[x,],na.rm = T))
+                       }}, meth = getMeth(mee,probe=unique(unlist(enriched.motif))) )
+                                                                   
   motif.meth <- do.call(rbind, motif.meth)
   
   if(!is.null(cores)){
     if(cores > detectCores()) cores <- detectCores()/2
     cl <- makeCluster(cores,type = "SOCK")
-    TF.meth.cor<-parSapplyLB(cl,rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=F)
+    TF.meth.cor<-parSapplyLB(cl,rownames(motif.meth),
+                             Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
+                             Top=percentage,Exps=getExp(mee), simplify=F)
     stopCluster(cl)
   }else{
-    TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=F) 
+    TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,
+                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=F) 
   }
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
   rownames(TF.meth.cor) <- TFs$Symbol
-  cor.summary <- sapply(colnames(TF.meth.cor), function(x, TF.meth.cor, motif.relavent.TFs){ cor <- sort(TF.meth.cor[,x])
-                                                                                             top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                                                                                             potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
-                                                                                             out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
-                                                                                                               "potential TFs"= paste(potential.TF, collapse = ";"),
-                                                                                                               "top_5percent"= paste(top,collapse = ";"))},
+  cor.summary <- sapply(colnames(TF.meth.cor), 
+                        function(x, TF.meth.cor, motif.relavent.TFs)
+                          { cor <- sort(TF.meth.cor[,x])
+                            top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
+                            potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                            out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
+                                              "potential TFs"= paste(potential.TF, collapse = ";"),
+                                              "top_5percent"= paste(top,collapse = ";"))},                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=F)
   cor.summary <- do.call(rbind, cor.summary)
-  save(TF.meth.cor, file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
-  write.csv(cor.summary, file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",dir.out=dir.out, label=label), row.names=T)
-  if(!file.exists(sprintf("%s/TFrankPlot",dir.out))) dir.create(sprintf("%s/TFrankPlot",dir.out))
-  TF.rank.plot(motif.pvalue=TF.meth.cor, motif=colnames(TF.meth.cor), dir.out=sprintf("%s/TFrankPlot",dir.out), save=TRUE)
+  save(TF.meth.cor, 
+       file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
+  write.csv(cor.summary, 
+            file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+                         dir.out=dir.out, label=label), row.names=T)
+  if(!file.exists(sprintf("%s/TFrankPlot",dir.out)))
+    dir.create(sprintf("%s/TFrankPlot",dir.out))
+  TF.rank.plot(motif.pvalue=TF.meth.cor, motif=colnames(TF.meth.cor), 
+               dir.out=sprintf("%s/TFrankPlot",dir.out), save=TRUE)
   return(cor.summary)
 }

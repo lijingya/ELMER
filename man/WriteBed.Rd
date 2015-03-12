@@ -9,7 +9,8 @@ WriteBed(x, save = T, fn = NULL)
 \arguments{
 \item{x}{GRange object}
 
-\item{save}{if save is false, function will return a bed format data.frame. if save is true, fn parameter need to be specific and it output bed file in the path you specified in fn.}
+\item{save}{if save is false, function will return a bed format data.frame.
+If save is true, fn parameter need to be specific and it output bed file in the path you specified in fn.}
 
 \item{fn}{A name of bed file you want to output.}
 }

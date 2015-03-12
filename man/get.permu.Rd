@@ -12,7 +12,8 @@ get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL,
 
 \item{geneID}{A vector lists the genes' ID.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.}
+\item{percentage}{A number ranges from 0 to 1 specifying the percentage of
+samples used to link probes to genes. Default is 0.2.}
 
 \item{rm.probes}{A vector lists the probes name.}
 
@@ -20,7 +21,8 @@ get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL,
 
 \item{permu.dir}{A path where the output of permuation will be.}
 
-\item{cores}{A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.}
+\item{cores}{A interger which defines number of core to be used in parallel process.
+Default is NULL: don't use parallel process.}
 }
 \value{
 permutation

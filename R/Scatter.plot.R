@@ -1,35 +1,54 @@
 #'scatter.plot
-#'@param mee A MEE.data object includes DNA methylation data, expression data, probeInfo and geneInfo.
-#'@param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector of probes' name and gene contains a vector of gene ID. The length of probe should be the same with length of gene. Output see detail.
-#'@param byProbe A list byProbe =list(probe=c(), geneNum=20); probe contains a vector of probes'name and geneNum specify the number of gene near the probes will ploted. 20 is default for geneNum. Output see detail.
-#'@param byTF A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's symbol and probe contains the a vector of probes' name. Output see detail.
-#'@param category A vector labels subtype of samples or a character which is the column name in the sampleInfo in the MEE.data object. Once specified, samples will label different color. The color can be customized by using color.value. 
-#'@param dir.out A path specify the directory to which the figures will be saved. Current directory is default.
+#'@param mee A MEE.data object includes DNA methylation data, expression data, 
+#'probeInfo and geneInfo.
+#'@param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
+#'of probes' name and gene contains a vector of gene ID. The length of probe 
+#'should be the same with length of gene. Output see detail.
+#'@param byProbe A list byProbe =list(probe=c(), geneNum=20); probe contains 
+#'a vector of probes'name and geneNum specify the number of gene near the probes 
+#'will ploted. 20 is default for geneNum. Output see detail.
+#'@param byTF A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's 
+#'symbol and probe contains the a vector of probes' name. Output see detail.
+#'@param category A vector labels subtype of samples or a character which is the 
+#'column name in the sampleInfo in the MEE.data object. Once specified, samples 
+#'will label different color. The color can be customized by using color.value. 
+#'@param dir.out A path specify the directory to which the figures will be saved. 
+#'Current directory is default.
 #'@param save A logic. If true, figure will be saved to dir.out.
 #'@param ... color.value, lm_line in scatter function
 #'@details byPair The output will be scatter plot for individual pairs.
 #'@details byProbe The output will be scatter plot for the probe and nearby genes.
-#'@details byTF The output will be scatter plot for the TFs and the average DNA methylation at the probes set specified in byTF list.
+#'@details byTF The output will be scatter plot for the TFs and the average 
+#'DNA methylation at the probes set specified in byTF list.
 #'@return Scatter plots.
 #'@export
-scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),byProbe=list(probe=c(),geneNum=20),byTF=list(TF=c(),probe=c()), category=NULL, dir.out ="./", save=TRUE, ...){
+scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
+                         byProbe=list(probe=c(),geneNum=20),byTF=list(TF=c(),probe=c()), 
+                         category=NULL, dir.out ="./", save=TRUE, ...){
   if(missing(mee)) stop("A MEE.data object should be included.")
-  if(!is.null(category) && length(category)==1) category <- getSample(mee,cols = category)
+  if(!is.null(category) && length(category)==1) 
+    category <- getSample(mee,cols = category)
   if(length(byPair$probe) != 0){
-    if(length(byPair$probe)!=length(byPair$gene)) stop("In pairs, the length of probes should be the same with the length of genes.")
+    if(length(byPair$probe)!=length(byPair$gene))
+      stop("In pairs, the length of probes should be the same with the length of genes.")
     for(i in 1:length(byPair$probe)){
       probe <- byPair$probe[i]
       gene <- byPair$gene[i]
       symbol <- getSymbol(mee,geneID=gene)
-      P <- scatter(meth=getMeth(mee,probe=probe),exp=getExp(mee,geneID = gene ),category=category, 
-              xlab=sprintf("DNA methyation at %s",probe), ylab=sprintf("%s gene expression",symbol), title=sprintf("%s_%s",probe,symbol),
+      P <- scatter(meth=getMeth(mee,probe=probe),
+                   exp=getExp(mee,geneID = gene ),category=category, 
+              xlab=sprintf("DNA methyation at %s",probe), 
+              ylab=sprintf("%s gene expression",symbol), 
+              title=sprintf("%s_%s",probe,symbol),
               ...)
-      if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),plot = P,useDingbats=FALSE, width=5.5, height = 4)
+      if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
+                      plot = P,useDingbats=FALSE, width=5.5, height = 4)
     }
   }
   
   if(length(byProbe$probe)!=0){
-    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee,probe=byProbe$probe),geneAnnot=getGeneInfo(mee),geneNum = byProbe$geneNum)
+    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee,probe=byProbe$probe),
+                              geneAnnot=getGeneInfo(mee),geneNum = byProbe$geneNum)
     for(i in byProbe$probe){
       probe <- i
       gene <- nearGenes[[i]]$GeneID
@@ -37,9 +56,12 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),byProbe=list(probe=
       exp <- getExp(mee,geneID=gene)
       rownames(exp) <- symbol
       P <- scatter(meth=getMeth(mee,probe=probe), exp=exp,category=category,
-                   xlab=sprintf("DNA methyation at %s",probe), ylab=sprintf("Gene expression"), title=sprintf("%s nearby %s genes",probe,byProbe$geneNum),
+                   xlab=sprintf("DNA methyation at %s",probe), 
+                   ylab=sprintf("Gene expression"), 
+                   title=sprintf("%s nearby %s genes",probe,byProbe$geneNum),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf",dir.out,probe),plot = P,useDingbats=FALSE)
+      if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf",dir.out,probe),
+                      plot = P,useDingbats=FALSE)
     }
   }
   
@@ -51,9 +73,12 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),byProbe=list(probe=
       rownames(exp) <- byTF$TF
     }
     P <- scatter(meth=meth, exp=exp,category=category,
-                 xlab="Avg DNA methyation", ylab=sprintf("TF expression"), title="TF vs avg DNA methylation",
+                 xlab="Avg DNA methyation", ylab=sprintf("TF expression"), 
+                 title="TF vs avg DNA methylation",
                  ...)
-    if(save) ggsave(filename = sprintf("%s/%s.byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),plot = P,useDingbats=FALSE, width=3*(length(byTF$TF)%%5), height = 3*ceiling(length(byTF$TF)/5))
+    if(save) ggsave(filename = sprintf("%s/%s.byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
+                    plot = P,useDingbats=FALSE, width=3*(length(byTF$TF)%%5), 
+                    height = 3*ceiling(length(byTF$TF)/5))
   }
   return(P)
 }
@@ -68,11 +93,12 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),byProbe=list(probe=
 #'@param xlab A character specify the title of x axis.
 #'@param ylab A character specify the title of y axis.
 #'@param title A character specify the figure title.
-#'@param color.value A vector specify the color of each category, such as color.value=c("Tumor"="red","Normal"="darkgreen")
+#'@param color.value A vector specify the color of each category, such as 
+#'color.value=c("Tumor"="red","Normal"="darkgreen")
 #'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
 #'@return ggplot figure object
-#'@export
-scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,color.value=NULL,lm_line=FALSE){
+scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
+                    color.value=NULL,lm_line=FALSE){
   if(is.null(category)) category <- rep(1,length(meth))
   if(!is.vector(exp)){
     exp <- as.data.frame(t(exp))
@@ -88,7 +114,8 @@ scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,co
       theme(panel.grid.major = element_blank())+
       labs(x=xlab,y=ylab,title=title)
     if(!is.null(color.value)) P <- P+scale_colour_manual(values = color.value)
-    if(lm_line) P <- P+geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+    if(lm_line) P <- P+geom_smooth(method = "lm", se=FALSE, color="black", 
+                                   formula = y ~ x,data=df)
   }else{
     df <- data.frame(meth=meth,exp=exp,category=category)
     if(length(unique(df$category))==1){
@@ -103,7 +130,8 @@ scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,co
             panel.grid.minor = element_blank())+
       labs(x=xlab,y=ylab,title=title)
     if(lm_line){
-#       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),parse = TRUE,colour = "black")+
+#       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
+      #parse = TRUE,colour = "black")+
         P <- P+ geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     }
   }

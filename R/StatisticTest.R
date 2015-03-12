@@ -4,9 +4,10 @@
 #' @param meths A matrix contain DNA methylation data.
 #' @param TN A vector of category of samples.
 #' @param test A function specify which statistic test will be used.
-#' @param percentage A number specify the percentage of normal and tumor samples used in the test.
-#' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. hypermethylated probe is TRUE.
-#' @export Stat.diff.meth
+#' @param percentage A number specify the percentage of normal and tumor 
+#' samples used in the test.
+#' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
+#' hypermethylated probe is TRUE.
 Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
   meth <- meths[probe,]
   if(Top.m){
@@ -59,7 +60,6 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @param permu.dir A path to store permuation data.
 #' @return U test results
-#' @export
 Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.dir=NULL){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Exp <- Exps[Gene,]
@@ -69,17 +69,26 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
   Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
   Fa[unmethy] <- -1
   Fa[methy] <- 1
-  test.p <- unlist(lapply(ELMER::splitmatrix(Exp),function(x,Factor) {wilcox.test(x~Factor,alternative = "greater",exact=F)$p.value},Factor=Fa))
-  out <- data.frame(GeneID=Gene,Raw.p=test.p[match(Gene, names(test.p))], stringsAsFactors = F) 
+  Exp <- Exp[,!is.na(Fa)]
+  Fa <- Fa[!is.na(Fa)]
+  test.p <- unlist(lapply(ELMER::splitmatrix(Exp),
+                          function(x,Factor) 
+                            {wilcox.test(x~Factor,alternative = "greater",exact=F)$p.value},
+                          Factor=Fa))
+  out <- data.frame(GeneID=Gene,
+                    Raw.p=test.p[match(Gene, names(test.p))], 
+                    stringsAsFactors = F) 
   if(is.null(permu.dir)){
     return(out)
   }else{
-    write.table(out,file=sprintf("%s/%s",permu.dir,Probe),quote=F,sep="\t",row.names=F,col.names=F)
+    write.table(out,file=sprintf("%s/%s",permu.dir,Probe),
+                quote=F,sep="\t",row.names=F,col.names=F)
   }
 }
 
 
-#' U test (non parameter test) for permutation. This is one probe vs nearby gene which is good for computing each probes for nearby genes.
+#' U test (non parameter test) for permutation. This is one probe vs nearby gene 
+#' which is good for computing each probes for nearby genes.
 #' @param Probe A character of name of Probe in array.
 #' @param NearGenes A list of nearby gene for each probe which is output of GetNearGenes function.
 #' @param K A number determines the methylated groups and unmethylated groups.
@@ -87,7 +96,6 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @return U test results
-#' @export
 Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Gene <- NearGenes[[Probe]][,2]
@@ -102,10 +110,21 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
     Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
     Fa[unmethy] <- -1
     Fa[methy] <- 1
-    test.p <- unlist(lapply(splitmatrix(Exp),function(x,Factor) {wilcox.test(x~Factor,alternative = "greater",exact=F)$p.value},Factor=Fa))
+    Exp <- Exp[,!is.na(Fa)]
+    Fa <- Fa[!is.na(Fa)]
+    test.p <- unlist(lapply(splitmatrix(Exp),
+                            function(x,Factor) 
+                              {wilcox.test(x~Factor,
+                                           alternative = "greater",
+                                           exact=F)$p.value},
+                            Factor=Fa))
   }
-  out <- data.frame(Probe=rep(Probe,length(Gene)),GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, Distance=NearGenes[[Probe]]$Distance, 
-                    Sides=NearGenes[[Probe]]$Side,Raw.p=test.p[match(Gene, names(test.p))], stringsAsFactors = F)
+  out <- data.frame(Probe=rep(Probe,length(Gene)),
+                    GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
+                    Distance=NearGenes[[Probe]]$Distance, 
+                    Sides=NearGenes[[Probe]]$Side,
+                    Raw.p=test.p[match(Gene, names(test.p))], 
+                    stringsAsFactors = F)
   return(out)
 }
 
@@ -114,7 +133,6 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
 #' @param U.matrix A data.frame of raw pvalue from U test. Output from .Stat.nonpara
 #' @param permu data frame of permutation. Output from .Stat.nonpara.permu
 #' @return A data frame with empirical Pvalue.
-#' @export
 Get.Pvalue.p <- function(U.matrix,permu){
   .Pvalue <- function(x,permu){
     Raw.p <- as.numeric(x["Raw.p"])
@@ -122,7 +140,8 @@ Get.Pvalue.p <- function(U.matrix,permu){
     if(is.na(Raw.p)){
       out <- NA
     }else{
-      out <- (sum(permu[as.character(Gene),]  < Raw.p | permu[Gene,] == Raw.p,na.rm=T)+1)/(sum(!is.na(permu[Gene,])) + 1)
+      out <- (sum(permu[as.character(Gene),]  < Raw.p | 
+                    permu[Gene,] == Raw.p,na.rm=T)+1)/(sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }

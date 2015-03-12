@@ -9,9 +9,11 @@ getPair(object, probe, geneID)
 \arguments{
 \item{object}{Pair object}
 
-\item{probe}{A vector of probes' name. When specified, only the pair containing these probes will be output.}
+\item{probe}{A vector of probes' name. When specified, only the pair containing
+these probes will be output.}
 
-\item{geneID}{A vector of genes' id. When specified, only the pair containing these genes will be output.}
+\item{geneID}{A vector of genes' id. When specified, only the pair containing
+these genes will be output.}
 }
 \description{
 getPair

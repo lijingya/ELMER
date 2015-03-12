@@ -8,11 +8,13 @@ motif.enrichment.plot(motif.enrichment, significant = NULL, dir.out = "./",
   save = TRUE, label = NULL)
 }
 \arguments{
-\item{motif.enrichment}{A data frame or file path of get.enriched.motif output motif.enrichment.csv file. See detial for the format of motif.enrichment if a data frame is specified.}
+\item{motif.enrichment}{A data frame or file path of get.enriched.motif output
+motif.enrichment.csv file. See detial for the format of motif.enrichment if a data frame is specified.}
 
 \item{significant}{A list to select subset of motif. Default is NULL. See detail}
 
-\item{dir.out}{A path specify the directory to which the figures will be saved. Current directory is default.}
+\item{dir.out}{A path specify the directory to which the figures will be saved.
+Current directory is default.}
 
 \item{save}{A logic. If true (default), figure will be saved to dir.out.}
 
@@ -22,6 +24,9 @@ motif.enrichment.plot(motif.enrichment, significant = NULL, dir.out = "./",
 motif.enrichment.plot
 }
 \details{
-motif.enrichment If input data.frame object, it should contain "motif", "OR", "lowerOR", "upperOR" columns. motif specifies name of motif; OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ; upperOR specifies upper boundary of OR(95%).
+motif.enrichment If input data.frame object, it should contain "motif",
+"OR", "lowerOR", "upperOR" columns. motif specifies name of motif;
+OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ;
+upperOR specifies upper boundary of OR(95%).
 }
 

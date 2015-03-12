@@ -9,9 +9,11 @@ getMeth(object, probe, ID)
 \arguments{
 \item{object}{MEE.data object}
 
-\item{probe}{A vector of probes' name. When specified, DNA methylation only for these probes will be output.}
+\item{probe}{A vector of probes' name. When specified, DNA methylation only
+for these probes will be output.}
 
-\item{ID}{A vector of sample ID. When specified, DNA methylation only for these samples will be output.}
+\item{ID}{A vector of sample ID. When specified, DNA methylation only for
+these samples will be output.}
 }
 \description{
 getMeth

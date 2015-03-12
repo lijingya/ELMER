@@ -9,9 +9,11 @@ getExp(object, geneID, ID)
 \arguments{
 \item{object}{MEE.data object}
 
-\item{geneID}{A vector of genes' id. When specified, gene expression only for these genes will be output.}
+\item{geneID}{A vector of genes' id. When specified, gene expression only
+for these genes will be output.}
 
-\item{ID}{A vector of sample ID. When specified, gene expression only for these samples will be output.}
+\item{ID}{A vector of sample ID. When specified, gene expression only for
+these samples will be output.}
 }
 \description{
 getExp

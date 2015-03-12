@@ -7,13 +7,16 @@
 TF.rank.plot(motif.pvalue, motif, TF.label, dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{motif.pvalue}{A matrix or a path specifying location of "XXX.with.pvalue.rda" which is output of getTF.}
+\item{motif.pvalue}{A matrix or a path specifying location of "XXX.with.pvalue.rda"
+which is output of getTF.}
 
 \item{motif}{A vector of charactor specify the motif to plot}
 
-\item{TF.label}{A list show the label for each motif. If TF.label is not specified, the motif relevant TF and top3 TF will be labeled.}
+\item{TF.label}{A list show the label for each motif. If TF.label is not specified,
+the motif relevant TF and top3 TF will be labeled.}
 
-\item{dir.out}{A path specify the directory to which the figures will be saved. Current directory is default.}
+\item{dir.out}{A path specify the directory to which the figures will be saved.
+Current directory is default.}
 
 \item{save}{A logic. If true (default), figure will be saved to dir.out.}
 }

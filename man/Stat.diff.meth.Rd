@@ -16,9 +16,11 @@ Stat.diff.meth(probe, meths, TN, test = t.test, percentage = 0.2,
 
 \item{test}{A function specify which statistic test will be used.}
 
-\item{percentage}{A number specify the percentage of normal and tumor samples used in the test.}
+\item{percentage}{A number specify the percentage of normal and tumor
+samples used in the test.}
 
-\item{Top.m}{A logic. If to identify hypomethylated probe Top.m should be FALSE. hypermethylated probe is TRUE.}
+\item{Top.m}{A logic. If to identify hypomethylated probe Top.m should be FALSE.
+hypermethylated probe is TRUE.}
 }
 \description{
 Stat.diff.meth

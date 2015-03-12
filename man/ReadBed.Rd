@@ -9,7 +9,8 @@ ReadBed(x, strand = FALSE, skip = 0, cols = NULL, seqLength = NULL)
 \arguments{
 \item{x}{A path of bed file (characters)}
 
-\item{strand}{A boolean to specific strands. If true, strand column will be filled as input. If false, strand column will be filled "*""}
+\item{strand}{A boolean to specific strands. If true, strand column will be filled as input.
+If false, strand column will be filled "*""}
 
 \item{skip}{A number to specify how many lines should be removed from bed file.}
 

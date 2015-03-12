@@ -13,19 +13,23 @@ get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 1000,
 
 \item{probes}{A vector lists the probes' name that need to be linked to genes.}
 
-\item{nearGenes}{Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.}
+\item{nearGenes}{Can be either a list containing output of GetNearGenes
+function or path of rda file containing output of GetNearGenes function.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.}
+\item{percentage}{A number ranges from 0 to 1 specifying the percentage of
+samples used to link probes to genes. Default is 0.2.}
 
 \item{permu.size}{A number specify the times of permuation. Default is 1000.}
 
 \item{permu.dir}{A path where the output of permuation will be.}
 
-\item{Pe}{A number specify the empircal pvalue cutoff for defining signficant pairs. Default is 0.01}
+\item{Pe}{A number specify the empircal pvalue cutoff for defining signficant pairs.
+Default is 0.01}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
-\item{cores}{A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.}
+\item{cores}{A interger which defines number of core to be used in parallel process.
+Default is NULL: don't use parallel process.}
 
 \item{label}{A character labels the outputs.}
 }

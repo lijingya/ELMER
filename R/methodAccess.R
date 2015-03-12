@@ -45,8 +45,10 @@ setMethod (f="summary","MEE.data",
 #Accessor Getter
 #' getMeth
 #' @param object MEE.data object
-#' @param probe A vector of probes' name. When specified, DNA methylation only for these probes will be output.
-#' @param ID A vector of sample ID. When specified, DNA methylation only for these samples will be output.
+#' @param probe A vector of probes' name. When specified, DNA methylation only 
+#' for these probes will be output.
+#' @param ID A vector of sample ID. When specified, DNA methylation only for 
+#' these samples will be output.
 #' @exportMethod getMeth
 setGeneric(name="getMeth",def=function(object,probe,ID){standardGeneric("getMeth")})
 setMethod(f="getMeth",signature="MEE.data",
@@ -65,8 +67,10 @@ setMethod(f="getMeth",signature="MEE.data",
 
 #' getExp
 #' @param object MEE.data object
-#' @param geneID A vector of genes' id. When specified, gene expression only for these genes will be output.
-#' @param ID A vector of sample ID. When specified, gene expression only for these samples will be output.
+#' @param geneID A vector of genes' id. When specified, gene expression only 
+#' for these genes will be output.
+#' @param ID A vector of sample ID. When specified, gene expression only for 
+#' these samples will be output.
 #' @exportMethod getExp
 
 setGeneric(name="getExp",def=function(object,geneID,ID){standardGeneric("getExp")})
@@ -86,7 +90,8 @@ setMethod(f="getExp",signature="MEE.data",
 
 #' getSample
 #' @param object MEE.data object
-#' @param ID A vector of sample ID. When specified, sample informtion only for these samples will be output.
+#' @param ID A vector of sample ID. When specified, sample informtion only for 
+#' these samples will be output.
 #' @param cols A vector of columns names of Sample slots of MEE.data object.
 #' @exportMethod getSample
 #' 
@@ -149,8 +154,10 @@ setMethod (f="summary","Pair",
 #Accessor Getter
 #' getPair
 #' @param object Pair object
-#' @param geneID A vector of genes' id. When specified, only the pair containing these genes will be output.
-#' @param probe A vector of probes' name. When specified, only the pair containing these probes will be output.
+#' @param geneID A vector of genes' id. When specified, only the pair containing 
+#' these genes will be output.
+#' @param probe A vector of probes' name. When specified, only the pair containing 
+#' these probes will be output.
 #' @exportMethod getPair
 
 setGeneric(name="getPair",def=function(object,probe,geneID){standardGeneric("getPair")})
@@ -163,16 +170,20 @@ setMethod(f="getPair",signature="Pair",
             }else if(!missing(probe) & missing(geneID)){
               pair <- object@pairInfo[object@pairInfo$Probe %in% probe,]
             }else if(!missing(probe) & !missing(geneID)){
-              pair <- object@pairInfo[object@pairInfo$Probe %in% probe & object@pairInfo$GeneID %in% geneID,]
+              pair <- object@pairInfo[object@pairInfo$Probe %in% probe & 
+                                        object@pairInfo$GeneID %in% geneID,]
             }
             return(pair)
           })
 
 #' getProbeInfo
 #' @param object MEE.data or Pair object
-#' @param probe A vector of probes' name. When specified, only the these probes' coordinate will be output.
-#' @param chr A vector of chromosome such chr1, chr2. When specified, only the probeInfo locating on these chromosome will be output.
-#' @param range A GRanges object. When specified, only the probeInfo locating within these loci will be output.
+#' @param probe A vector of probes' name. When specified, only the these probes' 
+#' coordinate will be output.
+#' @param chr A vector of chromosome such chr1, chr2. When specified, only the 
+#' probeInfo locating on these chromosome will be output.
+#' @param range A GRanges object. When specified, only the probeInfo locating 
+#' within these loci will be output.
 #' @exportMethod getProbeInfo
 setGeneric(name="getProbeInfo",def=function(object,chr,probe,range){standardGeneric("getProbeInfo")})
 setMethod(f="getProbeInfo",signature="ANY",
@@ -184,7 +195,8 @@ setMethod(f="getProbeInfo",signature="ANY",
             }else if(!missing(chr) & missing(probe)){
               probeInfo <- object@probeInfo[seqnames(object@probeInfo) %in% chr]
             }else if(!missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe & seqnames(object@probeInfo) %in% chr]
+              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe & 
+                                              seqnames(object@probeInfo) %in% chr]
             }
             if(!missing(range)){
               over <- findOverlaps(probeInfo,range)
@@ -195,9 +207,12 @@ setMethod(f="getProbeInfo",signature="ANY",
 
 #' getProbeInfo
 #' @param object MEE.data or Pair object
-#' @param geneID A vector of genes' id. When specified, only the these genes' coordinate will be output.
-#' @param symbol A vector of genes' symbols . When specified, only the these genes' coordinate will be output.
-#' @param range A GRanges object. When specified, only the geneInfo locating within these loci will be output.
+#' @param geneID A vector of genes' id. When specified, only the these genes' 
+#' coordinate will be output.
+#' @param symbol A vector of genes' symbols . When specified, only the these genes' 
+#' coordinate will be output.
+#' @param range A GRanges object. When specified, only the geneInfo locating within
+#'  these loci will be output.
 #' @exportMethod getGeneInfo
 setGeneric(name="getGeneInfo",def=function(object,geneID,symbol,range){standardGeneric("getGeneInfo")})
 setMethod(f="getGeneInfo",signature="ANY",

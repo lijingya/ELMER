@@ -9,9 +9,11 @@ fetch.pair(pair, probeInfo, geneInfo)
 \arguments{
 \item{pair}{A data.frame or path of csv file containing pair information.}
 
-\item{probeInfo}{A GRnage object or path of rda file only containing a GRange of probe information}
+\item{probeInfo}{A GRnage object or path of rda file only containing
+a GRange of probe information}
 
-\item{geneInfo}{A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL)}
+\item{geneInfo}{A GRnage object or path of rda file only containing
+a GRange of gene information (Coordinates, GENEID and SYMBOL)}
 }
 \value{
 pair.data object

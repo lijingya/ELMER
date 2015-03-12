@@ -20,7 +20,8 @@ scatter(meth, exp, category = NULL, xlab = NULL, ylab = NULL,
 
 \item{title}{A character specify the figure title.}
 
-\item{color.value}{A vector specify the color of each category, such as color.value=c("Tumor"="red","Normal"="darkgreen")}
+\item{color.value}{A vector specify the color of each category, such as
+color.value=c("Tumor"="red","Normal"="darkgreen")}
 
 \item{lm_line}{A logic. If it is TRUE, regression line will be added to the graph.}
 }
