@@ -249,6 +249,7 @@ getSymbol <- function(mee,geneID){
 }
 
 #'getGeneID
+#'@importFrom S4Vectors values
 #'@param mee A MEE.data or Pair object.
 #'@param symbol A character which is the geneID
 #'@return gene symbol 

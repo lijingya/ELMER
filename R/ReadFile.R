@@ -1,4 +1,6 @@
 #' Read a bed file.
+#' @importFrom GenomeInfoDb seqlengths<- seqlevels
+#' @importFrom S4Vectors values<-
 #' @param x A path of bed file (characters)
 #' @param strand A boolean to specific strands. If true, strand column will be filled as input. 
 #' If false, strand column will be filled "*""

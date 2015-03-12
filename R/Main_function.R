@@ -1,5 +1,6 @@
 ##get.distal.en
 #' get.feature.probe
+#' @importFrom GenomicRanges promoters
 #' @param probe A GRange object containing probes coordinate information. 
 #' Default is Illumina-methyl-450K probes coordinates.
 #' @param distal A logical. If FALSE, function will output the all 
@@ -106,7 +107,6 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 						percentage=percentage,meth=mee@meth,
 						TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
 	  }
-  }
     out <- do.call(rbind,out)
     out <- as.data.frame(out,stringsAsFactors = F)
     out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
@@ -123,6 +123,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 			out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
 										 percentage=percentage,meth=mee@meth,
 										 TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
+			snow::stopCluster(cl)
 		}
     }else{
       out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
@@ -140,12 +141,6 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
               row.names=FALSE)
     result[["hypo"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
-  
-  if(!is.null(cores)){
-    stopCluster(cl)
-  }
-  
-   
   return(result)  
 }
 
