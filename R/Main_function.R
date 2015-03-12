@@ -45,7 +45,7 @@ get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
   
   
   if(missing(feature)){
-    feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed",
+    feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed.xz",
                                    package = "ELMER"))
     probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
   }else if(is(feature,"GRange")){             
