@@ -11,10 +11,6 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     stop ("Target and Genes should both be defined")
   }
   message(Target)
-  # form the Gene GRange
-  # Gene <- GRanges(seqnames = TBed[Target,1], 
-  #ranges = IRanges (start =as.numeric(TBed[Target,2]), 
-  #end = as.numeric(TBed[Target,3])), strand=TBed[Target,6])
   if(is.null(TRange)){
     stop( "TRange must be defined")
   }else{
@@ -22,14 +18,14 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   }
   GeneIDs <-c()
   Distances <- c()
-  BiocGenerics::strand(Gene) <- "*"
+  strand(Gene) <- "*"
   Gene <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
   if(length(Gene)==0){
     warning(paste0(Target," don't have any nearby gene in the given gene list."))
     Final <- NA
   }else{
     Gene <- sort(Gene)
-    index <- IRanges::follow(regionInfo,Gene)
+    index <- follow(regionInfo,Gene)
     #left side
     Leftlimit <- geneNum/2
     Rightlimit <- geneNum/2
@@ -92,7 +88,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     Whole <- c(Left,Right)
     GeneIDs <- Gene$GENEID[Whole]
     Symbols <- Gene$SYMBOL[Whole]
-    Distances <-  suppressWarnings(IRanges::distance(Gene[Whole],regionInfo))
+    Distances <-  suppressWarnings(distance(Gene[Whole],regionInfo))
     if(Rightlimit < 1){
       Sides <- paste0("L",length(Left):1)
     }else if( Leftlimit < 1){
@@ -118,18 +114,20 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
+#' @importFrom GenomicRanges strand follow distance
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
   if(!is.null(cores)){
     if(cores > detectCores()) cores <- detectCores()/2
     cl <- makeCluster(cores,type = "SOCK")
   }
   if(is.null(TRange)){
-    stop( " TRange must be defined")
+    stop(" TRange must be defined")
   }else{
     if(is.null(cores)){
       NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
                           Gene=geneAnnot,TRange=TRange,simplify=FALSE)
     }else{
+      clusterEvalQ(cl, library(GenomicRanges))
       NearGenes <- parSapplyLB(cl,as.character(TRange$name),NearGenes,
                                geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
                                simplify=FALSE)
