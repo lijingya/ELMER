@@ -71,9 +71,9 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
   Fa[methy] <- 1
   Exp <- Exp[,!is.na(Fa)]
   Fa <- Fa[!is.na(Fa)]
-  test.p <- unlist(lapply(ELMER::splitmatrix(Exp),
+  test.p <- unlist(lapply(splitmatrix(Exp),
                           function(x,Factor) 
-                            {wilcox.test(x~Factor,alternative = "greater",exact=F)$p.value},
+                            {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],alternative = "greater",exact=F)$p.value},
                           Factor=Fa))
   out <- data.frame(GeneID=Gene,
                     Raw.p=test.p[match(Gene, names(test.p))], 
@@ -114,7 +114,7 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
     Fa <- Fa[!is.na(Fa)]
     test.p <- unlist(lapply(splitmatrix(Exp),
                             function(x,Factor) 
-                              {wilcox.test(x~Factor,
+                              {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],
                                            alternative = "greater",
                                            exact=F)$p.value},
                             Factor=Fa))

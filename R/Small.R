@@ -221,7 +221,7 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
     geneInfo <- NULL
   }
   
-  pair <- pair.data(pair=pair,probeInfo=probeInfo,geneInfo=geneInfo)
+  pair <- pair.data(pairInfo=pair,probeInfo=probeInfo,geneInfo=geneInfo)
   return(pair)
 }
 
