@@ -4,17 +4,21 @@
 \name{MEE.data-class}
 \alias{MEE.data-class}
 \title{MEE.data
-An S4 class that methylation, expression, sample information, probe information and gene information.}
+An S4 class that methylation, expression, sample information, probe
+information and gene information.}
 \description{
 MEE.data
-An S4 class that methylation, expression, sample information, probe information and gene information.
+An S4 class that methylation, expression, sample information, probe
+information and gene information.
 }
 \section{Slots}{
 
 \describe{
-\item{\code{meth}}{A matrix of DNA methylation. Each row is one probe and each column is one sample}
+\item{\code{meth}}{A matrix of DNA methylation. Each row is one probe and each
+column is one sample}
 
-\item{\code{exp}}{A matrix of expression. Each row is one gene and each column is one sample}
+\item{\code{exp}}{A matrix of expression. Each row is one gene and each
+column is one sample}
 
 \item{\code{sample}}{A data.frame contains sample information}
 

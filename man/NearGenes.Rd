@@ -11,12 +11,14 @@ NearGenes(Target = NULL, Gene = NULL, geneNum = 20, TRange = NULL)
 
 \item{Gene}{A GRange object contains coordinates of promoters for human genome.}
 
-\item{geneNum}{A number determine how many gene will be collected from each side of target (number shoule be even).}
+\item{geneNum}{A number determine how many gene will be collected from each
+side of target (number shoule be even).}
 
 \item{TRange}{A GRange object contains coordinate of targets.}
 }
 \value{
-A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
+A data frame of nearby genes and information: genes' IDs, genes' symbols,
+distance with target and side to which the gene locate to the target.
 }
 \description{
 NearGenes

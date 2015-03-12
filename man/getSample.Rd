@@ -9,7 +9,8 @@ getSample(object, ID, cols)
 \arguments{
 \item{object}{MEE.data object}
 
-\item{ID}{A vector of sample ID. When specified, sample informtion only for these samples will be output.}
+\item{ID}{A vector of sample ID. When specified, sample informtion only for
+these samples will be output.}
 
 \item{cols}{A vector of columns names of Sample slots of MEE.data object.}
 }

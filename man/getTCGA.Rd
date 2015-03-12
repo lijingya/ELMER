@@ -18,9 +18,12 @@ getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE,
 
 \item{basedir}{A path shows where the data will be stored.}
 
-\item{RNAtype}{A charactor to specify whether use isoform level or gene level. When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.}
+\item{RNAtype}{A charactor to specify whether use isoform level or gene level.
+When RNAtype=gene, gene level gene expression will be used. When isoform,
+then isoform data will be used.}
 
-\item{Methfilter}{A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.}
+\item{Methfilter}{A number. For each probe, the percentage of NA among the
+all the samples should smaller than Methfilter.}
 }
 \description{
 getTCGA

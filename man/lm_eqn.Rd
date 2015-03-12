@@ -7,11 +7,14 @@
 lm_eqn(df, Dep, Exp)
 }
 \arguments{
-\item{df}{A data.frame object contains two variables: dependent variable (Dep) and explanation variable (Exp).}
+\item{df}{A data.frame object contains two variables: dependent
+variable (Dep) and explanation variable (Exp).}
 
-\item{Dep}{A character specify dependent variable. The first column will be dependent variable as default.}
+\item{Dep}{A character specify dependent variable. The first column
+will be dependent variable as default.}
 
-\item{Exp}{A character specify explanation variable. The second column will be explanation variable as default.}
+\item{Exp}{A character specify explanation variable. The second column
+will be explanation variable as default.}
 }
 \value{
 a linear regression formula

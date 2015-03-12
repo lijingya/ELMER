@@ -13,9 +13,11 @@ schematic(probe.range, gene.range, special = list(names = c(), colors = c()),
 
 \item{gene.range}{A GRanges object contains gene TSS coordinates.}
 
-\item{special}{A list: special=list(names=c(), colors=c()) show the name of feature you want to highlight and specify the color respectively.}
+\item{special}{A list: special=list(names=c(), colors=c()) show the name of
+feature you want to highlight and specify the color respectively.}
 
-\item{interaction}{A list: interaction=list(probe=c(),gene=c(),colors=c()) show the interacted features and specify the color respectively.}
+\item{interaction}{A list: interaction=list(probe=c(),gene=c(),colors=c())
+show the interacted features and specify the color respectively.}
 
 \item{label}{A character labels the outputs figure.}
 
@@ -25,6 +27,9 @@ schematic(probe.range, gene.range, special = list(names = c(), colors = c()),
 schematicPlot
 }
 \details{
-byProbes When a vector of probes' name are provided, function will produce schematic plot for each individual probes. The schematic plot contains probe, nearby 20 (or the number of gene user specified.) genes and the significantly linked gene with the probe.
+byProbes When a vector of probes' name are provided, function will
+produce schematic plot for each individual probes. The schematic plot contains
+probe, nearby 20 (or the number of gene user specified.) genes and the significantly
+linked gene with the probe.
 }
 

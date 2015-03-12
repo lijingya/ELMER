@@ -10,19 +10,27 @@ get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2,
 \arguments{
 \item{mee}{A MEE.data object containing at least meth, exp, probeInfo, geneInfo.}
 
-\item{enriched.motif}{Can be either a list containing output of get.enriched.motif function or path of rda file containing output of get.enriched.motif function.}
+\item{enriched.motif}{Can be either a list containing output of
+get.enriched.motif function or path of rda file containing output of get.enriched.motif function.}
 
-\item{TFs}{Can be either a data.frame containing TF GeneID and Symbol or path of csv file containing TF GeneID and Symbol. If missing, human TF list will be used. For detail information, refer reference paper.}
+\item{TFs}{Can be either a data.frame containing TF GeneID and Symbol
+or path of csv file containing TF GeneID and Symbol. If missing,
+human TF list will be used. For detail information, refer reference paper.}
 
-\item{motif.relavent.TFs}{Can be either a list containing motif (list name) and relavent TF (content of list) or path of rda file containing a list containing motif (list name) and relavent TF (content of list). If missing, human TF list will be used. For detail information, refer reference paper.}
+\item{motif.relavent.TFs}{Can be either a list containing motif (list name)
+and relavent TF (content of list) or path of rda file containing a list
+containing motif (list name) and relavent TF (content of list). If missing,
+ human TF list will be used. For detail information, refer reference paper.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples used to link probes to genes. Default is 0.2.}
+\item{percentage}{A number ranges from 0 to 1 specifying the percentage of
+samples used to link probes to genes. Default is 0.2.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
 \item{label}{A character labels the outputs.}
 
-\item{cores}{A interger which defines number of core to be used in parallel process. Default is NULL: don't use parallel process.}
+\item{cores}{A interger which defines number of core to be used in parallel
+process. Default is NULL: don't use parallel process.}
 }
 \value{
 potential responsible TFs will be reported.

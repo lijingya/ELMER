@@ -8,16 +8,20 @@ GetNearGenes(geneNum = 20, geneAnnot = NULL, TRange = NULL,
   cores = NULL)
 }
 \arguments{
-\item{geneNum}{A number determine how many gene will be collected from each side of target (number shoule be even) Default to 20.}
+\item{geneNum}{A number determine how many gene will be collected from
+each side of target (number shoule be even) Default to 20.}
 
-\item{geneAnnot}{A GRange object contains coordinates of promoters for human genome.}
+\item{geneAnnot}{A GRange object contains coordinates of promoters for
+human genome.}
 
 \item{TRange}{A GRange object contains coordinate of a list targets.}
 
-\item{cores}{A number to specific how many cores to use to compute. Default to detectCores()/2.}
+\item{cores}{A number to specific how many cores to use to compute.
+Default to detectCores()/2.}
 }
 \value{
-A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
+A data frame of nearby genes and information: genes' IDs, genes' symbols,
+distance with target and side to which the gene locate to the target.
 }
 \description{
 Collect nearby gene for one locus.

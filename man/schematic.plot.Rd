@@ -14,7 +14,8 @@ schematic.plot(pair, byProbe, byGene, byCoordinate = list(chr = c(), start =
 
 \item{byGene}{A vector of gene ID}
 
-\item{byCoordinate}{A list contains chr, start and end. byCoordinate=list(chr=c(),start=c(),end=c()).}
+\item{byCoordinate}{A list contains chr, start and end.
+byCoordinate=list(chr=c(),start=c(),end=c()).}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
@@ -29,6 +30,9 @@ a schematic plot will be produced.
 schematicPlot
 }
 \details{
-byProbes When a vector of probes' name are provided, function will produce schematic plot for each individual probes. The schematic plot contains probe, nearby 20 (or the number of gene user specified.) genes and the significantly linked gene with the probe.
+byProbes When a vector of probes' name are provided,
+function will produce schematic plot for each individual probes.
+The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
+genes and the significantly linked gene with the probe.
 }
 

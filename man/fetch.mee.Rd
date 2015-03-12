@@ -8,21 +8,29 @@ fetch.mee(meth, exp, sample, probeInfo, geneInfo, probes = NULL,
   genes = NULL, TCGA = FALSE)
 }
 \arguments{
-\item{meth}{A matrix or path of rda file only containing a matrix of DNA methylation data.}
+\item{meth}{A matrix or path of rda file only containing a matrix of
+DNA methylation data.}
 
-\item{exp}{A matrix or path of rda file only containing a matrix of expression data.}
+\item{exp}{A matrix or path of rda file only containing a matrix of
+expression data.}
 
-\item{sample}{A data frame or path of rda file only containing sample information in data frame format.}
+\item{sample}{A data frame or path of rda file only containing sample
+information in data frame format.}
 
-\item{probeInfo}{A GRnage object or path of rda file only containing a GRange of probe information}
+\item{probeInfo}{A GRnage object or path of rda file only containing
+a GRange of probe information}
 
-\item{geneInfo}{A GRnage object or path of rda file only containing a GRange of gene information (Coordinates, GENEID and SYMBOL)}
+\item{geneInfo}{A GRnage object or path of rda file only containing
+a GRange of gene information (Coordinates, GENEID and SYMBOL)}
 
-\item{probes}{A vector lists probes' name. If probes are specified, the methylation and probeInfo will only contain this list of probes.}
+\item{probes}{A vector lists probes' name. If probes are specified,
+the methylation and probeInfo will only contain this list of probes.}
 
-\item{genes}{A vector lists genes' ID. If gene are specified, the methylation and probeInfo will only contain this list of probes.}
+\item{genes}{A vector lists genes' ID. If gene are specified,
+the methylation and probeInfo will only contain this list of probes.}
 
-\item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default). TRUE indicates data is from TCGA and sample section will automatically filled in.}
+\item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default).
+TRUE indicates data is from TCGA and sample section will automatically filled in.}
 }
 \value{
 MEE.data object

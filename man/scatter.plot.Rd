@@ -9,17 +9,26 @@ scatter.plot(mee, byPair = list(probe = c(), gene = c()),
   c()), category = NULL, dir.out = "./", save = TRUE, ...)
 }
 \arguments{
-\item{mee}{A MEE.data object includes DNA methylation data, expression data, probeInfo and geneInfo.}
+\item{mee}{A MEE.data object includes DNA methylation data, expression data,
+probeInfo and geneInfo.}
 
-\item{byPair}{A list: byPair =list(probe=c(),gene=c()); probe contains a vector of probes' name and gene contains a vector of gene ID. The length of probe should be the same with length of gene. Output see detail.}
+\item{byPair}{A list: byPair =list(probe=c(),gene=c()); probe contains a vector
+of probes' name and gene contains a vector of gene ID. The length of probe
+should be the same with length of gene. Output see detail.}
 
-\item{byProbe}{A list byProbe =list(probe=c(), geneNum=20); probe contains a vector of probes'name and geneNum specify the number of gene near the probes will ploted. 20 is default for geneNum. Output see detail.}
+\item{byProbe}{A list byProbe =list(probe=c(), geneNum=20); probe contains
+a vector of probes'name and geneNum specify the number of gene near the probes
+will ploted. 20 is default for geneNum. Output see detail.}
 
-\item{byTF}{A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's symbol and probe contains the a vector of probes' name. Output see detail.}
+\item{byTF}{A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's
+symbol and probe contains the a vector of probes' name. Output see detail.}
 
-\item{category}{A vector labels subtype of samples or a character which is the column name in the sampleInfo in the MEE.data object. Once specified, samples will label different color. The color can be customized by using color.value.}
+\item{category}{A vector labels subtype of samples or a character which is the
+column name in the sampleInfo in the MEE.data object. Once specified, samples
+will label different color. The color can be customized by using color.value.}
 
-\item{dir.out}{A path specify the directory to which the figures will be saved. Current directory is default.}
+\item{dir.out}{A path specify the directory to which the figures will be saved.
+Current directory is default.}
 
 \item{save}{A logic. If true, figure will be saved to dir.out.}
 

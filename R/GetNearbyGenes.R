@@ -1,16 +1,20 @@
 #' NearGenes
 #' @param Target A charactor which is name of TRange or one of rownames of TBed.
 #' @param Gene A GRange object contains coordinates of promoters for human genome.
-#' @param geneNum A number determine how many gene will be collected from each side of target (number shoule be even).
+#' @param geneNum A number determine how many gene will be collected from each 
+#' side of target (number shoule be even).
 #' @param TRange A GRange object contains coordinate of targets.
-#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
+#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
+#' distance with target and side to which the gene locate to the target.
 NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")
   }
   message(Target)
   # form the Gene GRange
-  # Gene <- GRanges(seqnames = TBed[Target,1], ranges = IRanges (start =as.numeric(TBed[Target,2]), end = as.numeric(TBed[Target,3])), strand=TBed[Target,6])
+  # Gene <- GRanges(seqnames = TBed[Target,1], 
+  #ranges = IRanges (start =as.numeric(TBed[Target,2]), 
+  #end = as.numeric(TBed[Target,3])), strand=TBed[Target,6])
   if(is.null(TRange)){
     stop( "TRange must be defined")
   }else{
@@ -25,7 +29,6 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     Final <- NA
   }else{
     Gene <- sort(Gene)
-    #  Gene_subset <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
     index <- IRanges::follow(regionInfo,Gene)
     #left side
     Leftlimit <- geneNum/2
@@ -36,7 +39,8 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
       Leftlimit <- length(Left)
     }else{
       while(length(Left) < Leftlimit){
-        if(!as.character(Gene$GENEID[index-n])%in%as.character(Gene$GENEID[Left])) Left <- c((index-n),Left) 
+        if(!as.character(Gene$GENEID[index-n])%in%as.character(Gene$GENEID[Left]))
+          Left <- c((index-n),Left) 
         if((index-n)==1){
           Leftlimit <- length(Left)
         } 
@@ -46,11 +50,13 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     
     Right <- c()
     n <- 1
-    if(index==length(Gene) || all(unique(Gene$GENEID[(index+1):length(Gene)]) %in% as.character(Gene$GENEID[index]))){
+    if(index==length(Gene) || 
+         all(unique(Gene$GENEID[(index+1):length(Gene)]) %in% as.character(Gene$GENEID[index]))){
       Rightlimit <- length(Right)
     }else{
       while(length(Right) < Rightlimit){
-        if(!as.character(Gene$GENEID[index+n])%in% as.character(Gene$GENEID[c(Right,Left)])) Right <- c(Right,(index+n))
+        if(!as.character(Gene$GENEID[index+n])%in% as.character(Gene$GENEID[c(Right,Left)])) 
+          Right <- c(Right,(index+n))
         
         if(index+n==length(Gene)){
           Rightlimit <- length(Right)
@@ -64,7 +70,8 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
       n <- 1
       if(Left[1]-n > 0){
         while((length(Left)+length(Right)) < geneNum){
-          if(!as.character(Gene$GENEID[Left[1]-n])%in%as.character(Gene$GENEID[c(Left,Right)])) Left <- c((Left[1]-n),Left) 
+          if(!as.character(Gene$GENEID[Left[1]-n])%in%as.character(Gene$GENEID[c(Left,Right)])) 
+            Left <- c((Left[1]-n),Left) 
           n <- n+1
         }
       }  
@@ -75,7 +82,8 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
       m <- length(Right)
       if(Right[m]+n < length(Gene)+1)
         while((length(Left)+length(Right)) < geneNum){
-          if(!as.character(Gene$GENEID[Right[m]+n])%in%as.character(Gene$GENEID[c(Left,Right)])) Right <- c(Right,(Right[m]+n)) 
+          if(!as.character(Gene$GENEID[Right[m]+n])%in%as.character(Gene$GENEID[c(Left,Right)])) 
+            Right <- c(Right,(Right[m]+n)) 
           n <- n+1
         } 
     }
@@ -92,17 +100,23 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     }else{
       Sides <- c(paste0("L",length(Left):1),paste0("R",1:length(Right)))
     }
-    Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,Symbol=Symbols,Distance=Distances, Side=Sides, stringsAsFactors = F)
+    Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,
+                        Symbol=Symbols,Distance=Distances, Side=Sides, 
+                        stringsAsFactors = F)
   }
   return(Final)
 }
 
 #' Collect nearby gene for one locus.
-#' @param geneAnnot A GRange object contains coordinates of promoters for human genome.
-#' @param geneNum A number determine how many gene will be collected from each side of target (number shoule be even) Default to 20.
+#' @param geneAnnot A GRange object contains coordinates of promoters for 
+#' human genome.
+#' @param geneNum A number determine how many gene will be collected from 
+#' each side of target (number shoule be even) Default to 20.
 #' @param TRange A GRange object contains coordinate of a list targets.
-#' @param cores A number to specific how many cores to use to compute. Default to detectCores()/2.
-#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, distance with target and side to which the gene locate to the target.
+#' @param cores A number to specific how many cores to use to compute. 
+#' Default to detectCores()/2.
+#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
+#' distance with target and side to which the gene locate to the target.
 #' @export
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
   if(!is.null(cores)){
@@ -113,9 +127,12 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
     stop( " TRange must be defined")
   }else{
     if(is.null(cores)){
-      NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,Gene=geneAnnot,TRange=TRange,simplify=FALSE)
+      NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
+                          Gene=geneAnnot,TRange=TRange,simplify=FALSE)
     }else{
-      NearGenes <- parSapplyLB(cl,as.character(TRange$name),NearGenes,geneNum=geneNum,Gene=geneAnnot,TRange=TRange,simplify=FALSE)
+      NearGenes <- parSapplyLB(cl,as.character(TRange$name),NearGenes,
+                               geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
+                               simplify=FALSE)
       stopCluster(cl)
     }
   }

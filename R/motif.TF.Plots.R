@@ -1,14 +1,22 @@
 #'motif.enrichment.plot
-#'@param motif.enrichment A data frame or file path of get.enriched.motif output motif.enrichment.csv file. See detial for the format of motif.enrichment if a data frame is specified.
+#'@param motif.enrichment A data frame or file path of get.enriched.motif output 
+#'motif.enrichment.csv file. See detial for the format of motif.enrichment if a data frame is specified.
 #'@param significant A list to select subset of motif. Default is NULL. See detail
-#'@param dir.out A path specify the directory to which the figures will be saved. Current directory is default.
+#'@param dir.out A path specify the directory to which the figures will be saved. 
+#'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@param label A character labels the outputs figure.
-#'@details motif.enrichment If input data.frame object, it should contain "motif", "OR", "lowerOR", "upperOR" columns. motif specifies name of motif; OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ; upperOR specifies upper boundary of OR(95%).
-#'@details significant A list used to select subset of motif.enrichment by the cutoff of OR, lowerOR, upperOR. significant=list(OR=1). More than one cutoff can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4) 
+#'@details motif.enrichment If input data.frame object, it should contain "motif",
+#' "OR", "lowerOR", "upperOR" columns. motif specifies name of motif; 
+#' OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ; 
+#' upperOR specifies upper boundary of OR(95%).
+#'@details significant A list used to select subset of motif.enrichment by the 
+#'cutoff of OR, lowerOR, upperOR. significant=list(OR=1). More than one cutoff 
+#'can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4) 
 #'@importFrom ggplot2 aes ggplot geom_point geom_errorbar
 #'@export
-motif.enrichment.plot <- function(motif.enrichment, significant=NULL, dir.out ="./", save=TRUE,label=NULL){
+motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
+                                  dir.out ="./", save=TRUE,label=NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
   if(is.character(motif.enrichment)){
     motif.enrichment <- read.csv(motif.enrichment, stringsAsFactors=F)
@@ -19,7 +27,8 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL, dir.out ="
     }
   } 
   motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = T),]
-  motif.enrichment$motif <- factor(motif.enrichment$motif, levels=c(motif.enrichment$motif[nrow(motif.enrichment):1]))
+  motif.enrichment$motif <- factor(motif.enrichment$motif,
+                                   levels=c(motif.enrichment$motif[nrow(motif.enrichment):1]))
   limits <- aes(ymax = upperOR, ymin=lowerOR)
   P <- ggplot(motif.enrichment, aes(x=motif, y=OR))+
     geom_point()+
@@ -29,16 +38,21 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL, dir.out ="
     theme_bw()+
     theme(panel.grid.major = element_blank())+
     labs(xlab="motifs", ylab="Odds Ratio")
-  if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),useDingbats=FALSE, plot=P,width=4, height = 2*round(nrow(motif.enrichment)/10))
+  if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
+                  useDingbats=FALSE, plot=P,width=4, 
+                  height = 2*round(nrow(motif.enrichment)/10))
   return(P)
 }
 
 
 #'TF.rank.plot
-#'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" which is output of getTF. 
+#'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
+#'which is output of getTF. 
 #'@param motif A vector of charactor specify the motif to plot
-#'@param TF.label A list show the label for each motif. If TF.label is not specified, the motif relevant TF and top3 TF will be labeled.
-#'@param dir.out A path specify the directory to which the figures will be saved. Current directory is default.
+#'@param TF.label A list show the label for each motif. If TF.label is not specified, 
+#'the motif relevant TF and top3 TF will be labeled.
+#'@param dir.out A path specify the directory to which the figures will be saved. 
+#'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@export
 TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){
@@ -51,7 +65,8 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
   }
   if(missing(TF.label)){
     newenv <- new.env()
-    load(system.file("extdata","motif.relavent.TFs.human.rda",package = "ELMER"), envir=newenv)
+    load(system.file("extdata","motif.relavent.TFs.human.rda",package = "ELMER"), 
+         envir=newenv)
     motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
     TF.label <- motif.relavent.TFs[motif]
     specify <- "No"
@@ -71,13 +86,16 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
     }
     df$label <- "No"
     df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"
-    df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], text=as.character(df$Gene[df$label %in% "Yes"]), x=which(df$label %in% "Yes"), stringsAsFactors = F)
+    df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
+                           text=as.character(df$Gene[df$label %in% "Yes"]), 
+                           x=which(df$label %in% "Yes"), stringsAsFactors = F)
     
     P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label)))+
       scale_color_manual(values = c("black","red"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point()+
-      geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",position=position_jitter(height=0.5,width = 0.3), size=2)+
+      geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",
+                position=position_jitter(height=0.5,width = 0.3), size=2)+
 
       #     geom_segment(aes(x = x, y = pvalue, xend = , yend = ),df.label,color="black")+
       theme_bw()+
@@ -86,7 +104,8 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
       theme(legend.position="none")+
       labs(x="Rank", y="-log10 P value", title=i)
     if(save){
-      ggsave(filename = sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),useDingbats=FALSE, plot=P,width=6, height = 6)
+      ggsave(filename = sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),
+             useDingbats=FALSE, plot=P,width=6, height = 6)
     }else{
       Plots[[i]] <- P
     }

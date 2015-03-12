@@ -11,7 +11,8 @@ matrixMeth(disease, basedir = "./Data", filter = 0.2)
 
 \item{basedir}{A path shows where the data will be stored.}
 
-\item{filter}{For each probe, the percentage of NA among the all the samples should smaller than filter.}
+\item{filter}{For each probe, the percentage of NA among the all the samples
+should smaller than filter.}
 }
 \description{
 matrixMeth

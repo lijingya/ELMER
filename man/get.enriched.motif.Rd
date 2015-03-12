@@ -12,11 +12,14 @@ get.enriched.motif(probes.motif, probes, background.probes, lower.OR = 1.1,
 
 \item{probes}{A vector lists the probes' names in which motif enrichment will be calculated.}
 
-\item{background.probes}{A vector list of probes' names which are considered as background for motif.enrichment calculation.}
+\item{background.probes}{A vector list of probes' names which are considered as
+background for motif.enrichment calculation.}
 
-\item{lower.OR}{A number specify the lower boundary of Odds ratio which defines the significant enriched motif. 1.1 is default.}
+\item{lower.OR}{A number specify the lower boundary of Odds ratio which defines
+the significant enriched motif. 1.1 is default.}
 
-\item{min.incidence}{A non-negative integer specify the minimum incidence of motif in the given probes set. 10 is default.}
+\item{min.incidence}{A non-negative integer specify the minimum incidence of
+motif in the given probes set. 10 is default.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 

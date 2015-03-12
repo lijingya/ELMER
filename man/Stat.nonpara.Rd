@@ -2,7 +2,8 @@
 % Please edit documentation in R/StatisticTest.R
 \name{Stat.nonpara}
 \alias{Stat.nonpara}
-\title{U test (non parameter test) for permutation. This is one probe vs nearby gene which is good for computing each probes for nearby genes.}
+\title{U test (non parameter test) for permutation. This is one probe vs nearby gene
+which is good for computing each probes for nearby genes.}
 \usage{
 Stat.nonpara(Probe, NearGenes, K, Top = NULL, Meths = Meths, Exps = Exps)
 }
@@ -23,6 +24,7 @@ Stat.nonpara(Probe, NearGenes, K, Top = NULL, Meths = Meths, Exps = Exps)
 U test results
 }
 \description{
-U test (non parameter test) for permutation. This is one probe vs nearby gene which is good for computing each probes for nearby genes.
+U test (non parameter test) for permutation. This is one probe vs nearby gene
+which is good for computing each probes for nearby genes.
 }
 
