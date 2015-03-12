@@ -13,20 +13,20 @@
 #'@details significant A list used to select subset of motif.enrichment by the 
 #'cutoff of OR, lowerOR, upperOR. significant=list(OR=1). More than one cutoff 
 #'can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4) 
-#'@importFrom ggplot2 aes ggplot geom_point geom_errorbar
+#'@importFrom ggplot2 aes ggplot geom_point geom_errorbar coord_flip geom_abline
 #'@export
 motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
                                   dir.out ="./", save=TRUE,label=NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
   if(is.character(motif.enrichment)){
-    motif.enrichment <- read.csv(motif.enrichment, stringsAsFactors=F)
+    motif.enrichment <- read.csv(motif.enrichment, stringsAsFactors=FALSE)
   }
   if(!is.null(significant)){
     for(i in names(significant)){
       motif.enrichment <- motif.enrichment[motif.enrichment[,i] > significant[[i]],]
     }
   } 
-  motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = T),]
+  motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = TRUE),]
   motif.enrichment$motif <- factor(motif.enrichment$motif,
                                    levels=c(motif.enrichment$motif[nrow(motif.enrichment):1]))
   limits <- aes(ymax = upperOR, ymin=lowerOR)
@@ -46,6 +46,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 
 
 #'TF.rank.plot
+#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter
 #'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
 #'which is output of getTF. 
 #'@param motif A vector of charactor specify the motif to plot
@@ -77,8 +78,8 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
   motif.pvalue <- -log10(motif.pvalue)
   Plots <- list()
   for(i in motif){
-    df <- data.frame(pvalue=motif.pvalue[,i], Gene=rownames(motif.pvalue), stringAsFactors=F)
-    df <- df[order(df$pvalue, decreasing = T),]
+    df <- data.frame(pvalue=motif.pvalue[,i], Gene=rownames(motif.pvalue), stringAsFactors=FALSE)
+    df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
     TF.sub <- TF.label[[i]]
     if(specify %in% "No"){
@@ -88,7 +89,7 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
     df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
                            text=as.character(df$Gene[df$label %in% "Yes"]), 
-                           x=which(df$label %in% "Yes"), stringsAsFactors = F)
+                           x=which(df$label %in% "Yes"), stringsAsFactors = FALSE)
     
     P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label)))+
       scale_color_manual(values = c("black","red"))+
