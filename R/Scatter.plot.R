@@ -88,7 +88,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 #'scatter
 #'@importFrom reshape melt
 #'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth
-#'@importFrom S4Vector value
+#'@importFrom S4Vectors value
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
 #'@param category A vector of sample labels.
