@@ -131,7 +131,7 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
   }else{
 	  if(requireNamespace("snow", quietly=TRUE)) {
 		  snow::clusterEvalQ(cl, library(GenomicRanges))
-		  NearGenes <- snow::parSapplyLB(cl,as.character(TRange$name),NearGenes,
+		  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
 								   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
 								   simplify=FALSE)
 		  snow::stopCluster(cl)

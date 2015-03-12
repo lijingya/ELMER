@@ -95,9 +95,9 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 	  }
   }
   if("hyper" %in% diff.dir){
-	  if(requireNamespace("snow", quietly=TRUE)) {
+	  if(requireNamespace("parallel", quietly=TRUE)) {
 		  if(!is.null(cores)){
-			  out <- snow::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
+			  out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
 								 percentage=percentage,meth=mee@meth,
 								 TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =F)
 		  }
@@ -119,9 +119,11 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
   }
   if("hypo" %in% diff.dir){
     if(!is.null(cores)){
-      out <- parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
-                         percentage=percentage,meth=mee@meth,
-                         TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
+		if(requireNamespace("parallel")) {
+			out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
+										 percentage=percentage,meth=mee@meth,
+										 TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =F)
+		}
     }else{
       out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
                     meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
@@ -190,7 +192,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
 		  if(requireNamespace("snow", quietly=TRUE)) {
 			  cl <- snow::makeCluster(cores,type = "SOCK")
-			  Probe.gene<-snow::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
+			  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
 											NearGenes=nearGenes,K=0.3,Top=percentage,
 											Exps=getExp(mee),simplify = F)
 			  snow::stopCluster(cl)
@@ -261,7 +263,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
 			if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
 			if(requireNamespace("snow", quietly=TRUE)) {
 				suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-				permu<-snow::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+				permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
 										 Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
 										 Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
 										 simplify = F)
@@ -449,7 +451,7 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
 		  if(requireNamespace("snow", quietly=TRUE)) {
 			  cl <- snow::makeCluster(cores,type = "SOCK")
-			  TF.meth.cor<-snow::parSapplyLB(cl,rownames(motif.meth),
+			  TF.meth.cor<-parallel::parSapplyLB(cl,rownames(motif.meth),
 											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=F)
 			  snow::stopCluster(cl)
