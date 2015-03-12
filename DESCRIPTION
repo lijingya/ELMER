@@ -1,10 +1,17 @@
 Package: ELMER
 Title: What the Package Does (one line, title case)
 Version: 0.0.0.9000
+Author: Lijing Yao<lijingya@usc.edu>
+Maintainer: Lijing Yao<lijingya@usc.edu>
 Authors@R: "Lijing Yao <lijingya@usc.edu> [aut, cre]"
 Description: What the package does (one paragraph)
-Depends: R (>= 3.0.1), GenomicRanges, ggplot2,reshape,grid,parallel,IRanges,methods
+Depends: R (>= 3.0.1), GenomicRanges
 License: GPL-3
 LazyData: true
+<<<<<<< HEAD
 import: GenomicRanges,ggplot2,reshape,grid,parallel,BiocGenerics,IRanges
 Suggests: BiocStyle
+=======
+Imports: GenomicRanges,ggplot2,reshape,grid,IRanges,GenomeInfoDb,S4Vectors
+Suggests: parallel, snow
+>>>>>>> bd3d3683fd4e3ee5711e31cbafd0f6494df96c32

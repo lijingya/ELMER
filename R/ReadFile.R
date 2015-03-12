@@ -1,4 +1,6 @@
 #' Read a bed file.
+#' @importFrom GenomeInfoDb seqlengths<- seqlevels
+#' @importFrom S4Vectors values<-
 #' @param x A path of bed file (characters)
 #' @param strand A boolean to specific strands. If true, strand column will be filled as input. 
 #' If false, strand column will be filled "*""
@@ -35,13 +37,13 @@ ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
   }else{
     Bed<-GRanges( x[,1], IRanges(x[,2], x[,3]) )
     if(ncol(x)==4){
-      values(Bed) <- data.frame(name=x[,4],stringsAsFactors = F)
+      values(Bed) <- data.frame(name=x[,4],stringsAsFactors = FALSE)
     }else if(ncol(x)==5){
-      values(Bed) <- data.frame(name=x[,4],score = x[,5],stringsAsFactors = F)
+      values(Bed) <- data.frame(name=x[,4],score = x[,5],stringsAsFactors = FALSE)
     }else if(ncol(x)>=6){
       values(Bed) <- data.frame(name=x[,4],score = x[,5],
                                 x[,setdiff(seq_len(ncol(x)),c(1:6))],
-                                stringsAsFactors = F)
+                                stringsAsFactors = FALSE)
     }  
   }
   if(!is.null(seqLength)){
@@ -70,13 +72,13 @@ ReadGFF <- function(x,strand=FALSE,skip=0  ){
     values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],
                               frame = x[,8],name = x[,9],
                               x[,setdiff(seq_len(ncol(x)),c(1:9))],
-                              stringsAsFactors = F)
+                              stringsAsFactors = FALSE)
   }else{
     GFF<-GRanges( x[,1], IRanges(x[,4], x[,5]) )
     values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],
                               frame = x[,8],name = x[,9],
                               x[,setdiff(seq_len(ncol(x)),c(1:9))],
-                              stringsAsFactors = F)
+                              stringsAsFactors = FALSE)
   }
   seqlengths(GFF) <- sequenceLen[seqlevels(GFF),2]
   return(GFF)
@@ -128,7 +130,7 @@ rownames(sequenceLen) <- sequenceLen$chr
 #' @param fn A name of bed file you want to output.
 #' @return A data.frame bed object or save output bed file.
 #' @export
-WriteBed <-function(x,save=T,fn=NULL){
+WriteBed <-function(x,save=TRUE,fn=NULL){
   x <- as.data.frame(x,row.names=NULL)
   x$element=NULL
   if(ncol(x) >5){
@@ -144,7 +146,7 @@ WriteBed <-function(x,save=T,fn=NULL){
   rownames(out) <- NULL
   if(save){
     if(is.null(fn)) fn <- deparse(substitute(x))
-    write.table(out,file=fn,row.names=F,col.names=F,quote=F,sep="\t")
+    write.table(out,file=fn,row.names=FALSE,col.names=FALSE,quote=FALSE,sep="\t")
   }else{
     return(out)
   }
