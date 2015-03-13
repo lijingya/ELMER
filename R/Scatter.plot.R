@@ -86,7 +86,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 
 
 #'scatter
-#'@importFrom reshape melt
+#'@importFrom reshape melt.data.frame
 #'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
@@ -106,7 +106,7 @@ scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
     GeneID <- colnames(exp)
     exp$meth <- meth
     exp$category <- category
-    df <- melt(exp, measure.vars = GeneID)
+    df <- melt.data.frame(exp, measure.vars = GeneID)
     P <- ggplot(df, aes(x= meth, y=value, color=factor(category)))+
       geom_point(size=0.9)+
       facet_wrap(facets = ~ variable, ncol = 5)+

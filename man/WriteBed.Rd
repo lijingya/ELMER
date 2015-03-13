@@ -4,7 +4,7 @@
 \alias{WriteBed}
 \title{Write a bed file from GRange object.}
 \usage{
-WriteBed(x, save = T, fn = NULL)
+WriteBed(x, save = TRUE, fn = NULL)
 }
 \arguments{
 \item{x}{GRange object}
