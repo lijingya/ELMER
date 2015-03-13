@@ -116,7 +116,6 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' distance with target and side to which the gene locate to the target.
 #' @export
 #' @importFrom GenomicRanges strand follow distance
-#' @importFrom parallel detectCores
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
 	if(!is.null(cores)){
 		if(requireNamespace("parallel", quietly=TRUE)) {
