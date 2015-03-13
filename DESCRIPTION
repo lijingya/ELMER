@@ -1,6 +1,6 @@
 Package: ELMER
 Title: What the Package Does (one line, title case)
-Version: 0.0.0.9002
+Version: 0.0.0.9003
 Author: Lijing Yao<lijingya@usc.edu>
 Maintainer: Lijing Yao<lijingya@usc.edu>
 Authors@R: "Lijing Yao <lijingya@usc.edu> [aut, cre]"

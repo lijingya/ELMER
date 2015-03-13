@@ -129,12 +129,14 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
   if(is.null(TRange)){
     stop(" TRange must be defined")
   }else{
-	  if(requireNamespace("snow", quietly=TRUE)) {
-		  snow::clusterEvalQ(cl, library(GenomicRanges))
-		  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
-								   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
-								   simplify=FALSE)
-		  parallel::stopCluster(cl)
+	  if(!is.null(cores)) {
+		  if(requireNamespace("snow", quietly=TRUE)) {
+			  snow::clusterEvalQ(cl, library(GenomicRanges))
+			  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
+												 geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
+												 simplify=FALSE)
+			  parallel::stopCluster(cl)
+		  }
 	  }else{
 		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
 							  Gene=geneAnnot,TRange=TRange,simplify=FALSE)
