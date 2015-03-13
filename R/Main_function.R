@@ -35,11 +35,11 @@ get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
       load(system.file("extdata","GENCODE.UCSC.combined.TSS",package = "ELMER"),
            envir=newenv)
       txs <- get(ls(newenv)[1],envir=newenv)
-      TSS <- suppressWarnings(promoters(txs,upstream = TRUESS.range[["upstream"]], 
-                                        downstream = TRUESS.range[["downstream"]]))    
+      TSS <- suppressWarnings(promoters(txs,upstream = TSS.range[["upstream"]], 
+                                        downstream = TSS.range[["downstream"]]))    
     }else{
-      TSS <- suppressWarnings(promoters(TSS,upstream = TRUESS.range[["upstream"]], 
-                                        downstream = TRUESS.range[["downstream"]]))
+      TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
+                                        downstream = TSS.range[["downstream"]]))
     }
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
   }
@@ -447,14 +447,14 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
 		  if(requireNamespace("snow", quietly=TRUE)) {
 			  cl <- snow::makeCluster(cores,type = "SOCK")
 			  TF.meth.cor<-parallel::parSapplyLB(cl,rownames(motif.meth),
-											 Stat.nonpara.permu,Meths=motif.meth,Gene=TRUEFs$GeneID,
+											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
 			  snow::stopCluster(cl)
 		  }
 	  }
   }else{
     TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,
-                        Gene=TRUEFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
+                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
   }
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
@@ -468,7 +468,7 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
                             out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
                                               "potential TFs"= paste(potential.TF, collapse = ";"),
                                               "top_5percent"= paste(top,collapse = ";"))},                                         
-                        TF.meth.cor=TRUEF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
+                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
   cor.summary <- do.call(rbind, cor.summary)
   save(TF.meth.cor, 
        file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
@@ -477,7 +477,7 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
                          dir.out=dir.out, label=label), row.names=TRUE)
   if(!file.exists(sprintf("%s/TFrankPlot",dir.out)))
     dir.create(sprintf("%s/TFrankPlot",dir.out))
-  TF.rank.plot(motif.pvalue=TRUEF.meth.cor, motif=colnames(TF.meth.cor), 
+  TF.rank.plot(motif.pvalue=TF.meth.cor, motif=colnames(TF.meth.cor), 
                dir.out=sprintf("%s/TFrankPlot",dir.out), save=TRUE)
   return(cor.summary)
 }
