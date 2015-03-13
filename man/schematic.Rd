@@ -6,7 +6,7 @@
 \usage{
 schematic(probe.range, gene.range, special = list(names = c(), colors = c()),
   interaction = list(probe = c(), gene = c(), colors = c()), label,
-  save = T)
+  save = TRUE)
 }
 \arguments{
 \item{probe.range}{A GRanges object contains probes coordinates.}
