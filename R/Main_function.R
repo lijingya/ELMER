@@ -123,7 +123,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 			out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
 										 percentage=percentage,meth=mee@meth,
 										 TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =FALSE)
-			snow::stopCluster(cl)
+			parallel::stopCluster(cl)
 		}
     }else{
       out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
@@ -190,7 +190,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 			  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
 											NearGenes=nearGenes,K=0.3,Top=percentage,
 											Exps=getExp(mee),simplify = FALSE)
-			  snow::stopCluster(cl)
+			  parallel::stopCluster(cl)
 		  }
 	  }
   }else{
@@ -262,7 +262,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
 										 Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
 										 Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
 										 simplify = FALSE)
-				snow::stopCluster(cl)
+				parallel::stopCluster(cl)
 			}
 		}
     }else{
@@ -449,7 +449,7 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
 			  TF.meth.cor<-parallel::parSapplyLB(cl,rownames(motif.meth),
 											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
-			  snow::stopCluster(cl)
+			  parallel::stopCluster(cl)
 		  }
 	  }
   }else{

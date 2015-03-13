@@ -134,7 +134,7 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
 		  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
 								   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
 								   simplify=FALSE)
-		  snow::stopCluster(cl)
+		  parallel::stopCluster(cl)
 	  }else{
 		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
 							  Gene=geneAnnot,TRange=TRange,simplify=FALSE)
