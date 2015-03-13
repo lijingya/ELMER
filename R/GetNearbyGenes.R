@@ -84,8 +84,6 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
           n <- n+1
         } 
     }
-    print(Left)
-    print(Right)
     Whole <- c(Left,Right)
     GeneIDs <- Gene$GENEID[Whole]
     Symbols <- Gene$SYMBOL[Whole]
