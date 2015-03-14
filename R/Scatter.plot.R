@@ -43,7 +43,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
               title=sprintf("%s_%s",probe,symbol),
               ...)
       if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
-                      plot = P,useDingbats=FALSE, width=5.5, height = 4)
+                      plot = P,useDingbats=FALSE, width=7, height = 6)
     }
   }
   
