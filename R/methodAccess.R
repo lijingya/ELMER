@@ -2,7 +2,7 @@
 # # initialize 
 setMethod(f="initialize",signature="MEE.data",
           definition=function(.Object,meth,exp,sample,probeInfo,geneInfo){
-            cat("~~~ MEE.data: initializator ~~~ \n")
+            message("~~~ MEE.data: initializator ~~~ ")
             # meth needs to be matrix
             if(!missing(meth)) .Object@meth<-meth
             #exp needs to be matrix
@@ -20,25 +20,25 @@ setMethod(f="initialize",signature="MEE.data",
 # show
 setMethod (f="show","MEE.data",
            function(object){
-             cat("*** Class MEE.data, method show *** \n")
-             cat("* meth \n"); print(str(object@meth))
-             cat("* exp \n"); print(str(object@exp))
-             cat("* sample \n"); print(str(object@sample))
-             cat("* probeInfo \n"); print(object@probeInfo)
-             cat("* geneInfo \n"); print(object@geneInfo)
-             cat("******* End Print (MEE.data) ******* \n")
+             message("*** Class MEE.data, method show *** ")
+             message("* meth "); print(str(object@meth))
+             message("* exp "); print(str(object@exp))
+             message("* sample "); print(str(object@sample))
+             message("* probeInfo "); print(object@probeInfo)
+             message("* geneInfo "); print(object@geneInfo)
+             message("******* End Print (MEE.data) ******* ")
            }
 )
 
 setMethod (f="summary","MEE.data",
            function(object){
-             cat("*** Class MEE.data, method summary *** \n")
-             cat("* meth \n"); print(str(object@meth))
-             cat("* exp \n"); print(str(object@exp))
-             cat("* sample \n"); print(str(object@sample))
-             cat("* probeInfo \n"); print(object@probeInfo)
-             cat("* geneInfo \n"); print(object@geneInfo)
-             cat("******* End Print (MEE.data) ******* \n")
+             message("*** Class MEE.data, method summary *** ")
+             message("* meth "); print(str(object@meth))
+             message("* exp "); print(str(object@exp))
+             message("* sample "); print(str(object@sample))
+             message("* probeInfo "); print(object@probeInfo)
+             message("* geneInfo "); print(object@geneInfo)
+             message("******* End Print (MEE.data) ******* ")
            }
 )
 
@@ -101,7 +101,7 @@ setMethod(f="getSample",signature="MEE.data",
 # initialize
 setMethod(f="initialize",signature="Pair",
           definition=function(.Object,pairInfo,probeInfo,geneInfo){
-            cat("~~~ Pair: initializator ~~~ \n")
+            message("~~~ Pair: initializator ~~~ ")
             # meth needs to be matrix
             if(!missing(pairInfo)) .Object@pairInfo<-pairInfo
             #probeInfo needs to be GRanges
@@ -115,21 +115,21 @@ setMethod(f="initialize",signature="Pair",
 #show
 setMethod (f="show","Pair",
            function(object){
-             cat("*** Class Pair, method show *** \n")
-             cat("* pair \n"); print(str(object@pairInfo))
-             cat("* probeInfo \n"); print(head(object@probeInfo))
-             cat("* geneInfo \n"); print(head(object@geneInfo))
-             cat("******* End Print (Pair) ******* \n")
+             message("*** Class Pair, method show *** ")
+             message("* pair "); print(str(object@pairInfo))
+             message("* probeInfo "); print(head(object@probeInfo))
+             message("* geneInfo "); print(head(object@geneInfo))
+             message("******* End Print (Pair) ******* ")
            }
 )
 
 setMethod (f="summary","Pair",
            function(object){
-             cat("*** Class Pair, method summary *** \n")
-             cat("* pair \n"); print(str(object@pairInfo))
-             cat("* probeInfo \n"); print(head(object@probeInfo))
-             cat("* geneInfo \n"); print(head(object@geneInfo))
-             cat("******* End Print (MEE.data) ******* \n")
+             message("*** Class Pair, method summary *** ")
+             message("* pair "); print(str(object@pairInfo))
+             message("* probeInfo "); print(head(object@probeInfo))
+             message("* geneInfo "); print(head(object@geneInfo))
+             message("******* End Print (MEE.data) ******* ")
            }
 )
 
