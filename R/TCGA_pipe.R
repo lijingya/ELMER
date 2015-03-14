@@ -25,7 +25,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   args <- list(...)
   #Download 
   if("download" %in% analysis){
-    cat("###################\nDownload data\n###################\n\n\n")
+    message("###################\nDownload data\n###################\n\n")
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
     params <- args[names(args) %in% c("RNAtype","Methfilter")]
     params$disease <- disease
@@ -36,7 +36,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
     
   ## select distal enhancer probes
   if("distal.enhancer" %in% analysis){
-    cat("###################\nSelect distal enhancer probes\n###################\n\n\n")
+    message("###################\nSelect distal enhancer probes\n###################\n\n")
     params <- args[names(args) %in% c("probe","TSS","feature","TSS.range","distal")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file=sprintf("%s/probeInfo_feature.rda",dir.out))
@@ -50,7 +50,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   
   #get differential DNA methylation
   if("diffMeth" %in% analysis){
-    cat("###################\nGet differential DNA methylation loci\n###################\n\n\n")
+    message("###################\nGet differential DNA methylation loci\n###################\n\n")
     #refine meth data: filter out non tumor or normal samples--------------
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     if(!file.exists(meth.file)){
@@ -79,7 +79,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   
   #predict pair
   if("pair" %in% analysis){
-    cat("###################\nPredict pairs\n###################\n\n\n")
+    message("###################\nPredict pairs\n###################\n\n")
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
     if(!file.exists(exp.file)){
@@ -159,7 +159,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   
   # search enriched motif
   if("motif" %in% analysis){
-    cat("###################\nMotif search\n###################\n\n\n")
+    message("###################\nMotif search\n###################\n\n")
     ## define diff.dir
     diff.dir <- args[names(args) %in% "diff.dir"]
     if(length(diff.dir)==0 || diff.dir[["diff.dir"]]=="both"){
@@ -192,7 +192,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
    
    #search responsible TFs
   if("TF.search" %in% analysis){
-    cat("###################\nSearch responsible TFs\n###################\n\n\n")
+    message("###################\nSearch responsible TFs\n###################\n\n")
     ## make mee 
     #construct RNA seq data
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)

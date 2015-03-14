@@ -346,7 +346,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
-  cat(sprintf("%s motifs are enriched.\n",length(en.motifs)))
+  message(sprintf("%s motifs are enriched.",length(en.motifs)))
   enriched.motif <- sapply(en.motifs, 
                            function(x, probes.TF)
                              {names(probes.TF[probes.TF[,x]==1,x])},
