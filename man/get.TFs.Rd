@@ -47,7 +47,7 @@ enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
 TF <- get.TFs(mee, enriched.motif,
 TFs=data.frame(GeneID=c("ID7157","ID8626","ID7161"),
               Symbol=c("TP53","TP63","TP73"),
-              stringsAsFactors = F),
+              stringsAsFactors = FALSE),
               label="hypo")
 }
 

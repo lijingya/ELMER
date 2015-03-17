@@ -102,6 +102,7 @@ rownames(sequenceLen) <- sequenceLen$chr
 #' If save is true, fn parameter need to be specific and it output bed file in the path you specified in fn.
 #' @param fn A name of bed file you want to output.
 #' @return A data.frame bed object or save output bed file.
+#' @importFrom IRanges as.data.frame
 #' @export
 #' @examples
 #' probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"), 

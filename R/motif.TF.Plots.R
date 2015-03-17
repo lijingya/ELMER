@@ -21,10 +21,10 @@
 #'OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
 #'lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
 #'upperOR =c(23,5,3,7,6,5,5),
-#'stringsAsFactors=F)
+#'stringsAsFactors=FALSE)
 #'motif.enrichment.plot(motif.enrichment=motif.enrichment,
 #'                      significant=list(OR=3),
-#'                      label="hypo", save=F)
+#'                      label="hypo", save=FALSE)
 motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
                                   dir.out ="./", save=TRUE,label=NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
@@ -69,7 +69,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 #'@examples
 #'load(system.file("extradata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
 #'TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-#'             save=F)
+#'             save=FALSE)
 TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
