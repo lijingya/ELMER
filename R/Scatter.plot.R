@@ -87,7 +87,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 
 #'scatter
 #'@importFrom reshape melt.data.frame
-#'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth
+#'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth element_text
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
 #'@param category A vector of sample labels.
@@ -112,7 +112,8 @@ scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
       facet_wrap(facets = ~ variable, ncol = 5)+
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
       theme_bw()+
-      theme(panel.grid.major = element_blank())+
+      theme(panel.grid.major = element_blank(),
+			axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
       labs(x=xlab,y=ylab,title=title)
     if(!is.null(color.value)) P <- P+scale_colour_manual(values = color.value)
     if(lm_line) P <- P+geom_smooth(method = "lm", se=FALSE, color="black", 
@@ -128,7 +129,8 @@ scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
       theme_bw()+
       theme(panel.grid.major = element_blank(), 
-            panel.grid.minor = element_blank())+
+            panel.grid.minor = element_blank(),
+			axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
       labs(x=xlab,y=ylab,title=title)
     if(lm_line){
 #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
