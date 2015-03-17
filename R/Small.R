@@ -83,6 +83,14 @@ standardizeTcgaId<-function(tcgaId){
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @return MEE.data object
 #' @export 
+#' @examples
+#' meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
+#' exp <- matrix(data=c(101:110),ncol=5,dimnames=list(c("gene1","gene2"),paste0("sample",1:5)))
+#' mee <- fetch.mee(meth=meth, exp=exp)
+#' ## only fetch probe 1 and 3
+#' mee <- fetch.mee(meth=meth, exp=exp, probes=c("probe1","probe3")) 
+#' ## only fetch gene 1
+#' mee <- fetch.mee(meth=meth, exp=exp, genes="gene1")
 fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
                       genes=NULL,TCGA=FALSE){
   if(!missing(meth)){
@@ -121,7 +129,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
                            exp.ID=colnames(exp),
                            TN=sapply(colnames(exp),tcgaSampleType),
                            stringsAsFactors = FALSE)
-    }else if(!is.null(meth) & !is.null(meth)){
+    }else if(!is.null(meth) & !is.null(exp)){
       ID <- intersect(standardizeTcgaId(colnames(meth)),standardizeTcgaId(colnames(exp)))
       meth.ID <- colnames(meth)
       exp.ID <- colnames(exp)
@@ -130,7 +138,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
                            TN=sapply(ID,tcgaSampleType),stringsAsFactors = FALSE)
       
     }
-  }else{
+  }else if(!is.null(meth) & !is.null(exp)){
     ID <- intersect(colnames(meth),colnames(exp))
     if(length(ID)==0) 
       stop("Sample naming should consistant in methylation and expression data.")
@@ -138,6 +146,8 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
     exp.ID <- colnames(exp)
     sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,meth.ID)],
                          exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = FALSE)
+  }else{
+    sample <- NULL
   }
   if(!missing(probeInfo)){
     if(is.character(probeInfo)){
@@ -191,6 +201,15 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
 #' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
 #' @return pair.data object
 #' @export 
+#' @examples
+#' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
+#' GeneID =c("ID255928","ID84451","ID55811"),
+#' Symbol =c("SYT14","KIAA1804","ADCY10"),
+#' Pe=c(0.003322259,0.003322259,0.003322259))
+#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' ## input can be a path
+#' pair <- fetch.pair(pair = df, geneInfo=geneInfo)
+
 fetch.pair <- function(pair,probeInfo,geneInfo){
   if(!missing(pair)){
     if(is.character(pair)){
@@ -242,6 +261,11 @@ splitmatrix <- function(x,by="row") {
 #'@param geneID A character which is the geneID
 #'@return gene symbol 
 #'@export
+#' @examples
+#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' ## input can be a path
+#' pair <- fetch.pair(geneInfo=geneInfo)
+#' getSymbol(pair, geneID="84451")
 getSymbol <- function(mee,geneID){
   gene <- unique(values(getGeneInfo(mee,geneID=geneID))[,c("GENEID","SYMBOL")])
   gene <- gene[match(geneID,gene$GENEID),"SYMBOL"]
@@ -254,6 +278,11 @@ getSymbol <- function(mee,geneID){
 #'@param symbol A character which is the geneID
 #'@return gene symbol 
 #'@export
+#'@examples
+#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' ## input can be a path
+#' pair <- fetch.pair(geneInfo=geneInfo)
+#' getGeneID(pair, symbol="KIAA1804")
 getGeneID <- function(mee,symbol){
   gene <- unique(values(getGeneInfo(mee,symbol=symbol))[,c("GENEID","SYMBOL")])
   gene <- gene[match(symbol,gene$SYMBOL),"GENEID"]

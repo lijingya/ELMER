@@ -43,4 +43,14 @@ scatter.plot
 \details{
 byPair The output will be scatter plot for individual pairs.
 }
+\examples{
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20),
+           category="TN", save=F)
+scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20),
+           category="TN", save=T) ## save to pdf
+# b. generate one probe-gene pair
+scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
+            category="TN", save=F,lm_line=T)
+}
 

@@ -22,4 +22,10 @@ these samples will be output.}
 \description{
 getExp
 }
+\examples{
+exp <- matrix(data=c(101:110),ncol=5,dimnames=list(c("gene1","gene2"),paste0("sample",1:5)))
+mee <- fetch.mee(exp=exp)
+Exp <- getExp(mee, geneID = "gene1") ## get gene expression for certain genes
+Exp <- getExp(mee, ID = c("sample1","sample5")) ## get gene expression for certain samples
+}
 

@@ -21,4 +21,13 @@ pair.data object
 \description{
 fetch.pair
 }
+\examples{
+df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
+GeneID =c("ID255928","ID84451","ID55811"),
+Symbol =c("SYT14","KIAA1804","ADCY10"),
+Pe=c(0.003322259,0.003322259,0.003322259))
+geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+## input can be a path
+pair <- fetch.pair(pair = df, geneInfo=geneInfo)
+}
 

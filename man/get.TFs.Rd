@@ -38,4 +38,16 @@ potential responsible TFs will be reported.
 \description{
 get.TFs
 }
+\examples{
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
+                                 "cg17153775", "cg21156590", "cg19749688", "cg12590404",
+                                 "cg24517858", "cg00329272", "cg09010107", "cg15386853",
+                                 "cg10097755", "cg09247779", "cg09181054"))
+TF <- get.TFs(mee, enriched.motif,
+TFs=data.frame(GeneID=c("ID7157","ID8626","ID7161"),
+              Symbol=c("TP53","TP63","TP73"),
+              stringsAsFactors = F),
+              label="hypo")
+}
 

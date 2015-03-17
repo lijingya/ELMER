@@ -114,6 +114,12 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' distance with target and side to which the gene locate to the target.
 #' @export
 #' @importFrom GenomicRanges strand follow distance
+#' @examples
+#' load(system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER"))
+#' probe <- GRanges(seqnames = c("chr1","chr2"), 
+#' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
+#' name= c("cg18108049","cg17125141"))
+#' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=txs,TRange=probe)
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
 	if(!is.null(cores)){
 		if(requireNamespace("parallel", quietly=TRUE)) {

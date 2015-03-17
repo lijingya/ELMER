@@ -45,6 +45,11 @@ setMethod (f="summary","MEE.data",
 #Accessor Getter
 #' @rdname getMeth
 #' @aliases getMeth
+#' @examples 
+#' meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
+#' mee <- fetch.mee(meth=meth)
+#' Meth <- getMeth(mee,probe = "probe1")
+#' Meth <- getMeth(mee, ID = c("sample1","sample2"))
 setMethod(f="getMeth",signature="MEE.data",
           definition=function(object,probe,ID){
             if(missing(probe) & missing(ID)){
@@ -62,6 +67,11 @@ setMethod(f="getMeth",signature="MEE.data",
 
 #' @rdname getExp
 #' @aliases getExp
+#' @examples
+#' exp <- matrix(data=c(101:110),ncol=5,dimnames=list(c("gene1","gene2"),paste0("sample",1:5)))
+#' mee <- fetch.mee(exp=exp)
+#' Exp <- getExp(mee, geneID = "gene1") ## get gene expression for certain genes
+#' Exp <- getExp(mee, ID = c("sample1","sample5")) ## get gene expression for certain samples
 setMethod(f="getExp",signature="MEE.data",
           function(object,geneID,ID){
             if(missing(geneID) & missing(ID)){
@@ -79,6 +89,12 @@ setMethod(f="getExp",signature="MEE.data",
 
 #' @rdname getSample
 #' @aliases getSample
+#' @examples
+#' SampleInfo <- data.frame(ID=paste0("sample",1:5), 
+#' TN=c("Tumor","Tumor","Normal","Normal","Tumor"))
+#' mee <- fetch.mee(sample = SampleInfo)
+#' Samples <- getSample(mee,ID = "sample2") ## get sample2's information
+#' Samples <- getSample(mee, cols = "TN")  ## get 'TN' information for each samples
 setMethod(f="getSample",signature="MEE.data",
           function(object,ID,cols){
             if(missing(ID) & missing(cols)){
@@ -138,6 +154,14 @@ setMethod (f="summary","Pair",
 
 #' @rdname getPair
 #' @aliases getPair
+#' @examples
+#' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
+#' GeneID =c("ID255928","ID84451","ID55811"),
+#' Symbol =c("SYT14","KIAA1804","ADCY10"),
+#' Pe=c(0.003322259,0.003322259,0.003322259))
+#' pair <- fetch.pair(pair = df)
+#' Pairs <- getPair(pair, probe = "cg19403323") # get pair information for a probe
+#' Pairs <- getPair(pair, geneID = "ID55811") # get pair information for a gene
 setMethod(f="getPair",signature="Pair",
           function(object,probe,geneID){
             if(missing(geneID) & missing(probe)){
@@ -155,6 +179,14 @@ setMethod(f="getPair",signature="Pair",
 
 #' @rdname getProbeInfo
 #' @aliases getProbeInfo
+#' @examples
+#' probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"), 
+#' ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
+#' name=c("cg1","cg2","cg3"))
+#' mee <- fetch.mee(probeInfo=probeInfo)
+#' Probes <- getProbeInfo(mee,chr="chr1") # get probes which locate on the chr1
+#' Probes <- getProbeInfo(mee, probe = "cg1") # get certain probes information
+#' Probes <- getProbeInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(5,20)))
 setMethod(f="getProbeInfo",signature="ANY",
           function(object,chr,probe,range){
             if(missing(chr) & missing(probe)){
@@ -162,10 +194,10 @@ setMethod(f="getProbeInfo",signature="ANY",
             }else if(missing(chr) & !missing(probe)){
               probeInfo <- object@probeInfo[object@probeInfo$name %in% probe]
             }else if(!missing(chr) & missing(probe)){
-              probeInfo <- object@probeInfo[seqnames(object@probeInfo) %in% chr]
+              probeInfo <- object@probeInfo[as.vector(seqnames(object@probeInfo)) %in% chr]
             }else if(!missing(chr) & !missing(probe)){
               probeInfo <- object@probeInfo[object@probeInfo$name %in% probe & 
-                                              seqnames(object@probeInfo) %in% chr]
+                                              as.vector(seqnames(object@probeInfo)) %in% chr]
             }
             if(!missing(range)){
               over <- findOverlaps(probeInfo,range)
@@ -177,6 +209,12 @@ setMethod(f="getProbeInfo",signature="ANY",
 #' @rdname getGeneInfo
 #' @aliases getGeneInfo
 #'@importFrom GenomicRanges queryHits findOverlaps
+#'@examples
+#'geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#'mee <- fetch.mee(geneInfo=geneInfo)
+#'Genes <- getGeneInfo(mee, geneID = "55811")
+#'Genes <- getGeneInfo(mee, symbol ="ADCY10")
+#'Genes <- getGeneInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(1000000,1600000)))
 setMethod(f="getGeneInfo",signature="ANY",
           function(object,geneID,symbol,range){
             if(missing(geneID) & missing(symbol)){

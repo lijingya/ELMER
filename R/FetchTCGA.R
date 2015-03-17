@@ -10,6 +10,8 @@
 #' @param Methfilter A number. For each probe, the percentage of NA among the 
 #' all the samples should smaller than Methfilter.
 #' @export
+#' @examples
+#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
 getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",
                     RNAtype="gene",Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
@@ -33,17 +35,17 @@ getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",
                             error=function(err){return("error")})
     if(!test.clinic == "error") matrixClinic(disease,basedir)
   }
-  if(test.meth=="error") 
+  if(Meth && test.meth=="error") 
     warning(
       sprintf("Failed to download DNA methylation data. Possible possibility: 
               1. No 450K DNA methylation data for %s patients; 
               2.Wget doesn't work.",disease))
-  if(test.rna=="error") 
+  if(RNA && test.rna=="error") 
     warning(
       sprintf("Failed to download RNA-seq data. Possible possibility: 
               1. No RNA-seq data for %s patients; 
               2.Wget doesn't work.",disease))
-  if(test.clinic=="error") 
+  if(Clinic && test.clinic=="error") 
     warning(
       sprintf("Failed to download clinic data. Possible possibility:
               1. No clinical data for %s patients; 
@@ -55,13 +57,11 @@ getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",
 #' @param basedir A path shows where the data will be stored.
 getRNAseq <- function(disease, basedir="./Data")
 {
-  wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.rna <- file.path(dir.raw,"RNA")
   if(!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE)
-  setwd(dir.rna)
   target <- 
     "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
   domain <- "cgcc/unc.edu/illuminahiseq_rnaseqv2/rnaseqv2"
@@ -82,20 +82,18 @@ getRNAseq <- function(disease, basedir="./Data")
   mage.URL <- paste(baseURL, mage.version, sep="/")
   RNA.URL <- paste(baseURL, RNA.version, sep="/")
   if(length(mage.URL)==0 | length(RNA.URL)==0){
-    setwd(wd)
     stop("No RNA-seq data.")
   }else{
     cmd <- list(mage = paste("wget --no-check-certificate -O",
-                             mage.version, mage.URL, "-a", 
+                             paste0(dir.rna,"/",mage.version), mage.URL, "-a", 
                              "mage_download.log", sep=" "), 
                 RNA = paste("wget --no-check-certificate -O",
-                            RNA.version, RNA.URL, "-a",  
-                            "RNA_download.log", sep=" "))
+                            paste0(dir.rna,"/",RNA.version), RNA.URL, "-a",  
+                            "RNA_download.log",sep=" "))
     lapply(cmd, system)
-    system(sprintf("tar -zxvf %s", mage.version),ignore.stdout=TRUE)
-    system(sprintf("tar -zxvf %s", RNA.version),ignore.stdout=TRUE)
-    system (sprintf("rm %s %s", mage.version, RNA.version))
-    setwd(wd)
+    system(sprintf("tar -zxvf %s", paste0(dir.rna,"/",mage.version)),ignore.stdout=TRUE)
+    system(sprintf("tar -zxvf %s", paste0(dir.rna,"/",RNA.version)),ignore.stdout=TRUE)
+    system (sprintf("rm %s %s", paste0(dir.rna,"/",mage.version), paste0(dir.rna,"/",RNA.version)))
   } 
 }
 
@@ -104,13 +102,11 @@ getRNAseq <- function(disease, basedir="./Data")
 #' @param basedir A path shows where the data will be stored.
 get450K <- function(disease, basedir="./Data")
 {
-  wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.meth <- file.path(dir.raw,"Meth")
   if(!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE)
-  setwd(dir.meth)
   target <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
   domain <- "cgcc/jhu-usc.edu/humanmethylation450/methylation/"
   baseURL <- paste(target, disease, domain, sep="/")
@@ -131,21 +127,21 @@ get450K <- function(disease, basedir="./Data")
   Meth.URL <- paste(baseURL,meth.version, sep="/")
   
   if(length(mage.URL)==0 | length(mage.URL)==0){
-    setwd(wd)
     stop("No 450K DNA methylation data.")
   }else{
     cmd <- list(mage = paste("wget --no-check-certificate -O",
-                             mage.version, mage.URL, "-a", 
+                             paste0(dir.meth,"/",mage.version), mage.URL,"-a", 
                              "mage_download.log", sep=" "), 
-                Meth = paste(paste("wget --no-check-certificate -O",
-                                   meth.version, Meth.URL, "-a", 
+                Meth = paste(paste("wget --no-check-certificate -O", 
+                                   paste0(dir.meth,"/",meth.version), Meth.URL, "-a", 
                                    "Meth_download.log", sep=" "),
                              collapse = ";"))
     lapply(cmd, system)
-    system(sprintf("tar -zxvf %s", mage.version),ignore.stdout=TRUE)
-    system(paste(sprintf("tar -zxvf %s", meth.version),collapse=";"),ignore.stdout=TRUE)
-    system (sprintf("rm %s %s", mage.version, paste(meth.version,collapse = " ")))
-    setwd(wd)
+    system(sprintf("tar -zxvf %s", paste0(dir.meth,"/",mage.version)),ignore.stdout=TRUE)
+    system(paste(sprintf("tar -zxvf %s", paste0(dir.meth,"/",meth.version)),collapse=";"),
+           ignore.stdout=TRUE)
+    system (sprintf("rm %s %s", paste0(dir.meth,"/",mage.version), 
+                    paste(paste0(dir.meth,"/",meth.version),collapse = " ")))
   }
 }
 
@@ -154,13 +150,11 @@ get450K <- function(disease, basedir="./Data")
 #' @param basedir A path shows where the data will be stored.
 getClinic <- function(disease, basedir="./Data")
 {
-  wd <- getwd()
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.clinic <- file.path(dir.raw,"Clinic")
   if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE)
-  setwd(dir.clinic)
   target <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
   domain <- "bcr/biotab/clin/"
   baseURL <- paste(target, disease, domain, sep="/")
@@ -171,14 +165,12 @@ getClinic <- function(disease, basedir="./Data")
   links <- system(cmd, intern=TRUE)
   clinic <- links[grep("clinical_patient", links)]
   if(length(clinic)==0){
-    setwd(wd)
     stop(sprintf("No clinical data for %s patients.",disease))
   }else{
     Clinic.URL <- paste(baseURL,clinic, sep="/")
-    cmd <-paste("wget --no-check-certificate -O",clinic, Clinic.URL, "-a", 
+    cmd <-paste("wget --no-check-certificate","-O",paste0(dir.clinic,"/",clinic), Clinic.URL, "-a", 
                 "download.log", sep=" ")
     system(cmd)
-    setwd(wd)
   }
 }
 
@@ -190,9 +182,8 @@ getClinic <- function(disease, basedir="./Data")
 #'  When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.
 matrixRNA <- function(disease,basedir="./Data",type="gene"){
   if(missing(disease)) stop("disease should be specified.")
-  wd <- getwd()
   disease <- tolower(disease)
-  diseasedir <- file.path(wd,basedir, toupper(disease))
+  diseasedir <- file.path(basedir, toupper(disease))
   dir.RNA <- file.path(diseasedir,"Raw","RNA")
   ## read file names
   mage.file <- dir(dir(path = dir.RNA,pattern = "mage-tab",full.names = TRUE),
@@ -234,9 +225,8 @@ matrixRNA <- function(disease,basedir="./Data",type="gene"){
 #'  should smaller than filter.
 matrixMeth <- function(disease,basedir="./Data",filter=0.2){
   if(missing(disease)) stop("disease should be specified.")
-  wd <- getwd()
   disease <- tolower(disease)
-  diseasedir <- file.path(wd,basedir, toupper(disease))
+  diseasedir <- file.path(basedir, toupper(disease))
   dir.meth <- file.path(diseasedir,"Raw","Meth")
   ## read file names
   mage.file <- dir(dir(path = dir.meth,pattern = "mage-tab",full.names = TRUE),
@@ -268,12 +258,11 @@ matrixMeth <- function(disease,basedir="./Data",filter=0.2){
 #' @param basedir A path shows where the data will be stored.
 matrixClinic <- function(disease,basedir="./Data"){
   if(missing(disease)) stop("disease should be specified.")
-  wd <- getwd()
   disease <- tolower(disease)
-  diseasedir <- file.path(wd,basedir, toupper(disease))
+  diseasedir <- file.path(basedir, toupper(disease))
   dir.Clinic <- file.path(diseasedir,"Raw","Clinic")
   File <- dir(dir.Clinic,pattern = "nationwidechildrens.org_clinical_patient",full.names = TRUE)
-  Clinic <- read.table(File,sep="\t",header=TRUE,stringsAsFactors = FALSE)[-c(1:2),]
+  Clinic <- read.delim(File,sep="\t",header=TRUE,stringsAsFactors = FALSE)[-c(1:2),]
   Useful <- unlist(apply(Clinic,2,function(x){tmp <- unique(x) 
                                           if(length(tmp)<2 & all(grepl("Not",tmp)))
                                             {return(FALSE)

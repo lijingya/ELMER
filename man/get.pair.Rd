@@ -39,4 +39,13 @@ Statistics for all pairs and significant pairs
 \description{
 get pair
 }
+\examples{
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg10097755")),
+                         geneAnnot=getGeneInfo(mee))
+                         Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg10097755"),
+                                              nearGenes=nearGenes,permu.size=5,Pe = 0.2,
+                                              dir.out="./",
+                                              label= "hypo")
+}
 

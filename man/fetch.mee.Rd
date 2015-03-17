@@ -38,4 +38,13 @@ MEE.data object
 \description{
 fetch.mee
 }
+\examples{
+meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
+exp <- matrix(data=c(101:110),ncol=5,dimnames=list(c("gene1","gene2"),paste0("sample",1:5)))
+mee <- fetch.mee(meth=meth, exp=exp)
+## only fetch probe 1 and 3
+mee <- fetch.mee(meth=meth, exp=exp, probes=c("probe1","probe3"))
+## only fetch gene 1
+mee <- fetch.mee(meth=meth, exp=exp, genes="gene1")
+}
 
