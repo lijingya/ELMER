@@ -115,30 +115,31 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' @export
 #' @importFrom GenomicRanges strand follow distance
 GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
-	if(!is.null(cores)){
-		if(requireNamespace("parallel", quietly=TRUE)) {
+	if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+		if(!is.null(cores)){
 			if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-			if(requireNamespace("snow", quietly=TRUE)) {
-				cl <- snow::makeCluster(cores,type = "SOCK")
-			}
+			cl <- snow::makeCluster(cores,type = "SOCK")
 		}
 	}
-  if(is.null(TRange)){
-    stop(" TRange must be defined")
-  }else{
-	  if(!is.null(cores)) {
-		  if(requireNamespace("snow", quietly=TRUE)) {
-			  snow::clusterEvalQ(cl, library(GenomicRanges))
-			  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
-												 geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
-												 simplify=FALSE)
-			  parallel::stopCluster(cl)
-		  }
-	  }else{
-		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-							  Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-	  }
-  }
-  return(NearGenes)
+	if(is.null(TRange)){
+		stop(" TRange must be defined")
+	}else{
+		if(requireNamespace("parallel", quietly = TRUE) && requireNamespace("snow", quietly=TRUE)) {
+			if(!is.null(cores)) {
+				snow::clusterEvalQ(cl, library(GenomicRanges))
+				NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
+												   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
+												   simplify=FALSE)
+				parallel::stopCluster(cl)
+			} else {
+				NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
+									Gene=geneAnnot,TRange=TRange,simplify=FALSE)
+			}
+		} else {
+			NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
+								Gene=geneAnnot,TRange=TRange,simplify=FALSE)
+		}
+	}
+	return(NearGenes)
 }
 
