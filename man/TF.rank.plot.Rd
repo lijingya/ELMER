@@ -26,6 +26,6 @@ TF.rank.plot
 \examples{
 load(system.file("extradata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
 TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-            save=F)
+            save=FALSE)
 }
 

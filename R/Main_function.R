@@ -463,7 +463,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 #'TF <- get.TFs(mee, enriched.motif, 
 #'TFs=data.frame(GeneID=c("ID7157","ID8626","ID7161"),
 #'               Symbol=c("TP53","TP63","TP73"), 
-#'               stringsAsFactors = F),
+#'               stringsAsFactors = FALSE),
 #'               label="hypo")
 get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
                     percentage=0.2,dir.out="./",label=NULL,cores=NULL){
