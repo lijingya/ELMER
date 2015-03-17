@@ -2,7 +2,6 @@
 
 export(GetNearGenes)
 export(ReadBed)
-export(ReadGFF)
 export(TCGA.pipe)
 export(TF.rank.plot)
 export(WriteBed)
