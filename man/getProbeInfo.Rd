@@ -25,4 +25,13 @@ within these loci will be output.}
 \description{
 getProbeInfo
 }
+\examples{
+probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"),
+ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
+name=c("cg1","cg2","cg3"))
+mee <- fetch.mee(probeInfo=probeInfo)
+Probes <- getProbeInfo(mee,chr="chr1") # get probes which locate on the chr1
+Probes <- getProbeInfo(mee, probe = "cg1") # get certain probes information
+Probes <- getProbeInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(5,20)))
+}
 

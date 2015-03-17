@@ -25,4 +25,11 @@ these loci will be output.}
 \description{
 getProbeInfo
 }
+\examples{
+geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+mee <- fetch.mee(geneInfo=geneInfo)
+Genes <- getGeneInfo(mee, geneID = "55811")
+Genes <- getGeneInfo(mee, symbol ="ADCY10")
+Genes <- getGeneInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(1000000,1600000)))
+}
 

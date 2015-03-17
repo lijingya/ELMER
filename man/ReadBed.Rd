@@ -24,4 +24,9 @@ GRange object containning bed file information.
 \description{
 Read a bed file.
 }
+\examples{
+file <- system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed.xz",
+package = "ELMER")
+Bed <- ReadBed(file)
+}
 

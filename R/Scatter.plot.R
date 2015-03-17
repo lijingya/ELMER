@@ -23,6 +23,17 @@
 #'DNA methylation at the probes set specified in byTF list.
 #'@return Scatter plots.
 #'@export
+#'@examples
+#'load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#'scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#'            category="TN", save=F)
+#'scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#'            category="TN", save=T) ## save to pdf
+#'# b. generate one probe-gene pair
+#'scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
+#'             category="TN", save=F,lm_line=T) 
+            
+            
 scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
                          byProbe=list(probe=c(),geneNum=20),byTF=list(TF=c(),probe=c()), 
                          category=NULL, dir.out ="./", save=TRUE, ...){

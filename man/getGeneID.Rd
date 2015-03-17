@@ -17,4 +17,10 @@ gene symbol
 \description{
 getGeneID
 }
+\examples{
+geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+## input can be a path
+pair <- fetch.pair(geneInfo=geneInfo)
+getGeneID(pair, symbol="KIAA1804")
+}
 

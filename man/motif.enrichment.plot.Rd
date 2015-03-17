@@ -29,4 +29,15 @@ motif.enrichment If input data.frame object, it should contain "motif",
 OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ;
 upperOR specifies upper boundary of OR(95%).
 }
+\examples{
+motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5",
+"ZNF143", "CTCF"),
+OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
+upperOR =c(23,5,3,7,6,5,5),
+stringsAsFactors=F)
+motif.enrichment.plot(motif.enrichment=motif.enrichment,
+                     significant=list(OR=3),
+                     label="hypo", save=F)
+}
 

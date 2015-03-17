@@ -28,4 +28,7 @@ all the samples should smaller than Methfilter.}
 \description{
 getTCGA
 }
+\examples{
+getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
+}
 

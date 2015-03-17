@@ -30,4 +30,7 @@ Different analysis results.
 \description{
 ELMER analysis pipe for TCGA data.
 }
+\examples{
+distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+}
 

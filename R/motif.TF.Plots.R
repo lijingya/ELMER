@@ -15,6 +15,16 @@
 #'can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4) 
 #'@importFrom ggplot2 aes ggplot geom_point geom_errorbar coord_flip geom_abline
 #'@export
+#'@examples
+#'motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5",
+#'"ZNF143", "CTCF"),
+#'OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+#'lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
+#'upperOR =c(23,5,3,7,6,5,5),
+#'stringsAsFactors=F)
+#'motif.enrichment.plot(motif.enrichment=motif.enrichment,
+#'                      significant=list(OR=3),
+#'                      label="hypo", save=F)
 motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
                                   dir.out ="./", save=TRUE,label=NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
@@ -56,6 +66,10 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@export
+#'@examples
+#'load(system.file("extradata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
+#'TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
+#'             save=F)
 TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")

@@ -20,4 +20,10 @@ A data.frame bed object or save output bed file.
 \description{
 Write a bed file from GRange object.
 }
+\examples{
+probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"),
+ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
+name=c("cg1","cg2","cg3"))
+WriteBed(probeInfo, fn="test.bed")
+}
 

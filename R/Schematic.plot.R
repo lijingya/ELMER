@@ -21,6 +21,24 @@
 #'all genes and significantly linked probes in the range and the significant links.
 #'@return a schematic plot will be produced.
 #'@export
+#'@examples
+#'library(grid)
+#'load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#'nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg19403323")),
+#'                         geneAnnot=getGeneInfo(test))
+#'Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg19403323"),
+#'                     nearGenes=nearGenes,permu.size=5,Pe = 0.2,dir.out="./",
+#'                     label= "hypo")
+#'pair <- fetch.pair(pair=Hypo.pair,
+#'                   probeInfo = getProbeInfo(mee),
+#'                   geneInfo = getGeneInfo(mee))
+#'# a. generate schematic plot of one probe with nearby 20 genes and label 
+#'#the gene significantly linked with the probe.
+#'grid.newpage()
+#'schematic.plot(pair=pair, byProbe="cg19403323" ,save=F)
+#'#b. generate schematic plot of ont gene with the probe which the gene significanlty linked to.
+#'grid.newpage()
+#'schematic.plot(pair=pair, byGene="ID255928",save=F)
 schematic.plot <- function(pair, byProbe, byGene, 
                            byCoordinate=list(chr=c(), start=c(), end=c()),
                            dir.out="./",save=TRUE,...){

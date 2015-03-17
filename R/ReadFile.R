@@ -9,7 +9,10 @@
 #' @param seqLength Specify custmer seqLength parameter in GRange function
 #' @return GRange object containning bed file information.
 #' @export
-
+#' @examples
+#' file <- system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed.xz",
+#' package = "ELMER")
+#' Bed <- ReadBed(file)
 
 
 ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
@@ -53,36 +56,6 @@ ReadBed <- function(x,strand=FALSE,skip=0,cols=NULL,seqLength=NULL){
   return(Bed)
 }
 
-#' Read a GFF file.
-#' @param x A path of GFF file (characters)
-#' @param strand A boolean to specific strands. If true, strand column will be 
-#' filled as input. If false, strand column will be filled "*""
-#' @param skip A number to specify how many lines should be removed from bed file.
-#' @return GRange object containning GFF file information.
-#' @export
-ReadGFF <- function(x,strand=FALSE,skip=0  ){
-  x <- read.table(x,stringsAsFactors=FALSE,sep = "\t",skip=skip)
-  x[,1] <- sub("chrx","chrX",x[,1])
-  x[,1] <- sub("chry","chrY",x[,1])
-  x[,1] <- sub("chrm","chrM",x[,1])
-  x[,7] <- sub("\\.","*",x[,7])
-  x[,1] <- sub(" ","",x[,1])
-  if(strand){
-    GFF<-GRanges( x[,1], IRanges(x[,4], x[,5]) ,strand=x[,7])
-    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],
-                              frame = x[,8],name = x[,9],
-                              x[,setdiff(seq_len(ncol(x)),c(1:9))],
-                              stringsAsFactors = FALSE)
-  }else{
-    GFF<-GRanges( x[,1], IRanges(x[,4], x[,5]) )
-    values(GFF) <- data.frame(Source=x[,2],feature=x[,3],score = x[,6],
-                              frame = x[,8],name = x[,9],
-                              x[,setdiff(seq_len(ncol(x)),c(1:9))],
-                              stringsAsFactors = FALSE)
-  }
-  seqlengths(GFF) <- sequenceLen[seqlevels(GFF),2]
-  return(GFF)
-}
 
 sequenceLen <- 
   data.frame(chr=c("chr1","chr1_gl000191_random","chr1_gl000192_random","chr2",
@@ -130,6 +103,11 @@ rownames(sequenceLen) <- sequenceLen$chr
 #' @param fn A name of bed file you want to output.
 #' @return A data.frame bed object or save output bed file.
 #' @export
+#' @examples
+#' probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"), 
+#' ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
+#' name=c("cg1","cg2","cg3"))
+#' WriteBed(probeInfo, fn="test.bed")
 WriteBed <-function(x,save=TRUE,fn=NULL){
   x <- as.data.frame(x,row.names=NULL)
   x$element=NULL

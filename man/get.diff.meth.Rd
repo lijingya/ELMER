@@ -5,7 +5,7 @@
 \title{get.diff.meth}
 \usage{
 get.diff.meth(mee, diff.dir = "both", cores = NULL, percentage = 0.2,
-  pvalue = 0.01, sig.dif = 0.3, dir.out = "./")
+  pvalue = 0.01, sig.dif = 0.3, dir.out = "./", save = TRUE)
 }
 \arguments{
 \item{mee}{A MEE.data object containing at least meth and probeInfo.}
@@ -28,11 +28,17 @@ hypo/hyper-methylated probes. Default is current directory.}
 for significant hypo/hyper-methylated probes. Default is 0.3.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is is current directory.}
+
+\item{save}{A logic. When TRUE, output file will be saved.}
 }
 \value{
 Statistics for all probes and significant hypo or hyper-methylated probes.
 }
 \description{
 get.diff.meth
+}
+\examples{
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
 }
 

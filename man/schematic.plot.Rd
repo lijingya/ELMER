@@ -35,4 +35,23 @@ function will produce schematic plot for each individual probes.
 The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
 genes and the significantly linked gene with the probe.
 }
+\examples{
+library(grid)
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg19403323")),
+                        geneAnnot=getGeneInfo(test))
+Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg19403323"),
+                    nearGenes=nearGenes,permu.size=5,Pe = 0.2,dir.out="./",
+                    label= "hypo")
+pair <- fetch.pair(pair=Hypo.pair,
+                  probeInfo = getProbeInfo(mee),
+                  geneInfo = getGeneInfo(mee))
+# a. generate schematic plot of one probe with nearby 20 genes and label
+#the gene significantly linked with the probe.
+grid.newpage()
+schematic.plot(pair=pair, byProbe="cg19403323" ,save=F)
+#b. generate schematic plot of ont gene with the probe which the gene significanlty linked to.
+grid.newpage()
+schematic.plot(pair=pair, byGene="ID255928",save=F)
+}
 

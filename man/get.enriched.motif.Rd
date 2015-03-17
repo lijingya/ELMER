@@ -31,4 +31,13 @@ A list contains enriched motifs with the probes regions harboring the motif.
 \description{
 get.enriched.motif
 }
+\examples{
+probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
+"cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
+"cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
+load(system.file("extradata","mee.example.rda",package = "ELMER"))
+bg <- rownames(getMeth(mee))
+enriched.motif <- get.enriched.motif(probes=probes,background.probes = bg,
+min.incidence=2, label="hypo")
+}
 

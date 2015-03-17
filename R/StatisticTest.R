@@ -63,7 +63,11 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
 Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.dir=NULL){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Exp <- Exps[Gene,]
-  Meth <- Meths[Probe,]
+  if(is.vector(Meths)){
+    Meth <- Meths
+  }else{
+    Meth <- Meths[Probe,]
+  }
   unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
   methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
   Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))

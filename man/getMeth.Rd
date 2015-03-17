@@ -22,4 +22,10 @@ these samples will be output.}
 \description{
 getMeth
 }
+\examples{
+meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
+mee <- fetch.mee(meth=meth)
+Meth <- getMeth(mee,probe = "probe1")
+Meth <- getMeth(mee, ID = c("sample1","sample2"))
+}
 
