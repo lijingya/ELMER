@@ -15,8 +15,6 @@
 #' @return A GRange object containing probes that satisfy selecting critiria.
 #' @export 
 #' @examples 
-#' # get distal enhancer probe
-#' Probe <- get.feature.probe()
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
 get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
