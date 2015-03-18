@@ -379,7 +379,7 @@ expression of this gene.
 
 
 \subsection{Motif enrichment plot}
-Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:hypo.motif.enrichment}
+Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:figure6}
 
 \begin{figure}[H]
 <<figure6,fig.width=4, fig.height=4,fig.scap="Motif Enrichment", cache=TRUE>>=

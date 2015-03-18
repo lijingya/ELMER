@@ -32,8 +32,6 @@ A GRange object containing probes that satisfy selecting critiria.
 get.feature.probe
 }
 \examples{
-# get distal enhancer probe
-Probe <- get.feature.probe()
 # get distal enhancer probe remove chrX chrY
 Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
 }
