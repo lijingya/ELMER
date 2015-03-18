@@ -51,7 +51,7 @@ if(!file_test("-d", "./ELMER.example")) {
                 extra = c("--no-check-certificate -a download.log"))
   untar("./ELMER.example")
 }
-library(ELMER)
+library(ELMER,quietly = TRUE)
 @
 
 <<example.data, eval=FALSE>>=
