@@ -1,0 +1,8 @@
+base
+knitr
+BiocGenerics
+S4Vectors
+IRanges
+GenomeInfoDb
+GenomicRanges
+ELMER
