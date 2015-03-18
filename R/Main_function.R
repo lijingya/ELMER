@@ -212,10 +212,10 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 											NearGenes=nearGenes,K=0.3,Top=percentage,
 											Exps=getExp(mee),simplify = FALSE)
 		  parallel::stopCluster(cl)
-	  } else {
-		  Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-							 NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
-							 simplify = FALSE)
+	  }else{
+	    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
+	                       NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+	                       simplify = FALSE)
 	  }
   } else {
     Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
@@ -278,28 +278,29 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
   
   if(is.null(permu.dir)){
     permu.meth <- getMeth(mee,probe=probes.permu)
-    if(!is.null(cores)){
-      if(requireNamespace("parallel", quietly=TRUE)) {
+    if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)){
+      if(!is.null(cores)){
         if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-        if(requireNamespace("snow", quietly=TRUE)) {
-          suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-          permu<-parallel::parSapplyLB(cl,probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-                                       Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                                       Top=percentage,Exps=getExp(mee), 
-                                       simplify = FALSE)
-          parallel::stopCluster(cl)
-        }
+        suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
+        permu<-parallel::parSapplyLB(cl,probes.permu,Stat.nonpara.permu,Meths=permu.meth,
+                                     Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                                     Top=percentage,Exps=getExp(mee), 
+                                     simplify = FALSE)
+        parallel::stopCluster(cl)
+      }else{
+        permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
+                      Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                      Top=percentage,Exps=getExp(mee),
+                      simplify=FALSE)
       }
-    }else{
-      permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-                    Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                    Top=percentage,Exps=getExp(mee),
-                    simplify=FALSE)
-    }
-    permu <- sapply(permu,
-                    function(x,geneID){ 
-                      x <- x[match(geneID,x[,1]),2]},
-                    geneID=geneID,simplify=FALSE)
+    } else {
+      permu <- sapply(permu,
+                      function(x,geneID){ 
+                        x <- x[match(geneID,x[,1]),2]},
+                      geneID=geneID,simplify=FALSE)
+    } 
+    
+   
   }else{
     ## if file already there don't need to calculate.
     if(!file.exists(permu.dir)){
@@ -325,8 +326,17 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
         }
       } else {
         permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+                      Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                      Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
+                      simplify=FALSE)
       }
     }
+    permu.p <- paste0(permu.dir,"/",probes.permu)
+    permu <- sapply(permu.p,
+                    function(x,geneID){ 
+                      tmp <- read.table(x,stringsAsFactors=F)
+                      tmp <- tmp[match(geneID,tmp[,1]),2]},
+                    geneID=geneID,simplify=F)
   }
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
@@ -517,12 +527,10 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
 											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
 		  parallel::stopCluster(cl)
-	  } else {
-		  TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,
-							  Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE)
+	  }else{
+	    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
+	                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
 	  }
-  }else{
-    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
   } else {
     TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
                         Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
