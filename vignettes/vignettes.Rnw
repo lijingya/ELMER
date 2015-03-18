@@ -1,4 +1,5 @@
 %\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{ELMER: Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
 % !Rnw weave = knitr
 \documentclass{article}
 <<style-knitr, eval=TRUE, echo=FALSE, results="asis">>=
@@ -7,7 +8,6 @@ BiocStyle::latex()
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{grffile}
-
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
 \author {Lijing Yao}
