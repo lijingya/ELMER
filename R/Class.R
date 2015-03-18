@@ -16,7 +16,7 @@ setClass("MEE.data",
                                          sample="data.frame",probeInfo="GRanges"
                                          ,geneInfo="GRanges"),
          validity=function(object){
-           cat("~~~ MEE.data: inspector ~~~\n")
+           message("~~~ MEE.data: inspector ~~~")
            if(!is.null(probeInfo)){
              if(any(!rownames(object@meth) %in% 
                       as.character(object@probeInfo$name)))
@@ -48,7 +48,7 @@ setClass("Pair",
          prototype = list(pairInfo=data.frame(),
                           probeInfo=NULL,geneInfo=NULL),
          validity=function(object){
-           cat("~~~ Pair: inspector ~~~\n")
+           message("~~~ Pair: inspector ~~~")
            if(!is.null(probeInfo)){
              if(any(!rownames(object@pairInfo$probe) %in% 
                       as.character(object@probeInfo$name)))
