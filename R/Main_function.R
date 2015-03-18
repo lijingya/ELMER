@@ -212,10 +212,10 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 											NearGenes=nearGenes,K=0.3,Top=percentage,
 											Exps=getExp(mee),simplify = FALSE)
 		  parallel::stopCluster(cl)
-	  } else {
-		  Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-							 NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
-							 simplify = FALSE)
+	  }else{
+	    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
+	                       NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+	                       simplify = FALSE)
 	  }
   } else {
     Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
@@ -530,9 +530,9 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
 											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
 		  parallel::stopCluster(cl)
-	  } else {
-		  TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,
-							  Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE)
+	  }else{
+	    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
+	                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
 	  }
   } else {
     TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
