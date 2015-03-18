@@ -2,7 +2,7 @@
 # # initialize 
 setMethod(f="initialize",signature="MEE.data",
           definition=function(.Object,meth,exp,sample,probeInfo,geneInfo){
-            cat("~~~ MEE.data: initializator ~~~ \n")
+            message("~~~ MEE.data: initializator ~~~ ")
             # meth needs to be matrix
             if(!missing(meth)) .Object@meth<-meth
             #exp needs to be matrix
@@ -117,7 +117,7 @@ setMethod(f="getSample",signature="MEE.data",
 # initialize
 setMethod(f="initialize",signature="Pair",
           definition=function(.Object,pairInfo,probeInfo,geneInfo){
-            cat("~~~ Pair: initializator ~~~ \n")
+            message("~~~ Pair: initializator ~~~ ")
             # meth needs to be matrix
             if(!missing(pairInfo)) .Object@pairInfo<-pairInfo
             #probeInfo needs to be GRanges
