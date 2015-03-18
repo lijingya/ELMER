@@ -67,7 +67,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@export
 #'@examples
-#'load(system.file("extradata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
+#'load(system.file("extdata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
 #'TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
 #'             save=FALSE)
 TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){

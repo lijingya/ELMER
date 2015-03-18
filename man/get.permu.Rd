@@ -31,7 +31,7 @@ permutation
 get.permu
 }
 \examples{
-load(system.file("extradata","mee.example.rda",package = "ELMER"))
+load(system.file("extdata","mee.example.rda",package = "ELMER"))
 permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
                   rm.probes=c("cg00329272","cg10097755"),
                   permu.size=5)

@@ -31,6 +31,8 @@ Different analysis results.
 ELMER analysis pipe for TCGA data.
 }
 \examples{
+\dontrun{
 distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+}
 }
 

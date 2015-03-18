@@ -13,7 +13,9 @@
 #' @return Different analysis results.
 #' @export 
 #' @examples
+#' \dontrun{
 #' distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+#' }
 TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   if(missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
