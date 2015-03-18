@@ -92,20 +92,24 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
   if("both" == diff.dir) diff.dir <- c("hypo","hyper")
   
   result <- list()
-  if(!is.null(cores)){
-	  if(requireNamespace("parallel", quietly=TRUE)) {
+  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+	  if(!is.null(cores)) {
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  if(requireNamespace("snow", quietly=TRUE)) cl <- snow::makeCluster(cores,type = "SOCK")
+		  cl <- snow::makeCluster(cores,type = "SOCK")
 	  }
   }
   if("hyper" %in% diff.dir){
 	  if(requireNamespace("parallel", quietly=TRUE)) {
 		  if(!is.null(cores)){
 			  out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
-								 percentage=percentage,meth=mee@meth,
-								 TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE)
+										   percentage=percentage,meth=mee@meth,
+										   TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE)
+		  } else {
+			  out <- sapply(rownames(mee@meth),Stat.diff.meth,
+							percentage=percentage,meth=mee@meth,
+							TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE) 
 		  }
-	  }else{
+	  } else {
 		  out <- sapply(rownames(mee@meth),Stat.diff.meth,
 						percentage=percentage,meth=mee@meth,
 						TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE)
@@ -123,13 +127,17 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
     result[["hyper"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
   if("hypo" %in% diff.dir){
-    if(!is.null(cores)){
-		if(requireNamespace("parallel")) {
+	  if(requireNamespace("parallel")) {
+		  if(!is.null(cores)){
 			out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
 										 percentage=percentage,meth=mee@meth,
 										 TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =FALSE)
 			parallel::stopCluster(cl)
-		}
+		  } else {
+			out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
+						  meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
+						  simplify =FALSE)
+		  }
     }else{
       out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
                     meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
@@ -196,18 +204,20 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
   }
   #get raw pvalue
   ##I need to modify that if there is all NA. stop the process.
-  if(!is.null(cores)){
-	  if(requireNamespace("parallel", quietly=TRUE)) {
+  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+	  if(!is.null(cores)){
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  if(requireNamespace("snow", quietly=TRUE)) {
-			  cl <- snow::makeCluster(cores,type = "SOCK")
-			  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
+		  cl <- snow::makeCluster(cores,type = "SOCK")
+		  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
 											NearGenes=nearGenes,K=0.3,Top=percentage,
 											Exps=getExp(mee),simplify = FALSE)
-			  parallel::stopCluster(cl)
-		  }
+		  parallel::stopCluster(cl)
+	  } else {
+		  Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
+							 NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+							 simplify = FALSE)
 	  }
-  }else{
+  } else {
     Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
                        NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
                        simplify = FALSE)
@@ -265,6 +275,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
   usable.probes <- sample(usable.probes,size = permu.size,replace = FALSE)
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
+<<<<<<< HEAD
   
   if(is.null(permu.dir)){
     permu.meth <- getMeth(mee,probe=probes.permu)
@@ -282,9 +293,36 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
       }
     }else{
       permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
+=======
+  ## if file already there don't need to calculate.
+  if(!file.exists(permu.dir)){
+    dir.create(permu.dir,recursive = TRUE)
+  }
+  if(!all(probes.permu %in% dir(permu.dir))){
+    tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
+    permu.meth <- getMeth(mee,probe=tmp.probes)
+	if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+		if(!is.null(cores)){
+			if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
+			suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
+			permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+										 Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+										 Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
+										 simplify = FALSE)
+			parallel::stopCluster(cl)
+		} else {
+			permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+						  Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+						  Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
+						  simplify=FALSE)
+		}
+	} else {
+	  permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+>>>>>>> e3069baa6d6b4203e6c499ddf3d80f9afe77e3d4
                     Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
                     Top=percentage,Exps=getExp(mee),
                     simplify=FALSE)
+<<<<<<< HEAD
     }
     
     permu <- sapply(permu,
@@ -324,6 +362,9 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
                       tmp <- read.table(x,stringsAsFactors=FALSE)
                       tmp <- tmp[match(geneID,tmp[,1]),2]},
                     geneID=geneID,simplify=FALSE)
+=======
+	}
+>>>>>>> e3069baa6d6b4203e6c499ddf3d80f9afe77e3d4
   }
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
@@ -400,7 +441,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
-  cat(sprintf("%s motifs are enriched.\n",length(en.motifs)))
+  message(sprintf("%s motifs are enriched.",length(en.motifs)))
   enriched.motif <- sapply(en.motifs, 
                            function(x, probes.TF)
                              {names(probes.TF[probes.TF[,x]==1,x])},
@@ -505,18 +546,22 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
                        }}, meth = getMeth(mee,probe=unique(unlist(enriched.motif))) )
                                                                    
   motif.meth <- do.call(rbind, motif.meth)
-  if(!is.null(cores)){
-	  if(requireNamespace("parallel", quietly=TRUE)) {
+
+  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+	  if(!is.null(cores)){
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  if(requireNamespace("snow", quietly=TRUE)) {
-			  cl <- snow::makeCluster(cores,type = "SOCK")
-			  TF.meth.cor<-parallel::parSapplyLB(cl,names(enriched.motif),
+		  cl <- snow::makeCluster(cores,type = "SOCK")
+		  TF.meth.cor<-parallel::parSapplyLB(cl,names(enriched.motif),
 											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
 											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
-			  parallel::stopCluster(cl)
-		  }
+		  parallel::stopCluster(cl)
+	  } else {
+		  TF.meth.cor<-sapply(rownames(motif.meth),Stat.nonpara.permu,Meths=motif.meth,
+							  Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE)
 	  }
   }else{
+    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
+  } else {
     TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
                         Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
   }
