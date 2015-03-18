@@ -12,7 +12,13 @@ BiocStyle::latex()
 
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
-\author {Lijing Yao}
+\author {Lijing Yao [cre, aut]\\
+Ben Berman [aut]\\
+Peggy Farnham [aut]\\
+Hui Shen [ctb]\\
+Peter Laird [ctb]\\
+Simon Coetzee [ctb]}
+
 \begin{document}
 <<setup, include=FALSE, cache=FALSE>>=
 library(knitr)
@@ -65,7 +71,7 @@ library(ELMER)
 
 
 \section{Quick start: running TCGA example}
-Function, TCGA.pipe, is the easy usage for downloading TCGA data and performing all 
+A function, TCGA.pipe, is the easy usage for downloading TCGA data and performing all 
 the analyses in ELMER. For illustration purpose, we skip the downloading step. 
 The user can use the getTCGA function to download TCGA data or
 use TCGA.pipe by including "download" in the analysis option.
@@ -169,7 +175,7 @@ mee
 A subset of chromosome 1 data from TCGA LUSC were used as illustruation. 
 
 \subsection{Selection of probes within biofeatures}
-Function, get.feature.probe, is used to select probes that are located within 
+A function, get.feature.probe, is used to select probes that are located within 
 biofeatures such as H3K27ac ChIP-seq peaks. As default, the get.feature.probe function
 will automatically select distal enhancer probes on HM450K which are at least 
 2kb away from the TSS annotated by GENCODE V15 and UCSC-gene and locate within 
@@ -183,7 +189,7 @@ save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature.rda")
 
 
 \subsection{Identifying differentially methylated probes}
-Function, get.diff.meth, will be used to identify differentially methylated 
+A function, get.diff.meth, will be used to identify differentially methylated 
 probes among the ones within biofeatures, which are selected in the above step. 
 <<identifying.differentially.methylated.probes, cache=TRUE>>=
 ## fetch.mee can take path as input.
@@ -205,7 +211,7 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "getMethdiff")
 
 
 \subsection{Identifying putative probe-gene pairs}
-Function, get.pair function, will be used to identify putative target genes for selected probes. 
+A function, get.pair function, will be used to identify putative target genes for selected probes. 
 This step is the most time consuming step since it requires a large amount calculations 
 for permutation. The greater the permutation time is, the longer it will take. 
 It is recommended to use multiple cores for this step. Default permutation time 
@@ -237,7 +243,7 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "getPair")
 
 
 \subsection{Motif enrichment analysis on the selected probes}
-Function, get.enriched.motif, will be used to calculate enrichment of the motifs from 
+A function, get.enriched.motif, will be used to calculate enrichment of the motifs from 
 factorbook and JASPER for the selected probes. Odds Ratio is used to assess 
 the enrichment levels and 95\% confidence interval of Odds Ratio is calculated.
 <<motif.enrichment.analysis.on.selected.probes, cache=TRUE>>=
@@ -264,7 +270,7 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "motif.enrichment.pdf")
 
 
 \subsection{Identifying regulatory TF}
-Function, get.TFs, will use the anti-correlation of a particular TF and the level of 
+A function, get.TFs, will use the anti-correlation of a particular TF and the level of 
 demethylation at its binding sites to predict the regulatory TF.
 
 <<identifying.regulatory.tf, cache=TRUE>>=
