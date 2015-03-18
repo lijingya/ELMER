@@ -335,7 +335,7 @@ schematic.plot(pair=pair, byGene="ID255928", save=FALSE)
 @
 
 \subsection{Motif enrichment plot}
-Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:hypo.motif.enrichment}
+Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:figure6}
 
 <<figure6, fig.cap="\\label{fig:hypo.motif.enrichment} The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95\\% confidence interval for each Odds Ratio.", fig.scap="Motif Enrichment", cache=TRUE, fig.height=2>>=
 motif.enrichment.plot(motif.enrichment="./ELMER.example/Result/LUSC/getMotif.hypo.motif.enrichment.csv", 
