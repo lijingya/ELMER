@@ -23,7 +23,7 @@
 #'@export
 #'@examples
 #'library(grid)
-#'load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#'load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #'nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg19403323")),
 #'                         geneAnnot=getGeneInfo(mee))
 #'Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg19403323"),

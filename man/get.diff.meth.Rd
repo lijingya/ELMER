@@ -38,7 +38,7 @@ Statistics for all probes and significant hypo or hyper-methylated probes.
 get.diff.meth
 }
 \examples{
-load(system.file("extradata","mee.example.rda",package = "ELMER"))
+load(system.file("extdata","mee.example.rda",package = "ELMER"))
 Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
 }
 

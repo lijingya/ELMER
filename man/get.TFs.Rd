@@ -39,7 +39,7 @@ potential responsible TFs will be reported.
 get.TFs
 }
 \examples{
-load(system.file("extradata","mee.example.rda",package = "ELMER"))
+load(system.file("extdata","mee.example.rda",package = "ELMER"))
 enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",

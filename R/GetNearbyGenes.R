@@ -132,7 +132,7 @@ GetNearGenes <- function(geneNum=20,geneAnnot=NULL,TRange=NULL,cores=NULL){
 	}else{
 		if(requireNamespace("parallel", quietly = TRUE) && requireNamespace("snow", quietly=TRUE)) {
 			if(!is.null(cores)) {
-				snow::clusterEvalQ(cl, library(GenomicRanges))
+				##snow::clusterEvalQ(cl, library(GenomicRanges))
 				NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
 												   geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
 												   simplify=FALSE)

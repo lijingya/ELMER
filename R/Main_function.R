@@ -1,6 +1,7 @@
 ##get.distal.en
 #' get.feature.probe
 #' @importFrom GenomicRanges promoters
+#' @importFrom minfi getAnnotation
 #' @param probe A GRange object containing probes coordinate information. 
 #' Default is Illumina-methyl-450K probes coordinates.
 #' @param distal A logical. If FALSE, function will output the all 
@@ -16,21 +17,28 @@
 #' @export 
 #' @examples 
 #' # get distal enhancer probe
+#' \dontrun{
 #' Probe <- get.feature.probe()
+#' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
 get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
                               TSS.range=list(upstream=2000,downstream=2000),rm.chr=NULL){
   if(missing(probe)){
     warning("Default probes coordinates are for HM450K DNA methylation array")
-    probe <- ReadBed(system.file("extdata","Illumina-methyl-450K-manifest.hg19.bed.xz",
-                                 package = "ELMER"))
+    probe <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19, what="Locations")
+	probe <- GRanges(seqnames=probe$chr,
+					 ranges=IRanges(probe$pos,
+									width=1,
+									names=rownames(probe)),
+					 strand=probe$strand,
+					 name=rownames(probe))
   }
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(distal){
     if(missing(TSS)){
       newenv <- new.env()
-      load(system.file("extdata","GENCODE.UCSC.combined.TSS",package = "ELMER"),
+      load(system.file("extdata","GENCODE.UCSC.combined.TSS.rda",package = "ELMER"),
            envir=newenv)
       txs <- get(ls(newenv)[1],envir=newenv)
       TSS <- suppressWarnings(promoters(txs,upstream = TSS.range[["upstream"]], 
@@ -75,7 +83,7 @@ get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
 #' @examples
-#' load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
 
 get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
@@ -182,7 +190,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 #' @return Statistics for all pairs and significant pairs
 #' @export 
 #' @examples
-#' load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg10097755")),
 #'                          geneAnnot=getGeneInfo(mee))
 #'                          Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg10097755"),
@@ -258,7 +266,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 #' @return permutation
 #' @export 
 #' @examples
-#' load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
@@ -366,7 +374,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
 #' probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 #' "cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
 #' "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
-#' load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' bg <- rownames(getMeth(mee))
 #' enriched.motif <- get.enriched.motif(probes=probes,background.probes = bg,
 #' min.incidence=2, label="hypo")
@@ -471,7 +479,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 #' @return potential responsible TFs will be reported.
 #' @export 
 #' @examples
-#' load(system.file("extradata","mee.example.rda",package = "ELMER"))
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
@@ -494,7 +502,7 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
   }
   
   if(missing(TFs)){
-    TFs <- read.csv(system.file("extdata","human.TF.list.csv",package = "ELMER"),
+    TFs <- read.csv(system.file("extdata","human.TF.list.csv.xz",package = "ELMER"),
                     stringsAsFactors=FALSE)
     TFs$GeneID <- paste0("ID",TFs$GeneID)
     TFs <- TFs[TFs$GeneID %in% rownames(getExp(mee)),]
