@@ -8,10 +8,19 @@ BiocStyle::latex()
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{grffile}
+\usepackage{float}
+
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
 \author {Lijing Yao}
 \begin{document}
+<<setup, include=FALSE, cache=FALSE>>=
+library(knitr)
+opts_chunk$set(fig.align='center', cache=TRUE,par=TRUE)
+knit_hooks$set(par=function(before, options, envir){
+if (before && options$fig.show!='none') par(mar=c(1,1,.1,.1),cex.lab=1,cex.axis=1,mgp=c(2,.7,0),tcl=-.3)
+}, crop=hook_pdfcrop)
+@
 \maketitle
 
 \tableofcontents
@@ -280,27 +289,49 @@ dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf")
 \subsubsection{Scatter Plot of 20 nearby genes}
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
-<<figure1, fig.cap="\\label{fig:cg19403323.byprobe} Each scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of one of 20 adjacent genes.", fig.scap="Scatter Plot of 20 nearby genes", cache=TRUE, fig.height=5.5>>=
-scatter.plot(mee,byProbe=list(probe=c("cg19403323"), geneNum=20), 
-             category="TN", save=FALSE)
+\begin{figure}[H]
+<<figure1,fig.width=11, fig.height=10,fig.scap="Scatter Plot of 20 nearby genes",cache=TRUE>>=
+scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+             category="TN", dir.out ="./ELMER.example/Result/LUSC", save=FALSE) 
 @
+\protect\caption{SEach scatter plot shows the methylation level of an example 
+probe cg19403323 in all LUSC samples plotted against the expression of one of 
+20 adjacent genes.
+\label{fig:figure1}}
+\end{figure}
+
 
 \subsubsection{Scatter Plot of One Pair}
 Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
-<<figure2, fig.cap="\\label{fig:cg19403323_SYT14.bypair} Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative target gene SYT14.", fig.scap="Scatter Plot of One Pair", cache=TRUE, fig.height=3.5>>=
-scatter.plot(mee, byPair=list(probe=c("cg19403323"), gene=c("ID255928")),
-             category="TN", save=FALSE, lm_line=TRUE)
+
+\begin{figure}[H]
+<<figure2, fig.width=5, fig.height=4,fig.scap="Scatter Plot of One Pair", cache=TRUE>>=
+scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")), 
+             category="TN", save=FALSE,lm_line=TRUE) 
 @
+\protect\caption{Scatter plot shows the methylation level of an example probe 
+cg19403323 in all LUSC samples plotted against the expression of the putative 
+target gene SYT14.
+\label{fig:figure2}}
+\end{figure}
+
 
 \subsubsection{TF expression vs. average DNA methylation}
 Generate scatter plot for TF expression vs average DNA methylation of the sites 
 with certain motif. Figure \ref{fig:figure3}
-<<figure3, fig.cap="\\label{fig:TP53_TP63_TP73.byTF} Each scatter plot shows the average methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively.", fig.scap="TF expression vs. average DNA methylation", cache=TRUE, fig.height=3.5>>=
+\begin{figure}[H]
+<<figure3, fig.width=8, fig.height=3.5, fig.scap="TF expression vs. average DNA methylation", cache=TRUE>>=
 load("ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(mee,byTF=list(TF=c("TP53","TP63","TP73"),
-                           probe=enriched.motif[["TP53"]]), category="TN",
-             save=FALSE, lm_line=TRUE)
+             probe=enriched.motif[["TP53"]]), category="TN",
+             save=FALSE,lm_line=TRUE)
 @
+\protect\caption{Each scatter plot shows the average 
+methylation level of sites with the TP53 motif in all LUSC samples plotted 
+against the expression of the transcription factor TP53, TP63, TP73 respectively.
+\label{fig:figure3}}
+\end{figure}
+
 
 \subsection{Schematic plot}
 Schematic plot shows a breif view of linkages between genes and probes. To make a 
@@ -311,41 +342,70 @@ pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.signific
                    probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature.rda",
                    geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
 @
-
+\newpage
 \subsubsection{Nearby Genes}
 Generate schematic plot for one probe with 20 nearby genes and label 
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
-<<figure4, fig.cap="\\label{fig:cg19403323.schematic.byProbe} The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe were shown in red.", fig.scap="Nearby Genes", cache=TRUE, fig.height=3.5>>=
-grid::grid.newpage()
-schematic.plot(pair=pair, byProbe="cg19403323", save=FALSE)
+\begin{figure}[H]
+<<figure4,fig.width=8, fig.height=3,fig.scap="Nearby Genes", cache=TRUE>>=
+schematic.plot(pair=pair, byProbe="cg19403323",save=FALSE)
 @
+\protect\caption{The schematic plot shows probe colored 
+in blue and the location of nearby 20 genes. The genes significantly linked to the probe 
+were shown in red.
+\label{fig:figure4}}
+\end{figure}
+
 
 \subsubsection{Nearby Probes}
 Generate schematic plot for one gene with the probes which the gene is significantly 
 linked to. Figure \ref{fig:figure5}
-<<figure5, fig.cap="\\label{fig:ID255928.schematic.byGene} The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the expression of this gene.", fig.scap="Nearby Probes", cache=TRUE, fig.height=3.5>>=
-grid::grid.newpage()
-schematic.plot(pair=pair, byGene="ID255928", save=FALSE)
+\begin{figure}[H]
+<<figure5,fig.width=8, fig.height=3,fig.scap="Nearby Probes", cache=TRUE>>=
+schematic.plot(pair=pair, byGene="ID255928",save=FALSE)
 @
+\protect\caption{The schematic plot shows the gene 
+colored in red and all blue colored probes, which are significantly linked to the 
+expression of this gene.
+\label{fig:figure5}}
+\end{figure}
+
 
 \subsection{Motif enrichment plot}
 Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:hypo.motif.enrichment}
 
-<<figure6, fig.cap="\\label{fig:hypo.motif.enrichment} The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95\\% confidence interval for each Odds Ratio.", fig.scap="Motif Enrichment", cache=TRUE, fig.height=2>>=
+\begin{figure}[H]
+<<figure6,fig.width=4, fig.height=4,fig.scap="Motif Enrichment", cache=TRUE>>=
 motif.enrichment.plot(motif.enrichment="./ELMER.example/Result/LUSC/getMotif.hypo.motif.enrichment.csv", 
-                      significant=list(OR=1.3, lowerOR=1.3), label="hypo", save=FALSE)
+                      significant=list(OR=1.3,lowerOR=1.3), dir.out ="ELMER.example/Result/LUSC",
+                      label="hypo", save=FALSE)  ## different signficant cut off.
 @
+\protect\caption{The plot shows the Odds Ratio (x axis) 
+for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
+The range shows the 95\% confidence interval for each Odds Ratio.
+\label{fig:figure6}}
+\end{figure}
+
 
 \subsection{TF ranking plot}
 TF ranking plot shows statistic -log10(P value) assessing the anti-correlation level 
 of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
 
-<<figure7, fig.cap="\\label{fig:TP53.TFrankPlot} Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary of the top 5\\% association score. The top 3 associated TFs and the TF family members (dots in red) that are associated with that specific motif are labeled in the plot.", fig.scap="TF Ranking", cache=TRUE, fig.height=4.5>>=
+\begin{figure}[H]
+<<figure7,fig.width=5, fig.height=5,fig.scap="TF Ranking", cache=TRUE>>=
 load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
 TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-             save=FALSE)
+            save=FALSE) 
 @
+
+\protect\caption{Shown are TF ranking plots based on 
+the score (-log(P value)) of association between TF expression and DNA methylation of 
+the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary 
+of the top 5\% association score. The top 3 associated TFs and the TF family members
+(dots in red) that are associated with that specific motif are labeled in the plot.
+\label{fig:figure7}}
+\end{figure}
 
 \newpage
 <<finalsession, cache=TRUE>>=

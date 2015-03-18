@@ -1,6 +1,7 @@
 %\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{ELMER: Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
 % !Rnw weave = knitr
-\documentclass{article}\usepackage[]{graphicx}\usepackage[]{color}
+\documentclass{article}\usepackage[]{graphicx}\usepackage[usenames,dvipsnames]{color}
 %% maxwidth is the original width if it is less than linewidth
 %% otherwise use linewidth (to make sure the graphics do not exceed the margin)
 \makeatletter
@@ -50,19 +51,21 @@
 \newenvironment{knitrout}{}{} % an empty environment to be redefined in TeX
 
 \usepackage{alltt}
-\RequirePackage{/usr/local/Cellar/r/3.1.3/R.framework/Versions/3.1/Resources/library/BiocStyle/resources/latex/Bioconductor}
+\RequirePackage{/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BiocStyle/resources/latex/Bioconductor}
 
-\AtBeginDocument{\bibliographystyle{/usr/local/Cellar/r/3.1.3/R.framework/Versions/3.1/Resources/library/BiocStyle/resources/latex/unsrturl}}
+\AtBeginDocument{\bibliographystyle{/Library/Frameworks/R.framework/Versions/3.1/Resources/library/BiocStyle/resources/latex/unsrturl}}
 
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{grffile}
+\usepackage{float}
 
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
 \author {Lijing Yao}
 \IfFileExists{upquote.sty}{\usepackage{upquote}}{}
 \begin{document}
+
 \maketitle
 
 \tableofcontents
@@ -614,53 +617,84 @@ demethylation at its binding sites to predict the regulatory TF.
 \subsubsection{Scatter Plot of 20 nearby genes}
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{scatter.plot}\hlstd{(mee,}\hlkwc{byProbe}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{probe}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"cg19403323"}\hlstd{),} \hlkwc{geneNum}\hlstd{=}\hlnum{20}\hlstd{),}
-             \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+\hlkwd{scatter.plot}\hlstd{(mee,}\hlkwc{byProbe}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{probe}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"cg19403323"}\hlstd{),}\hlkwc{geneNum}\hlstd{=}\hlnum{20}\hlstd{),}
+             \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,} \hlkwc{dir.out} \hlstd{=}\hlstr{"./ELMER.example/Result/LUSC"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \end{alltt}
 
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# cg19403323}}\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure1-1} \caption[Scatter Plot of 20 nearby genes]{\label{fig:cg19403323.byprobe} Each scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of one of 20 adjacent genes.}\label{fig:figure1}
-\end{figure}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# cg19403323}}\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure1-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{SEach scatter plot shows the methylation level of an example 
+probe cg19403323 in all LUSC samples plotted against the expression of one of 
+20 adjacent genes.
+\label{fig:figure1}}
+\end{figure}
+
 
 \subsubsection{Scatter Plot of One Pair}
 Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
+
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlkwd{scatter.plot}\hlstd{(mee,} \hlkwc{byPair}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{probe}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"cg19403323"}\hlstd{),} \hlkwc{gene}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"ID255928"}\hlstd{)),}
-             \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{lm_line}\hlstd{=}\hlnum{TRUE}\hlstd{)}
+\hlkwd{scatter.plot}\hlstd{(mee,}\hlkwc{byPair}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{probe}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"cg19403323"}\hlstd{),}\hlkwc{gene}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"ID255928"}\hlstd{)),}
+             \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{lm_line}\hlstd{=}\hlnum{TRUE}\hlstd{)}
 \end{alltt}
-\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure2-1} \caption[Scatter Plot of One Pair]{\label{fig:cg19403323_SYT14.bypair} Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative target gene SYT14.}\label{fig:figure2}
-\end{figure}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure2-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{Scatter plot shows the methylation level of an example probe 
+cg19403323 in all LUSC samples plotted against the expression of the putative 
+target gene SYT14.
+\label{fig:figure2}}
+\end{figure}
+
 
 \subsubsection{TF expression vs. average DNA methylation}
 Generate scatter plot for TF expression vs average DNA methylation of the sites 
 with certain motif. Figure \ref{fig:figure3}
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{load}\hlstd{(}\hlstr{"ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda"}\hlstd{)}
 \hlkwd{scatter.plot}\hlstd{(mee,}\hlkwc{byTF}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{TF}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"TP53"}\hlstd{,}\hlstr{"TP63"}\hlstd{,}\hlstr{"TP73"}\hlstd{),}
-                           \hlkwc{probe}\hlstd{=enriched.motif[[}\hlstr{"TP53"}\hlstd{]]),} \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,}
-             \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{,} \hlkwc{lm_line}\hlstd{=}\hlnum{TRUE}\hlstd{)}
+             \hlkwc{probe}\hlstd{=enriched.motif[[}\hlstr{"TP53"}\hlstd{]]),} \hlkwc{category}\hlstd{=}\hlstr{"TN"}\hlstd{,}
+             \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{,}\hlkwc{lm_line}\hlstd{=}\hlnum{TRUE}\hlstd{)}
 \end{alltt}
-\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure3-1} \caption[TF expression vs. average DNA methylation]{\label{fig:TP53_TP63_TP73.byTF} Each scatter plot shows the average methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively.}\label{fig:figure3}
-\end{figure}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure3-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{Each scatter plot shows the average 
+methylation level of sites with the TP53 motif in all LUSC samples plotted 
+against the expression of the transcription factor TP53, TP63, TP73 respectively.
+\label{fig:figure3}}
+\end{figure}
+
 
 \subsection{Schematic plot}
 Schematic plot shows a breif view of linkages between genes and probes. To make a 
@@ -677,79 +711,120 @@ schematic plot, "Pair" object should be generated first.
 
 {\ttfamily\noindent\itshape\color{messagecolor}{\#\# \textasciitilde{}\textasciitilde{}\textasciitilde{} Pair: initializator \textasciitilde{}\textasciitilde{}\textasciitilde{}}}\end{kframe}
 \end{knitrout}
-
+\newpage
 \subsubsection{Nearby Genes}
 Generate schematic plot for one probe with 20 nearby genes and label 
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{grid}\hlopt{::}\hlkwd{grid.newpage}\hlstd{()}
-\hlkwd{schematic.plot}\hlstd{(}\hlkwc{pair}\hlstd{=pair,} \hlkwc{byProbe}\hlstd{=}\hlstr{"cg19403323"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+\hlkwd{schematic.plot}\hlstd{(}\hlkwc{pair}\hlstd{=pair,} \hlkwc{byProbe}\hlstd{=}\hlstr{"cg19403323"}\hlstd{,}\hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \end{alltt}
 
 
-{\ttfamily\noindent\itshape\color{messagecolor}{\#\# cg19403323}}\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure4-1} \caption[Nearby Genes]{\label{fig:cg19403323.schematic.byProbe} The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe were shown in red.}\label{fig:figure4}
-\end{figure}
+{\ttfamily\noindent\itshape\color{messagecolor}{\#\# cg19403323}}\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure4-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{The schematic plot shows probe colored 
+in blue and the location of nearby 20 genes. The genes significantly linked to the probe 
+were shown in red.
+\label{fig:figure4}}
+\end{figure}
+
 
 \subsubsection{Nearby Probes}
 Generate schematic plot for one gene with the probes which the gene is significantly 
 linked to. Figure \ref{fig:figure5}
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
-\hlstd{grid}\hlopt{::}\hlkwd{grid.newpage}\hlstd{()}
-\hlkwd{schematic.plot}\hlstd{(}\hlkwc{pair}\hlstd{=pair,} \hlkwc{byGene}\hlstd{=}\hlstr{"ID255928"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+\hlkwd{schematic.plot}\hlstd{(}\hlkwc{pair}\hlstd{=pair,} \hlkwc{byGene}\hlstd{=}\hlstr{"ID255928"}\hlstd{,}\hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \end{alltt}
-\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure5-1} \caption[Nearby Probes]{\label{fig:ID255928.schematic.byGene} The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the expression of this gene.}\label{fig:figure5}
-\end{figure}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure5-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{The schematic plot shows the gene 
+colored in red and all blue colored probes, which are significantly linked to the 
+expression of this gene.
+\label{fig:figure5}}
+\end{figure}
+
 
 \subsection{Motif enrichment plot}
 Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:hypo.motif.enrichment}
 
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{motif.enrichment.plot}\hlstd{(}\hlkwc{motif.enrichment}\hlstd{=}\hlstr{"./ELMER.example/Result/LUSC/getMotif.hypo.motif.enrichment.csv"}\hlstd{,}
-                      \hlkwc{significant}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{OR}\hlstd{=}\hlnum{1.3}\hlstd{,} \hlkwc{lowerOR}\hlstd{=}\hlnum{1.3}\hlstd{),} \hlkwc{label}\hlstd{=}\hlstr{"hypo"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+                      \hlkwc{significant}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{OR}\hlstd{=}\hlnum{1.3}\hlstd{,}\hlkwc{lowerOR}\hlstd{=}\hlnum{1.3}\hlstd{),} \hlkwc{dir.out} \hlstd{=}\hlstr{"ELMER.example/Result/LUSC"}\hlstd{,}
+                      \hlkwc{label}\hlstd{=}\hlstr{"hypo"}\hlstd{,} \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}  \hlcom{## different signficant cut off.}
 \end{alltt}
-\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure6-1} \caption[Motif Enrichment]{\label{fig:hypo.motif.enrichment} The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95\% confidence interval for each Odds Ratio.}\label{fig:figure6}
-\end{figure}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure6-1} 
+
+}
+
 
 
 \end{knitrout}
+\protect\caption{The plot shows the Odds Ratio (x axis) 
+for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
+The range shows the 95\% confidence interval for each Odds Ratio.
+\label{fig:figure6}}
+\end{figure}
+
 
 \subsection{TF ranking plot}
 TF ranking plot shows statistic -log10(P value) assessing the anti-correlation level 
 of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
 
+\begin{figure}[H]
 \begin{knitrout}
 \definecolor{shadecolor}{rgb}{0.969, 0.969, 0.969}\color{fgcolor}\begin{kframe}
 \begin{alltt}
 \hlkwd{load}\hlstd{(}\hlstr{"./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda"}\hlstd{)}
 \hlkwd{TF.rank.plot}\hlstd{(}\hlkwc{motif.pvalue}\hlstd{=TF.meth.cor,} \hlkwc{motif}\hlstd{=}\hlstr{"TP53"}\hlstd{,} \hlkwc{TF.label}\hlstd{=}\hlkwd{list}\hlstd{(}\hlkwc{TP53}\hlstd{=}\hlkwd{c}\hlstd{(}\hlstr{"TP53"}\hlstd{,}\hlstr{"TP63"}\hlstd{,}\hlstr{"TP73"}\hlstd{)),}
-             \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
+            \hlkwc{save}\hlstd{=}\hlnum{FALSE}\hlstd{)}
 \end{alltt}
 \begin{verbatim}
 ## $TP53
 \end{verbatim}
-\end{kframe}\begin{figure}
-\includegraphics[width=\maxwidth]{figure/figure7-1} \caption[TF Ranking]{\label{fig:TP53.TFrankPlot} Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary of the top 5\% association score. The top 3 associated TFs and the TF family members (dots in red) that are associated with that specific motif are labeled in the plot.}\label{fig:figure7}
-\end{figure}
+\end{kframe}
+
+{\centering \includegraphics[width=\maxwidth]{figure/figure7-1} 
+
+}
+
 
 
 
 \end{knitrout}
+
+\protect\caption{Shown are TF ranking plots based on 
+the score (-log(P value)) of association between TF expression and DNA methylation of 
+the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary 
+of the top 5\% association score. The top 3 associated TFs and the TF family members
+(dots in red) that are associated with that specific motif are labeled in the plot.
+\label{fig:figure7}}
+\end{figure}
 
 \newpage
 \begin{knitrout}
@@ -758,9 +833,8 @@ of TFs expression level with average DNA methylation level at sites with a given
 \hlkwd{sessionInfo}\hlstd{()}
 \end{alltt}
 \begin{verbatim}
-## R version 3.1.3 (2015-03-09)
-## Platform: x86_64-apple-darwin14.1.0 (64-bit)
-## Running under: OS X 10.10.2 (Yosemite)
+## R version 3.1.2 (2014-10-31)
+## Platform: x86_64-apple-darwin13.4.0 (64-bit)
 ## 
 ## locale:
 ## [1] en_US.UTF-8/en_US.UTF-8/en_US.UTF-8/C/en_US.UTF-8/en_US.UTF-8
@@ -771,14 +845,14 @@ of TFs expression level with average DNA methylation level at sites with a given
 ## 
 ## other attached packages:
 ## [1] ELMER_0.99.4         GenomicRanges_1.18.4 GenomeInfoDb_1.2.4   IRanges_2.0.1       
-## [5] S4Vectors_0.4.0      BiocGenerics_0.12.1 
+## [5] S4Vectors_0.4.0      BiocGenerics_0.12.1  knitr_1.9           
 ## 
 ## loaded via a namespace (and not attached):
 ##  [1] BiocStyle_1.4.1  codetools_0.2-11 colorspace_1.2-6 digest_0.6.8     evaluate_0.5.5  
-##  [6] formatR_1.0      ggplot2_1.0.0    grid_3.1.3       gtable_0.1.2     highr_0.4       
-## [11] knitr_1.9        labeling_0.3     MASS_7.3-39      munsell_0.4.2    plyr_1.8.1      
-## [16] proto_0.3-10     Rcpp_0.11.5      reshape_0.8.5    reshape2_1.4.1   scales_0.2.4    
-## [21] snow_0.3-13      stringr_0.6.2    tools_3.1.3      XVector_0.6.0
+##  [6] formatR_1.0      ggplot2_1.0.0    grid_3.1.2       gtable_0.1.2     highr_0.4       
+## [11] labeling_0.3     MASS_7.3-39      munsell_0.4.2    plyr_1.8.1       proto_0.3-10    
+## [16] Rcpp_0.11.5      reshape_0.8.5    reshape2_1.4.1   scales_0.2.4     snow_0.3-13     
+## [21] stringr_0.6.2    tools_3.1.2      XVector_0.6.0
 \end{verbatim}
 \end{kframe}
 \end{knitrout}
