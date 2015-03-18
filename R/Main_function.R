@@ -275,7 +275,6 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
   usable.probes <- sample(usable.probes,size = permu.size,replace = FALSE)
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
-<<<<<<< HEAD
   
   if(is.null(permu.dir)){
     permu.meth <- getMeth(mee,probe=probes.permu)
@@ -293,38 +292,10 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
       }
     }else{
       permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-=======
-  ## if file already there don't need to calculate.
-  if(!file.exists(permu.dir)){
-    dir.create(permu.dir,recursive = TRUE)
-  }
-  if(!all(probes.permu %in% dir(permu.dir))){
-    tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-    permu.meth <- getMeth(mee,probe=tmp.probes)
-	if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-		if(!is.null(cores)){
-			if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-			suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-			permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-										 Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-										 Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
-										 simplify = FALSE)
-			parallel::stopCluster(cl)
-		} else {
-			permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-						  Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-						  Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
-						  simplify=FALSE)
-		}
-	} else {
-	  permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
->>>>>>> e3069baa6d6b4203e6c499ddf3d80f9afe77e3d4
                     Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
                     Top=percentage,Exps=getExp(mee),
                     simplify=FALSE)
-<<<<<<< HEAD
     }
-    
     permu <- sapply(permu,
                     function(x,geneID){ 
                       x <- x[match(geneID,x[,1]),2]},
@@ -337,34 +308,25 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
     if(!all(probes.permu %in% dir(permu.dir))){
       tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
       permu.meth <- getMeth(mee,probe=tmp.probes)
-      if(!is.null(cores)){
-        if(requireNamespace("parallel", quietly=TRUE)) {
+      if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
+        if(!is.null(cores)){
           if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-          if(requireNamespace("snow", quietly=TRUE)) {
-            suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-            permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-                                         Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                                         Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
-                                         simplify = FALSE)
-            parallel::stopCluster(cl)
-          }
+          suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
+          permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+                                       Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                                       Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
+                                       simplify = FALSE)
+          parallel::stopCluster(cl)
+        } else {
+          permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
+                        Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                        Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
+                        simplify=FALSE)
         }
-      }else{
+      } else {
         permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-                      Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                      Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
-                      simplify=FALSE)
       }
     }
-    permu.p <- paste0(permu.dir,"/",probes.permu)
-    permu <- sapply(permu.p,
-                    function(x,geneID){ 
-                      tmp <- read.table(x,stringsAsFactors=FALSE)
-                      tmp <- tmp[match(geneID,tmp[,1]),2]},
-                    geneID=geneID,simplify=FALSE)
-=======
-	}
->>>>>>> e3069baa6d6b4203e6c499ddf3d80f9afe77e3d4
   }
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
