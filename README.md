@@ -1,8 +1,7 @@
-# ELMER
-## An R/Bioconductor Tool
-## Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes
+## ELMER
+### An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes
 
-### Installing and loading ELMER
+#### Installing and loading ELMER
 To obtain a copy of ELMER, you will need to install devtools
 
 ```r
