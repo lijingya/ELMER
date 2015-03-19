@@ -16,8 +16,6 @@ openVignette("ELMER")
 ```
 ```
 # Please select a vignette:
-
 # 1: ELMER - ELMER: Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes
-
 # Selection: 1
 ```
