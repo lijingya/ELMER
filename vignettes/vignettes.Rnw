@@ -9,8 +9,6 @@ BiocStyle::latex()
 \usepackage{graphicx}
 \usepackage{grffile}
 \usepackage{float}
-\usepackage{subfig}
-
 
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
@@ -52,19 +50,19 @@ devtools::install_github("lijingya/ELMER");
 
 \section{Download example data}
 The following steps can be used to download the example data set for \Rpackage{ELMER}
-<<example.data.run, echo=FALSE>>=
+<<example.data.run, echo=FALSE, hide=TRUE, message=FALSE, include=FALSE>>=
 if(!file_test("-d", "./ELMER.example")) {
   URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
   download.file(URL,destfile = "ELMER.example",method= "wget",
                 extra = c("--no-check-certificate -a download.log"))
   untar("./ELMER.example")
 }
-library(ELMER,quietly = TRUE)
+library(ELMER, quietly = TRUE)
 @
 
 <<example.data, eval=FALSE>>=
 #Example file download from URL: https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz
-URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
+URL <- "https://raw.githubusercontent.com/lijingya/ELMER/master/ELMER.example.tar.xz"
 download.file(URL,destfile = "ELMER.example",method= "wget",
               extra = c("--no-check-certificate -a download.log"))
 untar("./ELMER.example")
