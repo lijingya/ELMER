@@ -11,6 +11,9 @@ splitmatrix(x, by = "row")
 
 \item{by}{A character specify if split the matix by row or column.}
 }
+\value{
+A list each of which is the value of each row/column in the matrix.
+}
 \description{
 splitmatix
 }

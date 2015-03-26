@@ -19,6 +19,9 @@ for these probes will be output.}
 \item{ID}{A vector of sample ID. When specified, DNA methylation only for
 these samples will be output.}
 }
+\value{
+DNA methylation values.
+}
 \description{
 getMeth
 }

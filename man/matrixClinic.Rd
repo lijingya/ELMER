@@ -11,6 +11,9 @@ matrixClinic(disease, basedir = "./Data")
 
 \item{basedir}{A path shows where the data will be stored.}
 }
+\value{
+A data frame contains clinic information for samples
+}
 \description{
 matrixClinic
 }

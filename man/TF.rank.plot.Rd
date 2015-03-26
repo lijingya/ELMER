@@ -20,6 +20,10 @@ Current directory is default.}
 
 \item{save}{A logic. If true (default), figure will be saved to dir.out.}
 }
+\value{
+A plot shows the score (-log(P value)) of association between TF
+expression and DNA methylation of the certain motif sites.
+}
 \description{
 TF.rank.plot
 }

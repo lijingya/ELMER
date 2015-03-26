@@ -11,6 +11,9 @@ getClinic(disease, basedir = "./Data")
 
 \item{basedir}{A path shows where the data will be stored.}
 }
+\value{
+Download all clinic information for the specified disease.
+}
 \description{
 getClinic
 }

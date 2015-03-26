@@ -23,6 +23,9 @@ show the interacted features and specify the color respectively.}
 
 \item{save}{A logic. If true, figure will be saved to dir.out.}
 }
+\value{
+A schematic plot.
+}
 \description{
 schematicPlot
 }

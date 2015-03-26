@@ -22,6 +22,9 @@ coordinate will be output.}
 \item{range}{A GRanges object. When specified, only the probeInfo locating
 within these loci will be output.}
 }
+\value{
+Probe information such as names, coordinates.
+}
 \description{
 getProbeInfo
 }
