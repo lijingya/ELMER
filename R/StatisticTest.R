@@ -8,6 +8,7 @@
 #' samples used in the test.
 #' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 #' hypermethylated probe is TRUE.
+#' @return Statistic test results to identify differentially methylated probes.
 Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
   meth <- meths[probe,]
   if(Top.m){

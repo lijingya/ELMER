@@ -12,7 +12,11 @@ matrixRNA(disease, basedir = "./Data", type = "gene")
 \item{basedir}{A path shows where the data will be stored.}
 
 \item{type}{A charactor to specify whether use isoform level or gene level.
-When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.}
+When RNAtype=gene, gene level gene expression will be used. When isoform,
+then isoform data will be used.}
+}
+\value{
+A matrix of gene expression values for samples (column) and genes (row)
 }
 \description{
 matrixRNA

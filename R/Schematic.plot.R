@@ -104,6 +104,7 @@ schematic.plot <- function(pair, byProbe, byGene,
 #'show the interacted features and specify the color respectively.
 #'@param label A character labels the outputs figure.
 #'@param save A logic. If true, figure will be saved to dir.out.
+#'@return A schematic plot.
 #'@details byProbes When a vector of probes' name are provided, function will 
 #'produce schematic plot for each individual probes. The schematic plot contains 
 #'probe, nearby 20 (or the number of gene user specified.) genes and the significantly
