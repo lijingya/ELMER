@@ -9,6 +9,8 @@
 #'  then isoform data will be used.
 #' @param Methfilter A number. For each probe, the percentage of NA among the 
 #' all the samples should smaller than Methfilter.
+#' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
+#' the specified disease from TCGA.
 #' @export
 #' @examples
 #' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
@@ -55,6 +57,7 @@ getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",
 #' getRNAseq
 #' @param disease A character to specify disease in TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @return Download all RNA seq level 3 data for the specified disease.
 getRNAseq <- function(disease, basedir="./Data")
 {
   disease <- tolower(disease)
@@ -100,6 +103,8 @@ getRNAseq <- function(disease, basedir="./Data")
 #' get450K
 #' @param disease A character to specify disease in TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @return Download all DNA methylation from HM450K level 3 data for the
+#' specified disease.
 get450K <- function(disease, basedir="./Data")
 {
   disease <- tolower(disease)
@@ -148,6 +153,7 @@ get450K <- function(disease, basedir="./Data")
 #' getClinic
 #' @param disease A character to specify disease in TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @return Download all clinic information for the specified disease.
 getClinic <- function(disease, basedir="./Data")
 {
   disease <- tolower(disease)
@@ -179,7 +185,9 @@ getClinic <- function(disease, basedir="./Data")
 #' @param disease A character to specify disease in TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
 #' @param type A charactor to specify whether use isoform level or gene level.
-#'  When RNAtype=gene, gene level gene expression will be used. When isoform, then isoform data will be used.
+#'  When RNAtype=gene, gene level gene expression will be used. When isoform, 
+#'  then isoform data will be used.
+#' @return A matrix of gene expression values for samples (column) and genes (row)
 matrixRNA <- function(disease,basedir="./Data",type="gene"){
   if(missing(disease)) stop("disease should be specified.")
   disease <- tolower(disease)
@@ -223,6 +231,7 @@ matrixRNA <- function(disease,basedir="./Data",type="gene"){
 #' @param basedir A path shows where the data will be stored.
 #' @param filter For each probe, the percentage of NA among the all the samples
 #'  should smaller than filter.
+#' @return A matrix of DNA methylation values for samples (column) and probes (row)
 matrixMeth <- function(disease,basedir="./Data",filter=0.2){
   if(missing(disease)) stop("disease should be specified.")
   disease <- tolower(disease)
@@ -256,6 +265,7 @@ matrixMeth <- function(disease,basedir="./Data",filter=0.2){
 #' matrixClinic
 #' @param disease A character to specify disease in TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @return A data frame contains clinic information for samples
 matrixClinic <- function(disease,basedir="./Data"){
   if(missing(disease)) stop("disease should be specified.")
   disease <- tolower(disease)

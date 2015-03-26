@@ -9,7 +9,7 @@ get450K(disease, basedir = "./Data")
 \arguments{
 \item{disease}{A character to specify disease in TCGA such as BLCA}
 
-\item{basedir}{A path shows where the data will be stored}
+\item{basedir}{A path shows where the data will be stored.}
 }
 \value{
 Download all DNA methylation from HM450K level 3 data for the

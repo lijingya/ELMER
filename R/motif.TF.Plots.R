@@ -6,6 +6,7 @@
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@param label A character labels the outputs figure.
+#'@return A figure shows the enrichment level for selected motifs.
 #'@details motif.enrichment If input data.frame object, it should contain "motif",
 #' "OR", "lowerOR", "upperOR" columns. motif specifies name of motif; 
 #' OR specifies Odds Ratio, lowerOR specifies lower boundary of OR (95%) ; 
@@ -65,6 +66,8 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
+#'@return A plot shows the score (-log(P value)) of association between TF
+#'expression and DNA methylation of the certain motif sites.
 #'@export
 #'@examples
 #'load(system.file("extdata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
