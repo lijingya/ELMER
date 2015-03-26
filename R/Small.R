@@ -247,6 +247,7 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
 #' splitmatix 
 #' @param x A matrix 
 #' @param by A character specify if split the matix by row or column.
+#' @return A list each of which is the value of each row/column in the matrix.
 splitmatrix <- function(x,by="row") {
   if(by %in% "row"){
     out <- split(x, rownames(x))
