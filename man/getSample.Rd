@@ -18,6 +18,9 @@ these samples will be output.}
 
 \item{cols}{A vector of columns names of Sample slots of MEE.data object.}
 }
+\value{
+Sample information.
+}
 \description{
 getSample
 }

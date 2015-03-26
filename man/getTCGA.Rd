@@ -25,6 +25,10 @@ then isoform data will be used.}
 \item{Methfilter}{A number. For each probe, the percentage of NA among the
 all the samples should smaller than Methfilter.}
 }
+\value{
+Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
+the specified disease from TCGA.
+}
 \description{
 getTCGA
 }

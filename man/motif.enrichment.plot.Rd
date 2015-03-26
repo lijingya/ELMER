@@ -20,6 +20,9 @@ Current directory is default.}
 
 \item{label}{A character labels the outputs figure.}
 }
+\value{
+A figure shows the enrichment level for selected motifs.
+}
 \description{
 motif.enrichment.plot
 }

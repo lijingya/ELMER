@@ -19,6 +19,9 @@ these probes will be output.}
 \item{geneID}{A vector of genes' id. When specified, only the pair containing
 these genes will be output.}
 }
+\value{
+Pair information such as empirical P values, probe and gene ID.
+}
 \description{
 getPair
 }

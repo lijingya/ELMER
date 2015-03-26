@@ -14,6 +14,9 @@ matrixMeth(disease, basedir = "./Data", filter = 0.2)
 \item{filter}{For each probe, the percentage of NA among the all the samples
 should smaller than filter.}
 }
+\value{
+A matrix of DNA methylation values for samples (column) and probes (row)
+}
 \description{
 matrixMeth
 }

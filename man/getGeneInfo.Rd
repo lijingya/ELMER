@@ -4,7 +4,7 @@
 \name{getGeneInfo}
 \alias{getGeneInfo}
 \alias{getGeneInfo,ANY-method}
-\title{getProbeInfo}
+\title{getGeneInfo}
 \usage{
 getGeneInfo(object, geneID, symbol, range)
 
@@ -22,8 +22,11 @@ coordinate will be output.}
 \item{range}{A GRanges object. When specified, only the geneInfo locating within
 these loci will be output.}
 }
+\value{
+Gene annotation information such as gene id, symbol and coordinates.
+}
 \description{
-getProbeInfo
+getGeneInfo
 }
 \examples{
 geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")

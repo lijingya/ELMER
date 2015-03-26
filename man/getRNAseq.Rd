@@ -11,6 +11,9 @@ getRNAseq(disease, basedir = "./Data")
 
 \item{basedir}{A path shows where the data will be stored.}
 }
+\value{
+Download all RNA seq level 3 data for the specified disease.
+}
 \description{
 getRNAseq
 }

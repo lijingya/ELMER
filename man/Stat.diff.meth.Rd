@@ -22,6 +22,9 @@ samples used in the test.}
 \item{Top.m}{A logic. If to identify hypomethylated probe Top.m should be FALSE.
 hypermethylated probe is TRUE.}
 }
+\value{
+Statistic test results to identify differentially methylated probes.
+}
 \description{
 Stat.diff.meth
 }

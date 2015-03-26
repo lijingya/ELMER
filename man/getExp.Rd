@@ -19,6 +19,9 @@ for these genes will be output.}
 \item{ID}{A vector of sample ID. When specified, gene expression only for
 these samples will be output.}
 }
+\value{
+Gene expression values.
+}
 \description{
 getExp
 }
