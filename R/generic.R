@@ -6,6 +6,7 @@
 #' for these probes will be output.
 #' @param ID A vector of sample ID. When specified, DNA methylation only for 
 #' these samples will be output.
+#' @return DNA methylation values.
 #' @exportMethod getMeth
 #' @docType methods
 setGeneric(name="getMeth",
@@ -19,6 +20,7 @@ setGeneric(name="getMeth",
 #' for these genes will be output.
 #' @param ID A vector of sample ID. When specified, gene expression only for 
 #' these samples will be output.
+#' @return Gene expression values.
 #' @exportMethod getExp
 #' @docType methods
 setGeneric(name="getExp",
@@ -30,6 +32,7 @@ setGeneric(name="getExp",
 #' @param ID A vector of sample ID. When specified, sample informtion only for 
 #' these samples will be output.
 #' @param cols A vector of columns names of Sample slots of MEE.data object.
+#' @return Sample information.
 #' @exportMethod getSample
 #' @docType methods
 setGeneric(name="getSample",
@@ -41,6 +44,7 @@ setGeneric(name="getSample",
 #' these genes will be output.
 #' @param probe A vector of probes' name. When specified, only the pair containing 
 #' these probes will be output.
+#' @return Pair information such as empirical P values, probe and gene ID.
 #' @exportMethod getPair
 #' @docType methods
 setGeneric(name="getPair",
@@ -54,6 +58,7 @@ setGeneric(name="getPair",
 #' probeInfo locating on these chromosome will be output.
 #' @param range A GRanges object. When specified, only the probeInfo locating 
 #' within these loci will be output.
+#' @return Probe information such as names, coordinates.
 #' @exportMethod getProbeInfo
 #' @docType methods
 setGeneric(name="getProbeInfo",
@@ -61,7 +66,7 @@ setGeneric(name="getProbeInfo",
 
 
 
-#' getProbeInfo
+#' getGeneInfo
 #' @param object MEE.data or Pair object
 #' @param geneID A vector of genes' id. When specified, only the these genes' 
 #' coordinate will be output.
@@ -69,6 +74,7 @@ setGeneric(name="getProbeInfo",
 #' coordinate will be output.
 #' @param range A GRanges object. When specified, only the geneInfo locating within
 #'  these loci will be output.
+#' @return Gene annotation information such as gene id, symbol and coordinates.
 #' @exportMethod getGeneInfo
 #' @docType methods
 setGeneric(name="getGeneInfo",
