@@ -24,7 +24,7 @@ byCoordinate=list(chr=c(),start=c(),end=c()).}
 \item{...}{Parameters for GetNearGenes}
 }
 \value{
-a schematic plot will be produced.
+A schematic plot will be produced.
 }
 \description{
 schematicPlot

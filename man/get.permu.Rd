@@ -25,7 +25,7 @@ samples used to link probes to genes. Default is 0.2.}
 Default is NULL: don't use parallel process.}
 }
 \value{
-permutation
+Permutations
 }
 \description{
 get.permu
