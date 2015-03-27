@@ -16,7 +16,7 @@ a GRange of probe information}
 a GRange of gene information (Coordinates, GENEID and SYMBOL)}
 }
 \value{
-pair.data object
+A pair.data object
 }
 \description{
 fetch.pair

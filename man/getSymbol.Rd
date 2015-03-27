@@ -12,7 +12,7 @@ getSymbol(mee, geneID)
 \item{geneID}{A character which is the geneID}
 }
 \value{
-gene symbol
+The gene symbol
 }
 \description{
 getSymbol

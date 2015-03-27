@@ -26,7 +26,7 @@ color.value=c("Tumor"="red","Normal"="darkgreen")}
 \item{lm_line}{A logic. If it is TRUE, regression line will be added to the graph.}
 }
 \value{
-ggplot figure object
+A ggplot figure object
 }
 \description{
 scatter

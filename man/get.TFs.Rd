@@ -33,7 +33,7 @@ samples used to link probes to genes. Default is 0.2.}
 process. Default is NULL: don't use parallel process.}
 }
 \value{
-potential responsible TFs will be reported.
+Potential responsible TFs will be reported.
 }
 \description{
 get.TFs

@@ -10,7 +10,7 @@ standardizeTcgaId(tcgaId)
 \item{tcgaId}{A vector list TCGA sample barcode.}
 }
 \value{
-standardized TCGA ID
+Standardized TCGA IDs
 }
 \description{
 tcgaSampleType.

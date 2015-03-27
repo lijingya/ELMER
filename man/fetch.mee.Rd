@@ -33,7 +33,7 @@ the methylation and probeInfo will only contain this list of probes.}
 TRUE indicates data is from TCGA and sample section will automatically filled in.}
 }
 \value{
-MEE.data object
+A MEE.data object
 }
 \description{
 fetch.mee

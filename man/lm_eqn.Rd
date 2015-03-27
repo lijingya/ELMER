@@ -17,7 +17,7 @@ will be dependent variable as default.}
 will be explanation variable as default.}
 }
 \value{
-a linear regression formula
+A linear regression formula
 }
 \description{
 lable linear regression formula
