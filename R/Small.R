@@ -49,7 +49,7 @@ tcgaSampleType <- function(x){
 
 #' tcgaSampleType.
 #' @param tcgaId A vector list TCGA sample barcode.
-#' @return standardized TCGA ID
+#' @return Standardized TCGA IDs
 standardizeTcgaId<-function(tcgaId){
   out<-substring(tcgaId,1,15)
   return(out)
@@ -81,7 +81,7 @@ standardizeTcgaId<-function(tcgaId){
 #' the methylation and probeInfo will only contain this list of probes.
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
-#' @return MEE.data object
+#' @return A MEE.data object
 #' @export 
 #' @examples
 #' meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
@@ -199,7 +199,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
 #' a GRange of probe information 
 #' @param geneInfo A GRnage object or path of rda file only containing 
 #' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
-#' @return pair.data object
+#' @return A pair.data object
 #' @export 
 #' @examples
 #' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
@@ -260,7 +260,7 @@ splitmatrix <- function(x,by="row") {
 #'getSymbol
 #'@param mee A MEE.data or Pair object.
 #'@param geneID A character which is the geneID
-#'@return gene symbol 
+#'@return The gene symbol 
 #'@export
 #' @examples
 #' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
@@ -277,7 +277,7 @@ getSymbol <- function(mee,geneID){
 #'@importFrom S4Vectors values
 #'@param mee A MEE.data or Pair object.
 #'@param symbol A character which is the geneID
-#'@return gene symbol 
+#'@return The gene ID
 #'@export
 #'@examples
 #' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
@@ -387,7 +387,7 @@ Binary <- function(x,Break=0.3,Break2=NULL){
 #' will be dependent variable as default.
 #' @param Exp A character specify explanation variable. The second column 
 #' will be explanation variable as default.
-#' @return a linear regression formula
+#' @return A linear regression formula
 lm_eqn = function(df,Dep,Exp){
   if(missing(Dep)) Dep <- colnames(df)[1]
   if(missing(Exp)) Exp <- colnames(df)[2]
