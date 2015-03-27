@@ -263,7 +263,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
-#' @return permutation
+#' @return Permutations
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
@@ -476,7 +476,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 #' process. Default is NULL: don't use parallel process.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
-#' @return potential responsible TFs will be reported.
+#' @return Potential responsible TFs will be reported.
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))

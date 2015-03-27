@@ -108,7 +108,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 #'@param color.value A vector specify the color of each category, such as 
 #'color.value=c("Tumor"="red","Normal"="darkgreen")
 #'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
-#'@return ggplot figure object
+#'@return A ggplot figure object
 scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
                     color.value=NULL,lm_line=FALSE){
   if(is.null(category)) category <- rep(1,length(meth))
