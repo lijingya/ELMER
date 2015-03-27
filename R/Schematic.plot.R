@@ -19,7 +19,7 @@
 #'@details byCoordinate When a genomic coordinate is provided, function will 
 #'produce a schematic plot for this coordinate. The schematic plot contains 
 #'all genes and significantly linked probes in the range and the significant links.
-#'@return a schematic plot will be produced.
+#'@return A schematic plot will be produced.
 #'@export
 #'@examples
 #'library(grid)
