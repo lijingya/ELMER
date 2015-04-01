@@ -115,7 +115,11 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
     Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
     Fa[unmethy] <- -1
     Fa[methy] <- 1
-    Exp <- Exp[,!is.na(Fa)]
+    if(!is.vector(Exp)){
+      Exp <- Exp[,!is.na(Fa)]
+    }else{
+      Exp <- Exp[!is.na(Fa)]
+    }
     Fa <- Fa[!is.na(Fa)]
     test.p <- unlist(lapply(splitmatrix(Exp),
                             function(x,Factor) 
