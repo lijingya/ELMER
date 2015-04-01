@@ -4,11 +4,12 @@
 #' @importFrom minfi getAnnotation
 #' @param probe A GRange object containing probes coordinate information. 
 #' Default is Illumina-methyl-450K probes coordinates.
-#' @param distal A logical. If FALSE, function will output the all 
-#' probes overlaping with features. If TRUE, function will ouput the distal probes 
-#' overlaping with features.
+#' @param promoter A logical.If TRUE, function will ouput the promoter probes.
+#' If FALSE, function will ouput the distal probes overlaping with features. The 
+#' default is FALSE.
 #' @param feature A GRange object containing biofeature coordinate such as 
 #' enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
+#' feature option is only usable when promoter option is FALSE.
 #' @param TSS A GRange object containing the transcription start site. Default is UCSC gene TSS.
 #' @param TSS.range A list specify how to define promoter regions. 
 #' Default is upstream =2000bp and downstream=2000bp.
@@ -20,9 +21,13 @@
 #' \dontrun{
 #' Probe <- get.feature.probe()
 #' }
+#' # get promoter probes
+#' \dontrun{
+#' Probe <- get.feature.probe(promoter=FALSE)
+#' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
+get.feature.probe <- function(probe,promoter=FALSE,feature,TSS,
                               TSS.range=list(upstream=2000,downstream=2000),rm.chr=NULL){
   if(missing(probe)){
     warning("Default probes coordinates are for HM450K DNA methylation array")
@@ -35,30 +40,34 @@ get.feature.probe <- function(probe,distal=TRUE,feature,TSS,
 					 name=rownames(probe))
   }
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
-  if(distal){
+  if(!promoter){
     if(missing(TSS)){
       newenv <- new.env()
       load(system.file("extdata","GENCODE.UCSC.combined.TSS.rda",package = "ELMER"),
            envir=newenv)
-      txs <- get(ls(newenv)[1],envir=newenv)
-      TSS <- suppressWarnings(promoters(txs,upstream = TSS.range[["upstream"]], 
-                                        downstream = TSS.range[["downstream"]]))    
-    }else{
-      TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
-                                        downstream = TSS.range[["downstream"]]))
+      TSS <- get(ls(newenv)[1],envir=newenv)   
     }
+    TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
+                                      downstream = TSS.range[["downstream"]]))
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
+    if(missing(feature)){
+      feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed.xz",
+                                     package = "ELMER"))
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
+    }else if(is(feature,"GRange")){             
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    }
+  }else{
+    if(missing(TSS)){
+      newenv <- new.env()
+      load(system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER"),
+           envir=newenv)
+      TSS <- get(ls(newenv)[1],envir=newenv)
+    }
+    TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
+                                      downstream = TSS.range[["downstream"]]))
+    probe <- probe[unique(queryHits(findOverlaps(probe,TSS)))]
   }
-  
-  
-  if(missing(feature)){
-    feature <- ReadBed(system.file("extdata","Union_strong_enhancer_REMC_FANTOM.bed.xz",
-                                   package = "ELMER"))
-    probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
-  }else if(is(feature,"GRange")){             
-    probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-  }
-  
   return(probe)
 }
 

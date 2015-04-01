@@ -76,12 +76,25 @@ the analyses in ELMER. For illustration purpose, we skip the downloading step.
 The user can use the getTCGA function to download TCGA data or
 use TCGA.pipe by including "download" in the analysis option.
 
+The following command will do distal enhancer DNA methylation analysis and predict putative
+target genes and responsible transcription factors.
 <<tcga.pipe, cache=TRUE>>=
 TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,
-          analysis = c("distal.enhancer","diffMeth","pair","motif","TF.search"),
-          diff.dir="hypo",rm.chr=paste0("chr",c(1:22,"X","Y")))
+          analysis = c("Probe.selection","diffMeth","pair","motif","TF.search"),
+          diff.dir="hypo",rm.chr=paste0("chr",c("X","Y")))
 @
 
+This package's main function is to study transcription factor network. But we also
+provide an option to identify gene silenceings by DNA methylation at promoter regions 
+by set promoter option as TRUE. When promoter analysis is set, motif analysis and 
+TF.search is not usable any more. Note: example data are can't apply to this function
+illustration. So all LUSC data will be downloaded and analyzed which may take about 
+1 day for the whole process.
+<<tcga.pipe_promoter, eval=FALSE>>=
+TCGA.pipe("LUSC",wd="./ELMER.example/promoter",cores=detectCores()/2,permu.size=300,
+          analysis = c("download","Probe.selection","diffMeth","pair"),
+          diff.dir="hyper",rm.chr=paste0("chr",c("X","Y")), promoter=TRUE)
+@
 
 \section{Input data}
 

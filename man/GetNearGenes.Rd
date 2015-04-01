@@ -4,17 +4,21 @@
 \alias{GetNearGenes}
 \title{Collect nearby gene for one locus.}
 \usage{
-GetNearGenes(geneNum = 20, geneAnnot = NULL, TRange = NULL,
-  cores = NULL)
+GetNearGenes(geneAnnot = NULL, TRange = NULL, geneNum = 20,
+  promoter = FALSE, cores = NULL)
 }
 \arguments{
-\item{geneNum}{A number determine how many gene will be collected from
-each side of target (number shoule be even) Default to 20.}
-
 \item{geneAnnot}{A GRange object contains coordinates of promoters for
 human genome.}
 
 \item{TRange}{A GRange object contains coordinate of a list targets.}
+
+\item{geneNum}{A number determine how many gene will be collected from
+each side of target (number shoule be even) Default to 20. This option only function
+when promoter option is FALSE.}
+
+\item{promoter}{A logic. When TRUE, the gene in which the probe reside will be
+returned.}
 
 \item{cores}{A number to specific how many cores to use to compute.
 Default to detectCores()/2.}

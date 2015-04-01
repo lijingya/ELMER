@@ -4,19 +4,20 @@
 \alias{get.feature.probe}
 \title{get.feature.probe}
 \usage{
-get.feature.probe(probe, distal = TRUE, feature, TSS,
+get.feature.probe(probe, promoter = FALSE, feature, TSS,
   TSS.range = list(upstream = 2000, downstream = 2000), rm.chr = NULL)
 }
 \arguments{
 \item{probe}{A GRange object containing probes coordinate information.
 Default is Illumina-methyl-450K probes coordinates.}
 
-\item{distal}{A logical. If FALSE, function will output the all
-probes overlaping with features. If TRUE, function will ouput the distal probes
-overlaping with features.}
+\item{promoter}{A logical.If TRUE, function will ouput the promoter probes.
+If FALSE, function will ouput the distal probes overlaping with features. The
+default is FALSE.}
 
 \item{feature}{A GRange object containing biofeature coordinate such as
-enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.}
+enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
+feature option is only usable when promoter option is FALSE.}
 
 \item{TSS}{A GRange object containing the transcription start site. Default is UCSC gene TSS.}
 
@@ -35,6 +36,10 @@ get.feature.probe
 # get distal enhancer probe
 \dontrun{
 Probe <- get.feature.probe()
+}
+# get promoter probes
+\dontrun{
+Probe <- get.feature.probe(promoter=FALSE)
 }
 # get distal enhancer probe remove chrX chrY
 Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))

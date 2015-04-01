@@ -2,7 +2,7 @@
 #' ELMER analysis pipe for TCGA data.
 #' @param disease TCGA short form disease name such as COAD
 #' @param analysis a vector of characters listing the analysis need to be done. 
-#' Analysis are "download","distal.enhancer","diffMeth","pair","motif","TF.search". 
+#' Analysis are "download","Probe.selection","diffMeth","pair","motif","TF.search". 
 #' Default is "all" meaning all the analysis will be processed. 
 #' @param wd a path showing working dirctory. Default is "./"
 #' @param cores A interger which defines number of core to be used in parallel process. 
@@ -14,7 +14,7 @@
 #' @export 
 #' @examples
 #' \dontrun{
-#' distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+#' distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
 #' }
 TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   if(missing(disease)) 
@@ -38,19 +38,18 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
   }
     
   ## select distal enhancer probes
-  if("distal.enhancer" %in% analysis){
+  if("Probe.selection" %in% analysis){
     message("###################\nSelect distal enhancer probes\n###################\n\n")
-    params <- args[names(args) %in% c("probe","TSS","feature","TSS.range","distal")]
+    params <- args[names(args) %in% c("probe","TSS","feature","TSS.range","promoter","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file=sprintf("%s/probeInfo_feature.rda",dir.out))
     if(length(analysis)==1){
       return(probeInfo)
     }else{
-      analysis <- analysis[!analysis %in% "distal.enhancer"]
+      analysis <- analysis[!analysis %in% "Probe.selection"]
       invisible(gc())
     }
   }
-  
   #get differential DNA methylation
   if("diffMeth" %in% analysis){
     message("###################\nGet differential DNA methylation loci\n###################\n\n")
@@ -109,8 +108,9 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
     }else{
       geneAnnot <- geneAnnot[["geneAnnot"]]
     }
-    distal.probe <- suppressWarnings(get.feature.probe(feature="distal"))
-    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
+    params <- args[names(args) %in% c("probe","TSS","feature","TSS.range","promoter","rm.chr")]
+    Selected.probe <- suppressWarnings(do.call(get.feature.probe,params))
+    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=Selected.probe, 
                     geneInfo=geneAnnot,TCGA=TRUE)
     ## define diff.dir
     diff.dir <- args[names(args) %in% "diff.dir"]
@@ -131,7 +131,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL,...){
       if(length(nearGenes.file)==0){
         nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff)
         if(!file.exists(nearGenes.file)){
-          params <- args[names(args) %in% c("geneNum")]
+          params <- args[names(args) %in% c("geneNum","promoter")]
           nearGenes <- do.call(GetNearGenes,
                                c(list(TRange=getProbeInfo(mee,probe=Sig.probes),
                                       geneAnnot=getGeneInfo(mee),cores=cores),
