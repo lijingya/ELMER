@@ -5,7 +5,7 @@
 \title{get pair}
 \usage{
 get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 1000,
-  permu.dir = NULL, Pe = 0.01, dir.out = "./", diffExp = FALSE,
+  permu.dir = NULL, Pe = 0.01, dir.out = "./", diffExp = TRUE,
   cores = NULL, label = NULL)
 }
 \arguments{
