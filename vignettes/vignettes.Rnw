@@ -62,7 +62,7 @@ library(ELMER, quietly = TRUE)
 
 <<example.data, eval=FALSE>>=
 #Example file download from URL: https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz
-URL <- "https://raw.githubusercontent.com/lijingya/ELMER/master/ELMER.example.tar.xz"
+URL <- "https://raw.githubusercontent.com/lijingya/ELMER/master/ELMER.example.tar.gz"
 download.file(URL,destfile = "ELMER.example",method= "wget",
               extra = c("--no-check-certificate -a download.log"))
 untar("./ELMER.example")
@@ -80,21 +80,10 @@ The following command will do distal enhancer DNA methylation analysis and predi
 target genes and responsible transcription factors.
 <<tcga.pipe, cache=TRUE>>=
 TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,
-          analysis = c("Probe.selection","diffMeth","pair","motif","TF.search"),
+          analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
           diff.dir="hypo",rm.chr=paste0("chr",c("X","Y")))
 @
 
-This package's main function is to study transcription factor network. But we also
-provide an option to identify gene silenceings by DNA methylation at promoter regions 
-by set promoter option as TRUE. When promoter analysis is set, motif analysis and 
-TF.search is not usable any more. Note: example data are can't apply to this function
-illustration. So all LUSC data will be downloaded and analyzed which may take about 
-1 day for the whole process.
-<<tcga.pipe_promoter, eval=FALSE>>=
-TCGA.pipe("LUSC",wd="./ELMER.example/promoter",cores=detectCores()/2,permu.size=300,
-          analysis = c("download","Probe.selection","diffMeth","pair"),
-          diff.dir="hyper",rm.chr=paste0("chr",c("X","Y")), promoter=TRUE)
-@
 
 \section{Input data}
 
@@ -201,8 +190,8 @@ the putative comprehensive enhancers from REMC, ENCODE and FANTOM5.
 <<selection.of.probes.within.biofeatures, cache=TRUE>>=
 #get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
 #enhancers on chromosome 1
-Probe <- get.feature.probe(probe=probe, rm.chr=paste0("chr",c(2:22,"X","Y")))
-save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature.rda")
+Probe <- get.feature.probe(rm.chr=paste0("chr",c(2:22,"X","Y")))
+save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda")
 @
 
 
@@ -213,13 +202,13 @@ probes among the ones within biofeatures, which are selected in the above step.
 ## fetch.mee can take path as input.
 mee <- fetch.mee(meth="./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
                  exp="./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda", TCGA=TRUE, 
-                 probeInfo="./ELMER.example/Result/LUSC/probeInfo_feature.rda", 
+                 probeInfo="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda", 
                  geneInfo="./ELMER.example/Result/LUSC/geneAnnot.rda") 
 
 sig.diff <- get.diff.meth(mee, cores=detectCores()/2, dir.out ="./ELMER.example/Result/LUSC", 
                           diff.dir="hypo", pvalue = 0.01)
 
-sig.diff$hypo[1:10,]   ## significantly hypomethylated probes
+sig.diff[1:10,]   ## significantly hypomethylated probes
 
 # get.diff.meth automatically save output files. 
 # getMethdiff.hypo.probes.csv contains statistics for all the probes.
@@ -364,7 +353,7 @@ schematic plot, "Pair" object should be generated first.
 <<makepair, cache=TRUE>>=
 # Make a "Pair" object for schematic.plot
 pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.significant.withmotif.csv",
-                   probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature.rda",
+                   probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda",
                    geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
 @
 \begin{minipage}{\textwidth}

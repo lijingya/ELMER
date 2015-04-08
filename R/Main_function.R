@@ -2,8 +2,8 @@
 #' get.feature.probe
 #' @importFrom GenomicRanges promoters
 #' @importFrom minfi getAnnotation
-#' @param probe A GRange object containing probes coordinate information. 
-#' Default is Illumina-methyl-450K probes coordinates.
+#' @description This function selects the probes on HM450K that either overlap 
+#' distal biofeatures or TSS promoter. 
 #' @param promoter A logical.If TRUE, function will ouput the promoter probes.
 #' If FALSE, function will ouput the distal probes overlaping with features. The 
 #' default is FALSE.
@@ -27,18 +27,15 @@
 #' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(probe,promoter=FALSE,feature,TSS,
-                              TSS.range=list(upstream=2000,downstream=2000),rm.chr=NULL){
-  if(missing(probe)){
-    warning("Default probes coordinates are for HM450K DNA methylation array")
-    probe <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19, what="Locations")
-	probe <- GRanges(seqnames=probe$chr,
-					 ranges=IRanges(probe$pos,
-									width=1,
-									names=rownames(probe)),
-					 strand=probe$strand,
-					 name=rownames(probe))
-  }
+get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstream=2000),
+                              promoter=FALSE,rm.chr=NULL){
+  probe <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19, what="Locations")
+  probe <- GRanges(seqnames=probe$chr,
+                   ranges=IRanges(probe$pos,
+                                  width=1,
+                                  names=rownames(probe)),
+                   strand=probe$strand,
+                   name=rownames(probe))
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(!promoter){
     if(missing(TSS)){
@@ -75,10 +72,9 @@ get.feature.probe <- function(probe,promoter=FALSE,feature,TSS,
 ## TCGA pipe don't specify dir.out
 #' get.diff.meth
 #' @param mee A MEE.data object containing at least meth and probeInfo.
-#' @param diff.dir A character showing differential methylation dirction. 
-#' It can be "hypo" which is only selecting hypomethylated probes; 
+#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
+#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
 #' "hyper" which is only selecting hypermethylated probes; 
-#' "both" which select both hypomethyalted and hypermethylated probes.
 #' @param cores A interger which defines number of core to be used in parallel process. 
 #' Default is NULL: don't use parallel process.
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of 
@@ -95,7 +91,7 @@ get.feature.probe <- function(probe,promoter=FALSE,feature,TSS,
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
 
-get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
+get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
                           pvalue=0.01, sig.dif=0.3, dir.out="./",save=TRUE){
   if(nrow(mee@meth)==0) 
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
@@ -106,9 +102,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
   }else if(length(table(getSample(mee,cols="TN")))<2){
     stop("\"TN\" should have at 2 distinct group labels for comparison.")
   }
-  if("both" == diff.dir) diff.dir <- c("hypo","hyper")
   
-  result <- list()
   if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
 	  if(!is.null(cores)) {
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
@@ -141,7 +135,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
                 file=sprintf("%s/getMethdiff.hyper.probes.significant.csv",dir.out), 
                 row.names=FALSE)
     }
-    result[["hyper"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
+    result <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
   if("hypo" %in% diff.dir){
 	  if(requireNamespace("parallel")) {
@@ -171,7 +165,7 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
                 file=sprintf("%s/getMethdiff.hypo.probes.significant.csv",dir.out),
                 row.names=FALSE)
     }
-    result[["hypo"]] <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
+    result <- out[out$adjust.p < pvalue & abs(out$tumorMinNormal)>sig.dif,]
   }
   return(result)  
 }
@@ -194,6 +188,8 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 #' @param permu.dir A path where the output of permuation will be. 
 #' @param Pe A number specify the empircal pvalue cutoff for defining signficant pairs.
 #'  Default is 0.01
+#'  @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
+#'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @return Statistics for all pairs and significant pairs
@@ -207,7 +203,8 @@ get.diff.meth <- function(mee,diff.dir="both",cores=NULL,percentage=0.2,
 #'                                               dir.out="./",
 #'                                               label= "hypo")
 get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
-                     permu.dir=NULL, Pe=0.01,dir.out="./",cores=NULL,label=NULL){
+                     permu.dir=NULL, Pe=0.01,dir.out="./",diffExp=TRUE,cores=NULL,
+                     label=NULL){
   ## check data
   if(!all(probes %in% rownames(mee@meth))) 
     stop("Probes option should be subset of rownames of methylation matrix.")
@@ -254,6 +251,22 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
   write.csv(Probe.gene.Pe, file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",
                                         dir.out, label),row.names=FALSE)
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  
+  if(diffExp){
+    ## calculate differential expression between two groups.
+    Exp <- getExp(mee, geneID = unique(selected$GeneID))
+    TN <- getSample(mee,cols = "TN")
+    out <- lapply(split(Exp,rownames(Exp)),
+                    function(x, TN){test <- t.test(x~TN)
+                                    U.test <- wilcox.test(x~TN)
+                                    out <- data.frame("log2FC_TvsN" = test$estimate[2]-test$estimate[1],
+                                                      "TN.diff.pvalue"=test$p.value)
+                                    return(out)}, TN=TN)
+    out <- do.call(rbind, out)
+    out$GeneID <- rownames(out)
+    add <- out[match(selected$GeneID, out$GeneID),c("log2FC_TvsN","TN.diff.pvalue")]
+    selected <- cbind(selected, add)                                                         
+  }
   write.csv(selected, file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
             row.names=FALSE)
   invisible(gc())
@@ -364,7 +377,51 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
   return(permu)
 }
 
-
+#'promoterMeth
+#'@param mee A MEE.data object must contains meth, exp, probeInfo, geneInfo four component.
+#'@param sig.pvalue A number specify significant cutoff for gene silenced by promoter
+#'methylation. Default is 0.01
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' samples used to link probes to genes. Default is 0.2.
+#' @importFrom GenomicRanges promoters
+#' @return A data frame contains genes whose expression significantly anti-correlated 
+#' with promoter methylation.
+promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
+  TSS_2K <- promoters(getGeneInfo(mee), upstream = 100, downstream = 700)
+  probes <- getProbeInfo(mee)
+  overlap <- findOverlaps(probes, TSS_2K)
+  df <- data.frame(Probe=as.character(probes$name[queryHits(overlap)]), 
+                   GeneID=TSS_2K$GENEID[subjectHits(overlap)], stringsAsFactors=F)
+  if(nrow(df)==0){
+    out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
+  }else{
+    df <- unique(df)
+    ProbeInTSS <- split(df$Probe,df$GeneID)
+    
+    ## calculate average methylation of promoter
+    Gene.promoter <- lapply(ProbeInTSS, 
+                            function(x, METH){meth <- METH[x,]
+                                              if(length(x)>1){
+                                                meth <- colMeans(meth,na.rm=T)
+                                              }  
+                                              return(meth)},   
+                            METH=getMeth(mee))
+    Gene.promoter <- do.call(rbind, Gene.promoter)
+    ## make fake NearGene 
+    Fake <- data.frame(Symbol = getSymbol(mee, geneID = rownames(Gene.promoter)),
+                       GeneID = rownames(Gene.promoter),
+                       Distance= 1,
+                       Side = 1, stringsAsFactors=F)
+    Fake <- split(Fake, Fake$GeneID)
+    out <- lapply(rownames(Gene.promoter),Stat.nonpara, NearGenes=Fake,K=0.3,Top=0.2,
+                  Meths=Gene.promoter,Exps=getExp(mee))
+    out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
+    out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
+  }
+  if(save) write.csv(out, file="Genes_significant_anticorrelated_promoter_methylation.csv",
+                     row.names=FALSE)
+  return(out)
+}
 
 #' get.enriched.motif
 #' @param probes.motif A matrix contains motifs occurrence within probes regions. 
@@ -401,9 +458,9 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 	## here need to be add motif search part.
 	if(missing(probes)) stop("probes option should be specified.")
 	if(missing(background.probes)){
-		if(file.exists(sprintf("%s/probeInfo_feature.rda",dir.out))){
+		if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
 			newenv <- new.env()
-			load(sprintf("%s/probeInfo_feature.rda",dir.out), envir=newenv)
+			load(sprintf("%s/probeInfo_feature_distal.rda",dir.out), envir=newenv)
       background.probes <- get(ls(newenv)[1],envir=newenv) 
       background.probes <- as.character(background.probes$name)
       # The data is in the one and only variable

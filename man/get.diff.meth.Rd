@@ -4,16 +4,15 @@
 \alias{get.diff.meth}
 \title{get.diff.meth}
 \usage{
-get.diff.meth(mee, diff.dir = "both", cores = NULL, percentage = 0.2,
+get.diff.meth(mee, diff.dir = "hypo", cores = NULL, percentage = 0.2,
   pvalue = 0.01, sig.dif = 0.3, dir.out = "./", save = TRUE)
 }
 \arguments{
 \item{mee}{A MEE.data object containing at least meth and probeInfo.}
 
-\item{diff.dir}{A character showing differential methylation dirction.
-It can be "hypo" which is only selecting hypomethylated probes;
-"hyper" which is only selecting hypermethylated probes;
-"both" which select both hypomethyalted and hypermethylated probes.}
+\item{diff.dir}{A character can be "hypo" or "hyper", showing differential
+methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes;
+"hyper" which is only selecting hypermethylated probes;}
 
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is NULL: don't use parallel process.}
