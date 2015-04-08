@@ -62,7 +62,7 @@ library(ELMER, quietly = TRUE)
 
 <<example.data, eval=FALSE>>=
 #Example file download from URL: https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz
-URL <- "https://raw.githubusercontent.com/lijingya/ELMER/master/ELMER.example.tar.gz"
+URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
 download.file(URL,destfile = "ELMER.example",method= "wget",
               extra = c("--no-check-certificate -a download.log"))
 untar("./ELMER.example")
