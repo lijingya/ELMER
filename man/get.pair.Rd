@@ -5,8 +5,8 @@
 \title{get pair}
 \usage{
 get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 1000,
-  permu.dir = NULL, Pe = 0.01, dir.out = "./", cores = NULL,
-  label = NULL)
+  permu.dir = NULL, Pe = 0.01, dir.out = "./", diffExp = FALSE,
+  cores = NULL, label = NULL)
 }
 \arguments{
 \item{mee}{A MEE.data object containing at least meth, exp, probeInfo, geneInfo.}
@@ -27,6 +27,9 @@ samples used to link probes to genes. Default is 0.2.}
 Default is 0.01}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
+
+\item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to
+test whether putative target gene are differentially expressed between two groups.}
 
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is NULL: don't use parallel process.}

@@ -117,23 +117,38 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
     Fa[methy] <- 1
     if(!is.vector(Exp)){
       Exp <- Exp[,!is.na(Fa)]
-    }else{
-      Exp <- Exp[!is.na(Fa)]
-    }
-    Fa <- Fa[!is.na(Fa)]
-    test.p <- unlist(lapply(splitmatrix(Exp),
-                            function(x,Factor) 
+      Fa <- Fa[!is.na(Fa)]
+      test.p <- unlist(lapply(splitmatrix(Exp),
+                              function(x,Factor) 
                               {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],
                                            alternative = "greater",
                                            exact=FALSE)$p.value},
-							Factor=Fa))
+                              Factor=Fa))
+    }else{
+      Exp <- Exp[!is.na(Fa)]
+      Fa <- Fa[!is.na(Fa)]
+      test.p <- wilcox.test(Exp[Fa %in% -1],Exp[Fa %in% 1],
+                                           alternative = "greater",
+                                           exact=FALSE)$p.value
+    }
   }
-  out <- data.frame(Probe=rep(Probe,length(Gene)),
-                    GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
-                    Distance=NearGenes[[Probe]]$Distance, 
-                    Sides=NearGenes[[Probe]]$Side,
-                    Raw.p=test.p[match(Gene, names(test.p))], 
-                    stringsAsFactors = FALSE)
+  
+  if(length(Gene)==1){
+    out <- data.frame(Probe=rep(Probe,length(Gene)),
+                      GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
+                      Distance=NearGenes[[Probe]]$Distance, 
+                      Sides=NearGenes[[Probe]]$Side,
+                      Raw.p=test.p, 
+                      stringsAsFactors = FALSE)
+  }else{
+    out <- data.frame(Probe=rep(Probe,length(Gene)),
+                      GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
+                      Distance=NearGenes[[Probe]]$Distance, 
+                      Sides=NearGenes[[Probe]]$Side,
+                      Raw.p=test.p[match(Gene, names(test.p))], 
+                      stringsAsFactors = FALSE)
+  }
+  
   return(out)
 }
 

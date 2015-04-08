@@ -4,17 +4,10 @@
 \alias{get.feature.probe}
 \title{get.feature.probe}
 \usage{
-get.feature.probe(probe, promoter = FALSE, feature, TSS,
-  TSS.range = list(upstream = 2000, downstream = 2000), rm.chr = NULL)
+get.feature.probe(feature, TSS, TSS.range = list(upstream = 2000, downstream =
+  2000), promoter = FALSE, rm.chr = NULL)
 }
 \arguments{
-\item{probe}{A GRange object containing probes coordinate information.
-Default is Illumina-methyl-450K probes coordinates.}
-
-\item{promoter}{A logical.If TRUE, function will ouput the promoter probes.
-If FALSE, function will ouput the distal probes overlaping with features. The
-default is FALSE.}
-
 \item{feature}{A GRange object containing biofeature coordinate such as
 enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
 feature option is only usable when promoter option is FALSE.}
@@ -24,13 +17,18 @@ feature option is only usable when promoter option is FALSE.}
 \item{TSS.range}{A list specify how to define promoter regions.
 Default is upstream =2000bp and downstream=2000bp.}
 
+\item{promoter}{A logical.If TRUE, function will ouput the promoter probes.
+If FALSE, function will ouput the distal probes overlaping with features. The
+default is FALSE.}
+
 \item{rm.chr}{A vector of chromosome need to be remove from probes such as chrX chrY or chrM}
 }
 \value{
 A GRange object containing probes that satisfy selecting critiria.
 }
 \description{
-get.feature.probe
+This function selects the probes on HM450K that either overlap
+distal biofeatures or TSS promoter.
 }
 \examples{
 # get distal enhancer probe

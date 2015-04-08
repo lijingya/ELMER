@@ -106,13 +106,10 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' @param geneAnnot A GRange object contains coordinates of promoters for 
 #' human genome.
 #' @param geneNum A number determine how many gene will be collected from 
-#' each side of target (number shoule be even) Default to 20. This option only function
-#' when promoter option is FALSE.
+#' each side of target (number shoule be even) Default to 20. 
 #' @param TRange A GRange object contains coordinate of a list targets.
 #' @param cores A number to specific how many cores to use to compute. 
 #' Default to detectCores()/2.
-#' @param promoter A logic. When TRUE, the gene in which the probe reside will be
-#' returned.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
@@ -123,7 +120,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
 #' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=txs,TRange=probe)
-GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20, promoter=FALSE,
+GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20,
                          cores=NULL){
 	if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
 		if(!is.null(cores)){
@@ -137,34 +134,17 @@ GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20, promoter=FALSE,
 		if(requireNamespace("parallel", quietly = TRUE) && requireNamespace("snow", quietly=TRUE)) {
 			if(!is.null(cores)) {
 				##snow::clusterEvalQ(cl, library(GenomicRanges))
-        if(promoter){
-          NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),TSSGene,
-                                             Gene=geneAnnot,TRange=TRange,
-                                             simplify=FALSE)
-        }else{
-          NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
-                                             geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
-                                             simplify=FALSE)
-        }
+			  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
+			                                     geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
+			                                     simplify=FALSE)
 				parallel::stopCluster(cl)
 			} else {
-        if(promoter){
-          NearGenes <- sapply(as.character(TRange$name),TSSGene,
-                              Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-        }else{
-          NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-                              Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-        }
-			
+			  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
+			                      Gene=geneAnnot,TRange=TRange,simplify=FALSE)
 			}
 		} else {
-		  if(promoter){
-		    NearGenes <- sapply(as.character(TRange$name),TSSGene,
-		                        Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-		  }else{
-		    NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-		                        Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-		  }
+		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
+		                      Gene=geneAnnot,TRange=TRange,simplify=FALSE)
 		}
 	}
 	return(NearGenes)
@@ -172,32 +152,3 @@ GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20, promoter=FALSE,
 
 
 
-TSSGene <- function(Target=NULL, Gene=NULL, TRange=NULL){
-  if(is.null(Gene) | is.null(Target)){
-    stop ("Target and Genes should both be defined")
-  }
-  message(Target)
-  if(is.null(TRange)){
-    stop( "TRange must be defined")
-  }else{
-    regionInfo <- TRange[as.character(TRange$name) %in% Target]
-  }
-  overlap <- findOverlaps(regionInfo, Gene)
-  Gene <- Gene[subjectHits(Gene)]
-  Whole <- 1
-  n <- 1
-  while(n <= length(Gene)){
-    if(Gene$SYMBOL[Whole] %in% Gene$SYMBOL[n+1]){
-      n <- n+1
-    }else{
-      Whole <- c(Whole, n)
-      n <- n+1
-    }
-  }
-  GeneIDs <- Gene$GENEID[Whole]
-  Symbols <- Gene$SYMBOL[Whole]
-  Distances <-  suppressWarnings(distance(Gene[Whole],regionInfo))
-  Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,
-                      Symbol=Symbols,Distance=Distances, 
-                      stringsAsFactors = FALSE)
-}

@@ -189,6 +189,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
   }
   mee <- mee.data(meth=meth,exp=exp,sample=sample,
                   probeInfo=probeInfo,geneInfo=geneInfo)
+  invisible(gc())
   return(mee)
 }
 
