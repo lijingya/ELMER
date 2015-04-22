@@ -99,11 +99,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL, diff.
     if(length(geneAnnot)==0){
       geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
       if(!file.exists(geneAnnot)){
-        newenv <- new.env()
-        load(system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER"),
-             envir=newenv)
-        txs <- get(ls(newenv)[1],envir=newenv)
-        geneInfo <- promoters(txs,upstream = 0, downstream = 0)
+        geneInfo <- txs(TSS=list(upstream=0, downstream=0))
         geneInfo$GENEID <- paste0("ID",geneInfo$GENEID)
         save(geneInfo,file=geneAnnot)
       }

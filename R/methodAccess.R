@@ -211,7 +211,7 @@ setMethod(f="getProbeInfo",signature="ANY",
 #' @aliases getGeneInfo
 #'@importFrom GenomicRanges queryHits findOverlaps
 #'@examples
-#'geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#'geneInfo <- txs()
 #'mee <- fetch.mee(geneInfo=geneInfo)
 #'Genes <- getGeneInfo(mee, geneID = "55811")
 #'Genes <- getGeneInfo(mee, symbol ="ADCY10")

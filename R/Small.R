@@ -207,7 +207,7 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
 #' GeneID =c("ID255928","ID84451","ID55811"),
 #' Symbol =c("SYT14","KIAA1804","ADCY10"),
 #' Pe=c(0.003322259,0.003322259,0.003322259))
-#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' geneInfo <- txs()
 #' ## input can be a path
 #' pair <- fetch.pair(pair = df, geneInfo=geneInfo)
 
@@ -264,7 +264,7 @@ splitmatrix <- function(x,by="row") {
 #'@return The gene symbol 
 #'@export
 #' @examples
-#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' geneInfo <- txs()
 #' ## input can be a path
 #' pair <- fetch.pair(geneInfo=geneInfo)
 #' getSymbol(pair, geneID="84451")
@@ -281,7 +281,7 @@ getSymbol <- function(mee,geneID){
 #'@return The gene ID
 #'@export
 #'@examples
-#' geneInfo <- system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER")
+#' geneInfo <- txs()
 #' ## input can be a path
 #' pair <- fetch.pair(geneInfo=geneInfo)
 #' getGeneID(pair, symbol="KIAA1804")
@@ -400,3 +400,34 @@ lm_eqn = function(df,Dep,Exp){
   as.character(as.expression(eq));                 
 }
 
+
+## txs
+#' @importFrom GenomicFeatures transcripts
+#' Fetch USCS gene annotation (transcripts level) from Bioconductor package 
+#' Homo.sapians. If upstream and downstream are specified in TSS list, promoter 
+#' regions of USCS gene will be generated.
+#' @param TSS A list contains upstream and downstream like TSS=list(upstream, downstream).
+#' When upstream and downstream is specified, coordinates of promoter regions with 
+#' gene annotation will be generated. 
+#' @return UCSC gene annotation if TSS is not specified. Coordinates
+#' of UCSC gene promoter regions with each gene annotation if TSS
+#' is specified.
+#' @examples
+#' # get UCSC gene annotation (transcripts level)
+#' \dontrun{
+#' txs <- txs()
+#' }
+#' # get coordinate of all UCSC promoter regions
+#' \dontrun{
+#' txs <- txs(TSS=list(upstream=1000, downstream=1000))
+#' }
+txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
+  gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
+  gene$GENEID <- unlist(gene$GENEID)
+  gene$TXNAME <- unlist(gene$TXNAME)
+  gene$SYMBOL <- unlist(gene$SYMBOL)
+  gene <- gene[!is.na(gene$GENEID)]
+  if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
+    gene <- promoters(gene, upstream = TSS$upstream, downstream = TSS$downstream)
+  return(gene)
+}

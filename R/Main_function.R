@@ -56,10 +56,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
     }
   }else{
     if(missing(TSS)){
-      newenv <- new.env()
-      load(system.file("extdata","UCSC_gene_hg19.rda",package = "ELMER"),
-           envir=newenv)
-      TSS <- get(ls(newenv)[1],envir=newenv)
+      TSS <- txs()
     }
     TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
                                       downstream = TSS.range[["downstream"]]))
