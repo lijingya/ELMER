@@ -27,7 +27,7 @@ A number ranges from 0 to 1 specifying the percentage of samples of control and 
 groups used to link probes to genes. Default is 0.2.
 }
   \item{rm.probes}{
-A vector lists name of probes which belongs to the set of probes fed into \code{\link{get.Pair}}
+A vector lists name of probes which belongs to the set of probes fed into \code{\link{get.pair}}
 function.
 }
   \item{permu.size}{

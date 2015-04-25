@@ -26,9 +26,7 @@ Lijing Yao (maintainer: lijingya@usc.edu)
 }
 \examples{
 # get UCSC gene annotation (transcripts level)
-\dontrun{
 txs <- txs()
-}
 # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
 \dontrun{
 txs <- txs(TSS=list(upstream=1000, downstream=1000))

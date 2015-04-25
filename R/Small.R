@@ -364,6 +364,7 @@ lm_eqn = function(df,Dep,Exp){
 #' }
 #' @export
 #' @importFrom GenomicRanges unlist
+#' @import GenomeInfoDb
 txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
   gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
   gene$GENEID <- unlist(gene$GENEID)

@@ -16,7 +16,7 @@ fetch.pair(pair, probeInfo, geneInfo)
 \arguments{
   \item{pair}{
  A data.frame (R object) or a path of XX.csv file containing pair information such as
- output of function \code{\link{get.Pair}}.
+ output of function \code{\link{get.pair}}.
 }
   \item{probeInfo}{
  A GRnage object or a path of XX.rda file which only contains a GRange of probe information.
