@@ -383,6 +383,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
 #' @importFrom GenomicRanges promoters
 #' @return A data frame contains genes whose expression significantly anti-correlated 
 #' with promoter methylation.
+#' @export
 promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
   TSS_2K <- promoters(getGeneInfo(mee), upstream = 100, downstream = 700)
   probes <- getProbeInfo(mee)
@@ -399,7 +400,7 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
     Gene.promoter <- lapply(ProbeInTSS, 
                             function(x, METH){meth <- METH[x,]
                                               if(length(x)>1){
-                                                meth <- colMeans(meth,na.rm=T)
+                                                meth <- colMeans(meth,na.rm=TRUE)
                                               }  
                                               return(meth)},   
                             METH=getMeth(mee))
@@ -408,7 +409,7 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
     Fake <- data.frame(Symbol = getSymbol(mee, geneID = rownames(Gene.promoter)),
                        GeneID = rownames(Gene.promoter),
                        Distance= 1,
-                       Side = 1, stringsAsFactors=F)
+                       Side = 1, stringsAsFactors=FALSE)
     Fake <- split(Fake, Fake$GeneID)
     out <- lapply(rownames(Gene.promoter),Stat.nonpara, NearGenes=Fake,K=0.3,Top=0.2,
                   Meths=Gene.promoter,Exps=getExp(mee))

@@ -15,7 +15,10 @@ methylation. Default is 0.01. P value is raw P value without adjustment.}
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of
 samples of control and experimental groups used to link promoter DNA methylation to genes.
 Default is 0.2.}
+
+\item{save}{A logic. If it is true, the result will be saved.}
 }
+
 \value{
 A data frame contains genes whose expression significantly anti-correlated
 with promoter methylation.
@@ -36,5 +39,5 @@ Lijing Yao (maintainer: lijingya@usc.edu)
 
 \examples{
 load(system.file("extdata","mee.example.rda",package = "ELMER"))
-Gene.promoter<- promoterMeth(mee) 
+Gene.promoter <- promoterMeth(mee) 
 }

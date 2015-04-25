@@ -106,7 +106,7 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 #@param ylab A character specify the title of y axis.
 #@param title A character specify the figure title.
 #@param color.value A vector specify the color of each category, such as 
-#'color.value=c("Experiment"="red","Control"="darkgreen")
+#color.value=c("Experiment"="red","Control"="darkgreen")
 #@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
 #@return A ggplot figure object
 scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
