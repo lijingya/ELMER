@@ -1,12 +1,12 @@
-#' NearGenes
-#' @param Target A charactor which is name of TRange or one of rownames of TBed.
-#' @param Gene A GRange object contains coordinates of promoters for human genome.
-#' @param geneNum A number determine how many gene will be collected from each 
-#' side of target (number shoule be even).
-#' @param TRange A GRange object contains coordinate of targets.
-#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
-#' distance with target and side to which the gene locate to the target.
-#' @importFrom GenomicRanges strand<-
+# NearGenes
+# @param Target A charactor which is name of TRange or one of rownames of TBed.
+# @param Gene A GRange object contains coordinates of promoters for human genome.
+# @param geneNum A number determine how many gene will be collected from each 
+# side of target (number shoule be even).
+# @param TRange A GRange object contains coordinate of targets.
+# @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
+# distance with target and side to which the gene locate to the target.
+#'@importFrom GenomicRanges strand<-
 NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")

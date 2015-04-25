@@ -1,7 +1,7 @@
 ### set class
 #' MEE.data
-#' An S4 class that methylation, expression, sample information, probe 
-#' information and gene information.
+#' An S4 class contains 5 slots: methylation, expression, sample information, probe 
+#' information and gene information. MEE.data class are the main input for main functions.
 #' @slot meth A matrix of DNA methylation. Each row is one probe and each 
 #' column is one sample
 #' @slot exp A matrix of expression. Each row is one gene and each 

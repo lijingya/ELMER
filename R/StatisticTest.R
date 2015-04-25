@@ -12,11 +12,11 @@
 Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
   meth <- meths[probe,]
   if(Top.m){
-    tumor.tmp <- sort(meth[TN %in% "Tumor"],decreasing=TRUE)
-    normal.tmp <- sort(meth[TN %in% "Normal"],decreasing=TRUE)
+    tumor.tmp <- sort(meth[TN %in% "Experiment"],decreasing=TRUE)
+    normal.tmp <- sort(meth[TN %in% "Control"],decreasing=TRUE)
   }else{
-    tumor.tmp <- sort(meth[TN %in% "Tumor"])
-    normal.tmp <- sort(meth[TN %in% "Normal"])
+    tumor.tmp <- sort(meth[TN %in% "Experiment"])
+    normal.tmp <- sort(meth[TN %in% "Control"])
   }
   if(round(length(normal.tmp)*percentage)< 5){
     if(length(normal.tmp) < 5) {
@@ -30,7 +30,7 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
   tumor.tmp <- tumor.tmp[1:round(length(tumor.tmp)*percentage)]
   normal.tmp <- normal.tmp[1:Normal.number]
   meth <- c(normal.tmp,tumor.tmp)
-  TN <- c(rep("Normal",length(normal.tmp)),rep("Tumor",length(tumor.tmp)))
+  TN <- c(rep("Control",length(normal.tmp)),rep("Experiment",length(tumor.tmp)))
   
   ##this is to remove the situation that the normal or tumor are all NA (only one is value)
   meth_split <- split(meth,TN)
