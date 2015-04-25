@@ -83,8 +83,7 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
   }
   if(missing(TF.label)){
     newenv <- new.env()
-    load(system.file("extdata","motif.relavent.TFs.human.rda",package = "ELMER"), 
-         envir=newenv)
+    data("motif.relavent.TFs",package = "ELMER.data",envir=newenv)
     motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
     TF.label <- motif.relavent.TFs[motif]
     specify <- "No"
