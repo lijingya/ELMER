@@ -217,7 +217,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL, diff.
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out, diff.dir)
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
-    do.call(get.TFs, c(list(mee=mee, enriched.motif=enriched.motif,
+    TFs <- do.call(get.TFs, c(list(mee=mee, enriched.motif=enriched.motif,
                             dir.out=dir.out, cores=cores, 
                             label=diff.dir),
                        params))

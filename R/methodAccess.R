@@ -91,7 +91,7 @@ setMethod(f="getExp",signature="MEE.data",
 #' @aliases getSample
 #' @examples
 #' SampleInfo <- data.frame(ID=paste0("sample",1:5), 
-#' TN=c("Tumor","Tumor","Normal","Normal","Tumor"))
+#' TN=c("Experiment","Experiment","Control","Control","Experiment"))
 #' mee <- fetch.mee(sample = SampleInfo)
 #' Samples <- getSample(mee,ID = "sample2") ## get sample2's information
 #' Samples <- getSample(mee, cols = "TN")  ## get 'TN' information for each samples
