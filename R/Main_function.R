@@ -1,6 +1,6 @@
 ##get.distal.en
 #' get.feature.probe
-#' @importFrom GenomicRanges promoters
+#' @importFrom GenomicRanges promoters 
 #' @importFrom minfi getAnnotation
 #' @description This function selects the probes on HM450K that either overlap 
 #' distal biofeatures or TSS promoter. 
@@ -380,7 +380,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
 #'methylation. Default is 0.01
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
-#' @importFrom GenomicRanges promoters
+#' @importFrom GenomicRanges promoters subjectHits
 #' @return A data frame contains genes whose expression significantly anti-correlated 
 #' with promoter methylation.
 #' @export
@@ -389,7 +389,7 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
   probes <- getProbeInfo(mee)
   overlap <- findOverlaps(probes, TSS_2K)
   df <- data.frame(Probe=as.character(probes$name[queryHits(overlap)]), 
-                   GeneID=TSS_2K$GENEID[subjectHits(overlap)], stringsAsFactors=F)
+                   GeneID=TSS_2K$GENEID[subjectHits(overlap)], stringsAsFactors=FALSE)
   if(nrow(df)==0){
     out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
   }else{
