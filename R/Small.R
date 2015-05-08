@@ -2,9 +2,9 @@
 # Returns type: tumor, bloodNormal, tissueNormal
 #according to the sampletypes
 # Returns type: tumor, bloodNormal, tissueNormal
-#' tcgaSampleType.
-#' @param x A TCGA sample barcode.
-#' @return Tissue type: Tumor, Normal, Control, TRB, cell_line, XP, XCL
+# tcgaSampleType.
+#x A TCGA sample barcode.
+# Tissue type: Tumor, Normal, Control, TRB, cell_line, XP, XCL
 tcgaSampleType <- function(x){
   # "Code","Definition","Short Letter Code"
   # "01","Primary solid Tumor","TP"
@@ -47,9 +47,9 @@ tcgaSampleType <- function(x){
   return(out)
 }
 
-#' tcgaSampleType.
-#' @param tcgaId A vector list TCGA sample barcode.
-#' @return Standardized TCGA IDs
+# tcgaSampleType.
+# param tcgaId A vector list TCGA sample barcode.
+# return Standardized TCGA IDs
 standardizeTcgaId<-function(tcgaId){
   out<-substring(tcgaId,1,15)
   return(out)
@@ -120,22 +120,31 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
     }
   }else if(TCGA){
     if(!is.null(meth) & is.null(exp)){
+      TN <- sapply(colnames(meth),tcgaSampleType)
+      TN[TN %in% "Tumor"] <- "Experiment"
+      TN[TN %in% "Normal"] <- "Control"
       sample <- data.frame(ID=standardizeTcgaId(colnames(meth)),
                            meth.ID=colnames(meth),
-                           TN=sapply(colnames(meth),tcgaSampleType),
+                           TN=TN,
                            stringsAsFactors = FALSE)
     }else if(is.null(meth) & !is.null(exp)){
+      TN <- sapply(colnames(exp),tcgaSampleType)
+      TN[TN %in% "Tumor"] <- "Experiment"
+      TN[TN %in% "Normal"] <- "Control"
       sample <- data.frame(ID=standardizeTcgaId(colnames(exp)),
                            exp.ID=colnames(exp),
-                           TN=sapply(colnames(exp),tcgaSampleType),
+                           TN=TN,
                            stringsAsFactors = FALSE)
     }else if(!is.null(meth) & !is.null(exp)){
       ID <- intersect(standardizeTcgaId(colnames(meth)),standardizeTcgaId(colnames(exp)))
+      TN <- sapply(ID,tcgaSampleType)
+      TN[TN %in% "Tumor"] <- "Experiment"
+      TN[TN %in% "Normal"] <- "Control"
       meth.ID <- colnames(meth)
       exp.ID <- colnames(exp)
       sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,standardizeTcgaId(meth.ID))],
                            exp.ID=exp.ID[match(ID,standardizeTcgaId(exp.ID))],
-                           TN=sapply(ID,tcgaSampleType),stringsAsFactors = FALSE)
+                           TN=TN,stringsAsFactors = FALSE)
       
     }
   }else if(!is.null(meth) & !is.null(exp)){
@@ -245,10 +254,10 @@ fetch.pair <- function(pair,probeInfo,geneInfo){
   return(pair)
 }
 
-#' splitmatix 
-#' @param x A matrix 
-#' @param by A character specify if split the matix by row or column.
-#' @return A list each of which is the value of each row/column in the matrix.
+# splitmatix 
+# @param x A matrix 
+# @param by A character specify if split the matix by row or column.
+# @return A list each of which is the value of each row/column in the matrix.
 splitmatrix <- function(x,by="row") {
   if(by %in% "row"){
     out <- split(x, rownames(x))
@@ -291,79 +300,11 @@ getGeneID <- function(mee,symbol){
   return(gene)
 }
 
-
-
-#' Normalization to 0 to 1
-#' @param x A matrix.
-#' @param col A boolean to determine normalize by column or not.
-#' @param row A boolean to determine normalize by row or not.
-#' @param na.rm A boolean to determine to remove na number or not.
-#' @return A normalized matrix.
-Normalize <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
-  if(col){
-    ColMax <- apply(x,2,max,na.rm=na.rm)
-    ColMin <- apply(x,2,min,na.rm=na.rm)
-    range <- ColMax-ColMin
-    x <- t((t(x)-ColMin)/range)
-  }
-  if(row){
-    RowMax <- apply(x,1,max,na.rm=na.rm)
-    RowMin <- apply(x,1,min,na.rm=na.rm)
-    range <- RowMax-RowMin
-    x <- (x-RowMin)/range
-  }
-  
-  return(x)
-}
-
-#' Normalization based on mean
-#' @param x A matrix.
-#' @param col A boolean to determine normalize by column or not.
-#' @param row A boolean to determine normalize by row or not.
-#' @param na.rm A boolean to determine to remove na number or not.
-#' @return A normalized matrix.
-NormalizeMean <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
-  
-  if(col){
-    Mean <- colMeans(x,na.rm=na.rm)
-    SD <- apply(x,2,sd,na.rm=na.rm)
-    x <- t((t(x)-Mean)/SD)
-    x[,SD==0] <- 0 
-  }
-  if(row){
-    Mean <- rowMeans(x,na.rm=na.rm)
-    SD <- apply(x,1,sd,na.rm=na.rm)
-    x <- (x-Mean)/SD
-    x[SD==0,] <- 0
-  }
-  
-  return(x)
-}
-
-#' Normalization based on median
-#' @param x A matrix.
-#' @param col A boolean to determine normalize by column or not.
-#' @param row A boolean to determine normalize by row or not.
-#' @param na.rm A boolean to determine to remove na number or not.
-#' @return A normalized matrix.
-NormalizeMedian <- function (x,col=FALSE,row=FALSE,na.rm=FALSE){
-  if(col){
-    Median <- apply(x,2,median,na.rm=na.rm)
-    x <- t((t(x)-Median))
-  }
-  if(row){
-    Median <- apply(x,1,median,na.rm=na.rm)  
-    x <- x-Median
-  }
-  
-  return(x)
-}
-
-#' binary data
-#' @param x A matrix.
-#' @param Break A value to binarize the data.
-#' @param Break2 A value to cut value to 3 categories.
-#' @return A binarized matrix.
+# binary data
+# @param x A matrix.
+# @param Break A value to binarize the data.
+# @param Break2 A value to cut value to 3 categories.
+# @return A binarized matrix.
 Binary <- function(x,Break=0.3,Break2=NULL){
   if(!is.numeric(x)) stop("x need to be numeric") 
   change <- x
@@ -381,14 +322,14 @@ Binary <- function(x,Break=0.3,Break2=NULL){
 
 
 
-#' lable linear regression formula 
-#' @param df A data.frame object contains two variables: dependent 
-#' variable (Dep) and explanation variable (Exp).
-#' @param Dep A character specify dependent variable. The first column 
-#' will be dependent variable as default.
-#' @param Exp A character specify explanation variable. The second column 
-#' will be explanation variable as default.
-#' @return A linear regression formula
+# lable linear regression formula 
+# @param df A data.frame object contains two variables: dependent 
+# variable (Dep) and explanation variable (Exp).
+# @param Dep A character specify dependent variable. The first column 
+# will be dependent variable as default.
+# @param Exp A character specify explanation variable. The second column 
+# will be explanation variable as default.
+# @return A linear regression formula
 lm_eqn = function(df,Dep,Exp){
   if(missing(Dep)) Dep <- colnames(df)[1]
   if(missing(Exp)) Exp <- colnames(df)[2]
@@ -402,8 +343,7 @@ lm_eqn = function(df,Dep,Exp){
 
 
 ## txs
-#' @importFrom GenomicFeatures transcripts
-#' Fetch USCS gene annotation (transcripts level) from Bioconductor package 
+#' txs Fetch USCS gene annotation (transcripts level) from Bioconductor package 
 #' Homo.sapians. If upstream and downstream are specified in TSS list, promoter 
 #' regions of USCS gene will be generated.
 #' @param TSS A list contains upstream and downstream like TSS=list(upstream, downstream).
@@ -412,6 +352,7 @@ lm_eqn = function(df,Dep,Exp){
 #' @return UCSC gene annotation if TSS is not specified. Coordinates
 #' of UCSC gene promoter regions with each gene annotation if TSS
 #' is specified.
+#' @importFrom GenomicFeatures transcripts
 #' @examples
 #' # get UCSC gene annotation (transcripts level)
 #' \dontrun{
@@ -421,6 +362,9 @@ lm_eqn = function(df,Dep,Exp){
 #' \dontrun{
 #' txs <- txs(TSS=list(upstream=1000, downstream=1000))
 #' }
+#' @export
+#' @importFrom GenomicRanges unlist
+#' @import GenomeInfoDb
 txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
   gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
   gene$GENEID <- unlist(gene$GENEID)
