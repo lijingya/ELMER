@@ -99,16 +99,16 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 #'scatter
 #'@importFrom reshape melt.data.frame
 #'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth element_text
-#'@param meth A vector of number.
-#'@param exp A vector of number or matrix with sample in column and gene in rows.
-#'@param category A vector of sample labels.
-#'@param xlab A character specify the title of x axis.
-#'@param ylab A character specify the title of y axis.
-#'@param title A character specify the figure title.
-#'@param color.value A vector specify the color of each category, such as 
-#'color.value=c("Tumor"="red","Normal"="darkgreen")
-#'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
-#'@return A ggplot figure object
+#@param meth A vector of number.
+#@param exp A vector of number or matrix with sample in column and gene in rows.
+#@param category A vector of sample labels.
+#@param xlab A character specify the title of x axis.
+#@param ylab A character specify the title of y axis.
+#@param title A character specify the figure title.
+#@param color.value A vector specify the color of each category, such as 
+#color.value=c("Experiment"="red","Control"="darkgreen")
+#@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
+#@return A ggplot figure object
 scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
                     color.value=NULL,lm_line=FALSE){
   if(is.null(category)) category <- rep(1,length(meth))
