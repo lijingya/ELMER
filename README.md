@@ -14,6 +14,7 @@ devtools::install_github("lijingya/ELMER");
 Then you can load the package and see an introduction with
 ```r
 library(ELMER)
+openVignette("ELMER.data")
 openVignette("ELMER")
 ```
 ```
@@ -23,5 +24,6 @@ openVignette("ELMER")
 ```
 Or you can have the vignette, and sourcecode for the vignette open directly in the browser
 ```r
+browseVignettes("ELMER.data")
 browseVignettes("ELMER")
 ```
