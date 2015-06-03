@@ -30,11 +30,14 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     #left side
     Leftlimit <- geneNum/2
     Rightlimit <- geneNum/2
-    Left <- index
     n <- 1
-    if(index==1){
+    if(is.na(index)){
+      Leftlimit <- 0
+    }else if(index==1){
+      Left <- index
       Leftlimit <- length(Left)
     }else{
+      Left <- index
       while(length(Left) < Leftlimit){
         if(!as.character(Gene$GENEID[index-n])%in%as.character(Gene$GENEID[Left]))
           Left <- c((index-n),Left) 
