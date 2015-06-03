@@ -32,7 +32,9 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     Rightlimit <- geneNum/2
     n <- 1
     if(is.na(index)){
+      index<- 0
       Leftlimit <- 0
+      Left <- c()
     }else if(index==1){
       Left <- index
       Leftlimit <- length(Left)
@@ -65,7 +67,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
         }     
       }
     }
-    
+   
     if(Rightlimit < geneNum/2){
       n <- 1
       if(Left[1]-n > 0){
