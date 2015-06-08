@@ -1,42 +1,18 @@
-## ----style-knitr, eval=TRUE, echo=FALSE, results="asis"------------------
-BiocStyle::latex()
-
-## ----setup, include=FALSE, cache=FALSE-----------------------------------
-library(knitr)
-opts_chunk$set(fig.align='center', cache=TRUE,par=TRUE)
-knit_hooks$set(par=function(before, options, envir){
-if (before && options$fig.show!='none') par(mar=c(1,1,.1,.1),cex.lab=1,cex.axis=1,mgp=c(2,.7,0),tcl=-.3)
-}, crop=hook_pdfcrop)
-
 ## ----installing, eval=FALSE,hide=TRUE, message=FALSE,include=FALSE-------
-## install.packages(devtools)
-## library(devtools);
-## devtools::install_github("lijingya/ELMER");
+install.packages(devtools)
+library(devtools);
+devtools::install_github("lijingya/ELMER");
 
 ## ----install, eval=FALSE-------------------------------------------------
-## source("http://bioconductor.org/biocLite.R")
-## biocLite("ELMER")
-
-## ----example.data.run, echo=FALSE, hide=TRUE, message=FALSE, include=FALSE----
-if(!file_test("-d", "./ELMER.example")) {
-  URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
-  SYS <- Sys.info()[['sysname']]
-  if(SYS == "Darwin"){
-    download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
-  }else{
-    download.file(URL,destfile = "ELMER.example.tar.gz",method= "wget",
-                extra = c("--no-check-certificate -a download.log"))
-  }
-  untar("./ELMER.example.tar.gz")
-}
-library(ELMER, quietly = TRUE)
+source("http://bioconductor.org/biocLite.R")
+biocLite("ELMER")
 
 ## ----example.data, eval=FALSE--------------------------------------------
 ## #Example file download from URL: https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz
-## URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
-## download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
-## untar("./ELMER.example.tar.gz")
-## library(ELMER)
+URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
+download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
+untar("./ELMER.example.tar.gz")
+library(ELMER)
 
 ## ----tcga.pipe, cache=TRUE-----------------------------------------------
 TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,
