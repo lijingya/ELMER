@@ -462,7 +462,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
       background.probes <- as.character(background.probes$name)
       # The data is in the one and only variable
     }else{
-      background.probes <- colnames(probes.motif)
+      background.probes <- colnames(all.probes.TF)
     }
   }
   bg.probes.TF <- all.probes.TF[background.probes,]
