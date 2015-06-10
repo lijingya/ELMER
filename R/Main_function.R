@@ -200,7 +200,7 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
 #'                                               dir.out="./",
 #'                                               label= "hypo")
 get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
-                     permu.dir=NULL, Pe=0.01,dir.out="./",diffExp=TRUE,cores=NULL,
+                     permu.dir=NULL, Pe=0.01,dir.out="./",diffExp=FALSE,cores=NULL,
                      label=NULL,save=TRUE){
   ## check data
   if(!all(probes %in% rownames(mee@meth))) 
@@ -235,6 +235,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
   }
   
   Probe.gene <- do.call(rbind,Probe.gene)
+
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
