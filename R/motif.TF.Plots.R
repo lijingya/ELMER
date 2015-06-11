@@ -39,7 +39,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
   } 
   motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = TRUE),]
   motif.enrichment$motif <- factor(motif.enrichment$motif,
-                                   levels=c(motif.enrichment$motif[nrow(motif.enrichment):1]))
+                                   levels=as.character(motif.enrichment$motif[nrow(motif.enrichment):1]))
   limits <- aes(ymax = upperOR, ymin=lowerOR)
   P <- ggplot(motif.enrichment, aes(x=motif, y=OR))+
     geom_point()+
