@@ -199,8 +199,8 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
 #'                                               nearGenes=nearGenes,permu.size=5,Pe = 0.2,
 #'                                               dir.out="./",
 #'                                               label= "hypo")
-get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
-                     permu.dir=NULL, Pe=0.01,dir.out="./",diffExp=FALSE,cores=NULL,
+get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
+                     permu.dir=NULL, Pe=0.001,dir.out="./",diffExp=FALSE,cores=NULL,
                      label=NULL,save=TRUE){
   ## check data
   if(!all(probes %in% rownames(mee@meth))) 
@@ -291,7 +291,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
 get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
-                      permu.size=1000, permu.dir=NULL,cores=NULL){
+                      permu.size=10000, permu.dir=NULL,cores=NULL){
   set.seed(200)
   ## get usable probes
   binary.m <- rowMeans(Binary(mee@meth,0.3),na.rm = TRUE)
