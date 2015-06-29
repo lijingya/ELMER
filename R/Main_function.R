@@ -295,12 +295,11 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
   set.seed(200)
   ## get usable probes
   binary.m <- rowMeans(Binary(mee@meth,0.3),na.rm = TRUE)
-  usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05])
+  usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
                  set a smaller permu.size.",permu.size))
-  usable.probes <- sample(usable.probes,size = permu.size,replace = FALSE)
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
