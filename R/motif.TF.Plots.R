@@ -39,7 +39,7 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
   } 
   motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = TRUE),]
   motif.enrichment$motif <- factor(motif.enrichment$motif,
-                                   levels=c(motif.enrichment$motif[nrow(motif.enrichment):1]))
+                                   levels=as.character(motif.enrichment$motif[nrow(motif.enrichment):1]))
   limits <- aes(ymax = upperOR, ymin=lowerOR)
   P <- ggplot(motif.enrichment, aes(x=motif, y=OR))+
     geom_point()+
@@ -57,7 +57,10 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 
 
 #'TF.rank.plot
-#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter
+#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter 
+#'@importFrom ggplot2 annotation_custom plot.margin unit ggplot_gtable ggplot_build
+#'@importFrom grid textGrob linesGrob grid.draw
+#'@importFrom gridExtra arrangeGrob
 #'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
 #'which is output of getTF. 
 #'@param motif A vector of charactor specify the motif to plot
@@ -92,6 +95,7 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
   }
   significant <- floor(0.05*nrow(motif.pvalue))
   motif.pvalue <- -log10(motif.pvalue)
+  
   Plots <- list()
   for(i in motif){
     df <- data.frame(pvalue=motif.pvalue[,i], Gene=rownames(motif.pvalue), stringAsFactors=FALSE)
@@ -106,25 +110,56 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
                            text=as.character(df$Gene[df$label %in% "Yes"]), 
                            x=which(df$label %in% "Yes"), stringsAsFactors = FALSE)
-    
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label)))+
-      scale_color_manual(values = c("black","red"))+
+    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Yes","No"))))+
+      scale_color_manual(values = c("red","black"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point()+
-      geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",
-                position=position_jitter(height=0.5,width = 0.3), size=2)+
-
+      # geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",
+      #          position=position_jitter(height=0.5,width = 0.3), size=2)+
       #     geom_segment(aes(x = x, y = pvalue, xend = , yend = ),df.label,color="black")+
       theme_bw()+
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
       theme(legend.position="none")+
       labs(x="Rank", y="-log10 P value", title=i)
-    if(save){
-      ggsave(filename = sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),
-             useDingbats=FALSE, plot=P,width=6, height = 6)
+    
+    
+    TF.text <- list()
+    delta <- ceiling(max(df$pvalue))/45
+    for(i in df$Gene[df$label %in% "Yes"]){
+      yposition <- df$pvalue[df$Gene %in% i]
+      xposition <- df$rank[df$Gene %in% i]
+      if(length(TF.text)>0){
+        if(last.y-delta < yposition)
+          yposition <- last.y-delta
+      }
+      # Create the text Grobs
+      TF.text[[i]] = textGrob(i,gp=gpar(fontsize=10))
+      # Draw the plot
+      P = P + annotation_custom(grob = TF.text[[i]],  xmin = -370, xmax = -370, 
+                                ymin = yposition, ymax = yposition) +
+        annotation_custom(grob = linesGrob(), xmin = -270, xmax = xposition, 
+                          ymin = yposition, ymax =df$pvalue[df$Gene %in% i] )
+      last.y <- yposition
+    }
+    if(yposition < 0 ){
+      y.margin <- abs(yposition)
     }else{
-      Plots[[i]] <- P
+      y.margin <- 0
+    }
+    P <- P + theme(plot.margin = unit(c(y.margin, 0.5, 0, 2), "cm"))
+    
+    # Code to override clipping
+    gt <- ggplot_gtable(ggplot_build(P))
+    gt$layout$clip[gt$layout$name=="panel"] <- "off"
+    
+    if(save){
+      pdf(sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),
+          useDingbats=FALSE, width=7, height = 6+y.margin)
+      grid.draw(gt)
+      invisible(dev.off())
+    }else{
+      Plots[[i]] <- arrangeGrob(gt)
     }
   }
   if(!save) return(Plots)

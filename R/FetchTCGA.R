@@ -94,8 +94,8 @@ getRNAseq <- function(disease, basedir="./Data")
                             paste0(dir.rna,"/",RNA.version), RNA.URL, "-a",  
                             "RNA_download.log",sep=" "))
     lapply(cmd, system)
-    system(sprintf("tar -zxvf %s", paste0(dir.rna,"/",mage.version)),ignore.stdout=TRUE)
-    system(sprintf("tar -zxvf %s", paste0(dir.rna,"/",RNA.version)),ignore.stdout=TRUE)
+    system(sprintf("tar -zxvf %s -C %s", paste0(dir.rna,"/",mage.version), dir.rna),ignore.stdout=TRUE)
+    system(sprintf("tar -zxvf %s -C %s", paste0(dir.rna,"/",RNA.version), dir.rna),ignore.stdout=TRUE)
     system (sprintf("rm %s %s", paste0(dir.rna,"/",mage.version), paste0(dir.rna,"/",RNA.version)))
   } 
 }
@@ -142,8 +142,8 @@ get450K <- function(disease, basedir="./Data")
                                    "Meth_download.log", sep=" "),
                              collapse = ";"))
     lapply(cmd, system)
-    system(sprintf("tar -zxvf %s", paste0(dir.meth,"/",mage.version)),ignore.stdout=TRUE)
-    system(paste(sprintf("tar -zxvf %s", paste0(dir.meth,"/",meth.version)),collapse=";"),
+    system(sprintf("tar -zxvf %s -C %s", paste0(dir.meth,"/",mage.version), dir.meth),ignore.stdout=TRUE)
+    system(paste(sprintf("tar -zxvf %s -C %s", paste0(dir.meth,"/",meth.version),dir.meth),collapse=";"),
            ignore.stdout=TRUE)
     system (sprintf("rm %s %s", paste0(dir.meth,"/",mage.version), 
                     paste(paste0(dir.meth,"/",meth.version),collapse = " ")))

@@ -199,8 +199,8 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
 #'                                               nearGenes=nearGenes,permu.size=5,Pe = 0.2,
 #'                                               dir.out="./",
 #'                                               label= "hypo")
-get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
-                     permu.dir=NULL, Pe=0.01,dir.out="./",diffExp=TRUE,cores=NULL,
+get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
+                     permu.dir=NULL, Pe=0.001,dir.out="./",diffExp=FALSE,cores=NULL,
                      label=NULL,save=TRUE){
   ## check data
   if(!all(probes %in% rownames(mee@meth))) 
@@ -235,6 +235,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
   }
   
   Probe.gene <- do.call(rbind,Probe.gene)
+
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
@@ -290,16 +291,15 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=1000,
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
 get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
-                      permu.size=1000, permu.dir=NULL,cores=NULL){
+                      permu.size=10000, permu.dir=NULL,cores=NULL){
   set.seed(200)
   ## get usable probes
   binary.m <- rowMeans(Binary(mee@meth,0.3),na.rm = TRUE)
-  usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05])
+  usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
                  set a smaller permu.size.",permu.size))
-  usable.probes <- sample(usable.probes,size = permu.size,replace = FALSE)
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
@@ -461,7 +461,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
       background.probes <- as.character(background.probes$name)
       # The data is in the one and only variable
     }else{
-      background.probes <- colnames(probes.motif)
+      background.probes <- rownames(all.probes.TF)
     }
   }
   bg.probes.TF <- all.probes.TF[background.probes,]

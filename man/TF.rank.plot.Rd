@@ -7,7 +7,7 @@ correlation between TF expression and average DNA methylation at motif sites.}
 TF.rank.plot(motif.pvalue, motif, TF.label, dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{motif.pvalue}{A matrix or a path specifying location of "XXX.with.pvalue.rda"
+\item{motif.pvalue}{A matrix or a path specifying location of "XXX.with.motif.pvalue.rda"
 which is output of get.TFs.}
 
 \item{motif}{A vector of charactors specify the motif to plot}

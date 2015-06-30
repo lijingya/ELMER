@@ -70,12 +70,12 @@ if(!file_test("-d", "./ELMER.example")) {
   URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
   SYS <- Sys.info()[['sysname']]
   if(SYS == "Darwin"){
-    download.file(URL,destfile = "ELMER.example",method= "curl")
+    download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
   }else{
-    download.file(URL,destfile = "ELMER.example",method= "wget",
+    download.file(URL,destfile = "ELMER.example.tar.gz",method= "wget",
                 extra = c("--no-check-certificate -a download.log"))
   } 
-  untar("./ELMER.example")
+  untar("./ELMER.example.tar.gz")
 }
 library(ELMER, quietly = TRUE)
 @
@@ -83,8 +83,8 @@ library(ELMER, quietly = TRUE)
 <<example.data, eval=FALSE>>=
 #Example file download from URL: https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz
 URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
-download.file(URL,destfile = "ELMER.example",method= "curl")
-untar("./ELMER.example")
+download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
+untar("./ELMER.example.tar.gz")
 library(ELMER)
 @
 
@@ -99,7 +99,7 @@ use TCGA.pipe by including "download" in the analysis option.
 The following command will do distal enhancer DNA methylation analysis and predict putative
 target genes, motif analysis and idnetify regulatory transcription factors.
 <<tcga.pipe, cache=TRUE>>=
-TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,
+TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,Pe=0.01,
           analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
           diff.dir="hypo",rm.chr=paste0("chr",c("X","Y")))
 @
