@@ -99,7 +99,7 @@ use TCGA.pipe by including "download" in the analysis option.
 The following command will do distal enhancer DNA methylation analysis and predict putative
 target genes, motif analysis and idnetify regulatory transcription factors.
 <<tcga.pipe, cache=TRUE>>=
-TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,
+TCGA.pipe("LUSC",wd="./ELMER.example",cores=detectCores()/2,permu.size=300,Pe=0.01,
           analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
           diff.dir="hypo",rm.chr=paste0("chr",c("X","Y")))
 @

@@ -57,7 +57,10 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 
 
 #'TF.rank.plot
-#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter
+#'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter 
+#'@importFrom ggplot2 annotation_custom plot.margin unit ggplot_gtable ggplot_build
+#'@importFrom grid textGrob linesGrob grid.draw
+#'@importFrom gridExtra arrangeGrob
 #'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
 #'which is output of getTF. 
 #'@param motif A vector of charactor specify the motif to plot
