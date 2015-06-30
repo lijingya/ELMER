@@ -53,7 +53,6 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL, diff.
       invisible(gc())
     }
   }
-  browser()
   #get differential DNA methylation
   if("diffMeth" %in% analysis){
     message("###################\nGet differential DNA methylation loci\n###################\n\n")
