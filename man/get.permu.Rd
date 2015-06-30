@@ -11,7 +11,7 @@ pairs. Based on the permutation value, empirical P value can be calculated for t
 real enhancer-gene pair (see reference).
 }
 \usage{
-get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL, permu.size = 1000, 
+get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL, permu.size = 10000, 
 permu.dir = NULL, cores = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
