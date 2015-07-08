@@ -448,7 +448,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 	if(missing(probes.motif)){
 		newenv <- new.env()
 		data("Probes.motif",package = "ELMER.data",envir=newenv)
-                all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
+    all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
 		# The data is in the one and only variable
 	}else{
 	         all.probes.TF <- probes.motif
