@@ -243,7 +243,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
   # get permutation
   permu <- get.permu(mee,geneID=GeneID, percentage=percentage, rm.probes=probes, 
-                     permu.size=permu.size, protion = portion,
+                     permu.size=permu.size, portion = portion,
                      permu.dir=permu.dir,cores=cores)
   #get empirical p-value
   message("Calculate empirical P value.\n")
