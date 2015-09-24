@@ -53,6 +53,8 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
     }else if(is(feature,"GRange")){             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    }else{
+        stop("feature is not GRange object.")
     }
   }else{
     if(missing(TSS)){
