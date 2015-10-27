@@ -12,7 +12,7 @@ and getPair.XX.pairs.significant.csv (see detail).
 }
 \usage{
 get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-Pe = 0.001, portion=0.3, dir.out = "./", diffExp = FALSE, cores = NULL, 
+Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = NULL, portion=0.3,   
 label = NULL, save=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
