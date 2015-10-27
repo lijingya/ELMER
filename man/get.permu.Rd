@@ -11,8 +11,8 @@ pairs. Based on the permutation value, empirical P value can be calculated for t
 real enhancer-gene pair (see reference).
 }
 \usage{
-get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL, permu.size = 10000, 
-permu.dir = NULL, cores = NULL)
+get.permu(mee, geneID, percentage = 0.2, rm.probes = NULL,
+portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = NULL)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -26,6 +26,13 @@ A vector lists gene id which need to be have permutation.
 A number ranges from 0 to 1 specifying the percentage of samples of control and experimental
 groups used to link probes to genes. Default is 0.2.
 }
+  \item{portion}{
+A number specify the cut point to define binary methlation level for probe loci.
+Default is 0.3. When beta value is above 0.3, the probe is methylated and 
+vice versa. For one probe, the percentage of methylated or unmethylated samples 
+should be above 0.05.
+}
+
   \item{rm.probes}{
 A vector lists name of probes which belongs to the set of probes fed into \code{\link{get.pair}}
 function.

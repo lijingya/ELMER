@@ -53,6 +53,8 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
     }else if(is(feature,"GRange")){             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    }else{
+        stop("feature is not GRange object.")
     }
   }else{
     if(missing(TSS)){
@@ -184,7 +186,9 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
 #' @param Pe A number specify the empircal pvalue cutoff for defining signficant pairs.
-#'  Default is 0.01
+#'  Default is 0.001
+#'  @param portion A number specify the cut point for methylated and unmethylated.
+#'  Default is 0.3.
 #'  @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
@@ -201,7 +205,7 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
 #'                                               label= "hypo")
 get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
                      permu.dir=NULL, Pe=0.001,dir.out="./",diffExp=FALSE,cores=NULL,
-                     label=NULL,save=TRUE){
+                     portion = 0.3, label=NULL,save=TRUE){
   ## check data
   if(!all(probes %in% rownames(mee@meth))) 
     stop("Probes option should be subset of rownames of methylation matrix.")
@@ -220,17 +224,17 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
 		  cl <- snow::makeCluster(cores,type = "SOCK")
 		  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
-											NearGenes=nearGenes,K=0.3,Top=percentage,
+											NearGenes=nearGenes,K=portion,Top=percentage,
 											Exps=getExp(mee),simplify = FALSE)
 		  parallel::stopCluster(cl)
 	  }else{
 	    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-	                       NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+	                       NearGenes=nearGenes,K=portion,Top=percentage,Exps=mee@exp,
 	                       simplify = FALSE)
 	  }
   } else {
     Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-                       NearGenes=nearGenes,K=0.3,Top=percentage,Exps=mee@exp,
+                       NearGenes=nearGenes,K=portion,Top=percentage,Exps=mee@exp,
                        simplify = FALSE)
   }
   
@@ -241,7 +245,8 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
   # get permutation
   permu <- get.permu(mee,geneID=GeneID, percentage=percentage, rm.probes=probes, 
-                     permu.size=permu.size, permu.dir=permu.dir,cores=cores)
+                     permu.size=permu.size, portion = portion,
+                     permu.dir=permu.dir,cores=cores)
   #get empirical p-value
   message("Calculate empirical P value.\n")
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
@@ -283,6 +288,8 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
+#' @param portion A number specify the cut point for methylated and unmethylated.
+#' Default is 0.3.
 #' @return Permutations
 #' @export 
 #' @examples
@@ -290,11 +297,11 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 #' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
-get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,
+get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,portion=0.3,
                       permu.size=10000, permu.dir=NULL,cores=NULL){
   set.seed(200)
   ## get usable probes
-  binary.m <- rowMeans(Binary(mee@meth,0.3),na.rm = TRUE)
+  binary.m <- rowMeans(Binary(mee@meth,portion),na.rm = TRUE)
   usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
@@ -450,7 +457,9 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 		data("Probes.motif",package = "ELMER.data",envir=newenv)
     all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
 		# The data is in the one and only variable
-	} 
+	}else{
+	         all.probes.TF <- probes.motif
+	}
 	## here need to be add motif search part.
 	if(missing(probes)) stop("probes option should be specified.")
 	if(missing(background.probes)){

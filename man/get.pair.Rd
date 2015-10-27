@@ -12,7 +12,8 @@ and getPair.XX.pairs.significant.csv (see detail).
 }
 \usage{
 get.pair(mee, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = NULL, label = NULL, save=TRUE)
+Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = NULL, portion=0.3,   
+label = NULL, save=TRUE)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -27,8 +28,8 @@ A list (R object) containing output of GetNearGenes function or a path of XX.rda
 containing output of GetNearGenes function.
 }
   \item{percentage}{
-A number ranges from 0 to 1 specifying the percentage of samples of control and experimental
-groups used to link probes to genes. Default is 0.2.
+A number ranges from 0 to 1 specifying the percentage of samples of methylated and 
+unmethylated groups used to link probes to genes. Default is 0.2.
 }
   \item{permu.size}{
 A number specifies the number of permuation. Default is 1000.
@@ -40,6 +41,13 @@ A path shows the directory of permutation outputs.
 A number specifies the empircal pvalue cutoff for defining signficant pairs.
 Default is 0.01
 }
+  \item{portion}{
+A number specify the cut point to define binary methlation level for probe loci.
+Default is 0.3. When beta value is above 0.3, the probe is methylated and 
+vice versa. For one probe, the percentage of methylated or unmethylated samples 
+should be above 0.05.
+}
+
   \item{dir.out}{
 A path specifies the directory for outputs of get.pair function. Default is current directory
 }

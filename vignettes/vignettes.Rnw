@@ -68,8 +68,14 @@ The following steps can be used to download the example data set for \Rpackage{E
 <<example.data.run, echo=FALSE, hide=TRUE, message=FALSE, include=FALSE>>=
 if(!file_test("-d", "./ELMER.example")) {
   URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.gz"
-  download.file(URL, destfile="ELMER.example.tar.gz")
-  untar("ELMER.example.tar.gz")
+  SYS <- Sys.info()[['sysname']]
+  if(SYS == "Darwin"){
+    download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
+  }else{
+    download.file(URL,destfile = "ELMER.example.tar.gz",method= "wget",
+                extra = c("--no-check-certificate -a download.log"))
+  } 
+  untar("./ELMER.example.tar.gz")
 }
 library(ELMER, quietly = TRUE)
 @
