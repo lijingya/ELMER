@@ -6,7 +6,7 @@
 # @param TRange A GRange object contains coordinate of targets.
 # @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
-#'@importFrom GenomicRanges strand<-
+#'@import BiocGenerics GenomicRanges
 NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")
@@ -118,7 +118,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
-#' @importFrom GenomicRanges strand follow distance
+#' @import BiocGenerics IRanges GenomicRanges
 #' @examples
 #' geneAnnot <- txs(TSS=list(upstream=0, downstream=0))
 #' probe <- GRanges(seqnames = c("chr1","chr2"), 

@@ -9,7 +9,7 @@
 #' @slot sample A data.frame contains sample information
 #' @slot probeInfo A GRange object contains probe information
 #' @slot geneInfo A GRange object contains gene information
-#' @importClassesFrom GenomicRanges GRanges
+#' @import GenomicRanges
 #' @exportClass MEE.data
 setClass("MEE.data",
          representation = representation(meth="matrix",exp="matrix",

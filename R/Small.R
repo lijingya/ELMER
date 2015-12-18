@@ -291,7 +291,7 @@ getSymbol <- function(mee,geneID){
 }
 
 #'getGeneID
-#'@importFrom S4Vectors values
+#'@import S4Vectors
 #'@param mee A MEE.data or Pair object.
 #'@param symbol A character which is the geneID
 #'@return The gene ID
@@ -370,8 +370,7 @@ lm_eqn = function(df,Dep,Exp){
 #' txs <- txs(TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @export
-#' @importFrom GenomicRanges unlist
-#' @import GenomeInfoDb
+#' @import BiocGenerics GenomeInfoDb GenomicRanges
 txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
   gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
   gene$GENEID <- unlist(gene$GENEID)

@@ -1,6 +1,5 @@
 #'schematicPlot
-#'@importFrom GenomicRanges GRanges findOverlaps
-#'@importFrom IRanges IRanges
+#'@import S4Vectors IRanges GenomicRanges
 #'@param pair A pair object. All slots should be included
 #'@param byProbe A vector of probe names.
 #'@param byGene A vector of gene ID
@@ -115,8 +114,7 @@ schematic.plot <- function(pair, byProbe, byGene,
 #'@details byCoordinate When a genomic coordinate is provided, function will 
 #'produce a schematic plot for this coordinate. The schematic plot contains all 
 #'genes and significantly linked probes in the range and the significant links.
-#'@importFrom GenomicRanges seqnames
-#'@importFrom IRanges as.vector
+#'@import IRanges GenomeInfoDb GenomicRanges
 #'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle viewport gpar
 schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()),
                       interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=TRUE){

@@ -1,6 +1,6 @@
 ##get.distal.en
 #' get.feature.probe
-#' @importFrom GenomicRanges promoters 
+#' @import IRanges GenomicRanges
 #' @importFrom minfi getAnnotation
 #' @description This function selects the probes on HM450K that either overlap 
 #' distal biofeatures or TSS promoter. 
@@ -387,7 +387,7 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,portion=0.3,
 #'methylation. Default is 0.01
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
-#' @importFrom GenomicRanges promoters subjectHits
+#' @import S4Vectors IRanges GenomicRanges
 #' @return A data frame contains genes whose expression significantly anti-correlated 
 #' with promoter methylation.
 #' @export
