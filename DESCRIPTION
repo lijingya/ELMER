@@ -16,6 +16,6 @@ Depends: R (>= 3.2.0), IlluminaHumanMethylation450kanno.ilmn12.hg19, Homo.sapien
 License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
-Imports: BiocGenerics,S4Vectors,IRanges,GenomeInfoDb,GenomicRanges,ggplot2,reshape,grid,gridExtra,minfi,GenomicFeatures
+Imports: methods,BiocGenerics,S4Vectors,IRanges,GenomeInfoDb,GenomicRanges,ggplot2,reshape,grid,gridExtra,minfi,GenomicFeatures
 Suggests: parallel, snow, BiocStyle, knitr
 biocViews: DNAMethylation, GeneExpression, MotifAnnotation, Software, GeneRegulation
