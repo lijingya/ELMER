@@ -9,6 +9,12 @@ BiocStyle::latex()
 \usepackage{graphicx}
 \usepackage{grffile}
 \usepackage{float}
+\usepackage{amsmath,epsfig,fullpage}
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage[authoryear,round]{natbib}
+%\usepackage[OT1]{fonitenc}
+\usepackage{textcomp}
 
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
@@ -20,13 +26,13 @@ Peter Laird [ctb],
 Simon Coetzee [ctb]}
 
 \begin{document}
-<<setup, include=FALSE, cache=FALSE>>=
-library(knitr)
-opts_chunk$set(fig.align='center', cache=TRUE,par=TRUE)
-knit_hooks$set(par=function(before, options, envir){
-if (before && options$fig.show!='none') par(mar=c(1,1,.1,.1),cex.lab=1,cex.axis=1,mgp=c(2,.7,0),tcl=-.3)
-}, crop=hook_pdfcrop)
-@
+% #' <<setup, include=FALSE, cache=FALSE>>=
+% #' library(knitr)
+% #' opts_chunk$set(fig.align='center', cache=TRUE,par=TRUE)
+% #' knit_hooks$set(par=function(before, options, envir){
+% #' if (before && options$fig.show!='none') par(mar=c(1,1,.1,.1),cex.lab=1,cex.axis=1,mgp=c(2,.7,0),tcl=-.3)
+% #' }, crop=hook_pdfcrop)
+% #' @
 \maketitle
 
 \tableofcontents
@@ -604,27 +610,36 @@ pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.signific
 Generate schematic plot for one probe with 20 nearby genes and label 
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
-\begin{figure}[H]
-<<figure4,fig.width=8, fig.height=3,fig.scap="Nearby Genes", cache=TRUE>>=
-schematic.plot(pair=pair, byProbe="cg19403323",save=FALSE)
+<<>>=
+schematic.plot(pair=pair, byProbe="cg19403323",save=TRUE)
 @
+
+\begin{figure}[H]
+\begin{center}  
+\includegraphics[scale=0.5]{cg19403323.schematic.byProbe.pdf} 
 \protect\caption{The schematic plot shows probe colored 
 in blue and the location of nearby 20 genes. The genes significantly linked to the probe 
 were shown in red.
 \label{fig:figure4}}
+\end{center}  
 \end{figure}
 
 \subsubsection{Nearby Probes}
 Generate schematic plot for one gene with the probes which the gene is significantly 
 linked to. Figure \ref{fig:figure5}
-\begin{figure}[H]
-<<figure5,fig.width=8, fig.height=3,fig.scap="Nearby Probes", cache=TRUE>>=
-schematic.plot(pair=pair, byGene="ID255928",save=FALSE)
+
+<<>>=
+schematic.plot(pair=pair, byGene="ID255928",save=TRUE)
 @
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{ID255928.schematic.byGene.pdf} 
 \protect\caption{The schematic plot shows the gene 
 colored in red and all blue colored probes, which are significantly linked to the 
 expression of this gene.
 \label{fig:figure5}}
+\end{center}
 \end{figure}
 \end{minipage}
 
@@ -637,6 +652,7 @@ motif.enrichment.plot(motif.enrichment="./ELMER.example/Result/LUSC/getMotif.hyp
                       significant=list(OR=1.3,lowerOR=1.3), dir.out ="ELMER.example/Result/LUSC",
                       label="hypo", save=FALSE)  ## different signficant cut off.
 @
+
 \protect\caption{The plot shows the Odds Ratio (x axis) 
 for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
 The range shows the 95\% confidence interval for each Odds Ratio.
@@ -648,19 +664,22 @@ The range shows the 95\% confidence interval for each Odds Ratio.
 TF ranking plot shows statistic -log10(P value) assessing the anti-correlation level 
 of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
 
-\begin{figure}[H]
-<<figure7,fig.width=5.5, fig.height=3.5,fig.scap="TF Ranking", cache=TRUE>>=
+<<>>=
 load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
 TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-            save=FALSE) 
+            save=TRUE) 
 @
 
+\begin{figure}[H]
+\begin{center}  
+\includegraphics[scale=0.5]{TP53.TFrankPlot.pdf} 
 \protect\caption{Shown are TF ranking plots based on 
 the score (-log(P value)) of association between TF expression and DNA methylation of 
 the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary 
 of the top 5\% association score. The top 3 associated TFs and the TF family members
 (dots in red) that are associated with that specific motif are labeled in the plot.
 \label{fig:figure7}}
+\end{center}  
 \end{figure}
 \end{minipage}
 \newpage
