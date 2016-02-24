@@ -209,7 +209,7 @@ setMethod(f="getProbeInfo",signature="ANY",
 
 #' @rdname getGeneInfo
 #' @aliases getGeneInfo
-#'@import S4Vectors IRanges GenomicRanges
+#'@import methods S4Vectors IRanges GenomicRanges
 #'@examples
 #'geneInfo <- txs()
 #'mee <- fetch.mee(geneInfo=geneInfo)
