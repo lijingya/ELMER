@@ -1,10 +1,10 @@
 %\VignetteEngine{knitr::knitr}
 %\VignetteIndexEntry{ELMER: Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
-% !Rnw weave = knitr
+%\ !Rnw weave = knitr
 \documentclass{article}
-<<style-knitr, eval=TRUE, echo=FALSE, results="asis">>=
-BiocStyle::latex()
-@
+%<<style, eval=TRUE, echo=FALSE, results="asis">>=
+%BiocStyle::latex()
+%@
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{grffile}
@@ -15,6 +15,8 @@ BiocStyle::latex()
 \usepackage[authoryear,round]{natbib}
 %\usepackage[OT1]{fonitenc}
 \usepackage{textcomp}
+\newcommand{\Rpackage}[1]{{\textit{#1}}}
+
 
 \title{ELMER: An R/Bioconductor Tool \\
 Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes}
@@ -26,6 +28,7 @@ Peter Laird [ctb],
 Simon Coetzee [ctb]}
 
 \begin{document}
+\SweaveOpts{concordance=TRUE}
 % #' <<setup, include=FALSE, cache=FALSE>>=
 % #' library(knitr)
 % #' opts_chunk$set(fig.align='center', cache=TRUE,par=TRUE)
@@ -78,8 +81,7 @@ if(!file_test("-d", "./ELMER.example")) {
   if(SYS == "Darwin"){
     download.file(URL,destfile = "ELMER.example.tar.gz",method= "curl")
   }else{
-    download.file(URL,destfile = "ELMER.example.tar.gz",method= "wget",
-                extra = c("--no-check-certificate -a download.log"))
+    download.file(URL,destfile = "ELMER.example.tar.gz")
   } 
   untar("./ELMER.example.tar.gz")
 }
@@ -545,56 +547,63 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "getTF")
 # TF ranking plot based on statistics will be automatically generated.
 dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf") 
 @
-\begin{minipage}{\textwidth}
 \section{Generating figures}
 \subsection{Scatter plots}
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
-\begin{figure}[H]
-<<figure1,fig.width=11, fig.height=10,fig.scap="Scatter Plot of 20 nearby genes",cache=TRUE>>=
+<<>>=
 scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
-             category="TN", dir.out ="./ELMER.example/Result/LUSC", save=FALSE) 
+             category="TN", save=TRUE) 
 @
+
+\begin{figure}[H]
+\begin{center}  
+\includegraphics[scale=0.5]{cg19403323.byprobe.pdf} 
 \protect\caption{SEach scatter plot shows the methylation level of an example 
 probe cg19403323 in all LUSC samples plotted against the expression of one of 
 20 adjacent genes.
 \label{fig:figure1}}
+\end{center}
 \end{figure}
-\end{minipage}
 
-\begin{minipage}{\textwidth}
 \subsubsection{Scatter plot of one pair}
 Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
 
-\begin{figure}[H]
-<<figure2, fig.height=4,fig.scap="Scatter Plot of One Pair", cache=TRUE>>=
+<<>>=
 scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")), 
-             category="TN", save=FALSE,lm_line=TRUE) 
+             category="TN", save=TRUE,lm_line=TRUE) 
 @
+
+\begin{figure}[H]
+\begin{center}  
+\includegraphics[scale=0.5]{cg19403323_SYT14.byPair.pdf} 
 \protect\caption{Scatter plot shows the methylation level of an example probe 
 cg19403323 in all LUSC samples plotted against the expression of the putative 
 target gene SYT14.
 \label{fig:figure2}}
+\end{center}
 \end{figure}
-\end{minipage}
 
-\begin{minipage}{\textwidth}
 \subsubsection{TF expression vs. average DNA methylation}
 Generate scatter plot for TF expression vs average DNA methylation of the sites 
 with certain motif. Figure \ref{fig:figure3}
-\begin{figure}[H]
-<<figure3, fig.height=4, fig.scap="TF expression vs. average DNA methylation", cache=TRUE>>=
+
+<<>>=
 load("ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(mee,byTF=list(TF=c("TP53","TP63","TP73"),
              probe=enriched.motif[["TP53"]]), category="TN",
-             save=FALSE,lm_line=TRUE)
+             save=TRUE,lm_line=TRUE)
 @
+
+\begin{figure}[H]
+\begin{center}  
+\includegraphics[scale=0.5]{TP53_TP63_TP73.byTF.pdf} 
 \protect\caption{Each scatter plot shows the average 
 methylation level of sites with the TP53 motif in all LUSC samples plotted 
 against the expression of the transcription factor TP53, TP63, TP73 respectively.
 \label{fig:figure3}}
+\end{center}
 \end{figure}
-\end{minipage}
 
 \subsection{Schematic plot}
 Schematic plot shows a breif view of linkages between genes and probes. To make a 
@@ -605,7 +614,6 @@ pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.signific
                    probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda",
                    geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
 @
-\begin{minipage}{\textwidth}
 \subsubsection{Nearby Genes}
 Generate schematic plot for one probe with 20 nearby genes and label 
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
@@ -623,6 +631,8 @@ were shown in red.
 \label{fig:figure4}}
 \end{center}  
 \end{figure}
+\clearpage
+
 
 \subsubsection{Nearby Probes}
 Generate schematic plot for one gene with the probes which the gene is significantly 
@@ -641,24 +651,26 @@ expression of this gene.
 \label{fig:figure5}}
 \end{center}
 \end{figure}
-\end{minipage}
 
-\begin{minipage}{\textwidth}
 \subsection{Motif enrichment plot}
 Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:figure6}
-\begin{figure}[H]
-<<figure6, fig.height=2,fig.scap="Motif Enrichment", cache=TRUE>>=
+
+<<>>=
 motif.enrichment.plot(motif.enrichment="./ELMER.example/Result/LUSC/getMotif.hypo.motif.enrichment.csv", 
-                      significant=list(OR=1.3,lowerOR=1.3), dir.out ="ELMER.example/Result/LUSC",
-                      label="hypo", save=FALSE)  ## different signficant cut off.
+                      significant=list(OR=1.3,lowerOR=1.3), 
+                      label="hypo", save=TRUE)  ## different signficant cut off.
 @
 
+\begin{figure}[H]
+\begin{center}
+\includegraphics[scale=0.5]{hypo.motif.enrichment.pdf} 
 \protect\caption{The plot shows the Odds Ratio (x axis) 
 for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. 
 The range shows the 95\% confidence interval for each Odds Ratio.
 \label{fig:figure6}}
+\end{center}
 \end{figure}
-
+\clearpage
 
 \subsection{TF ranking plot}
 TF ranking plot shows statistic -log10(P value) assessing the anti-correlation level 
@@ -681,7 +693,6 @@ of the top 5\% association score. The top 3 associated TFs and the TF family mem
 \label{fig:figure7}}
 \end{center}  
 \end{figure}
-\end{minipage}
 \newpage
 <<finalsession, cache=TRUE>>=
 sessionInfo()
