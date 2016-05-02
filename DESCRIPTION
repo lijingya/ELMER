@@ -17,6 +17,5 @@ License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
 Imports: methods,BiocGenerics,S4Vectors,IRanges,GenomeInfoDb,GenomicRanges,ggplot2,reshape,grid,gridExtra,minfi,GenomicFeatures
-Suggests: parallel, snow, BiocStyle, knitr
+Suggests: parallel, snow, BiocStyle, knitr, R.utils, downloader
 biocViews: DNAMethylation, GeneExpression, MotifAnnotation, Software, GeneRegulation
-PackageStatus: Deprecated

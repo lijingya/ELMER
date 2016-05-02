@@ -79,7 +79,8 @@ if(!file_test("-d", "./ELMER.example")) {
   if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
   URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.bz2"
   downloader::download(URL,destfile = "ELMER.example.tar.bz2",mode= mode)
-  untar("./ELMER.example.tar.bz2")
+  R.utils::bunzip2("./ELMER.example.tar.bz2")
+  untar("./ELMER.example.tar")
 }
 library(ELMER, quietly = TRUE)
 @
