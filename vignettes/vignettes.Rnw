@@ -76,13 +76,9 @@ biocLite("ELMER")
 The following steps can be used to download the example data set for \Rpackage{ELMER}.
 <<example.data.run, echo=FALSE, hide=TRUE, message=FALSE, include=FALSE>>=
 if(!file_test("-d", "./ELMER.example")) {
+  if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
   URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.bz2"
-  SYS <- Sys.info()[['sysname']]
-  if(SYS == "Darwin"){
-    download.file(URL,destfile = "ELMER.example.tar.bz2",method= "curl")
-  }else{
-    download.file(URL,destfile = "ELMER.example.tar.bz2")
-  } 
+  downloader::download(URL,destfile = "ELMER.example.tar.bz2",mode= mode)
   untar("./ELMER.example.tar.bz2")
 }
 library(ELMER, quietly = TRUE)
@@ -576,7 +572,7 @@ scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
 
 \begin{figure}[H]
 \begin{center}  
-\includegraphics[scale=0.5]{ELMER.example/cg19403323_SYT14.byPair.pdf} 
+\includegraphics[scale=0.5]{ELMER.example/cg19403323_SYT14.bypair.pdf}
 \protect\caption{Scatter plot shows the methylation level of an example probe 
 cg19403323 in all LUSC samples plotted against the expression of the putative 
 target gene SYT14.
