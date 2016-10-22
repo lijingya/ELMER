@@ -9,7 +9,8 @@ Authors@R: c(person("Lijing", "Yao", role = c("aut"),
 		person("Peggy", "Farnham", role = "aut"),
 		person("Hui", "Shen", role = "ctb"),
 		person("Peter", "Laird", role = "ctb"),
-		person("Simon","Coetzee", role = c("cre","ctb")))
+		person("Simon","Coetzee", role = c("cre","ctb"),
+                       email = "Simon.Coetzee@cshs.org"))
 Description:
 	ELMER is designed to use DNA methylation and gene expression from a large number of samples to infere regulatory element landscape and transcription factor network in primary tissue.
 Depends: R (>= 3.2.0), IlluminaHumanMethylation450kanno.ilmn12.hg19, Homo.sapiens, ELMER.data
