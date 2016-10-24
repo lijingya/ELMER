@@ -89,7 +89,6 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
-
 get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
                           pvalue=0.01, sig.dif=0.3, dir.out="./",save=TRUE){
   if(nrow(mee@meth)==0) 
