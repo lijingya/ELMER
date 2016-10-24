@@ -112,14 +112,17 @@ NearGenes <- function (Target=NULL,
   return(Final)
 }
 
-#' Collect nearby gene for one locus.
-#' @param geneAnnot A GRange object contains coordinates of promoters for 
+#' GetNearGenes to collect nearby genes for one locus.
+#' @description 
+#' GetNearGenes is a function to collect equal number of gene on each side of one locus.
+#' @param geneAnnot A GRange object. Contains coordinates of promoters for 
 #' human genome.
-#' @param geneNum A number determine how many gene will be collected from 
-#' each side of target (number shoule be even) Default to 20. 
-#' @param TRange A GRange object contains coordinate of a list targets.
-#' @param cores A number to specific how many cores to use to compute. 
-#' Default to detectCores()/2.
+#' @param geneNum A number determines how many gene will be collected totally. 
+#' Then the number devided by 2 is the number of genes collected from 
+#' each side of targets (number shoule be even) Default to 20.
+#' @param TRange A GRange object. Contains coordinates of a list of targets loci.
+#' @param cores A interger which defines the number of cores to be used in parallel process.
+#'  Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
@@ -127,6 +130,9 @@ NearGenes <- function (Target=NULL,
 #' @importFrom pbapply pbsapply
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' geneAnnot <- txs(TSS=list(upstream=0, downstream=0))
 #' probe <- GRanges(seqnames = c("chr1","chr2"), 
