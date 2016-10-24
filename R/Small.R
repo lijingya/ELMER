@@ -349,30 +349,33 @@ lm_eqn = function(df,Dep,Exp){
 }
 
 
-## txs
-#' txs Fetch USCS gene annotation (transcripts level) from Bioconductor package 
-#' Homo.sapians. If upstream and downstream are specified in TSS list, promoter 
-#' regions of USCS gene will be generated.
-#' @param TSS A list contains upstream and downstream like TSS=list(upstream, downstream).
-#' When upstream and downstream is specified, coordinates of promoter regions with 
-#' gene annotation will be generated. 
-#' @return UCSC gene annotation if TSS is not specified. Coordinates
-#' of UCSC gene promoter regions with each gene annotation if TSS
-#' is specified.
+#' txs to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians. 
+#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
+#' @description 
+#' txs is a function to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians.
+#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
+#' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
+#'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
+#' @param genome.build Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
+#' Options: hg19 (default) and hg38.
+#' @return UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.
 #' @importFrom GenomicFeatures transcripts
 #' @examples
 #' # get UCSC gene annotation (transcripts level)
 #' \dontrun{
-#' txs <- txs()
+#'     txs <- txs()
+#'     txs <- txs(genome.build = "hg38")
 #' }
-#' # get coordinate of all UCSC promoter regions
+#' # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
 #' \dontrun{
 #' txs <- txs(TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @export
+#' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @importFrom GenomicRanges unlist
 #' @import GenomeInfoDb
-txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
+txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
+  if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
   gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
