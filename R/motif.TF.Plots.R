@@ -56,22 +56,28 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
 }
 
 
-#'TF.rank.plot
+#' TF.rank.plot to plot the scores (-log10(P value)) which assess the correlation between 
+#' TF expression and average DNA methylation at motif sites.
+#' @description 
+#' TF.rank.plot is a function to plot the scores (-log10(P value)) which assess the
+#' correlation between TF expression and average DNA methylation at motif sites. The the motif 
+#' relevant TF and top3 TFs will be labeled in a different color.
 #'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter 
 #'@importFrom ggplot2 annotation_custom plot.margin unit ggplot_gtable ggplot_build
 #'@importFrom grid textGrob linesGrob grid.draw
 #'@importFrom gridExtra arrangeGrob
-#'@param motif.pvalue A matrix or a path specifying location of "XXX.with.pvalue.rda" 
+#'@param motif.pvalue A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"
 #'which is output of getTF. 
-#'@param motif A vector of charactor specify the motif to plot
-#'@param TF.label A list show the label for each motif. If TF.label is not specified, 
+#'@param motif A vector of characters specify the motif to plot
+#'@param TF.label A list shows the label for each motif. If TF.label is not specified, 
 #'the motif relevant TF and top3 TF will be labeled.
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@return A plot shows the score (-log(P value)) of association between TF
-#'expression and DNA methylation of the certain motif sites.
+#'expression and DNA methylation at sites of a certain motif.
 #'@export
+#' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
 #'load(system.file("extdata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
 #'TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),

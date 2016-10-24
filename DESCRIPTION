@@ -32,10 +32,10 @@ Imports:
     S4Vectors,
     minfi,
     GenomicFeatures,
-    TCGAbiolinks
+    TCGAbiolinks,
+    plyr
 Suggests:
     parallel,
-    snow,
     BiocStyle,
     knitr
 biocViews: 
