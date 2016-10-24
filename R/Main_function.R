@@ -265,6 +265,8 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 #' @param portion A number specify the cut point for methylated and unmethylated.
 #' Default is 0.3.
 #' @return Permutations
+#' @importFrom plyr alply
+#' @importFrom doParallel registerDoParallel
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
@@ -503,25 +505,42 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   return(enriched.motif)
 }
 
-#' get.TFs
-#' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo. 
-#' @param enriched.motif Can be either a list containing output of 
-#' get.enriched.motif function or path of rda file containing output of get.enriched.motif function.
-#' @param TFs Can be either a data.frame containing TF GeneID and Symbol 
-#' or path of csv file containing TF GeneID and Symbol. If missing, 
-#' human TF list will be used. For detail information, refer reference paper.
-#' @param motif.relavent.TFs Can be either a list containing motif (list name) 
-#' and relavent TF (content of list) or path of rda file containing a list 
-#' containing motif (list name) and relavent TF (content of list). If missing,
-#'  human TF list will be used. For detail information, refer reference paper.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
-#' samples used to link probes to genes. Default is 0.2.
-#' @param cores A interger which defines number of core to be used in parallel 
-#' process. Default is NULL: don't use parallel process.
-#' @param dir.out A path specify the directory for outputs. Default is current directory
+#' get.TFs to identify regulatory TFs.
+#' @description 
+#' get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis 
+#' between the probes containing a particular motif and expression of all known TFs. If save is ture, 
+#' two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
+#' @usage get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
+#' @param mee A MEE.data object contains at least meth, exp, probeInfo, geneInfo.
+#' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
+#' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
+#' If missing, human.TF list will be used (human.TF data in ELMER.data). 
+#' For detail information, refer the reference paper.
+#' @param motif.relavent.TFs A list containing motif as names and relavent TFs as contents
+#'  for each list element or a path of XX.rda file containing a list as above. 
+#' If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
+#' For detail information, refer the reference paper.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.
+#' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
+#' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
+#' @param save A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and 
+#' getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.
 #' @return Potential responsible TFs will be reported.
 #' @export 
+#' @details 
+#' save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
+#' This file contain the regulatory TF significantly associate with average DNA methylation at particular motif sites. 
+#' The second file is getTF.hypo.TFs.with.motif.pvalue.rda (XX depends on option label). 
+#' This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column). 
+#' If save is false, a data frame which contains the same content with the first file will be reported.
+#' @importFrom pbapply pbsapply
+#' @importFrom plyr alply
+#' @importFrom doParallel registerDoParallel
+#' @author Lijing Yao (maintainer: lijingya@usc.edu)
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
@@ -533,8 +552,15 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 #'               Symbol=c("TP53","TP63","TP73"), 
 #'               stringsAsFactors = FALSE),
 #'               label="hypo")
-get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
-                    percentage=0.2,dir.out="./",label=NULL,cores=NULL,save=TRUE){
+get.TFs <- function(mee, 
+                    enriched.motif, 
+                    TFs, 
+                    motif.relavent.TFs,
+                    percentage=0.2,
+                    dir.out="./",
+                    label=NULL,
+                    cores=1,
+                    save=TRUE){
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
@@ -575,34 +601,34 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
   
   motif.meth <- do.call(rbind, motif.meth)
   
-  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-    if(!is.null(cores)){
-      if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-      cl <- snow::makeCluster(cores,type = "SOCK")
-      TF.meth.cor<-parallel::parSapplyLB(cl,names(enriched.motif),
-                                         Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
-                                         Top=percentage,Exps=getExp(mee), simplify=FALSE)
-      parallel::stopCluster(cl)
-    }else{
-      TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
-                          Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
-    }
-  } else {
-    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
-                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
   }
+  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
+                       .fun = function(x) {
+                         Stat.nonpara.permu( 
+                           Probe = x,
+                           Meths=motif.meth,Gene=TFs$GeneID,
+                           Top=percentage,Exps=getExp(mee))},
+                       .progress = "text", .parallel = parallel
+  )
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
   rownames(TF.meth.cor) <- TFs$Symbol
+  colnames(TF.meth.cor) <- names(enriched.motif)
+
   cor.summary <- sapply(colnames(TF.meth.cor), 
-                        function(x, TF.meth.cor, motif.relavent.TFs)
-                        { cor <- sort(TF.meth.cor[,x])
-                        top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                        potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
-                        out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
-                                          "potential TFs"= paste(potential.TF, collapse = ";"),
-                                          "top_5percent"= paste(top,collapse = ";"))},                                         
+                        function(x, TF.meth.cor, motif.relavent.TFs){ 
+                          cor <- sort(TF.meth.cor[,x])
+                          top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
+                          potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                          out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
+                                            "potential TFs"= paste(potential.TF, collapse = ";"),
+                                            "top_5percent"= paste(top,collapse = ";"))},                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
   cor.summary <- do.call(rbind, cor.summary)
   if(save){
