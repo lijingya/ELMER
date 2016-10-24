@@ -54,7 +54,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
     }else if(is(feature,"GRange")){             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
     }else{
-        stop("feature is not GRange object.")
+      stop("feature is not GRange object.")
     }
   }else{
     if(missing(TSS)){
@@ -192,40 +192,39 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
   }
   #get raw pvalue
   ##I need to modify that if there is all NA. stop the process.
-  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-	  if(!is.null(cores)){
-		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  cl <- snow::makeCluster(cores,type = "SOCK")
-		  Probe.gene<-parallel::parSapplyLB(cl,probes,Stat.nonpara,Meths= getMeth(mee,probe=probes), 
-											NearGenes=nearGenes,K=portion,Top=percentage,
-											Exps=getExp(mee),simplify = FALSE)
-		  parallel::stopCluster(cl)
-	  }else{
-	    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-	                       NearGenes=nearGenes,K=portion,Top=percentage,Exps=mee@exp,
-	                       simplify = FALSE)
-	  }
-  } else {
-    Probe.gene<-sapply(probes,Stat.nonpara,Meths=getMeth(mee,probe=probes),
-                       NearGenes=nearGenes,K=portion,Top=percentage,Exps=mee@exp,
-                       simplify = FALSE)
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
   }
-  
-  Probe.gene <- do.call(rbind,Probe.gene)
-
+  Probe.gene <- adply(.data = probes, .margins = 1,
+                      .fun = function(x) {
+                        Stat.nonpara(Probe = x,
+                                     Meths= getMeth(mee,probe=probes), 
+                                     NearGenes=nearGenes,K=portion,Top=percentage,
+                                     Exps=getExp(mee))},
+                      .progress = "text", .parallel = parallel
+  )
+  Probe.gene[,1] <- NULL
+  rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
   # get permutation
-  permu <- get.permu(mee,geneID=GeneID, percentage=percentage, rm.probes=probes, 
-                     permu.size=permu.size, portion = portion,
+  permu <- get.permu(mee,geneID=GeneID, 
+                     percentage=percentage, 
+                     rm.probes=probes, 
+                     permu.size=permu.size, 
+                     portion = portion,
                      permu.dir=permu.dir,cores=cores)
   #get empirical p-value
   message("Calculate empirical P value.\n")
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
-  if(save) write.csv(Probe.gene.Pe, file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",
-                                        dir.out, label),row.names=FALSE)
+  if(save) write.csv(Probe.gene.Pe, 
+                     file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+                     row.names=FALSE)
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   
   if(diffExp){
@@ -233,18 +232,20 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
     Exp <- getExp(mee, geneID = unique(selected$GeneID))
     TN <- getSample(mee,cols = "TN")
     out <- lapply(split(Exp,rownames(Exp)),
-                    function(x, TN){test <- t.test(x~TN)
-                                    U.test <- wilcox.test(x~TN)
-                                    out <- data.frame("log2FC_TvsN" = test$estimate[2]-test$estimate[1],
-                                                      "TN.diff.pvalue"=test$p.value)
-                                    return(out)}, TN=TN)
+                  function(x, TN){
+                    test <- t.test(x~TN)
+                    U.test <- wilcox.test(x~TN)
+                    out <- data.frame("log2FC_TvsN" = test$estimate[2]-test$estimate[1],
+                                      "TN.diff.pvalue"=test$p.value)
+                    return(out)}, TN=TN)
     out <- do.call(rbind, out)
     out$GeneID <- rownames(out)
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC_TvsN","TN.diff.pvalue")]
     selected <- cbind(selected, add)                                                         
   }
-  if(save) write.csv(selected, file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
-            row.names=FALSE)
+  if(save) write.csv(selected, 
+                     file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
+                     row.names=FALSE)
   invisible(gc())
   return(selected)
 }
@@ -270,8 +271,14 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 #' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
-get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,portion=0.3,
-                      permu.size=10000, permu.dir=NULL,cores=NULL){
+get.permu <- function(mee, 
+                      geneID, 
+                      percentage=0.2, 
+                      rm.probes=NULL,
+                      portion=0.3,
+                      permu.size=10000, 
+                      permu.dir=NULL,
+                      cores=1){
   set.seed(200)
   ## get usable probes
   binary.m <- rowMeans(Binary(mee@meth,portion),na.rm = TRUE)
@@ -284,69 +291,61 @@ get.permu <- function(mee, geneID, percentage=0.2, rm.probes=NULL ,portion=0.3,
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
   if(is.null(permu.dir)){
-	  permu.meth <- getMeth(mee,probe=probes.permu)
-	  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-		  if(!is.null(cores)){
-			  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-			  suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-			  permu<-parallel::parSapplyLB(cl,probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-										   Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-										   Top=percentage,Exps=getExp(mee), 
-										   simplify = FALSE)
-			  parallel::stopCluster(cl)
-		  } else {
-			  permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-							Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-							Top=percentage,Exps=getExp(mee),
-							simplify=FALSE)
-		  }
-	  } else {
-		  permu<-sapply(probes.permu,Stat.nonpara.permu,Meths=permu.meth,
-						Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-						Top=percentage,Exps=getExp(mee),
-						simplify=FALSE)
-	  }
-	  permu <- sapply(permu,
-					  function(x,geneID){ 
-						  x <- x[match(geneID,x[,1]),2]},
-						  geneID=geneID,simplify=FALSE)
-  } else {
-	  ## if file already there don't need to calculate.
-	  if(!file.exists(permu.dir)){
-		  dir.create(permu.dir,recursive = TRUE)
-	  }
-	  if(!all(probes.permu %in% dir(permu.dir))){
-		  tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-		  permu.meth <- getMeth(mee,probe=tmp.probes)
-		  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-			  if(!is.null(cores)){
-				  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-				  suppressWarnings(cl <- snow::makeCluster(cores,type = "SOCK"))
-				  permu<-parallel::parSapplyLB(cl,tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-											   Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-											   Top=percentage,Exps=getExp(mee), permu.dir=permu.dir,
-											   simplify = FALSE)
-				  parallel::stopCluster(cl)
-			  } else {
-				  permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-								Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-								Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
-								simplify=FALSE)
-			  }
-		  } else {
-			  permu<-sapply(tmp.probes,Stat.nonpara.permu,Meths=permu.meth,
-							Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-							Top=percentage,Exps=getExp(mee),permu.dir=permu.dir,
-							simplify=FALSE)
-		  }
-	  }
-	  permu.p <- paste0(permu.dir,"/",probes.permu)
-	  permu <- sapply(permu.p,
-					  function(x,geneID){ 
-						  tmp <- read.table(x,stringsAsFactors=FALSE)
-						  tmp <- tmp[match(geneID,tmp[,1]),2]},
-						  geneID=geneID,simplify=FALSE)
+    permu.meth <- getMeth(mee,probe=probes.permu)
 
+    parallel <- FALSE
+    if (cores > 1){
+      if (cores > detectCores()) cores <- detectCores()
+      registerDoParallel(cores)
+      parallel = TRUE
+    }
+    
+    permu <- alply(.data = probes.permu, .margins = 1,
+                   .fun = function(x) {
+                     Stat.nonpara.permu(
+                       Probe = x,
+                       Meths=permu.meth,
+                       Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                       Top=percentage,Exps=getExp(mee))},
+                   .progress = "text", .parallel = parallel
+    )
+    permu <- sapply(permu,
+                    function(x,geneID){ 
+                      x <- x[match(geneID,x[,1]),2]},
+                    geneID=geneID,simplify=FALSE)
+  } else {
+    ## if file already there don't need to calculate.
+    if(!file.exists(permu.dir)){
+      dir.create(permu.dir,recursive = TRUE)
+    }
+    if(!all(probes.permu %in% dir(permu.dir))){
+      tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
+      permu.meth <- getMeth(mee,probe=tmp.probes)
+      parallel <- FALSE
+      if (cores > 1){
+        if (cores > detectCores()) cores <- detectCores()
+        registerDoParallel(cores)
+        parallel = TRUE
+      }
+      
+      permu <- alply(.data = tmp.probes, .margins = 1,
+                     .fun = function(x) {
+                       Stat.nonpara.permu(
+                         Probe = x,
+                         Meths=permu.meth,
+                         Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
+                         Top=percentage,Exps=getExp(mee),
+                         permu.dir=permu.dir)},
+                     .progress = "text", .parallel = parallel
+      )
+    }
+    permu.p <- paste0(permu.dir,"/",probes.permu)
+    permu <- sapply(permu.p,
+                    function(x,geneID){ 
+                      tmp <- read.table(x,stringsAsFactors=FALSE)
+                      tmp <- tmp[match(geneID,tmp[,1]),2]},
+                    geneID=geneID,simplify=FALSE)
+    
   }
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
@@ -379,10 +378,10 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
     ## calculate average methylation of promoter
     Gene.promoter <- lapply(ProbeInTSS, 
                             function(x, METH){meth <- METH[x,]
-                                              if(length(x)>1){
-                                                meth <- colMeans(meth,na.rm=TRUE)
-                                              }  
-                                              return(meth)},   
+                            if(length(x)>1){
+                              meth <- colMeans(meth,na.rm=TRUE)
+                            }  
+                            return(meth)},   
                             METH=getMeth(mee))
     Gene.promoter <- do.call(rbind, Gene.promoter)
     ## make fake NearGene 
@@ -423,22 +422,22 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
 #' enriched.motif <- get.enriched.motif(probes=probes,background.probes = bg,
 #' min.incidence=2, label="hypo")
 get.enriched.motif <- function(probes.motif, probes, background.probes,
-							   lower.OR=1.1,min.incidence=10, dir.out="./",
-							   label=NULL,save=TRUE){
-	if(missing(probes.motif)){
-		newenv <- new.env()
-		data("Probes.motif",package = "ELMER.data",envir=newenv)
+                               lower.OR=1.1,min.incidence=10, dir.out="./",
+                               label=NULL,save=TRUE){
+  if(missing(probes.motif)){
+    newenv <- new.env()
+    data("Probes.motif",package = "ELMER.data",envir=newenv)
     all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
-		# The data is in the one and only variable
-	}else{
-	         all.probes.TF <- probes.motif
-	}
-	## here need to be add motif search part.
-	if(missing(probes)) stop("probes option should be specified.")
-	if(missing(background.probes)){
-		if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
-			newenv <- new.env()
-			load(sprintf("%s/probeInfo_feature_distal.rda",dir.out), envir=newenv)
+    # The data is in the one and only variable
+  }else{
+    all.probes.TF <- probes.motif
+  }
+  ## here need to be add motif search part.
+  if(missing(probes)) stop("probes option should be specified.")
+  if(missing(background.probes)){
+    if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
+      newenv <- new.env()
+      load(sprintf("%s/probeInfo_feature_distal.rda",dir.out), envir=newenv)
       background.probes <- get(ls(newenv)[1],envir=newenv) 
       background.probes <- as.character(background.probes$name)
       # The data is in the one and only variable
@@ -462,7 +461,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
                         upperOR=sub.enrich.TF.upper)
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   if(save) write.csv(Summary, file= sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                                   dir.out,label))
+                                            dir.out,label))
   
   ## enriched motif and probes
   en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
@@ -471,10 +470,10 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
   enriched.motif <- sapply(en.motifs, 
                            function(x, probes.TF)
-                             {names(probes.TF[probes.TF[,x]==1,x])},
+                           {names(probes.TF[probes.TF[,x]==1,x])},
                            probes.TF=probes.TF)
-	if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
-
+  if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
+  
   ## make plot----
   motif.enrichment.plot(motif.enrichment=Summary, 
                         significant=list(OR=1.3), dir.out =dir.out,label=label, save=TRUE)
@@ -486,14 +485,14 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
     if(all(sig.Pairs$Probe %in% rownames(probes.TF))){
       motif.Info <- sapply(sig.Pairs$Probe,
                            function(x, probes.TF,en.motifs)
-                             {TFs <- names(probes.TF[x,probes.TF[x,]==1])
-                              non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
-                              en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                              out <- data.frame(non_enriched_motifs=non.en.motif, 
-                                                enriched_motifs=en.motif, stringsAsFactors = FALSE)
-                              return(out)},
+                           {TFs <- names(probes.TF[x,probes.TF[x,]==1])
+                           non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
+                           en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
+                           out <- data.frame(non_enriched_motifs=non.en.motif, 
+                                             enriched_motifs=en.motif, stringsAsFactors = FALSE)
+                           return(out)},
                            probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
-                                                                             
+      
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
       write.csv(sig.Pairs, 
@@ -569,25 +568,25 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
   
   motif.meth <- lapply(enriched.motif, 
                        function(x,meth){if(length(x)<2)
-                         { return(meth[x,])
+                       { return(meth[x,])
                        }else{
                          return(colMeans(meth[x,],na.rm = TRUE))
                        }}, meth = getMeth(mee,probe=unique(unlist(enriched.motif))) )
-                                                                   
+  
   motif.meth <- do.call(rbind, motif.meth)
-
+  
   if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-	  if(!is.null(cores)){
-		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  cl <- snow::makeCluster(cores,type = "SOCK")
-		  TF.meth.cor<-parallel::parSapplyLB(cl,names(enriched.motif),
-											 Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
-											 Top=percentage,Exps=getExp(mee), simplify=FALSE)
-		  parallel::stopCluster(cl)
-	  }else{
-	    TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
-	                        Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
-	  }
+    if(!is.null(cores)){
+      if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
+      cl <- snow::makeCluster(cores,type = "SOCK")
+      TF.meth.cor<-parallel::parSapplyLB(cl,names(enriched.motif),
+                                         Stat.nonpara.permu,Meths=motif.meth,Gene=TFs$GeneID,
+                                         Top=percentage,Exps=getExp(mee), simplify=FALSE)
+      parallel::stopCluster(cl)
+    }else{
+      TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
+                          Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
+    }
   } else {
     TF.meth.cor<-sapply(names(enriched.motif),Stat.nonpara.permu,Meths=motif.meth,
                         Gene=TFs$GeneID,Top=percentage,Exps=getExp(mee), simplify=FALSE) 
@@ -598,12 +597,12 @@ get.TFs <- function(mee, enriched.motif, TFs, motif.relavent.TFs,
   rownames(TF.meth.cor) <- TFs$Symbol
   cor.summary <- sapply(colnames(TF.meth.cor), 
                         function(x, TF.meth.cor, motif.relavent.TFs)
-                          { cor <- sort(TF.meth.cor[,x])
-                            top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                            potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
-                            out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
-                                              "potential TFs"= paste(potential.TF, collapse = ";"),
-                                              "top_5percent"= paste(top,collapse = ";"))},                                         
+                        { cor <- sort(TF.meth.cor[,x])
+                        top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
+                        potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                        out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
+                                          "potential TFs"= paste(potential.TF, collapse = ";"),
+                                          "top_5percent"= paste(top,collapse = ";"))},                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
   cor.summary <- do.call(rbind, cor.summary)
   if(save){
