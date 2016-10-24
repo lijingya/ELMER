@@ -69,28 +69,40 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 
 ## get differential methylated probes-------------------------
 ## TCGA pipe don't specify dir.out
-#' get.diff.meth
+#' get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental groups such as normal verus tumor samples.
+#' @description 
+#' get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
+#' hypo/hyper-methyalated using proportional samples (defined by percentage option) from control 
+#' and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
+#' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
+#'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
 #' @param mee A MEE.data object containing at least meth and probeInfo.
-#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
-#' "hyper" which is only selecting hypermethylated probes; 
-#' @param cores A interger which defines number of core to be used in parallel process. 
-#' Default is NULL: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
-#' samples used to identify the differential methylation. Default is 0.2.
-#' @param pvalue A number specify the significant Pvalue cutoff for significant 
-#' hypo/hyper-methylated probes. Default is current directory.
-#' @param sig.dif A number specify the significant methylation difference cutoff 
-#' for significant hypo/hyper-methylated probes. Default is 0.3.
+#' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
+#' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
+#' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
+#' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples from control and experimental groups that are used to identify the differential methylation. Default is 0.2.
+#' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01
+#' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
-#' @param save A logic. When TRUE, output file will be saved.
+#' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
+#' @importFrom plyr adply
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
-get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
-                          pvalue=0.01, sig.dif=0.3, dir.out="./",save=TRUE){
+get.diff.meth <- function(mee,
+                          diff.dir="hypo",
+                          cores=NULL,
+                          percentage=0.2,
+                          pvalue=0.01, 
+                          sig.dif=0.3,
+                          dir.out="./",
+                          save=TRUE){
   if(nrow(mee@meth)==0) 
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(getSample(mee))==0){
@@ -100,71 +112,33 @@ get.diff.meth <- function(mee,diff.dir="hypo",cores=NULL,percentage=0.2,
   }else if(length(table(getSample(mee,cols="TN")))<2){
     stop("\"TN\" should have at 2 distinct group labels for comparison.")
   }
-  
-  if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-	  if(!is.null(cores)) {
-		  if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-		  cl <- snow::makeCluster(cores,type = "SOCK")
-	  }
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
   }
-  if("hyper" %in% diff.dir){
-	  if(requireNamespace("parallel", quietly=TRUE)) {
-		  if(!is.null(cores)){
-			  out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
-										   percentage=percentage,meth=mee@meth,
-										   TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE)
-		  } else {
-			  out <- sapply(rownames(mee@meth),Stat.diff.meth,
-							percentage=percentage,meth=mee@meth,
-							TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE) 
-		  }
-	  } else {
-		  out <- sapply(rownames(mee@meth),Stat.diff.meth,
-						percentage=percentage,meth=mee@meth,
-						TN=getSample(mee,cols="TN"),Top.m=TRUE,simplify =FALSE)
-	  }
-    out <- do.call(rbind,out)
-    out <- as.data.frame(out,stringsAsFactors = FALSE)
-    out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
-    colnames(out) <- c("probe","pvalue","ExperimentMinControl","adjust.p")
-    if(save){
-      write.csv(out,file=sprintf("%s/getMethdiff.hyper.probes.csv",dir.out), row.names=FALSE)
-      write.csv(out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,],
-                file=sprintf("%s/getMethdiff.hyper.probes.significant.csv",dir.out), 
-                row.names=FALSE)
-    }
-    result <- out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,]
+  Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE )
+  out <- adply(.data = rownames(mee@meth), .margins = 1,
+               .fun = function(x) {
+                 Stat.diff.meth( probe = x,
+                                 percentage = percentage,
+                                 meth=mee@meth,
+                                 TN=getSample(mee,cols="TN"),
+                                 Top.m=Top.m)},
+               .progress = "text", .parallel = parallel
+  )
+  out[,1] <- NULL
+  out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
+  colnames(out) <- c("probe","pvalue","ExperimentMinControl","adjust.p")
+  rownames(out) <- out$probe
+  if(save){
+    write.csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
+    write.csv(out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,],
+              file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
+              row.names=FALSE)
   }
-  if("hypo" %in% diff.dir){
-	  if(requireNamespace("parallel")) {
-		  if(!is.null(cores)){
-			out <- parallel::parSapplyLB(cl,rownames(mee@meth),Stat.diff.meth,
-										 percentage=percentage,meth=mee@meth,
-										 TN=getSample(mee,cols="TN"),Top.m=FALSE,simplify =FALSE)
-			parallel::stopCluster(cl)
-		  } else {
-			out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
-						  meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
-						  simplify =FALSE)
-		  }
-    }else{
-      out <- sapply(rownames(mee@meth),Stat.diff.meth,percentage=percentage,
-                    meth=mee@meth,TN=getSample(mee,cols="TN"),Top.m=FALSE,
-                    simplify =FALSE)
-    }
-    out <- do.call(rbind,out)
-    out <- as.data.frame(out,stringsAsFactors = FALSE)
-    out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
-    colnames(out) <- c("probe","pvalue","ExperimentMinControl","adjust.p")
-    if(save){
-      write.csv(out,file=sprintf("%s/getMethdiff.hypo.probes.csv",dir.out), 
-                row.names=FALSE)
-      write.csv(out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,],
-                file=sprintf("%s/getMethdiff.hypo.probes.significant.csv",dir.out),
-                row.names=FALSE)
-    }
-    result <- out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,]
-  }
+  result <- out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,]
   return(result)  
 }
 
