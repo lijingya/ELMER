@@ -113,7 +113,7 @@ get450K <- function(disease,
                     data.category = "DNA methylation",
                     platform = "Illumina Human Methylation 450")
   
-  json  <- tryCatch(GDCdownload(query,directory = dir.meth, chunks.per.download = 10)
+  json  <- tryCatch(GDCdownload(query,directory = dir.meth, chunks.per.download = 10),
                     error = function(e) GDCdownload(query, method = "client"))
   met <- GDCprepare(query = query,
                     directory = dir.meth,
