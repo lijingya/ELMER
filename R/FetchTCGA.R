@@ -48,17 +48,17 @@ getTCGA <- function(disease,
     warning(
       sprintf("Failed to download DNA methylation data. Possible possibility: 
               1. No 450K DNA methylation data for %s patients; 
-              2.Wget doesn't work.",disease))
+              2.Download error.",disease))
   if(RNA && test.rna=="error") 
     warning(
       sprintf("Failed to download RNA-seq data. Possible possibility: 
               1. No RNA-seq data for %s patients; 
-              2.Wget doesn't work.",disease))
+               2.Download error.",disease))
   if(Clinic && test.clinic=="error") 
     warning(
       sprintf("Failed to download clinic data. Possible possibility:
               1. No clinical data for %s patients; 
-              2.Wget doesn't work.",disease))
+               2.Download error.",disease))
 }
 
 #' getRNAseq to download all RNAseq data for a certain cancer type from TCGA.
@@ -83,7 +83,9 @@ getRNAseq <- function(disease, basedir="./Data")
   GDCdownload(query)
   rna <- GDCprepare(query)
   GeneExp <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", save = TRUE)
-  save(GeneExp,file=sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease)))
+  fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
+  message(paste0("Saving Gene Expression to: ", fout))
+  save(GeneExp,file=fout)
 }
 
 #' get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
@@ -117,11 +119,11 @@ get450K <- function(disease,
                     error = function(e) GDCdownload(query, method = "client"))
   met <- GDCprepare(query = query,
                     directory = dir.meth,
-                    save = TRUE, 
-                    save.filename = paste(disease,"_DNA_methylation_450K.rda"),
                     summarizedExperiment = TRUE)
-  Meth <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", met.na.cut = 0.2, save = TRUE)
-  save(Meth,file=sprintf("%s/%s_meth.rda",diseasedir,toupper(disease)))
+  Meth <- TCGAprepare_elmer(rna,platform = "HumanMethylation450", met.na.cut = 0.2, save = FALSE)
+  fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
+  message(paste0("Saving DNA methylation to: ", fout))
+  save(Meth,file=fout)
 }
 
 #' getClinic to download clinic data for certain cancer types from TCGA website.
