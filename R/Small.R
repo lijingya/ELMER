@@ -372,7 +372,6 @@ lm_eqn = function(df,Dep,Exp){
 #' }
 #' @export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
-#' @importFrom GenomicRanges unlist
 #' @import GenomeInfoDb
 txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene

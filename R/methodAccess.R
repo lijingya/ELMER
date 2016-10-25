@@ -179,7 +179,6 @@ setMethod(f="getPair",signature="Pair",
 
 #' @rdname getProbeInfo
 #' @aliases getProbeInfo
-#' @importFrom IRanges as.vector
 #' @examples
 #' probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"), 
 #' ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
@@ -209,7 +208,7 @@ setMethod(f="getProbeInfo",signature="ANY",
 
 #' @rdname getGeneInfo
 #' @aliases getGeneInfo
-#'@importFrom GenomicRanges queryHits findOverlaps
+#'@importFrom GenomicRanges findOverlaps
 #'@examples
 #'geneInfo <- txs()
 #'mee <- fetch.mee(geneInfo=geneInfo)

@@ -361,7 +361,7 @@ get.permu <- function(mee,
 #'methylation. Default is 0.01
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
-#' @importFrom GenomicRanges promoters subjectHits
+#' @importFrom GenomicRanges promoters
 #' @return A data frame contains genes whose expression significantly anti-correlated 
 #' with promoter methylation.
 #' @export
