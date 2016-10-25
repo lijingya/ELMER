@@ -116,7 +116,6 @@ schematic.plot <- function(pair, byProbe, byGene,
 #'produce a schematic plot for this coordinate. The schematic plot contains all 
 #'genes and significantly linked probes in the range and the significant links.
 #'@importFrom GenomicRanges seqnames
-#'@importFrom IRanges as.vector
 #'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle viewport gpar
 schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()),
                       interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=TRUE){
