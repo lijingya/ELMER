@@ -27,7 +27,7 @@ getTCGA <- function(disease,
                     Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
   if(Meth){
-    message("################\nDownloading methylation\n################\n\n")
+    message("################\nDownloading DNA methylation\n################\n\n")
     test.meth <- tryCatch({get450K(disease, basedir,filter = Methfilter)},
                           error=function(err){return("error")})
   }
@@ -74,7 +74,7 @@ getRNAseq <- function(disease, basedir="./Data")
   dir.raw <- file.path(diseasedir,"Raw")
   dir.rna <- file.path(dir.raw,"RNA")
   if(!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE)
-  query <- GDCquery(project = paste0("TCGA-",disease),
+  query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
                     data.category = "Gene expression",
                     data.type = "Gene expression quantification",
                     platform = "Illumina HiSeq", file.type  = "normalized_results",
@@ -108,7 +108,7 @@ get450K <- function(disease,
   dir.meth <- file.path(dir.raw,"Meth")
   if(!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE)
   
-  query <- GDCquery(project = paste0("TCGA-",disease), 
+  query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
                     legacy = TRUE,
                     data.category = "DNA methylation",
                     platform = "Illumina Human Methylation 450")
@@ -138,7 +138,8 @@ getClinic <- function(disease, basedir="./Data")
   dir.clinic <- file.path(dir.raw,"Clinic")
   if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE)
   
-  clin.query <- GDCquery(project = paste0("TCGA-",disease), data.category = "Clinical", barcode = "TCGA-FD-A5C0")
+  clin.query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                         data.category = "Clinical", barcode = "TCGA-FD-A5C0")
   json  <- tryCatch(GDCdownload(clin.query, directory = dir.clinic), 
                     error = function(e) GDCdownload(clin.query, method = "client",directory = dir.clinic))
   clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient",directory = dir.clinic)
