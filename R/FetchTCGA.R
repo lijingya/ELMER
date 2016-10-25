@@ -120,7 +120,7 @@ get450K <- function(disease,
   met <- GDCprepare(query = query,
                     directory = dir.meth,
                     summarizedExperiment = TRUE)
-  Meth <- TCGAprepare_elmer(rna,platform = "HumanMethylation450", met.na.cut = 0.2, save = FALSE)
+  Meth <- TCGAprepare_elmer(met,platform = "HumanMethylation450", met.na.cut = 0.2, save = FALSE)
   fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
   message(paste0("Saving DNA methylation to: ", fout))
   save(Meth,file=fout)
