@@ -28,16 +28,14 @@ getTCGA <- function(disease,
   if(missing(disease)) stop("disease need to be specified.")
   if(Meth){
     message("################\nDownloading methylation\n################\n\n")
-    test.meth <- tryCatch({get450K(disease, basedir)},
+    test.meth <- tryCatch({get450K(disease, basedir,filter = Methfilter)},
                           error=function(err){return("error")})
-
   }
   
   if(RNA){
     message("################\nDownloading RNA\n################\n\n")
     test.rna <- tryCatch({getRNAseq(disease, basedir)},
                          error=function(err){return("error")})
-  
   }
   
   if(Clinic){
