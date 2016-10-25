@@ -78,7 +78,8 @@ getRNAseq <- function(disease, basedir="./Data")
                     legacy = TRUE)
   GDCdownload(query)
   rna <- GDCprepare(query)
-  return(rna)
+  GeneExp <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", save = TRUE)
+  save(GeneExp,file=sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease)))
 }
 
 #' get450K to download HM450K DNA methylation data for certain cancer types
@@ -93,7 +94,7 @@ getRNAseq <- function(disease, basedir="./Data")
 #' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
 #' @usage get450K(disease, basedir = "./Data")
 get450K <- function(disease, 
-                    basedir="./Data"){
+                    basedir="./Data",filter=0.2){
   
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
@@ -111,7 +112,8 @@ get450K <- function(disease,
                     save = TRUE, 
                     save.filename = paste(disease,"_DNA_methylation_450K.rda"),
                     summarizedExperiment = TRUE)
-  return(met)
+  Meth <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", met.na.cut = 0.2, save = TRUE)
+  save(Meth,file=sprintf("%s/%s_meth.rda",diseasedir,toupper(disease)))
 }
 
 #' getClinic
@@ -130,5 +132,14 @@ getClinic <- function(disease, basedir="./Data")
   json  <- tryCatch(GDCdownload(clin.query, directory = dir.clinic), 
                     error = function(e) GDCdownload(clin.query, method = "client",directory = dir.clinic))
   clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient",directory = dir.clinic)
-  return(clinical.patient)
+  save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
+}
+
+#Gene make rowname separat -------------------------------------
+GeneIDName <- function(x){
+  tmp<-strsplit(rownames(x),"\\|")
+  GeneID<-unlist(lapply(tmp,function(x) x[2]))
+  GeneID <- paste0("ID",GeneID)
+  row.names(x) <- GeneID
+  return(x)
 }
