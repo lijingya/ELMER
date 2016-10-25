@@ -86,6 +86,7 @@ getRNAseq <- function(disease, basedir="./Data")
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
   message(paste0("Saving Gene Expression to: ", fout))
   save(GeneExp,file=fout)
+  return("OK")
 }
 
 #' get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
@@ -124,6 +125,7 @@ get450K <- function(disease,
   fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
   message(paste0("Saving DNA methylation to: ", fout))
   save(Meth,file=fout)
+  return("OK")
 }
 
 #' getClinic to download clinic data for certain cancer types from TCGA website.
@@ -146,6 +148,7 @@ getClinic <- function(disease, basedir="./Data")
                     error = function(e) GDCdownload(clin.query, method = "client",directory = dir.clinic))
   clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient",directory = dir.clinic)
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
+  return("OK")
 }
 
 #Gene make rowname separat -------------------------------------
