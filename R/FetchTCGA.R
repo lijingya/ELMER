@@ -1,16 +1,20 @@
-#' getTCGA
-#' @param disease A character to specify disease in TCGA such as BLCA
+#' getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.
+#' @description 
+#' getTCGA is a function to download DNA methylation, RNA expression and clinic data for all
+#'  samples of certain cancer type from TCGA website. And downloaded data will be transform
+#'   to matrixes or data frame for further analysis.
+#' @param disease A character specifies the disease to download in TCGA such as BLCA
 #' @param Meth A logic if TRUE HM450K DNA methylation data will download.
 #' @param RNA A logic if TRUE RNA-seq Hiseq-V2 from TCGA level 3 will be download.
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
 #' @param basedir A path shows where the data will be stored.
-#' @param RNAtype A charactor to specify whether use isoform level or gene level.
-#'  When RNAtype=gene, gene level gene expression will be used. When isoform, 
-#'  then isoform data will be used.
-#' @param Methfilter A number. For each probe, the percentage of NA among the 
-#' all the samples should smaller than Methfilter.
+#' @param RNAtype A charactor to specify whether use isoform level or gene level. 
+#' When RNAtype=gene, gene level gene expression will be used.
+#' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
+#' @usage getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE, 
+#'                basedir = "./Data", RNAtype = "gene", Methfilter = 0.2)
 #' @export
 #' @examples
 #' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
@@ -59,9 +63,11 @@ getTCGA <- function(disease,
               2.Wget doesn't work.",disease))
 }
 
-#' getRNAseq
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
+#' getRNAseq to download all RNAseq data for a certain cancer type from TCGA.
+#' @description getRNAseq is a function to download RNAseq data for all samples of a certain cancer type from TCGA
+#' @param disease A character specifies disease in TCGA such as BLCA
+#' @param basedir Download all RNA seq level 3 data for the specified disease.
+#' @usage getRNAseq(disease, basedir = "./Data")
 #' @return Download all RNA seq level 3 data for the specified disease.
 getRNAseq <- function(disease, basedir="./Data")
 {
@@ -82,19 +88,21 @@ getRNAseq <- function(disease, basedir="./Data")
   save(GeneExp,file=sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease)))
 }
 
-#' get450K to download HM450K DNA methylation data for certain cancer types
-#' from GDC website.
+#' get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
 #'  @description 
 #'  get450K is a function to download latest version of HM450K DNA methylation 
 #'  for  all samples of certain cancer types from GDC website.
 #' @param disease A character specifies the disease to download from TCGA such as BLCA
 #' @param basedir A path. Shows where the data will be stored.
+#' @param filter For each probe, the percentage of NA among the all the samples
+#'  should smaller than filter.
 #' @return Download all DNA methylation from HM450K level 3 data for
 #'  the specified disease.
 #' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
 #' @usage get450K(disease, basedir = "./Data")
 get450K <- function(disease, 
-                    basedir="./Data",filter=0.2){
+                    basedir="./Data",
+                    filter=0.2){
   
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
@@ -116,8 +124,10 @@ get450K <- function(disease,
   save(Meth,file=sprintf("%s/%s_meth.rda",diseasedir,toupper(disease)))
 }
 
-#' getClinic
-#' @param disease A character to specify disease in TCGA such as BLCA
+#' getClinic to download clinic data for certain cancer types from TCGA website.
+#' @description 
+#' getClinic is a function to download latest version of clinic data for all samples of certain cancer types from TCGA website.
+#' @param disease A character specifies the disease to download from TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
 #' @return Download all clinic information for the specified disease.
 getClinic <- function(disease, basedir="./Data")

@@ -2,8 +2,7 @@
 % Please edit documentation in R/FetchTCGA.R
 \name{get450K}
 \alias{get450K}
-\title{get450K to download HM450K DNA methylation data for certain cancer types
-from GDC website.
+\title{get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
  @description 
  get450K is a function to download latest version of HM450K DNA methylation 
  for  all samples of certain cancer types from GDC website.}
@@ -14,14 +13,16 @@ get450K(disease, basedir = "./Data")
 \item{disease}{A character specifies the disease to download from TCGA such as BLCA}
 
 \item{basedir}{A path. Shows where the data will be stored.}
+
+\item{filter}{For each probe, the percentage of NA among the all the samples
+should smaller than filter.}
 }
 \value{
 Download all DNA methylation from HM450K level 3 data for
  the specified disease.
 }
 \description{
-get450K to download HM450K DNA methylation data for certain cancer types
-from GDC website.
+get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
  @description 
  get450K is a function to download latest version of HM450K DNA methylation 
  for  all samples of certain cancer types from GDC website.
