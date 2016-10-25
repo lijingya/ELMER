@@ -142,11 +142,7 @@ getClinic <- function(disease, basedir="./Data")
   dir.clinic <- file.path(dir.raw,"Clinic")
   if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE)
   
-  clin.query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                         data.category = "Clinical", barcode = "TCGA-FD-A5C0")
-  json  <- tryCatch(GDCdownload(clin.query, directory = dir.clinic), 
-                    error = function(e) GDCdownload(clin.query, method = "client",directory = dir.clinic))
-  clinical.patient <- GDCprepare_clinic(clin.query, clinical.info = "patient",directory = dir.clinic)
+  Clinic <- GDCquery_clinic(project = paste0("TCGA-",toupper(disease)))
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
   return("OK")
 }
