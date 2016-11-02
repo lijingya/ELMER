@@ -78,7 +78,8 @@ getRNAseq <- function(disease, basedir="./Data")
                     data.category = "Transcriptome Profiling", 
                     data.type = "Gene Expression Quantification", 
                     workflow.type = "HTSeq - FPKM-UQ")
-  GDCdownload(query)
+  tryCatch( GDCdownload(query,directory = dir.rna),
+           error = function(e) GDCdownload(query,directory = dir.rna, chunks.per.download = 10))
   rna <- GDCprepare(query)
   GeneExp <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", save = TRUE)
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
@@ -113,8 +114,8 @@ get450K <- function(disease,
                     data.category = "DNA Methylation",
                     platform = "Illumina Human Methylation 450")
   
-  json  <- tryCatch(GDCdownload(query,directory = dir.meth, chunks.per.download = 10),
-                    error = function(e) GDCdownload(query, method = "client"))
+  tryCatch(GDCdownload(query,directory = dir.meth, chunks.per.download = 10),
+                    error = function(e) GDCdownload(query,directory = dir.meth, method = "client"))
   met <- GDCprepare(query = query,
                     directory = dir.meth,
                     summarizedExperiment = TRUE)
