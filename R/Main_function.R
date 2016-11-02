@@ -85,6 +85,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01
 #' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
+#' @param test Statistical test to be used. Options: t.test, wilcox.test
 #' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
@@ -93,6 +94,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
+#' library(MultiAssayExperiment)
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' exp.sample <- DataFrame(mee@sample[,c("exp.ID","TN")])
 #' rownames(exp.sample) <- exp.sample$exp.ID; exp.sample$exp.ID <- NULL
@@ -106,7 +108,10 @@ get.diff.meth <- function(mae,
                           cores=1,
                           percentage=0.2,
                           pvalue=0.01,
-                          group.col = NULL, 
+                          group.col, 
+                          group1,
+                          group2,
+                          test = wilcox.test,
                           sig.dif=0.3,
                           dir.out="./",
                           save=TRUE){
@@ -114,10 +119,18 @@ get.diff.meth <- function(mae,
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(pData(mae))==0){
     stop("Sample information data to do differential analysis.")
-  }else if(is.null(group.col)){
+  }else if(missing(group.col)){
     stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(mae)) for possibilities")
-  }else if(length(unique(pData(mae)[,group.col]))<2){
-    stop("Group column should have at least 2 distinct group labels for comparison.")
+  } else if(missing(group1) | missing(group2)) {
+    if(length(unique(pData(mae)[,group.col]))<2){
+      stop("Group column should have at least 2 distinct group labels for comparison.")
+    } else {
+      # TO be changed
+      groups <- pData(mae)[,group.col]
+      group1 <- unique(groups)[1] 
+      group2 <- unique(groups)[2]
+      message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
+    }
   }
   parallel <- FALSE
   if (cores > 1){
@@ -132,20 +145,24 @@ get.diff.meth <- function(mae,
                                  percentage = percentage,
                                  meth=assay(experiments(mae)[["DNA methylation"]]),
                                  groups = pData(mae)[,group.col],
+                                 group1 = group1,
+                                 test = test,
+                                 group2 = group2,
                                  Top.m=Top.m)},
                .progress = "text", .parallel = parallel
   )
   out[,1] <- NULL
+  diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
   out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
-  colnames(out) <- c("probe","pvalue","ExperimentMinControl","adjust.p")
+  colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   if(save){
     write.csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
-    write.csv(out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,],
+    write.csv(out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,],
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
               row.names=FALSE)
   }
-  result <- out[out$adjust.p < pvalue & abs(out$ExperimentMinControl)>sig.dif,]
+  result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,]
   return(result)  
 }
 
@@ -301,7 +318,7 @@ get.permu <- function(mee,
   
   if(is.null(permu.dir)){
     permu.meth <- getMeth(mee,probe=probes.permu)
-
+    
     parallel <- FALSE
     if (cores > 1){
       if (cores > detectCores()) cores <- detectCores()
@@ -627,7 +644,7 @@ get.TFs <- function(mee,
   ## check row and col names
   rownames(TF.meth.cor) <- TFs$Symbol
   colnames(TF.meth.cor) <- names(enriched.motif)
-
+  
   cor.summary <- sapply(colnames(TF.meth.cor), 
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
                           cor <- sort(TF.meth.cor[,x])
