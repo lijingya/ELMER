@@ -94,23 +94,30 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' Hypo.probe <- get.diff.meth(mee, diff.dir="hypo") # get hypomethylated probes
-get.diff.meth <- function(mee,
+#' exp.sample <- DataFrame(mee@sample[,c("exp.ID","TN")])
+#' rownames(exp.sample) <- exp.sample$exp.ID; exp.sample$exp.ID <- NULL
+#' met.sample <- DataFrame(mee@sample[,c("meth.ID","TN")])
+#' rownames(met.sample) <- met.sample$meth.ID; met.sample$meth.ID <- NULL
+#' sample <- rbind( exp.sample,met.sample)
+#' mee.mae <- create.mae(exp = mee@exp, met = mee@meth,pData = sample, TCGA =  TRUE)
+#' Hypo.probe <- get.diff.meth(mee.mae, diff.dir="hypo",group.col = "TN") # get hypomethylated probes
+get.diff.meth <- function(mae,
                           diff.dir="hypo",
-                          cores=NULL,
+                          cores=1,
                           percentage=0.2,
-                          pvalue=0.01, 
+                          pvalue=0.01,
+                          group.col = NULL, 
                           sig.dif=0.3,
                           dir.out="./",
                           save=TRUE){
-  if(nrow(mee@meth)==0) 
+  if(is.null(experiments(mae)[["DNA methylation"]]))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
-  if(nrow(getSample(mee))==0){
+  if(nrow(pData(mae))==0){
     stop("Sample information data to do differential analysis.")
-  }else if(is.null(getSample(mee,cols="TN"))){
-    stop("\"TN\" should be specified, labeling two group of sample for comparison.")
-  }else if(length(table(getSample(mee,cols="TN")))<2){
-    stop("\"TN\" should have at 2 distinct group labels for comparison.")
+  }else if(is.null(group.col)){
+    stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(mae)) for possibilities")
+  }else if(length(unique(pData(mae)[,group.col]))<2){
+    stop("Group column should have at least 2 distinct group labels for comparison.")
   }
   parallel <- FALSE
   if (cores > 1){
@@ -118,13 +125,13 @@ get.diff.meth <- function(mee,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE )
-  out <- adply(.data = rownames(mee@meth), .margins = 1,
+  Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
+  out <- adply(.data = rownames(experiments(mae)[["DNA methylation"]]), .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth( probe = x,
                                  percentage = percentage,
-                                 meth=mee@meth,
-                                 TN=getSample(mee,cols="TN"),
+                                 meth=assay(experiments(mae)[["DNA methylation"]]),
+                                 groups = pData(mae)[,group.col],
                                  Top.m=Top.m)},
                .progress = "text", .parallel = parallel
   )

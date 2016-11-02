@@ -1,5 +1,3 @@
-
-##############-----------fetch data
 ## Construct Multi Assay Experiment
 #' @description 
 #' This function will receive a gene expression and DNA methylation data objects 
@@ -56,7 +54,7 @@ create.mae <- function (exp,
   
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
-  if(is.character(met)) exp <- get(load(met))
+  if(is.character(met)) met <- get(load(met))
   
   if(TCGA){
     message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
