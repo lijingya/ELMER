@@ -75,11 +75,9 @@ getRNAseq <- function(disease, basedir="./Data")
   dir.rna <- file.path(dir.raw,"RNA")
   if(!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE)
   query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                    data.category = "Gene expression",
-                    data.type = "Gene expression quantification",
-                    platform = "Illumina HiSeq", file.type  = "normalized_results",
-                    experimental.strategy = "RNA-Seq",
-                    legacy = TRUE)
+                    data.category = "Transcriptome Profiling", 
+                    data.type = "Gene Expression Quantification", 
+                    workflow.type = "HTSeq - FPKM-UQ")
   GDCdownload(query)
   rna <- GDCprepare(query)
   GeneExp <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", save = TRUE)
@@ -112,8 +110,7 @@ get450K <- function(disease,
   if(!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE)
   
   query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                    legacy = TRUE,
-                    data.category = "DNA methylation",
+                    data.category = "DNA Methylation",
                     platform = "Illumina Human Methylation 450")
   
   json  <- tryCatch(GDCdownload(query,directory = dir.meth, chunks.per.download = 10),
