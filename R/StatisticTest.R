@@ -9,41 +9,48 @@
 #' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 #' hypermethylated probe is TRUE.
 #' @return Statistic test results to identify differentially methylated probes.
-Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
+Stat.diff.meth <- function(probe,
+                           meths,
+                           groups,
+                           #group1,
+                           #group2,
+                           test=t.test,
+                           percentage=0.2,
+                           Top.m=NULL){
+  # TO be changed
+  group1 <- unique(groups)[1] 
+  group2 <- unique(groups)[2]
+  message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
+    
   meth <- meths[probe,]
   if(Top.m){
-    tumor.tmp <- sort(meth[TN %in% "Experiment"],decreasing=TRUE)
-    normal.tmp <- sort(meth[TN %in% "Control"],decreasing=TRUE)
+    group1.tmp <- sort(meth[groups %in% group1],decreasing=TRUE)
+    group2.tmp <- sort(meth[groups %in% group2],decreasing=TRUE)
   }else{
-    tumor.tmp <- sort(meth[TN %in% "Experiment"])
-    normal.tmp <- sort(meth[TN %in% "Control"])
+    group1.tmp <- sort(meth[groups %in% group1])
+    group2.tmp <- sort(meth[groups %in% group2])
   }
-  if(round(length(normal.tmp)*percentage)< 5){
-    if(length(normal.tmp) < 5) {
-      Normal.number <- length(normal.tmp)
-    }else{
-      Normal.number <- 5
-    }
-  }else{
-    Normal.number <- round(length(normal.tmp)*percentage)
-  }
-  tumor.tmp <- tumor.tmp[1:round(length(tumor.tmp)*percentage)]
-  normal.tmp <- normal.tmp[1:Normal.number]
-  meth <- c(normal.tmp,tumor.tmp)
-  TN <- c(rep("Control",length(normal.tmp)),rep("Experiment",length(tumor.tmp)))
+  group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, length(group1.tmp), round(length(group1.tmp) * percentage))
+  group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, length(group2.tmp), round(length(group2.tmp) * percentage))
+  
+  group1.tmp <- group1.tmp[1:group1.nb]
+  group2.tmp <- group2.tmp[1:group2.nb]
+  meth <- c(group2.tmp,group1.tmp)
+  groups <- c(rep(group2,length(group2.tmp)),
+              rep(group1,length(group1.tmp)))
   
   ##this is to remove the situation that the normal or tumor are all NA (only one is value)
-  meth_split <- split(meth,TN)
+  meth_split <- split(meth,groups)
   meth_split <- unlist(lapply(meth_split,function(x){!is.na(sd(x,na.rm=TRUE))}))
   
   if(sd(meth,na.rm=TRUE)>0 & all(meth_split)){
     if(!is.na(Top.m)){
       alternative <- ifelse(Top.m,"less","greater")
-    }else{
+    } else {
       alternative <- "two.sided"
     }
-    df <- data.frame(meth=meth,TN=factor(TN))
-    TT <- test(meth~TN,df,alternative=alternative)
+    df <- data.frame(meth=meth,groups=factor(groups))
+    TT <- test(meth~groups,df,alternative=alternative)
     MeanDiff <- TT$estimate[2]-TT$estimate[1]
     PP <- TT$p.value
     out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
