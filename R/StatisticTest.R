@@ -12,16 +12,11 @@
 Stat.diff.meth <- function(probe,
                            meths,
                            groups,
-                           #group1,
-                           #group2,
+                           group1,
+                           group2,
                            test=t.test,
                            percentage=0.2,
                            Top.m=NULL){
-  # TO be changed
-  group1 <- unique(groups)[1] 
-  group2 <- unique(groups)[2]
-  message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
-    
   meth <- meths[probe,]
   if(Top.m){
     group1.tmp <- sort(meth[groups %in% group1],decreasing=TRUE)
@@ -50,8 +45,12 @@ Stat.diff.meth <- function(probe,
       alternative <- "two.sided"
     }
     df <- data.frame(meth=meth,groups=factor(groups))
-    TT <- test(meth~groups,df,alternative=alternative)
-    MeanDiff <- TT$estimate[2]-TT$estimate[1]
+    TT <- test(meth~groups,df,alternative=alternative, conf.int = TRUE)
+    if(length(TT$estimate) == 2) {
+      MeanDiff <- TT$estimate[1]-TT$estimate[2]
+    } else {
+      MeanDiff <- TT$estimate
+    }
     PP <- TT$p.value
     out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
   }else{
