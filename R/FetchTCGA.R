@@ -67,6 +67,7 @@ getTCGA <- function(disease,
 #' @param basedir Download all RNA seq level 3 data for the specified disease.
 #' @usage getRNAseq(disease, basedir = "./Data")
 #' @return Download all RNA seq level 3 data for the specified disease.
+#' @importFrom TCGAbiolinks GDCdownload GDCquery GDCprepare
 getRNAseq <- function(disease, basedir="./Data")
 {
   disease <- tolower(disease)
@@ -81,10 +82,13 @@ getRNAseq <- function(disease, basedir="./Data")
   tryCatch( GDCdownload(query,directory = dir.rna),
            error = function(e) GDCdownload(query,directory = dir.rna, chunks.per.download = 10))
   rna <- GDCprepare(query)
-  GeneExp <- TCGAprepare_elmer(rna,platform = "IlluminaHiSeq_RNASeqV2", save = TRUE)
+  message(paste0("1 - expression = log2(expression + 1): ",
+                 "To linearize \n    relation between ",
+                 "methylation and expression"))
+  assay(rna) <- log2(assay(rna)+1)
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
   message(paste0("Saving Gene Expression to: ", fout))
-  save(GeneExp,file=fout)
+  save(rna,file=fout)
   return("OK")
 }
 
@@ -119,10 +123,10 @@ get450K <- function(disease,
   met <- GDCprepare(query = query,
                     directory = dir.meth,
                     summarizedExperiment = TRUE)
-  Meth <- TCGAprepare_elmer(met,platform = "HumanMethylation450", met.na.cut = 0.2, save = FALSE)
+  met <- met[rowMeans(is.na(assay(met))) < filter,]
   fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
   message(paste0("Saving DNA methylation to: ", fout))
-  save(Meth,file=fout)
+  save(met,file=fout)
   return("OK")
 }
 
