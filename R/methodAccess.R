@@ -118,14 +118,6 @@ setMethod(f="getGeneInfo",signature="ANY",
 
 ## Construct data structure-----------------------------------------------------
 
-mee.data <- function(meth=NULL,exp=NULL,sample=NULL,probeInfo=NULL,geneInfo=NULL){
-  args <- list(meth=meth,exp=exp,sample=sample,probeInfo=probeInfo,geneInfo=geneInfo)
-  args <- args[!unlist(lapply(args,is.null))]
-  args$Class <- "MEE.data"
-  MethExp <- do.call(new,args)
-  return(MethExp)
-}
-
 pair.data <- function(pairInfo=NULL,probeInfo=NULL,geneInfo=NULL){
   args <- list(pairInfo=pairInfo,probeInfo=probeInfo,geneInfo=geneInfo)
   args <- args[!unlist(lapply(args,is.null))]

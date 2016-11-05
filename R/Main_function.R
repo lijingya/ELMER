@@ -162,7 +162,10 @@ get.diff.meth <- function(mae,
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
               row.names=FALSE)
   }
+
   result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,]
+  if(nrow(result) == 0 ) message("No relevant probes found")
+  
   return(result)  
 }
 
@@ -173,7 +176,6 @@ get.diff.meth <- function(mae,
 ## TCGA pipe don't specify dir.out
 #' get pair
 #' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo.
-#' @param probes A vector lists the probes' name that need to be linked to genes.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -196,21 +198,31 @@ get.diff.meth <- function(mae,
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg10097755")),
 #'                          geneAnnot=getGeneInfo(mee))
-#'                          Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg10097755"),
-#'                                               nearGenes=nearGenes,permu.size=5,Pe = 0.2,
-#'                                               dir.out="./",
-#'                                               label= "hypo")
-get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
-                     permu.dir=NULL, Pe=0.001,dir.out="./",diffExp=FALSE,cores=NULL,
-                     portion = 0.3, label=NULL,save=TRUE){
+#' Hypo.pair <-get.pair(mee=mee,
+#'                      nearGenes=nearGenes,
+#'                      permu.size=5,
+#'                      Pe = 0.2,
+#'                      dir.out="./",
+#'                      label= "hypo")
+get.pair <- function(mae,
+                     probes, # necessary ?
+                     nearGenes,
+                     percentage=0.2,
+                     permu.size=10000,
+                     permu.dir=NULL, 
+                     Pe=0.001,
+                     dir.out="./",
+                     diffExp=FALSE,
+                     cores=NULL,
+                     portion = 0.3, 
+                     label=NULL,
+                     save=TRUE){
   ## check data
-  if(!all(probes %in% rownames(mee@meth))) 
+  if(!all(names(nearGenes) %in% rownames(experiments(mae)[["DNA methylation"]])))
     stop("Probes option should be subset of rownames of methylation matrix.")
   if(is.character(nearGenes)){
-    newenv <- new.env()
-    load(nearGenes, envir=newenv)
-    nearGenes <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-  }else if(!is.list(nearGenes)){
+    nearGenes <- get(load(nearGenes))
+  } else if(!is.list(nearGenes)){
     stop("nearGene option must be a list containing output of GetNearGenes function 
          or path of rda file containing output of GetNearGenes function.")
   }
@@ -222,26 +234,32 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  Probe.gene <- adply(.data = probes, .margins = 1,
+  Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
-                                     Meths= getMeth(mee,probe=probes), 
-                                     NearGenes=nearGenes,K=portion,Top=percentage,
-                                     Exps=getExp(mee))},
+                                     Meths= assay(experiments(mae)[["DNA methylation"]][names(nearGenes),]), 
+                                     NearGenes=nearGenes,
+                                     K=portion,
+                                     Top=percentage,
+                                     Exps=assay(experiments(mae)[["Gene expression"]]))},
                       .progress = "text", .parallel = parallel
   )
   Probe.gene[,1] <- NULL
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
+  
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
+  message("Permutation\n")
   # get permutation
-  permu <- get.permu(mee,geneID=GeneID, 
+  permu <- get.permu(mae,
+                     geneID=GeneID, 
                      percentage=percentage, 
-                     rm.probes=probes, 
+                     rm.probes=names(nearGenes), 
                      permu.size=permu.size, 
                      portion = portion,
-                     permu.dir=permu.dir,cores=cores)
+                     permu.dir=permu.dir,
+                     cores=cores)
   #get empirical p-value
   message("Calculate empirical P value.\n")
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
@@ -297,7 +315,7 @@ get.pair <- function(mee,probes,nearGenes,percentage=0.2,permu.size=10000,
 #' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
-get.permu <- function(mee, 
+get.permu <- function(mae, 
                       geneID, 
                       percentage=0.2, 
                       rm.probes=NULL,
@@ -305,19 +323,22 @@ get.permu <- function(mee,
                       permu.size=10000, 
                       permu.dir=NULL,
                       cores=1){
+  
+  # Why a const seed?
   set.seed(200)
+  
   ## get usable probes
-  binary.m <- rowMeans(Binary(mee@meth,portion),na.rm = TRUE)
-  usable.probes <- names(binary.m[binary.m <0.95 & binary.m > 0.05 & !is.na(binary.m)])
+  binary.m <- rowMeans(Binary(assay(experiments(mae)[["DNA methylation"]]),portion),na.rm = TRUE)
+  usable.probes <- names(binary.m[binary.m < 0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
                  set a smaller permu.size.",permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
-  
+
   if(is.null(permu.dir)){
-    permu.meth <- getMeth(mee,probe=probes.permu)
+    permu.meth <- assay(experiments(mae)[["DNA methylation"]])[probes.permu,] 
     
     parallel <- FALSE
     if (cores > 1){
@@ -330,9 +351,10 @@ get.permu <- function(mee,
                    .fun = function(x) {
                      Stat.nonpara.permu(
                        Probe = x,
-                       Meths=permu.meth,
-                       Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                       Top=percentage,Exps=getExp(mee))},
+                       Meths=permu.meth[x,],
+                       Gene=geneID,
+                       Top=percentage,
+                       Exps=assay(experiments(mae)[["Gene expression"]]))},
                    .progress = "text", .parallel = parallel
     )
     permu <- sapply(permu,
@@ -346,21 +368,22 @@ get.permu <- function(mee,
     }
     if(!all(probes.permu %in% dir(permu.dir))){
       tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-      permu.meth <- getMeth(mee,probe=tmp.probes)
+      permu.meth <-  assay(experiments(mae)[["DNA methylation"]])[tmp.probes,]
       parallel <- FALSE
       if (cores > 1){
         if (cores > detectCores()) cores <- detectCores()
         registerDoParallel(cores)
         parallel = TRUE
       }
-      
+     
       permu <- alply(.data = tmp.probes, .margins = 1,
                      .fun = function(x) {
                        Stat.nonpara.permu(
                          Probe = x,
-                         Meths=permu.meth,
-                         Gene=unique(as.character(getGeneInfo(mee)$GENEID)),
-                         Top=percentage,Exps=getExp(mee),
+                         Meths=permu.meth[x,],
+                         Gene=geneID, # How to do it  
+                         Top=percentage,
+                         Exps=assay(experiments(mae)[["Gene expression"]]),
                          permu.dir=permu.dir)},
                      .progress = "text", .parallel = parallel
       )
@@ -371,7 +394,6 @@ get.permu <- function(mee,
                       tmp <- read.table(x,stringsAsFactors=FALSE)
                       tmp <- tmp[match(geneID,tmp[,1]),2]},
                     geneID=geneID,simplify=FALSE)
-    
   }
   permu <- do.call(cbind,permu)
   rownames(permu) <- geneID
@@ -462,11 +484,8 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   if(missing(probes)) stop("probes option should be specified.")
   if(missing(background.probes)){
     if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
-      newenv <- new.env()
-      load(sprintf("%s/probeInfo_feature_distal.rda",dir.out), envir=newenv)
-      background.probes <- get(ls(newenv)[1],envir=newenv) 
+      background.probes <- get(load(sprintf("%s/probeInfo_feature_distal.rda",dir.out)))
       background.probes <- as.character(background.probes$name)
-      # The data is in the one and only variable
     }else{
       background.probes <- rownames(all.probes.TF)
     }
@@ -588,9 +607,7 @@ get.TFs <- function(mee,
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
-    newenv <- new.env()
-    load(enriched.motif, envir=newenv)
-    enriched.motif <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    enriched.motif <- get(enriched.motif) # The data is in the one and only variable
   }else if(!is.list(enriched.motif)){
     stop("enriched.motif option should be a list object.")
   }
@@ -635,7 +652,8 @@ get.TFs <- function(mee,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
-                           Meths=motif.meth,Gene=TFs$GeneID,
+                           Meths=motif.meth,
+                           Gene=TFs$GeneID,
                            Top=percentage,Exps=getExp(mee))},
                        .progress = "text", .parallel = parallel
   )

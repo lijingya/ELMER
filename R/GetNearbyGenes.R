@@ -12,6 +12,11 @@ NearGenes <- function (Target=NULL,
                        geneNum=20,
                        TRange=NULL){
   
+  # Is this necessary ?
+  # How to define a default for this ?
+  Gene$GENEID <- Gene$ensembl_gene_id
+  Gene$SYMBOL <- Gene$external_gene_name
+  
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")
   }
@@ -19,17 +24,18 @@ NearGenes <- function (Target=NULL,
     stop( "TRange must be defined")
   }else{
     # Just to be sure we have only one probe. To be removed ?
-    regionInfo <- TRange[as.character(TRange$name) %in% Target]
+    regionInfo <- TRange[names(TRange) %in% Target]
   }
   GeneIDs <- c()
   Distances <- c()
   strand(Gene) <- "*"
   # We will get only genes in the same same chromossome
   Gene <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
+  #print(Gene)
   if(length(Gene)==0){
     warning(paste0(Target," don't have any nearby gene in the given gene list."))
     Final <- NA
-  }else{
+  } else {
     Gene <- sort(Gene)
     index <- follow(regionInfo,Gene)
     #left side
@@ -139,7 +145,9 @@ NearGenes <- function (Target=NULL,
 #' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
 #' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
-GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20,
+GetNearGenes <- function(geneAnnot=NULL,
+                         TRange=NULL,
+                         geneNum=20,
                          cores=1){
   
   if(is.null(TRange)){
@@ -154,13 +162,13 @@ GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20,
   
   NearGenes <- alply(.data = as.data.frame(TRange), .margins = 1,
                      .fun = function(x) {
-                       NearGenes( Target = as.character(x$name),
+                       NearGenes( Target = rownames(x),
                                   geneNum = geneNum,
                                   Gene = geneAnnot,
                                   TRange = TRange)},
                      .progress = "text", .parallel = parallel
   )
-  names(NearGenes) <- as.data.frame(TRange)$name
+  names(NearGenes) <- names(TRange)
   return(NearGenes)
 }
 

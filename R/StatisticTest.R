@@ -169,9 +169,8 @@ Get.Pvalue.p <- function(U.matrix,permu){
     Gene <- as.character(x["GeneID"])
     if(is.na(Raw.p)){
       out <- NA
-    }else{
-      out <- (sum(permu[as.character(Gene),]  < Raw.p | 
-                    permu[Gene,] == Raw.p,na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
+    } else {
+      out <- (sum(permu[as.character(Gene),]  <= Raw.p, na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }
