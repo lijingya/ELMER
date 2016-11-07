@@ -1,32 +1,3 @@
-
-
-#' getMeth
-#' @param object MEE.data object
-#' @param probe A vector of probes' name. When specified, DNA methylation only 
-#' for these probes will be output.
-#' @param ID A vector of sample ID. When specified, DNA methylation only for 
-#' these samples will be output.
-#' @return DNA methylation values.
-#' @exportMethod getMeth
-#' @docType methods
-setGeneric(name="getMeth",
-           def=function(object,probe,ID){standardGeneric("getMeth")})
-
-
-
-#' getExp
-#' @param object MEE.data object
-#' @param geneID A vector of genes' id. When specified, gene expression only 
-#' for these genes will be output.
-#' @param ID A vector of sample ID. When specified, gene expression only for 
-#' these samples will be output.
-#' @return Gene expression values.
-#' @exportMethod getExp
-#' @docType methods
-setGeneric(name="getExp",
-           def=function(object,geneID,ID){standardGeneric("getExp")})
-
-
 #' getSample
 #' @param object MEE.data object
 #' @param ID A vector of sample ID. When specified, sample informtion only for 
