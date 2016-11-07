@@ -3,7 +3,7 @@
 export(GetNearGenes)
 export(TCGA.pipe)
 export(TF.rank.plot)
-export(create.mae)
+export(createMultiAssayExperiment)
 export(fetch.pair)
 export(get.TFs)
 export(get.diff.meth)

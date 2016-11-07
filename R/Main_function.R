@@ -101,7 +101,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' met.sample <- DataFrame(mee@sample[,c("meth.ID","TN")])
 #' rownames(met.sample) <- met.sample$meth.ID; met.sample$meth.ID <- NULL
 #' sample <- rbind( exp.sample,met.sample)
-#' mee.mae <- create.mae(exp = mee@exp, met = mee@meth,pData = sample, TCGA =  TRUE)
+#' mee.mae <- createMultiAssayExperiment(exp = mee@exp, met = mee@meth,pData = sample, TCGA =  TRUE)
 #' Hypo.probe <- get.diff.meth(mee.mae, diff.dir="hypo",group.col = "TN") # get hypomethylated probes
 get.diff.meth <- function(data,
                           diff.dir="hypo",
