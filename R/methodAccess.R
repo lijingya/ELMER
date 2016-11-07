@@ -1,3 +1,15 @@
+
+#' @importFrom MultiAssayExperiment experiments
+getMet <- function(data) {
+  return(experiments(data)[["DNA methylation"]])
+}
+
+#' @importFrom MultiAssayExperiment experiments
+getExp <- function(data) {
+  return(experiments(data)[["Gene expression"]])
+}
+
+
 ###Pair -------------------------------------------------------------------
 # initialize
 setMethod(f="initialize",signature="Pair",

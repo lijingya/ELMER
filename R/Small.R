@@ -9,6 +9,7 @@
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @return A MultiAssayExperiment object
 #' @export 
+#' @importFrom MultiAssayExperiment MultiAssayExperiment
 #' @examples
 #' # NON TCGA example
 #' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),

@@ -103,7 +103,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' sample <- rbind( exp.sample,met.sample)
 #' mee.mae <- create.mae(exp = mee@exp, met = mee@meth,pData = sample, TCGA =  TRUE)
 #' Hypo.probe <- get.diff.meth(mee.mae, diff.dir="hypo",group.col = "TN") # get hypomethylated probes
-get.diff.meth <- function(mae,
+get.diff.meth <- function(data,
                           diff.dir="hypo",
                           cores=1,
                           percentage=0.2,
@@ -115,18 +115,18 @@ get.diff.meth <- function(mae,
                           sig.dif=0.3,
                           dir.out="./",
                           save=TRUE){
-  if(is.null(experiments(mae)[["DNA methylation"]]))
+  if(is.null(getMet(data)))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
-  if(nrow(pData(mae))==0){
+  if(nrow(pData(data))==0){
     stop("Sample information data to do differential analysis.")
   }else if(missing(group.col)){
-    stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(mae)) for possibilities")
+    stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(data)) for possibilities")
   } else if(missing(group1) | missing(group2)) {
-    if(length(unique(pData(mae)[,group.col]))<2){
+    if(length(unique(pData(data)[,group.col]))<2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
     } else {
       # TO be changed
-      groups <- pData(mae)[,group.col]
+      groups <- pData(data)[,group.col]
       group1 <- unique(groups)[1] 
       group2 <- unique(groups)[2]
       message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
@@ -139,12 +139,12 @@ get.diff.meth <- function(mae,
     parallel = TRUE
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
-  out <- adply(.data = rownames(experiments(mae)[["DNA methylation"]]), .margins = 1,
+  out <- adply(.data = rownames(getMet(data)), .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth( probe = x,
                                  percentage = percentage,
-                                 meth=assay(experiments(mae)[["DNA methylation"]]),
-                                 groups = pData(mae)[,group.col],
+                                 meth=assay(getMet(data)),
+                                 groups = pData(data)[,group.col],
                                  group1 = group1,
                                  test = test,
                                  group2 = group2,
@@ -204,7 +204,7 @@ get.diff.meth <- function(mae,
 #'                      Pe = 0.2,
 #'                      dir.out="./",
 #'                      label= "hypo")
-get.pair <- function(mae,
+get.pair <- function(data,
                      probes, # necessary ?
                      nearGenes,
                      percentage=0.2,
@@ -218,7 +218,7 @@ get.pair <- function(mae,
                      label=NULL,
                      save=TRUE){
   ## check data
-  if(!all(names(nearGenes) %in% rownames(experiments(mae)[["DNA methylation"]])))
+  if(!all(names(nearGenes) %in% rownames(getMet(data))))
     stop("Probes option should be subset of rownames of methylation matrix.")
   if(is.character(nearGenes)){
     nearGenes <- get(load(nearGenes))
@@ -237,11 +237,11 @@ get.pair <- function(mae,
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
-                                     Meths= assay(experiments(mae)[["DNA methylation"]][names(nearGenes),]), 
+                                     Meths= assay(getMet(data)[names(nearGenes),]), 
                                      NearGenes=nearGenes,
                                      K=portion,
                                      Top=percentage,
-                                     Exps=assay(experiments(mae)[["Gene expression"]]))},
+                                     Exps=assay(getExp(data)))},
                       .progress = "text", .parallel = parallel
   )
   Probe.gene[,1] <- NULL
@@ -252,7 +252,7 @@ get.pair <- function(mae,
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
   message("Permutation\n")
   # get permutation
-  permu <- get.permu(mae,
+  permu <- get.permu(data,
                      geneID=GeneID, 
                      percentage=percentage, 
                      rm.probes=names(nearGenes), 
@@ -315,7 +315,7 @@ get.pair <- function(mae,
 #' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
-get.permu <- function(mae, 
+get.permu <- function(data, 
                       geneID, 
                       percentage=0.2, 
                       rm.probes=NULL,
@@ -328,7 +328,7 @@ get.permu <- function(mae,
   set.seed(200)
   
   ## get usable probes
-  binary.m <- rowMeans(Binary(assay(experiments(mae)[["DNA methylation"]]),portion),na.rm = TRUE)
+  binary.m <- rowMeans(Binary(assay(getMet(data)),portion),na.rm = TRUE)
   usable.probes <- names(binary.m[binary.m < 0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
@@ -338,7 +338,7 @@ get.permu <- function(mae,
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
 
   if(is.null(permu.dir)){
-    permu.meth <- assay(experiments(mae)[["DNA methylation"]])[probes.permu,] 
+    permu.meth <- assay(getMet(data))[probes.permu,] 
     
     parallel <- FALSE
     if (cores > 1){
@@ -354,7 +354,7 @@ get.permu <- function(mae,
                        Meths=permu.meth[x,],
                        Gene=geneID,
                        Top=percentage,
-                       Exps=assay(experiments(mae)[["Gene expression"]]))},
+                       Exps=assay(getExp(data)))},
                    .progress = "text", .parallel = parallel
     )
     permu <- sapply(permu,
@@ -368,7 +368,7 @@ get.permu <- function(mae,
     }
     if(!all(probes.permu %in% dir(permu.dir))){
       tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-      permu.meth <-  assay(experiments(mae)[["DNA methylation"]])[tmp.probes,]
+      permu.meth <-  assay(getMet(data))[tmp.probes,]
       parallel <- FALSE
       if (cores > 1){
         if (cores > detectCores()) cores <- detectCores()
@@ -383,7 +383,7 @@ get.permu <- function(mae,
                          Meths=permu.meth[x,],
                          Gene=geneID, # How to do it  
                          Top=percentage,
-                         Exps=assay(experiments(mae)[["Gene expression"]]),
+                         Exps=assay(getExp(data)),
                          permu.dir=permu.dir)},
                      .progress = "text", .parallel = parallel
       )
