@@ -20,7 +20,7 @@
 #' )
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- colnames(gene.exp)
-#' mae <- create.mae(exp = gene.exp, met = dna.met, pData = sample.info) 
+#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info) 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
 #'    library(TCGAbiolinks)
@@ -40,18 +40,18 @@
 #'                      legacy = TRUE)
 #'    GDCdownload(query)
 #'    tcga.met <- GDCprepare(query)
-#'    tcga.mae <- create.mae(exp = tcga.exp, met = tcga.met, TCGA = TRUE)
+#'    tcga.mae <- createMultiAssayExperiment(exp = tcga.exp, met = tcga.met, TCGA = TRUE)
 #'    # To access the information
 #'    sampleMap(tcga.mae)
 #'    pData(tcga.mae)
 #'    mae.met <- experiments(tcga.mae)[["DNA methylation"]]
 #'    mae.exp <- experiments(tcga.mae)[["Gene expression"]]
 #' }
-#' create.mae
-create.mae <- function (exp, 
-                        met, 
-                        pData, 
-                        TCGA = FALSE) {
+#' createMultiAssayExperiment
+createMultiAssayExperiment <- function (exp, 
+                                        met, 
+                                        pData, 
+                                        TCGA = FALSE) {
   
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
