@@ -162,7 +162,7 @@ get.diff.meth <- function(data,
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
               row.names=FALSE)
   }
-
+  
   result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,]
   if(nrow(result) == 0 ) message("No relevant probes found")
   
@@ -336,7 +336,7 @@ get.permu <- function(data,
                  set a smaller permu.size.",permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
-
+  
   if(is.null(permu.dir)){
     permu.meth <- assay(getMet(data))[probes.permu,] 
     
@@ -375,7 +375,7 @@ get.permu <- function(data,
         registerDoParallel(cores)
         parallel = TRUE
       }
-     
+      
       permu <- alply(.data = tmp.probes, .margins = 1,
                      .fun = function(x) {
                        Stat.nonpara.permu(
@@ -411,12 +411,15 @@ get.permu <- function(data,
 #' @return A data frame contains genes whose expression significantly anti-correlated 
 #' with promoter methylation.
 #' @export
-promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
-  TSS_2K <- promoters(getGeneInfo(mee), upstream = 100, downstream = 700)
-  probes <- getProbeInfo(mee)
+promoterMeth <- function(data,
+                         sig.pvalue=0.01,
+                         percentage=0.2,
+                         save=TRUE){
+  TSS_2K <- promoters(rowRanges(getExp(data)), upstream = 100, downstream = 700)
+  probes <- rowRanges(getMet(data))
   overlap <- findOverlaps(probes, TSS_2K)
-  df <- data.frame(Probe=as.character(probes$name[queryHits(overlap)]), 
-                   GeneID=TSS_2K$GENEID[subjectHits(overlap)], stringsAsFactors=FALSE)
+  df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]), 
+                   GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
   if(nrow(df)==0){
     out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
   }else{
@@ -425,21 +428,23 @@ promoterMeth <- function(mee,sig.pvalue=0.01,percentage=0.2,save=TRUE){
     
     ## calculate average methylation of promoter
     Gene.promoter <- lapply(ProbeInTSS, 
-                            function(x, METH){meth <- METH[x,]
-                            if(length(x)>1){
-                              meth <- colMeans(meth,na.rm=TRUE)
-                            }  
-                            return(meth)},   
-                            METH=getMeth(mee))
+                            function(x, METH){
+                              meth <- METH[x,]
+                              if(length(x)>1){
+                                meth <- colMeans(meth,na.rm=TRUE)
+                              }  
+                              return(meth)
+                            },   
+                            METH=assay(getMet(data)))
     Gene.promoter <- do.call(rbind, Gene.promoter)
     ## make fake NearGene 
-    Fake <- data.frame(Symbol = getSymbol(mee, geneID = rownames(Gene.promoter)),
+    Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
                        GeneID = rownames(Gene.promoter),
                        Distance= 1,
                        Side = 1, stringsAsFactors=FALSE)
     Fake <- split(Fake, Fake$GeneID)
     out <- lapply(rownames(Gene.promoter),Stat.nonpara, NearGenes=Fake,K=0.3,Top=0.2,
-                  Meths=Gene.promoter,Exps=getExp(mee))
+                  Meths=Gene.promoter,Exps=assay(getExp(data)))
     out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }
@@ -595,7 +600,7 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
 #'               Symbol=c("TP53","TP63","TP73"), 
 #'               stringsAsFactors = FALSE),
 #'               label="hypo")
-get.TFs <- function(mee, 
+get.TFs <- function(data, 
                     enriched.motif, 
                     TFs, 
                     motif.relavent.TFs,
@@ -615,11 +620,18 @@ get.TFs <- function(mee,
   if(missing(TFs)){
     newenv <- new.env()
     data("human.TF",package = "ELMER.data",envir=newenv)
-    TFs <- get(ls(newenv)[1],envir=newenv) 
-    if(all(grepl("ID", rownames(getExp(mee)) )))
-      TFs$GeneID <- paste0("ID",TFs$GeneID)
-    TFs <- TFs[TFs$GeneID %in% rownames(getExp(mee)),]
-  }else if(is.character(TFs)){
+    TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    
+    # Here we will make some assumptions:
+    # TFs has a column Symbol
+    # data has the field external_gene_name which should be created by 
+    # createMultAssayExperiment function
+    # external_gene_name is the default for hg38 in biomart
+    # external_gene_id is the default for hg19 in biomart
+    if("external_gene_name" %in% colanames(values(getExp(data)))) geneSymbolCol <- "external_gene_name"
+    if("external_gene_id" %in% colanames(values(getExp(data)))) geneSymbolCol <- "external_gene_id"
+    TFs <- TFs[TFs$Symbol %in% getExp(data)[,geneSymbolCol],]
+  } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
   
@@ -627,18 +639,17 @@ get.TFs <- function(mee,
     newenv <- new.env()
     data("motif.relavent.TFs",package = "ELMER.data",envir=newenv)
     motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-  }else if(is.character(motif.relavent.TFs)){
-    newenv <- new.env()
-    load(motif.relavent.TFs, envir=newenv)
-    motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+  } else if(is.character(motif.relavent.TFs)){
+    motif.relavent.TFs <- get(load(motif.relavent.TFs)) # The data is in the one and only variable
   }
   
   motif.meth <- lapply(enriched.motif, 
-                       function(x,meth){if(length(x)<2)
-                       { return(meth[x,])
-                       }else{
-                         return(colMeans(meth[x,],na.rm = TRUE))
-                       }}, meth = getMeth(mee,probe=unique(unlist(enriched.motif))) )
+                       function(x,meth){
+                         if(length(x)<2) { 
+                           return(meth[x,])
+                         } else {
+                           return(colMeans(meth[x,],na.rm = TRUE))
+                         }}, meth = getMet(data)[unique(unlist(enriched.motif)),])
   
   motif.meth <- do.call(rbind, motif.meth)
   
@@ -654,7 +665,7 @@ get.TFs <- function(mee,
                            Probe = x,
                            Meths=motif.meth,
                            Gene=TFs$GeneID,
-                           Top=percentage,Exps=getExp(mee))},
+                           Top=percentage,Exps=assay(getExp(data)))},
                        .progress = "text", .parallel = parallel
   )
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
