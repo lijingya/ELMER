@@ -17,37 +17,78 @@
 #' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
 #'                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
 #' )
-#' dna.met <- DataFrame(sample1 = c("cg22902499"=0.5,"cg06379435"=0.1),
-#'                        sample2 =  c("cg22902499"=0.3,"cg06379435"=0.9)
+#' dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'                        sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9)
 #' )
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- colnames(gene.exp)
-#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info) 
+#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
+#'    # Testing creating MultyAssayExperiment object
+#'    # Load library
 #'    library(TCGAbiolinks)
-#'    query <- GDCquery(project = "TCGA-ACC",
-#'                      data.category = "Gene expression",
-#'                      data.type = "Gene expression quantification",
-#'                      platform = "Illumina HiSeq", file.type  = "normalized_results",
-#'                      experimental.strategy = "RNA-Seq",
-#'                      barcode = c("TCGA-OR-A5J1","TCGA-OR-A5J2"),
-#'                      legacy = TRUE)
-#'    GDCdownload(query)
-#'    tcga.exp <- GDCprepare(query)
-#'    query <- GDCquery(project = "TCGA-ACC", 
-#'                      data.category = "DNA methylation", 
-#'                      platform = "Illumina Human Methylation 450",
-#'                      barcode = c("TCGA-OR-A5J1","TCGA-OR-A5J2"),
-#'                      legacy = TRUE)
-#'    GDCdownload(query)
-#'    tcga.met <- GDCprepare(query)
-#'    tcga.mae <- createMultiAssayExperiment(exp = tcga.exp, met = tcga.met, TCGA = TRUE)
-#'    # To access the information
-#'    sampleMap(tcga.mae)
-#'    pData(tcga.mae)
-#'    mae.met <- experiments(tcga.mae)[["DNA methylation"]]
-#'    mae.exp <- experiments(tcga.mae)[["Gene expression"]]
+#'    library(SummarizedExperiment)
+#'    
+#'    samples <- c("TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
+#'                 "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV")
+#'    
+#'    #1) Get gene expression matrix
+#'    query.exp <- GDCquery(project = "TCGA-HNSC", 
+#'                          data.category = "Transcriptome Profiling", 
+#'                          data.type = "Gene Expression Quantification", 
+#'                          workflow.type = "HTSeq - FPKM-UQ",
+#'                          barcode = samples)
+#'    
+#'    GDCdownload(query.exp)
+#'    exp.hg38 <- GDCprepare(query = query.exp)
+#'    
+#'    
+#'    # Aligned against Hg19
+#'    query.exp.hg19 <- GDCquery(project = "TCGA-HNSC", 
+#'                               data.category = "Gene expression",
+#'                               data.type = "Gene expression quantification",
+#'                               platform = "Illumina HiSeq", 
+#'                               file.type  = "normalized_results",
+#'                               experimental.strategy = "RNA-Seq",
+#'                               barcode = samples,
+#'                               legacy = TRUE)
+#'    GDCdownload(query.exp.hg19)
+#'    exp.hg19 <- GDCprepare(query.exp.hg19)
+#'    
+#'    # DNA Methylation
+#'    query.met <- GDCquery(project = "TCGA-HNSC",
+#'                          legacy = TRUE,
+#'                          data.category = "DNA methylation",
+#'                          barcode = samples,
+#'                          platform = "Illumina Human Methylation 450")
+#'    
+#'    GDCdownload(query.met)
+#'    met <- GDCprepare(query = query.met)
+#'    
+#'    
+#'    # Consisering it is TCGA and SE
+#'    mae.hg19 <- createMultiAssayExperiment(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+#'    values(getExp(mae.hg19))
+#'    
+#'    mae.hg38 <- createMultiAssayExperiment(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+#'    values(getExp(mae.hg38))
+#'    
+#'    # Consisering it is TCGA and not SE
+#'    mae.hg19.test <- createMultiAssayExperiment(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+#'    
+#'    mae.hg38 <- createMultiAssayExperiment(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+#'    values(getExp(mae.hg38))
+#'    
+#'    # Consisering it is not TCGA and SE
+#'    # DNA methylation and gene expression Objects should have same sample names in columns
+#'    not.tcga.exp <- exp.hg19 
+#'    colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
+#'    not.tcga.met <- exp.hg19 
+#'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
+#'    
+#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
+#'    mae.hg19 <- createMultiAssayExperiment(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
 #' }
 #' createMultiAssayExperiment
 createMultiAssayExperiment <- function (exp, 
@@ -62,43 +103,15 @@ createMultiAssayExperiment <- function (exp,
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
   
-  
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
-  
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
   if(class(exp) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
-    message("Creating a SummarizedExperiment object from input")
-    gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
-    colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
-    gene.info$strand[gene.info$strand == 1] <- "+"
-    gene.info$strand[gene.info$strand == -1] <- "-"
-    exp <- as.data.frame(exp)
-    
-    if(all(grepl("ENSG",rownames(exp)))) {
-      exp$ensembl_gene_id <- rownames(exp)
-      aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
-      aux <- aux[!duplicated(aux$ensembl_gene_id),]
-      rownames(aux) <- aux$ensembl_gene_id
-      exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
-                                                   start.field="start_position",
-                                                   end.field=c("end_position"))
-      extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
-      colnames(extra) <- required.cols
-      values(exp) <- cbind(values(exp),extra)
-    } else {
-      message("We will consider your gene expression row names are Gene Symbols")
-      exp$external_gene_name <- rownames(exp)
-      aux <- merge(exp, gene.info, by = geneCol, sort = FALSE)
-      aux <- aux[!duplicated(aux$external_gene_name),]
-      rownames(aux) <- aux$external_gene_name
-      exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
-                                                   start.field="start_position",
-                                                   end.field=c("end_position"))
-      extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-      colnames(extra) <- required.cols
-      values(exp) <- cbind(values(exp),extra)
-    }
+    exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome)
+  }
+  
+  if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    met <- makeSummarizedExperimentFromDNAMethylation(met, genome)
   }
   
   # We will need to check if the fields that we need exists.
@@ -146,13 +159,82 @@ createMultiAssayExperiment <- function (exp,
     ID <- intersect(colnames(met), colnames(exp))
     met <- met[,match(ID,colnames(met))]
     exp <- exp[,match(ID,colnames(exp))]
+    pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
+    sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(met)))),
+                            primary = c(colnames(met),colnames(exp)),
+                            colname=c(colnames(met),colnames(exp)))
     if(!all(colnames(exp) == colnames(met))) stop("Please, be sure your DNA methylation matrix and gene expression matrix have the samples in the same order")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
                                 pData = pData,
+                                sampleMap = sampleMap,
                                 metadata = list(TCGA=FALSE))
   }
   return(mae)
+}
+
+makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
+  message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+  message("Creating a SummarizedExperiment from gene expression input")
+  gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+  colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
+  gene.info$strand[gene.info$strand == 1] <- "+"
+  gene.info$strand[gene.info$strand == -1] <- "-"
+  exp <- as.data.frame(exp)
+  
+  if(all(grepl("ENSG",rownames(exp)))) {
+    exp$ensembl_gene_id <- rownames(exp)
+    aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
+    aux <- aux[!duplicated(aux$ensembl_gene_id),]
+    rownames(aux) <- aux$ensembl_gene_id
+    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
+                                                 start.field="start_position",
+                                                 end.field=c("end_position"))
+    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
+    colnames(extra) <- required.cols
+    values(exp) <- cbind(values(exp),extra)
+  } else {
+    message("We will consider your gene expression row names are Gene Symbols")
+    exp$external_gene_name <- rownames(exp)
+    aux <- merge(exp, gene.info, by = "external_gene_name", sort = FALSE)
+    aux <- aux[!duplicated(aux$external_gene_name),]
+    rownames(aux) <- aux$external_gene_name
+    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
+                                                 start.field="start_position",
+                                                 end.field=c("end_position"))
+    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+    colnames(extra) <- required.cols
+    values(exp) <- cbind(values(exp),extra)
+  }
+  return(exp)
+}
+
+#' @importFrom downloader download
+makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
+  message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+  message("Creating a SummarizedExperiment from DNA methylation input")
+  if(nrow(met) > 800000) {
+    plat <- "EPIC"
+    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/EPIC/EPIC.manifest.rda"
+    message(paste0("EPIC platform identified.\nAdding annotation from: ",annotation))
+  } else {
+    plat <- "450K"
+    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
+    message(paste0("450K platform identified.\nAdding annotation from: ",annotation))
+  }
+  
+  if(genome == "hg38") annotation <- gsub(".rda",".hg38.rda", annotation)
+  
+  if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
+  if(!file.exists(basename(annotation))) download(annotation, basename(annotation), mode = mode)
+  annotation <- get(load(basename(annotation)))
+  rowRanges <- annotation[rownames(met),]
+  colData <-  DataFrame(samples = colnames(met))
+  assay <- data.matrix(met)
+  met <- SummarizedExperiment(assays=assay,
+                              rowRanges=rowRanges,
+                              colData=colData)
+  return(met)
 }
 
 #' fetch.pair

@@ -12,8 +12,8 @@ getExp <- function(data) {
 # Check input
 checkData <- function(data){
   if(class(data) == class(MultiAssayExperiment())) {
-    if(! "DNA methylation" %in%  names(experiments(data)) |
-       !"Gene expression" %in%  names(experiments(data)))
+    if(! "DNA methylation" %in%  names(data) |
+       !"Gene expression" %in%  names(data))
       stop("Please the input should be a MultiAssayExperiment with both DNA methylation and Gene expression matrix. See function createMultiAssayExperiment")
   } else {
     stop("Please the input should be a MultiAssayExperiment with both DNA methylation and Gene expression matrix. See function createMultiAssayExperiment")
