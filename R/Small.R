@@ -3,7 +3,9 @@
 #' This function will receive a gene expression and DNA methylation data objects 
 #' and create a Multi Assay Experiment.
 #' @param met A Summaerized Experiment, a matrix or path of rda file only containing the data.
-#' @param exp A Summaerized Experiment, a matrix or path of rda file only containing the data.
+#' @param exp A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
+#' either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)
+#' @param genome Which is the default genome to make gene information. Options hg19 and hg38
 #' @param pData A DataFrame or data.frame of the phenotype data for all participants
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
@@ -51,11 +53,73 @@
 createMultiAssayExperiment <- function (exp, 
                                         met, 
                                         pData, 
+                                        genome = NULL,
                                         TCGA = FALSE) {
+  
+  if(missing(genome)) stop("Please specify the genome (hg38, hg19)")
   
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
+  
+  
+  # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
+  required.cols <- c("external_gene_name", "ensembl_gene_id")
+  
+  # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
+  if(class(exp) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    message("Creating a SummarizedExperiment object from input")
+    gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+    colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
+    gene.info$strand[gene.info$strand == 1] <- "+"
+    gene.info$strand[gene.info$strand == -1] <- "-"
+    exp <- as.data.frame(exp)
+    
+    if(all(grepl("ENSG",rownames(exp)))) {
+      exp$ensembl_gene_id <- rownames(exp)
+      aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
+      aux <- aux[!duplicated(aux$ensembl_gene_id),]
+      rownames(aux) <- aux$ensembl_gene_id
+      exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
+                                                   start.field="start_position",
+                                                   end.field=c("end_position"))
+      extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
+      colnames(extra) <- required.cols
+      values(exp) <- cbind(values(exp),extra)
+    } else {
+      message("We will consider your gene expression row names are Gene Symbols")
+      exp$external_gene_name <- rownames(exp)
+      aux <- merge(exp, gene.info, by = geneCol, sort = FALSE)
+      aux <- aux[!duplicated(aux$external_gene_name),]
+      rownames(aux) <- aux$external_gene_name
+      exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
+                                                   start.field="start_position",
+                                                   end.field=c("end_position"))
+      extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+      colnames(extra) <- required.cols
+      values(exp) <- cbind(values(exp),extra)
+    }
+  }
+  
+  # We will need to check if the fields that we need exists.
+  # Otherwise we will need to create them
+  if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    required.cols <- required.cols[!required.cols %in% colnames(values(exp))]
+    if(length(required.cols) > 0) {
+      gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+      colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
+      if(all(grepl("ENSG",rownames(exp)))) {
+        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
+        colnames(extra) <- required.cols
+        values(exp) <- cbind(values(exp),extra)
+      } else {
+        message("We will consider your gene expression row names are Gene Symbols")
+        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+        colnames(extra) <- required.cols
+        values(exp) <- cbind(values(exp),extra)
+      }
+    }
+  } 
   
   if(TCGA){
     message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
@@ -239,7 +303,6 @@ lm_eqn = function(df,Dep,Exp){
 #' @param genome.build Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
 #' Options: hg19 (default) and hg38.
 #' @return UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.
-#' @importFrom GenomicFeatures transcripts
 #' @examples
 #' # get UCSC gene annotation (transcripts level)
 #' \dontrun{
@@ -253,9 +316,11 @@ lm_eqn = function(df,Dep,Exp){
 #' @export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
+#' @importFrom GenomicFeatures transcripts
+#' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
-  gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
+  gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL'))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
   gene$SYMBOL <- unlist(gene$SYMBOL)
