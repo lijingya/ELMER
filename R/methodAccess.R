@@ -18,7 +18,9 @@ checkData <- function(data){
   } else {
     stop("Please the input should be a MultiAssayExperiment with both DNA methylation and Gene expression matrix. See function createMultiAssayExperiment")
   }
-  
+  # We will need to ensure createMultiAssayExperiment add those fields if they don't exists
+  if(!"external_gene_name" %in% colnames(values(data))) stop("Please the input should be a Gene Expression data must have external_gene_name column")
+  if(!"ensembl_gene_id" %in% colnames(values(data))) stop("Please the input should be a Gene Expression data must have external_gene_name column")
 }
 
 ###Pair -------------------------------------------------------------------
