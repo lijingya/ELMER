@@ -1,10 +1,12 @@
 
 #' @importFrom MultiAssayExperiment experiments
+#' @export
 getMet <- function(data) {
   return(experiments(data)[["DNA methylation"]])
 }
 
 #' @importFrom MultiAssayExperiment experiments
+#' @export
 getExp <- function(data) {
   return(experiments(data)[["Gene expression"]])
 }

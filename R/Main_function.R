@@ -472,11 +472,17 @@ promoterMeth <- function(data,
 #' "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' bg <- rownames(getMeth(mee))
-#' enriched.motif <- get.enriched.motif(probes=probes,background.probes = bg,
-#' min.incidence=2, label="hypo")
-get.enriched.motif <- function(probes.motif, probes, background.probes,
-                               lower.OR=1.1,min.incidence=10, dir.out="./",
-                               label=NULL,save=TRUE){
+#' enriched.motif <- get.enriched.motif(probes=probes,
+#'                                      background.probes = bg,
+#'                                      min.incidence=2, label="hypo")
+get.enriched.motif <- function(probes.motif, 
+                               probes, 
+                               background.probes,
+                               lower.OR=1.1,
+                               min.incidence=10, 
+                               dir.out="./",
+                               label=NULL,
+                               save=TRUE){
   if(missing(probes.motif)){
     newenv <- new.env()
     data("Probes.motif",package = "ELMER.data",envir=newenv)
@@ -506,9 +512,12 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
   sub.enrich.TF.lower <- exp(log(sub.enrich.TF)-1.96*SE)
   sub.enrich.TF.upper <- exp(log(sub.enrich.TF)+1.96*SE)
   ## summary
-  Summary <- data.frame(motif = colnames(probes.TF), NumOfProbes= probes.TF.num,
-                        OR=sub.enrich.TF, lowerOR=sub.enrich.TF.lower, 
-                        upperOR=sub.enrich.TF.upper)
+  Summary <- data.frame(motif = colnames(probes.TF), 
+                        NumOfProbes = probes.TF.num,
+                        OR = sub.enrich.TF, 
+                        lowerOR = sub.enrich.TF.lower, 
+                        upperOR = sub.enrich.TF.upper)
+  
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   if(save) write.csv(Summary, file= sprintf("%s/getMotif.%s.motif.enrichment.csv",
                                             dir.out,label))
@@ -519,8 +528,9 @@ get.enriched.motif <- function(probes.motif, probes, background.probes,
                                            probes.TF.num > min.incidence])
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
   enriched.motif <- sapply(en.motifs, 
-                           function(x, probes.TF)
-                           {names(probes.TF[probes.TF[,x]==1,x])},
+                           function(x, probes.TF) {
+                             names(probes.TF[probes.TF[,x]==1,x])
+                           },
                            probes.TF=probes.TF)
   if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
@@ -628,9 +638,7 @@ get.TFs <- function(data,
     # createMultAssayExperiment function
     # external_gene_name is the default for hg38 in biomart
     # external_gene_id is the default for hg19 in biomart
-    if("external_gene_name" %in% colanames(values(getExp(data)))) geneSymbolCol <- "external_gene_name"
-    if("external_gene_id" %in% colanames(values(getExp(data)))) geneSymbolCol <- "external_gene_id"
-    TFs <- TFs[TFs$Symbol %in% getExp(data)[,geneSymbolCol],]
+    TFs <- TFs[TFs$Symbol %in% getExp(data)[,"external_gene_name"],]
   } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
@@ -679,9 +687,11 @@ get.TFs <- function(data,
                           cor <- sort(TF.meth.cor[,x])
                           top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
                           potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
-                          out <- data.frame("motif"=x,"top potential TF"= potential.TF[1],
-                                            "potential TFs"= paste(potential.TF, collapse = ";"),
-                                            "top_5percent"= paste(top,collapse = ";"))},                                         
+                          out <- data.frame("motif" = x,
+                                            "top potential TF" = potential.TF[1],
+                                            "potential TFs" = paste(potential.TF, collapse = ";"),
+                                            "top_5percent" = paste(top,collapse = ";"))
+                          },                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
   cor.summary <- do.call(rbind, cor.summary)
   if(save){
