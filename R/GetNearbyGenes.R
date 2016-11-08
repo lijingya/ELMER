@@ -121,12 +121,12 @@ NearGenes <- function (Target=NULL,
 #' GetNearGenes to collect nearby genes for one locus.
 #' @description 
 #' GetNearGenes is a function to collect equal number of gene on each side of one locus.
-#' @param geneAnnot A GRange object. Contains coordinates of promoters for 
+#' @param geneAnnot A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 #' human genome.
 #' @param geneNum A number determines how many gene will be collected totally. 
 #' Then the number devided by 2 is the number of genes collected from 
 #' each side of targets (number shoule be even) Default to 20.
-#' @param TRange A GRange object. Contains coordinates of a list of targets loci.
+#' @param TRange A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.
 #' @param cores A interger which defines the number of cores to be used in parallel process.
 #'  Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
@@ -153,6 +153,17 @@ GetNearGenes <- function(geneAnnot=NULL,
   if(is.null(TRange)){
     stop(" TRange must be defined")
   }
+  if(is.null(geneAnnot)){
+    stop(" geneAnnot must be defined")
+  }
+  
+  if(class(TRange) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    TRange <- rowRanges(TRange)
+  }
+  if(class(geneAnnot) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    geneAnnot <- rowRanges(geneAnnot)
+  }
+  
   parallel <- FALSE
   if (cores > 1){
     if (cores > detectCores()) cores <- detectCores()
@@ -169,6 +180,8 @@ GetNearGenes <- function(geneAnnot=NULL,
                      .progress = "text", .parallel = parallel
   )
   names(NearGenes) <- names(TRange)
+  if("split_labels" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_labels"] <- NULL 
+  if("split_type" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_type"] <- NULL 
   return(NearGenes)
 }
 
