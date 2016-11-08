@@ -378,7 +378,7 @@ get.permu <- function(data,
       
       permu <- alply(.data = tmp.probes, .margins = 1,
                      .fun = function(x) {
-                       Stat.nonpara.permu(
+                       Stat.nonpara.permu_bc(
                          Probe = x,
                          Meths=permu.meth[x,],
                          Gene=geneID, # How to do it  

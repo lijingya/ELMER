@@ -1,3 +1,5 @@
+
+
 ## get differential methylated probes-------------------------
 #' Stat.diff.meth
 #' @param probe A charactor specify probe name
@@ -183,3 +185,8 @@ Get.Pvalue.p <- function(U.matrix,permu){
   U.matrix$Pe <- Pvalue
   return(U.matrix)
 }
+
+# Trying byte code compilation to make it faster
+Stat.diff.meth_bc <- compiler::cmpfun(Stat.diff.meth)
+Stat.nonpara.permu_bc <- compiler::cmpfun(Stat.nonpara.permu)
+
