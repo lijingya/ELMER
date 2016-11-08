@@ -67,7 +67,12 @@ Stat.diff.meth <- function(probe,
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @param permu.dir A path to store permuation data.
 #' @return U test results
-Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.dir=NULL){
+Stat.nonpara.permu <- function(Probe,
+                               Gene,
+                               Top=0.2,
+                               Meths=Meths,
+                               Exps=Exps,
+                               permu.dir=NULL){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Exp <- Exps[Gene,]
   if(is.vector(Meths)){

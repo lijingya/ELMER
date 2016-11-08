@@ -402,12 +402,24 @@ lm_eqn = function(df,Dep,Exp){
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
-  gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL'))
+  gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
   gene$SYMBOL <- unlist(gene$SYMBOL)
   gene <- gene[!is.na(gene$GENEID)]
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     gene <- promoters(gene, upstream = TSS$upstream, downstream = TSS$downstream)
+  return(gene)
+}
+
+# list of TF from this paper:  http://www.sciencedirect.com/science/article/pii/S0092867410000796 
+getTF <- function(genome.build = "hg19"){
+  newenv <- new.env()
+  data("human.TF",package = "ELMER.data",envir=newenv)
+  human.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+  
+  if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
+  gene <- values(transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"), filter = list(gene_id =human.TF$GeneID)))
+  gene  <- gene[!duplicated(gene),]
   return(gene)
 }

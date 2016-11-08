@@ -601,13 +601,20 @@ get.enriched.motif <- function(probes.motif,
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
+#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+#' exp <- mee@exp
+#' rownames(exp) <- gene.info$ensembl_gene_id
+#' exp <- exp[!is.na(rownames(exp)),]
+#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
 #' enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
-#'TF <- get.TFs(mee, enriched.motif, 
-#'               TFs=data.frame(GeneID=c("ID7157","ID8626","ID7161"),
-#'               Symbol=c("TP53","TP63","TP73"), 
+#' TF <- get.TFs(data, enriched.motif, 
+#'               TFs=data.frame(GeneID=c("7157","8626","7161"),
+#'               Symbol=c("TP53","TP63","TP73"),
+#'                ENSEMBL= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
 #'               stringsAsFactors = FALSE),
 #'               label="hypo")
 get.TFs <- function(data, 
@@ -628,9 +635,7 @@ get.TFs <- function(data,
   }
   
   if(missing(TFs)){
-    newenv <- new.env()
-    data("human.TF",package = "ELMER.data",envir=newenv)
-    TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    
     
     # Here we will make some assumptions:
     # TFs has a column Symbol
@@ -638,7 +643,8 @@ get.TFs <- function(data,
     # createMultAssayExperiment function
     # external_gene_name is the default for hg38 in biomart
     # external_gene_id is the default for hg19 in biomart
-    TFs <- TFs[TFs$Symbol %in% getExp(data)[,"external_gene_name"],]
+    Tfs <- getTF()
+    
   } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
@@ -657,7 +663,7 @@ get.TFs <- function(data,
                            return(meth[x,])
                          } else {
                            return(colMeans(meth[x,],na.rm = TRUE))
-                         }}, meth = getMet(data)[unique(unlist(enriched.motif)),])
+                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),])
   
   motif.meth <- do.call(rbind, motif.meth)
   
@@ -667,13 +673,19 @@ get.TFs <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
+  if(all(grepl("ENSG",rownames(getExp(data))))) {
+    gene <-  TFs$ENSEMBL
+  } else {
+    gene <- TFs$Symbol
+  }
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
                            Meths=motif.meth,
-                           Gene=TFs$GeneID,
-                           Top=percentage,Exps=assay(getExp(data)))},
+                           Gene=TFs$ENSEMBL,
+                           Top=percentage,
+                           Exps=assay(getExp(data)))},
                        .progress = "text", .parallel = parallel
   )
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
@@ -691,7 +703,7 @@ get.TFs <- function(data,
                                             "top potential TF" = potential.TF[1],
                                             "potential TFs" = paste(potential.TF, collapse = ";"),
                                             "top_5percent" = paste(top,collapse = ";"))
-                          },                                         
+                        },                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
   cor.summary <- do.call(rbind, cor.summary)
   if(save){
