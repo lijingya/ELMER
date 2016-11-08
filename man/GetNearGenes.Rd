@@ -7,10 +7,10 @@
 GetNearGenes(geneAnnot = NULL, TRange = NULL, geneNum = 20, cores = 1)
 }
 \arguments{
-\item{geneAnnot}{A GRange object. Contains coordinates of promoters for 
+\item{geneAnnot}{A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 human genome.}
 
-\item{TRange}{A GRange object. Contains coordinates of a list of targets loci.}
+\item{TRange}{A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.}
 
 \item{geneNum}{A number determines how many gene will be collected totally. 
 Then the number devided by 2 is the number of genes collected from 
