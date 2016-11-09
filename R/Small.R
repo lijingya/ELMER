@@ -177,6 +177,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from gene expression input")
   gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+  gene.info$chromosome_name <- paste0("chr",gene.info$chromosome_name)
   colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
   gene.info$strand[gene.info$strand == 1] <- "+"
   gene.info$strand[gene.info$strand == -1] <- "-"
