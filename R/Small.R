@@ -161,8 +161,8 @@ createMultiAssayExperiment <- function (exp,
     exp <- exp[,match(ID,colnames(exp))]
     pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
     sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(met)))),
-                            primary = c(colnames(met),colnames(exp)),
-                            colname=c(colnames(met),colnames(exp)))
+                           primary = c(colnames(met),colnames(exp)),
+                           colname=c(colnames(met),colnames(exp)))
     if(!all(colnames(exp) == colnames(met))) stop("Please, be sure your DNA methylation matrix and gene expression matrix have the samples in the same order")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
@@ -182,6 +182,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   gene.info$strand[gene.info$strand == 1] <- "+"
   gene.info$strand[gene.info$strand == -1] <- "-"
   exp <- as.data.frame(exp)
+  required.cols <- c("external_gene_name", "ensembl_gene_id")
   
   if(all(grepl("ENSG",rownames(exp)))) {
     exp$ensembl_gene_id <- rownames(exp)
