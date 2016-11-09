@@ -204,9 +204,8 @@ get.diff.meth <- function(data,
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @references 
-#' Yao L, Shen H, Laird PW, Farnham PJ,Berman BP: Inferring Regulatory Element 
-#' Landscapes and Transcription Factor Networks from Cancer Methylomes. in revision of
-#' Genome Biology
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
@@ -342,9 +341,8 @@ get.pair <- function(data,
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @references 
-#' Yao L, Shen H, Laird PW, Farnham PJ,Berman BP: Inferring Regulatory Element 
-#' Landscapes and Transcription Factor Networks from Cancer Methylomes. in revision of
-#' Genome Biology
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @note 
 #' Permutation is the most time consuming step. It is recommended to use multiple  
 #' cores for this step. Default permutation time is 1000 which may need 12 hrs by 4 cores. 
@@ -618,7 +616,7 @@ get.enriched.motif <- function(probes.motif,
 #' between the probes containing a particular motif and expression of all known TFs. If save is ture, 
 #' two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
 #' @usage get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
-#' @param mee A MEE.data object contains at least meth, exp, probeInfo, geneInfo.
+#' @param data #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
 #' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
 #' If missing, human.TF list will be used (human.TF data in ELMER.data). 
@@ -644,7 +642,9 @@ get.enriched.motif <- function(probes.motif,
 #' @importFrom pbapply pbsapply
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
-#' @author Lijing Yao (maintainer: lijingya@usc.edu)
+#' @author 
+#' Lijing Yao (creator: lijingya@usc.edu) 
+#' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.

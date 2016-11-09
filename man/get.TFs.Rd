@@ -7,7 +7,7 @@
 get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
 }
 \arguments{
-\item{mee}{A MEE.data object contains at least meth, exp, probeInfo, geneInfo.}
+\item{data}{#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
 
 \item{enriched.motif}{A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.}
 
@@ -48,18 +48,26 @@ If save is false, a data frame which contains the same content with the first fi
 }
 \examples{
 load(system.file("extdata","mee.example.rda",package = "ELMER"))
+gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+exp <- mee@exp
+rownames(exp) <- gene.info$ensembl_gene_id
+exp <- exp[!is.na(rownames(exp)),]
+data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
 enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
-TF <- get.TFs(mee, enriched.motif, 
-              TFs=data.frame(GeneID=c("ID7157","ID8626","ID7161"),
-              Symbol=c("TP53","TP63","TP73"), 
+TF <- get.TFs(data, enriched.motif, 
+              TFs=data.frame(GeneID=c("7157","8626","7161"),
+              Symbol=c("TP53","TP63","TP73"),
+               ENSEMBL= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
               stringsAsFactors = FALSE),
               label="hypo")
 }
 \author{
-Lijing Yao (maintainer: lijingya@usc.edu)
+Lijing Yao (creator: lijingya@usc.edu) 
+Tiago C Silva (maintainer: tiagochst@usp.br)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
