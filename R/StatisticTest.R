@@ -78,14 +78,9 @@ Stat.nonpara.permu <- function(Probe,
   unmethy <- head(idx, n = nb) 
   methy <- tail(idx, n = nb) 
 
-  # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
-  Exps <- Exps[,c(unmethy,methy)]
-  
-  methy.start <-  nb + 1
-  methy.end <-  2 * nb
   test.p <- unlist(lapply(splitmatrix(Exps),
                           function(x) {
-                            wilcox.test(x[1:nb],x[methy.start:methy.end],alternative = "greater",exact=FALSE)$p.value
+                            wilcox.test(x[unmethy],x[methy],alternative = "greater",exact=FALSE)$p.value
                           }))
   
   test.p <- data.frame(GeneID=Gene,
@@ -108,7 +103,12 @@ Stat.nonpara.permu <- function(Probe,
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @return U test results
-Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
+Stat.nonpara <- function(Probe,
+                         NearGenes,
+                         K,
+                         Top=NULL,
+                         Meths=Meths,
+                         Exps=Exps){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,]
@@ -117,24 +117,21 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
   if( Meth_B >0.95 | Meth_B < 0.05 ){
     test.p <- NA
   }else{
-    unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-    methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
-    Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
-    Fa[unmethy] <- -1
-    Fa[methy] <- 1
+    idx <- order(Meth)
+    nb <- round(length(Meth)*Top)
+    unmethy <- head(idx, n = nb) 
+    methy <- tail(idx, n = nb) 
+    # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
     if(!is.vector(Exp)){
-      Exp <- Exp[,!is.na(Fa)]
-      Fa <- Fa[!is.na(Fa)]
+      Exps <- Exps[,c(unmethy,methy)]
       test.p <- unlist(lapply(splitmatrix(Exp),
                               function(x,Factor) 
-                              {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],
+                              {wilcox.test(x[unmethy],x[methy],
                                            alternative = "greater",
                                            exact=FALSE)$p.value},
                               Factor=Fa))
     }else{
-      Exp <- Exp[!is.na(Fa)]
-      Fa <- Fa[!is.na(Fa)]
-      test.p <- wilcox.test(Exp[Fa %in% -1],Exp[Fa %in% 1],
+      test.p <- wilcox.test(Exps[unmethy],Exps[methy],
                             alternative = "greater",
                             exact=FALSE)$p.value
     }

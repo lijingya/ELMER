@@ -196,9 +196,15 @@ get.diff.meth <- function(data,
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg10097755")),
-#'                          geneAnnot=getGeneInfo(mee))
-#' Hypo.pair <-get.pair(mee=mee,
+#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+#' exp <- mee@exp
+#' rownames(exp) <- gene.info$ensembl_gene_id
+#' exp <- exp[!is.na(rownames(exp)),]
+#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+#'                          geneAnnot=getExp(data))
+#' Hypo.pair <-get.pair(data=data,
 #'                      nearGenes=nearGenes,
 #'                      permu.size=5,
 #'                      Pe = 0.2,
@@ -213,7 +219,7 @@ get.pair <- function(data,
                      Pe=0.001,
                      dir.out="./",
                      diffExp=FALSE,
-                     cores=NULL,
+                     cores=1,
                      portion = 0.3, 
                      label=NULL,
                      save=TRUE){
@@ -237,7 +243,7 @@ get.pair <- function(data,
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
-                                     Meths= assay(getMet(data)[names(nearGenes),]), 
+                                     Meths= assay(getMet(data)[x,]), 
                                      NearGenes=nearGenes,
                                      K=portion,
                                      Top=percentage,
@@ -362,7 +368,7 @@ get.permu <- function(data,
                        Gene=geneID,
                        Top=percentage,
                        Exps=exp.data[geneID,])},
-                   .progress = "none", .parallel = parallel
+                   .progress = "text", .parallel = parallel
     )
 
     permu <- sapply(permu,
