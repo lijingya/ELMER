@@ -312,7 +312,14 @@ get.pair <- function(data,
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' permu <-get.permu(mee=mee,geneID=rownames(getExp(mee)),
+#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+#' exp <- mee@exp
+#' rownames(exp) <- gene.info$ensembl_gene_id
+#' exp <- exp[!is.na(rownames(exp)),]
+#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' permu <-get.permu(data = data,
+#'                   geneID=rownames(getExp(data)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
 #'                   permu.size=5)
 get.permu <- function(data, 
@@ -338,7 +345,7 @@ get.permu <- function(data,
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
   if(is.null(permu.dir)){
-    permu.meth <- assay(getMet(data))[probes.permu,] 
+    permu.meth <- assay(getMet(data)[probes.permu,] )
     
     parallel <- FALSE
     if (cores > 1){
@@ -346,7 +353,7 @@ get.permu <- function(data,
       registerDoParallel(cores)
       parallel = TRUE
     }
-    
+    exp.data <- assay(getExp(data))
     permu <- alply(.data = probes.permu, .margins = 1,
                    .fun = function(x) {
                      Stat.nonpara.permu(
@@ -354,9 +361,10 @@ get.permu <- function(data,
                        Meths=permu.meth[x,],
                        Gene=geneID,
                        Top=percentage,
-                       Exps=assay(getExp(data)))},
-                   .progress = "text", .parallel = parallel
+                       Exps=exp.data[geneID,])},
+                   .progress = "none", .parallel = parallel
     )
+
     permu <- sapply(permu,
                     function(x,geneID){ 
                       x <- x[match(geneID,x[,1]),2]},
@@ -368,25 +376,26 @@ get.permu <- function(data,
     }
     if(!all(probes.permu %in% dir(permu.dir))){
       tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-      permu.meth <-  assay(getMet(data))[tmp.probes,]
+      permu.meth <-  assay(getMet(data)[tmp.probes,])
       parallel <- FALSE
       if (cores > 1){
         if (cores > detectCores()) cores <- detectCores()
         registerDoParallel(cores)
         parallel = TRUE
       }
-      
+      exp.data <- assay(getExp(data))
       permu <- alply(.data = tmp.probes, .margins = 1,
                      .fun = function(x) {
-                       Stat.nonpara.permu_bc(
+                       Stat.nonpara.permu(
                          Probe = x,
                          Meths=permu.meth[x,],
                          Gene=geneID, # How to do it  
                          Top=percentage,
-                         Exps=assay(getExp(data)),
+                         Exps=exp.data,
                          permu.dir=permu.dir)},
                      .progress = "text", .parallel = parallel
       )
+      
     }
     permu.p <- paste0(permu.dir,"/",probes.permu)
     permu <- sapply(permu.p,

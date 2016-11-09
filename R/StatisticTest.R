@@ -1,5 +1,3 @@
-
-
 ## get differential methylated probes-------------------------
 #' Stat.diff.meth
 #' @param probe A charactor specify probe name
@@ -75,35 +73,31 @@ Stat.nonpara.permu <- function(Probe,
                                Meths=Meths,
                                Exps=Exps,
                                permu.dir=NULL){
-  if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
-  Exp <- Exps[Gene,]
-  if(is.vector(Meths)){
-    Meth <- Meths
-  }else{
-    Meth <- Meths[Probe,]
-  }
-  unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-  methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
-  Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
-  Fa[unmethy] <- -1
-  Fa[methy] <- 1
-  Exp <- Exp[,!is.na(Fa)]
-  Fa <- Fa[!is.na(Fa)]
-  test.p <- unlist(lapply(splitmatrix(Exp),
-                          function(x,Factor) 
-                            {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],alternative = "greater",exact=FALSE)$p.value},
-							Factor=Fa))
-  out <- data.frame(GeneID=Gene,
-                    Raw.p=test.p[match(Gene, names(test.p))], 
-                    stringsAsFactors = FALSE) 
+  idx <- order(Meths)
+  nb <- round(length(Meths)*Top)
+  unmethy <- head(idx, n = nb) 
+  methy <- tail(idx, n = nb) 
+
+  # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
+  Exps <- Exps[,c(unmethy,methy)]
+  
+  methy.start <-  nb + 1
+  methy.end <-  2 * nb
+  test.p <- unlist(lapply(splitmatrix(Exps),
+                          function(x) {
+                            wilcox.test(x[1:nb],x[methy.start:methy.end],alternative = "greater",exact=FALSE)$p.value
+                          }))
+  
+  test.p <- data.frame(GeneID=Gene,
+                       Raw.p=test.p[match(Gene, names(test.p))], 
+                       stringsAsFactors = FALSE) 
   if(is.null(permu.dir)){
-    return(out)
+    return(test.p)
   }else{
-    write.table(out,file=sprintf("%s/%s",permu.dir,Probe),
+    write.table(test.p,file=sprintf("%s/%s",permu.dir,Probe),
                 quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE)
   }
 }
-
 
 #' U test (non parameter test) for permutation. This is one probe vs nearby gene 
 #' which is good for computing each probes for nearby genes.
@@ -141,8 +135,8 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
       Exp <- Exp[!is.na(Fa)]
       Fa <- Fa[!is.na(Fa)]
       test.p <- wilcox.test(Exp[Fa %in% -1],Exp[Fa %in% 1],
-                                           alternative = "greater",
-                                           exact=FALSE)$p.value
+                            alternative = "greater",
+                            exact=FALSE)$p.value
     }
   }
   
@@ -185,8 +179,3 @@ Get.Pvalue.p <- function(U.matrix,permu){
   U.matrix$Pe <- Pvalue
   return(U.matrix)
 }
-
-# Trying byte code compilation to make it faster
-Stat.diff.meth_bc <- compiler::cmpfun(Stat.diff.meth)
-Stat.nonpara.permu_bc <- compiler::cmpfun(Stat.nonpara.permu)
-
