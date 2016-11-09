@@ -313,21 +313,42 @@ get.pair <- function(data,
 
 ### permutation
 #permu.size can be all which mean all the usable probes.
-#' get.permu
-#' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo.
+#' get.permu to generate permutation results for calculation of empirical P values for
+#' each enhancer-gene linkage.
+#' @description 
+#' get.permu is a function to use the same statistic model to calculate random enhancer-gene 
+#' pairs. Based on the permutation value, empirical P value can be calculated for the 
+#' real enhancer-gene pair (see reference).
+#' @usage 
+#' get.permu(data, geneID, percentage = 0.2, rm.probes = NULL, portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = 1)
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
 #' @param cores A interger which defines number of core to be used in parallel process.
-#'  Default is NULL: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
-#' samples used to link probes to genes. Default is 0.2.
-#' @param permu.size A number specify the times of permuation. Default is 1000.
+#'  Default is 1: don't use parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples of group 1 and group 2
+#' groups used to link probes to genes. Default is 0.2.
+#' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permuation will be. 
-#' @param portion A number specify the cut point for methylated and unmethylated.
+#' @param portion A number specify the cut point to define binary methlation level for probe loci. 
+#' Default is 0.3. When beta value is above 0.3, the probe is methylated and 
+#' vice versa. For one probe, the percentage of methylated or unmethylated samples 
+#' should be above 0.05.
 #' Default is 0.3.
 #' @return Permutations
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
+#' @author 
+#' Lijing Yao (creator: lijingya@usc.edu) 
+#' Tiago C Silva (maintainer: tiagochst@usp.br)
+#' @references 
+#' Yao L, Shen H, Laird PW, Farnham PJ,Berman BP: Inferring Regulatory Element 
+#' Landscapes and Transcription Factor Networks from Cancer Methylomes. in revision of
+#' Genome Biology
+#' @note 
+#' Permutation is the most time consuming step. It is recommended to use multiple  
+#' cores for this step. Default permutation time is 1000 which may need 12 hrs by 4 cores. 
+#' However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 #' @export 
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
