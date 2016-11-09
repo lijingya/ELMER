@@ -61,8 +61,7 @@ Lijing Yao (creator: lijingya@usc.edu)
 Tiago C Silva (maintainer: tiagochst@usp.br)
 }
 \references{
-Yao L, Shen H, Laird PW, Farnham PJ,Berman BP: Inferring Regulatory Element 
-Landscapes and Transcription Factor Networks from Cancer Methylomes. in revision of
-Genome Biology
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
 
