@@ -170,16 +170,22 @@ get.diff.meth <- function(data,
 }
 
 
-### pairing function--------------------
-#nearGenes : can be either a list containing output of GetNearGenes function or 
-#path of rda file containing output of GetNearGenes function.
 ## TCGA pipe don't specify dir.out
-#' get pair
-#' @param mee A MEE.data object containing at least meth, exp, probeInfo, geneInfo.
+#' get.pair to predict enhancer-gene linkages.
+#' @description 
+#' get.pair is a function to predict enhancer-gene linkages using associations between 
+#' DNA methylation at enhancer CpG sites and expression of 20 nearby genes of the CpG sites
+#' (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
+#' and getPair.XX.pairs.significant.csv (see detail).
+#' @usage 
+#' get.pair(data, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
+#'          Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = 1, portion=0.3,   
+#'          label = NULL, save=TRUE)
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
-#'  Default is NULL: don't use parallel process.
+#'  Default is 1: don't use parallel process.
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
@@ -194,6 +200,13 @@ get.diff.meth <- function(data,
 #' @param label A character labels the outputs.
 #' @return Statistics for all pairs and significant pairs
 #' @export 
+#' @author 
+#' Lijing Yao (creator: lijingya@usc.edu) 
+#' Tiago C Silva (maintainer: tiagochst@usp.br)
+#' @references 
+#' Yao L, Shen H, Laird PW, Farnham PJ,Berman BP: Inferring Regulatory Element 
+#' Landscapes and Transcription Factor Networks from Cancer Methylomes. in revision of
+#' Genome Biology
 #' @examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
