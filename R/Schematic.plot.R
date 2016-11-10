@@ -24,24 +24,33 @@
 #'@examples
 #'library(grid)
 #'load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#'nearGenes <-GetNearGenes(TRange=getProbeInfo(mee,probe=c("cg00329272","cg19403323")),
-#'                         geneAnnot=getGeneInfo(mee))
-#'Hypo.pair <-get.pair(mee=mee,probes=c("cg00329272","cg19403323"),
+#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+#' exp <- mee@exp
+#' rownames(exp) <- gene.info$ensembl_gene_id
+#' exp <- exp[!is.na(rownames(exp)),]
+#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+#'                          geneAnnot=getExp(data))
+#' Hypo.pair <-get.pair(data=data,probes=c("cg00329272","cg10097755"),
 #'                     nearGenes=nearGenes,permu.size=5,Pe = 0.2,dir.out="./",
 #'                     label= "hypo")
 #'pair <- fetch.pair(pair=Hypo.pair,
-#'                   probeInfo = getProbeInfo(mee),
-#'                   geneInfo = getGeneInfo(mee))
+#'                   probeInfo = rowRanges(getMet(data)),
+#'                   geneInfo = rowRanges(getExp(data)))
 #'# a. generate schematic plot of one probe with nearby 20 genes and label 
 #'#the gene significantly linked with the probe.
 #'grid.newpage()
-#'schematic.plot(pair=pair, byProbe="cg19403323" ,save=FALSE)
+#'schematic.plot(pair=pair, byProbe="cg00329272" ,save=FALSE)
 #'#b. generate schematic plot of ont gene with the probe which the gene significanlty linked to.
 #'grid.newpage()
-#'schematic.plot(pair=pair, byGene="ID255928",save=FALSE)
-schematic.plot <- function(pair, byProbe, byGene, 
+#'schematic.plot(pair=pair, byGene="ENSG00000078900",save=FALSE)
+schematic.plot <- function(pair, 
+                           byProbe, 
+                           byGene, 
                            byCoordinate=list(chr=c(), start=c(), end=c()),
-                           dir.out="./",save=TRUE,...){
+                           dir.out="./",
+                           save=TRUE,...){
   if(missing(pair)) stop("Pair option is empty.")
   if(nrow(getPair(pair))==0 | length(getProbeInfo(pair))==0 | length(getGeneInfo(pair))==0) 
     stop("All slot should be included in pair object.")
@@ -67,7 +76,7 @@ schematic.plot <- function(pair, byProbe, byGene,
       }else{
         schematic(probe.range= getProbeInfo(pair,probe=unique(significant$Probe)), 
                   gene.range=getGeneInfo(pair, geneID=i),
-                  special=list(names= c(getSymbol(pair,geneID=i),significant$Probe), 
+                  special=list(names= c(significant$Symbol,significant$Probe), 
                                colors=c("red",rep("blue",length(significant$Probe)))),
                   label=sprintf("%s/%s.schematic.byGene",dir.out,i), save=save)
       }
@@ -121,12 +130,12 @@ schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()
                       interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=TRUE){
   if(!unique(seqnames(probe.range)) %in% unique(seqnames(gene.range))) 
     stop("probe and gene should be in the same chromosome.")
-  Sequences <- data.frame(name = gene.range$SYMBOL, 
+  Sequences <- data.frame(name = gene.range$external_gene_name, 
                           position=start(gene.range),
                           Type=rep("arrow",length(gene.range)),
                           dir=as.vector(strand(gene.range)), 
                           stringsAsFactors = FALSE )
-  Sequences <- rbind(Sequences, data.frame(name = probe.range$name, 
+  Sequences <- rbind(Sequences, data.frame(name = names(probe.range), 
                                            position=start(probe.range), 
                                            Type=rep("circle",length(probe.range)), 
                                            dir=as.vector(strand(probe.range)),
