@@ -26,8 +26,11 @@
 #'motif.enrichment.plot(motif.enrichment=motif.enrichment,
 #'                      significant=list(OR=3),
 #'                      label="hypo", save=FALSE)
-motif.enrichment.plot <- function(motif.enrichment, significant=NULL, 
-                                  dir.out ="./", save=TRUE,label=NULL){
+motif.enrichment.plot <- function(motif.enrichment, 
+                                  significant=NULL, 
+                                  dir.out ="./", 
+                                  save=TRUE,
+                                  label=NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
   if(is.character(motif.enrichment)){
     motif.enrichment <- read.csv(motif.enrichment, stringsAsFactors=FALSE)
@@ -48,7 +51,8 @@ motif.enrichment.plot <- function(motif.enrichment, significant=NULL,
     geom_abline(intercept = 1, slope = 0, linetype = "3313")+
     theme_bw()+
     theme(panel.grid.major = element_blank())+
-    labs(xlab="motifs", ylab="Odds Ratio")
+    xlab("Motifs") + ylab("Odds Ratio") +
+    scale_y_continuous(breaks=c(1,pretty(motif.enrichment$OR, n = 5)))
   if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
                   useDingbats=FALSE, plot=P,width=4, 
                   height = 2*round(nrow(motif.enrichment)/10))
