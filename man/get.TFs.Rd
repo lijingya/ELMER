@@ -7,7 +7,7 @@
 get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
 }
 \arguments{
-\item{data}{#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
 
 \item{enriched.motif}{A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.}
 

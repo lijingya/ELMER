@@ -116,11 +116,11 @@ setMethod(f="getProbeInfo",signature="ANY",
             if(missing(chr) & missing(probe)){
               probeInfo <- object@probeInfo
             }else if(missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe]
+              probeInfo <- object@probeInfo[names(object@probeInfo) %in% probe]
             }else if(!missing(chr) & missing(probe)){
               probeInfo <- object@probeInfo[as.vector(seqnames(object@probeInfo)) %in% chr]
             }else if(!missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[object@probeInfo$name %in% probe & 
+              probeInfo <- object@probeInfo[names(object@probeInfo) %in% probe & 
                                               as.vector(seqnames(object@probeInfo)) %in% chr]
             }
             if(!missing(range)){
@@ -144,9 +144,9 @@ setMethod(f="getGeneInfo",signature="ANY",
             if(missing(geneID) & missing(symbol)){
               out <- object@geneInfo
             }else if(missing(geneID) & !missing(symbol)){
-              out <- object@geneInfo[object@geneInfo$SYMBOL %in% symbol]
+              out <- object@geneInfo[object@geneInfo$external_gene_name %in% symbol]
             }else if(!missing(geneID) & missing(symbol)){
-              out <- object@geneInfo[object@geneInfo$GENEID %in% geneID]
+              out <- object@geneInfo[object@geneInfo$ensembl_gene_id %in% geneID]
             }
             if(!missing(range)){
               over <- findOverlaps(out,range)
