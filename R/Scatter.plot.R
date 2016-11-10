@@ -1,8 +1,8 @@
 #'scatter.plot
-#'@importFrom ggplot2 ggsave
-#'@param mee A MEE.data object includes DNA methylation data, expression data, 
-#'probeInfo and geneInfo.
-#'@param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
+#' @importFrom ggplot2 ggsave
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
+#' See \code{\link{createMultiAssayExperiment function}}.
+#' @param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
 #'of probes' name and gene contains a vector of gene ID. The length of probe 
 #'should be the same with length of gene. Output see detail.
 #'@param byProbe A list byProbe =list(probe=c(), geneNum=20); probe contains 
@@ -24,34 +24,48 @@
 #'@return Scatter plots.
 #'@export
 #'@examples
-#'load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#'scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
-#'            category="TN", save=FALSE)
-#'scatter.plot(mee,byProbe=list(probe=c("cg19403323"),geneNum=20), 
-#'            category="TN", save=TRUE) ## save to pdf
-#'# b. generate one probe-gene pair
-#'scatter.plot(mee,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
-#'             category="TN", save=FALSE,lm_line=TRUE) 
-            
-            
-scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
-                         byProbe=list(probe=c(),geneNum=20),byTF=list(TF=c(),probe=c()), 
-                         category=NULL, dir.out ="./", save=TRUE, ...){
-  if(missing(mee)) stop("A MEE.data object should be included.")
-  if(!is.null(category) && length(category)==1) 
-    category <- getSample(mee,cols = category)
+#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
+#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
+#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
+#' exp <- mee@exp
+#' rownames(exp) <- gene.info$ensembl_gene_id
+#' exp <- exp[!is.na(rownames(exp)),]
+#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' scatter.plot(data,
+#'             byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#'             category="definition", save=FALSE)
+#' scatter.plot(data,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#'             category="TN", save=TRUE) ## save to pdf
+#' # b. generate one probe-gene pair
+#' scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
+#'              category="TN", save=FALSE,lm_line=TRUE) 
+scatter.plot <- function(data,
+                         byPair=list(probe=c(),gene=c()),
+                         byProbe=list(probe=c(),geneNum=20),
+                         byTF=list(TF=c(),probe=c()), 
+                         category=NULL, 
+                         dir.out ="./", 
+                         save=TRUE, ...){
+  if(missing(data)) stop("A data object should be included.")
+  
+  if(!is.null(category) && length(category)==1) { 
+    if(! category %in% colnames(pData(data))) stop("Cateogry not found in the  phenotypic data (pData(data)) ")
+    samples <- sampleMap(data)[sampleMap(data)$assay=="DNA methylation","primary"]
+    category <- pData(data)[samples,category]
+  }
   if(length(byPair$probe) != 0){
     if(length(byPair$probe)!=length(byPair$gene))
       stop("In pairs, the length of probes should be the same with the length of genes.")
     for(i in 1:length(byPair$probe)){
       probe <- byPair$probe[i]
       gene <- byPair$gene[i]
-      symbol <- getSymbol(mee,geneID=gene)
-      P <- scatter(meth=getMeth(mee,probe=probe),
-                   exp=getExp(mee,geneID = gene ),category=category, 
-              xlab=sprintf("DNA methyation at %s",probe), 
-              ylab=sprintf("%s gene expression",symbol), 
-              title=sprintf("%s_%s",probe,symbol),
+      symbol <- getSymbol(data,geneID=gene)
+      P <- scatter(meth=assay(getMet(data)[probe,]),
+                   exp=assay(getExp(data)[gene,] ),
+                   category=category, 
+                   xlab=sprintf("DNA methyation at %s",probe), 
+                   ylab=sprintf("%s gene expression",symbol), 
+                   title=sprintf("%s_%s",probe,symbol),
               ...)
       if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
                       plot = P,useDingbats=FALSE, width=7, height = 6)
@@ -59,15 +73,18 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
   }
   
   if(length(byProbe$probe)!=0){
-    nearGenes <- GetNearGenes(TRange=getProbeInfo(mee,probe=byProbe$probe),
-                              geneAnnot=getGeneInfo(mee),geneNum = byProbe$geneNum)
+    nearGenes <- GetNearGenes(TRange=rowRanges(getMet(data)[byProbe$probe,]),
+                              geneAnnot=rowRanges(getExp(data)),
+                              geneNum = byProbe$geneNum)
     for(i in byProbe$probe){
       probe <- i
       gene <- nearGenes[[i]]$GeneID
-      symbol <- getSymbol(mee,geneID=gene)
-      exp <- getExp(mee,geneID=gene)
+      symbol <- getSymbol(data,geneID=gene)
+      exp <- assay(getExp(data)[gene,])
       rownames(exp) <- symbol
-      P <- scatter(meth=getMeth(mee,probe=probe), exp=exp,category=category,
+      P <- scatter(meth=assay(getMet(data)[byProbe$probe,]), 
+                   exp=exp,
+                   category=category,
                    xlab=sprintf("DNA methyation at %s",probe), 
                    ylab=sprintf("Gene expression"), 
                    title=sprintf("%s nearby %s genes",probe,byProbe$geneNum),
@@ -78,13 +95,15 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
   }
   
   if(length(byTF$TF)!=0){
-    meth <- colMeans(getMeth(mee,probe=byTF$probe),na.rm = TRUE)
-    gene <- getGeneID(mee,symbol=byTF$TF)
-    exp <- getExp(mee,geneID=gene)
+    meth <- colMeans(assay(getMeth(data)[byTF$probe,]),na.rm = TRUE)
+    gene <- getGeneID(data,symbol=byTF$TF)
+    exp <- assay(getExp(data)[gene,])
     if(nrow(exp)>1){
       rownames(exp) <- byTF$TF
     }
-    P <- scatter(meth=meth, exp=exp,category=category,
+    P <- scatter(meth=meth, 
+                 exp=exp,
+                 category=category,
                  xlab="Avg DNA methyation", ylab=sprintf("TF expression"), 
                  title="TF vs avg DNA methylation",
                  ...)
@@ -109,13 +128,20 @@ scatter.plot <- function(mee,byPair=list(probe=c(),gene=c()),
 #color.value=c("Experiment"="red","Control"="darkgreen")
 #@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
 #@return A ggplot figure object
-scatter <- function(meth, exp, category=NULL, xlab=NULL, ylab=NULL,title=NULL,
-                    color.value=NULL,lm_line=FALSE){
+scatter <- function(meth, 
+                    exp, 
+                    category=NULL, 
+                    xlab=NULL, 
+                    ylab=NULL,
+                    title=NULL,
+                    color.value=NULL,
+                    lm_line=FALSE){
   if(is.null(category)) category <- rep(1,length(meth))
+  
   if(!is.vector(exp)){
     exp <- as.data.frame(t(exp))
     GeneID <- colnames(exp)
-    exp$meth <- meth
+    exp$meth <- as.vector(meth)
     exp$category <- category
     df <- melt.data.frame(exp, measure.vars = GeneID)
     P <- ggplot(df, aes(x= meth, y=value, color=factor(category)))+
