@@ -1,5 +1,16 @@
-#'scatter.plot
+#' scatter.plot to plot scatter plots between gene expression and DNA methylation.
+#' @description 
+#' scatter.plot is a function to plot various scatter plots between gene expression and 
+#' DNA methylation. When byPair is specified, scatter plot for individual probe-gene pairs
+#' will be generated. When byProbe is specified, scatter plots for one probes with nearby
+#' 20 gene pairs will be generated. When byTF is specified, scatter plot for TF expression 
+#' and average DNA methylation at certain motif sites will be generated.
 #' @importFrom ggplot2 ggsave
+#' @usage 
+#' scatter.plot(data, 
+#'              byPair = list(probe = c(), gene = c()),
+#'              byProbe = list(probe = c(), geneNum = 20), 
+#               byTF = list(TF = c(), probe = c()), category = NULL, dir.out = "./", save = TRUE, ...)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
 #' See \code{\link{createMultiAssayExperiment function}}.
 #' @param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
@@ -11,7 +22,7 @@
 #'@param byTF A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's 
 #'symbol and probe contains the a vector of probes' name. Output see detail.
 #'@param category A vector labels subtype of samples or a character which is the 
-#'column name in the sampleInfo in the MEE.data object. Once specified, samples 
+#'column name in the pData(data) in the multiAssayExperiment object. Once specified, samples 
 #'will label different color. The color can be customized by using color.value. 
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
@@ -23,6 +34,7 @@
 #'DNA methylation at the probes set specified in byTF list.
 #'@return Scatter plots.
 #'@export
+#'@author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
 #' load(system.file("extdata","mee.example.rda",package = "ELMER"))
 #' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
