@@ -35,10 +35,10 @@
 #'             byProbe=list(probe=c("cg19403323"),geneNum=20), 
 #'             category="definition", save=FALSE)
 #' scatter.plot(data,byProbe=list(probe=c("cg19403323"),geneNum=20), 
-#'             category="TN", save=TRUE) ## save to pdf
+#'             category="definition", save=TRUE) ## save to pdf
 #' # b. generate one probe-gene pair
-#' scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ID255928")),
-#'              category="TN", save=FALSE,lm_line=TRUE) 
+#' scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143322")),
+#'              category="definition", save=FALSE,lm_line=TRUE) 
 scatter.plot <- function(data,
                          byPair=list(probe=c(),gene=c()),
                          byProbe=list(probe=c(),geneNum=20),
@@ -46,12 +46,19 @@ scatter.plot <- function(data,
                          category=NULL, 
                          dir.out ="./", 
                          save=TRUE, ...){
-  if(missing(data)) stop("A data object should be included.")
+  simpleCap <- function(x) {
+    s <- x
+    paste(toupper(substring(s, first = 1, last = 1)), tolower(substring(s, 2)),
+          sep="", collapse=" ")
+  }
+    if(missing(data)) stop("A data object should be included.")
   
   if(!is.null(category) && length(category)==1) { 
     if(! category %in% colnames(pData(data))) stop("Cateogry not found in the  phenotypic data (pData(data)) ")
+    legend.title <- simpleCap(category)
     samples <- sampleMap(data)[sampleMap(data)$assay=="DNA methylation","primary"]
     category <- pData(data)[samples,category]
+    category <- sapply(category, simpleCap)
   }
   if(length(byPair$probe) != 0){
     if(length(byPair$probe)!=length(byPair$gene))
@@ -63,10 +70,11 @@ scatter.plot <- function(data,
       P <- scatter(meth=assay(getMet(data)[probe,]),
                    exp=assay(getExp(data)[gene,] ),
                    category=category, 
+                   legend.title = legend.title,
                    xlab=sprintf("DNA methyation at %s",probe), 
                    ylab=sprintf("%s gene expression",symbol), 
                    title=sprintf("%s_%s",probe,symbol),
-              ...)
+                   ...)
       if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
                       plot = P,useDingbats=FALSE, width=7, height = 6)
     }
@@ -85,6 +93,7 @@ scatter.plot <- function(data,
       P <- scatter(meth=assay(getMet(data)[byProbe$probe,]), 
                    exp=exp,
                    category=category,
+                   legend.title = legend.title,
                    xlab=sprintf("DNA methyation at %s",probe), 
                    ylab=sprintf("Gene expression"), 
                    title=sprintf("%s nearby %s genes",probe,byProbe$geneNum),
@@ -117,7 +126,7 @@ scatter.plot <- function(data,
 
 #'scatter
 #'@importFrom reshape melt.data.frame
-#'@importFrom ggplot2 geom_point facet_wrap scale_x_continuous theme_bw theme element_blank labs scale_colour_manual geom_smooth element_text
+#'@import ggplot2
 #@param meth A vector of number.
 #@param exp A vector of number or matrix with sample in column and gene in rows.
 #@param category A vector of sample labels.
@@ -130,6 +139,7 @@ scatter.plot <- function(data,
 #@return A ggplot figure object
 scatter <- function(meth, 
                     exp, 
+                    legend.title = "Legend",
                     category=NULL, 
                     xlab=NULL, 
                     ylab=NULL,
@@ -149,11 +159,16 @@ scatter <- function(meth,
       facet_wrap(facets = ~ variable, ncol = 5)+
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
       theme_bw()+
-      theme(panel.grid.major = element_blank(),
-			axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
-      labs(x=xlab,y=ylab,title=title)
+      theme(panel.grid.major = element_blank(),  
+            # legend.position="top",
+            legend.key = element_rect(colour = 'white'), 
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5)) +
+      labs(x=xlab,y=ylab,title=title) + scale_colour_discrete(name=legend.title) + 
+       guides(colour = guide_legend(override.aes = list(size=4),
+                                    title.position="top", 
+                                    title.hjust =0.5)) 
     if(!is.null(color.value)) P <- P+scale_colour_manual(values = color.value)
-    if(lm_line) P <- P+geom_smooth(method = "lm", se=FALSE, color="black", 
+    if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", 
                                    formula = y ~ x,data=df)
   }else{
     df <- data.frame(meth=meth,exp=exp,category=category)
@@ -162,17 +177,22 @@ scatter <- function(meth,
     }else{
       P <- ggplot(df, aes(x= meth, y=exp, color=factor(category)))
     }
-      P <- P + geom_point()+
+    P <- P + geom_point() +
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
       theme_bw()+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
-			axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
-      labs(x=xlab,y=ylab,title=title)
+            legend.key = element_rect(colour = 'white'),
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
+      labs(x=xlab,y=ylab,title=title) +  
+      scale_colour_discrete(name=legend.title) + 
+      guides(colour = guide_legend(override.aes = list(size=4),
+                                   title.position="top", 
+                                   title.hjust =0.5)) 
     if(lm_line){
-#       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
+      #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
-        P <- P+ geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+      P <- P+ geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     }
   }
   return(P)

@@ -25,6 +25,18 @@ checkData <- function(data){
   if(!"ensembl_gene_id" %in% colnames(values(data))) stop("Please the input should be a Gene Expression data must have external_gene_name column")
 }
 
+
+#'getSymbol
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param geneID A character which is the geneID
+#' @return The gene symbol 
+#' @export
+getSymbol <- function(data, geneID){
+  gene.info <- values(getExp(data))
+  gene <- gene.info[gene.info$ensembl_gene_id %in% geneID,"external_gene_name"]
+  return(gene)
+}
+  
 ###Pair -------------------------------------------------------------------
 # initialize
 setMethod(f="initialize",signature="Pair",
