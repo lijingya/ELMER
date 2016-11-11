@@ -45,13 +45,7 @@ DNA methylation at enhancer CpG sites and expression of 20 nearby genes of the C
 and getPair.XX.pairs.significant.csv (see detail).
 }
 \examples{
-load(system.file("extdata","mee.example.rda",package = "ELMER"))
-gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-exp <- mee@exp
-rownames(exp) <- gene.info$ensembl_gene_id
-exp <- exp[!is.na(rownames(exp)),]
-data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+data(elmer.data.example)
 nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                          geneAnnot=getExp(data))
 Hypo.pair <-get.pair(data=data,

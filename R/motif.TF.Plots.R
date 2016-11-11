@@ -83,16 +83,16 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'@export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
-#'load(system.file("extdata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
-#'TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-#'             save=FALSE)
+#' data(getTF.hypo.TFs.with.motif.pvalue)
+#' TF.rank.plot(motif.pvalue=TF.meth.cor, 
+#'             motif="TP53", 
+#'             TF.label=list(TP53=c("TP53","TP63","TP73")),
+#'             save=TRUE)
 TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
   if(is.character(motif.pvalue)){
-    newenv <- new.env()
-    load(motif.pvalue, envir=newenv)
-    motif.pvalue <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
   if(missing(TF.label)){
     newenv <- new.env()
@@ -103,7 +103,7 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
   }else{
     specify <- "Yes"
   }
-  significant <- floor(0.05*nrow(motif.pvalue))
+  significant <- floor(0.05 * nrow(motif.pvalue))
   motif.pvalue <- -log10(motif.pvalue)
   
   Plots <- list()
@@ -113,7 +113,7 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
     df$rank <- 1:nrow(df)
     TF.sub <- TF.label[[i]]
     if(specify %in% "No"){
-      TF.sub <- TF.sub[TF.sub %in% df$Gene[1:floor(0.05*nrow(df))]]
+      TF.sub <- TF.sub[TF.sub %in% df$Gene[1:floor(0.05 * nrow(df))]]
     }
     df$label <- "No"
     df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"

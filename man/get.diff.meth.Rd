@@ -56,16 +56,17 @@ save:
  information with the second file.
 }
 \examples{
-library(MultiAssayExperiment)
-load(system.file("extdata","mee.example.rda",package = "ELMER"))
-exp.sample <- DataFrame(mee@sample[,c("exp.ID","TN")])
-rownames(exp.sample) <- exp.sample$exp.ID; exp.sample$exp.ID <- NULL
-met.sample <- DataFrame(mee@sample[,c("meth.ID","TN")])
-rownames(met.sample) <- met.sample$meth.ID; met.sample$meth.ID <- NULL
-sample <- rbind( exp.sample,met.sample)
-mee.mae <- createMultiAssayExperiment(exp = mee@exp, met = mee@meth,pData = sample, 
-                                      TCGA =  TRUE, genome = "hg19")
-Hypo.probe <- get.diff.meth(mee.mae, diff.dir="hypo",group.col = "TN") # get hypomethylated probes
+data(elmer.data.example)
+Hypo.probe <- get.diff.meth(data, 
+                            diff.dir="hypo",
+                            group.col = "definition", 
+                            group1 = "Primary solid Tumor", 
+                            group2 = "Solid Tissue Normal",
+                            sig.dif = 0.1) # get hypomethylated probes
+Hyper.probe <- get.diff.meth(data, 
+                            diff.dir="hyper",
+                            group.col = "definition", 
+                            sig.dif = 0.1) # get hypomethylated probes
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 

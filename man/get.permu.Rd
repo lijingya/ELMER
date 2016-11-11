@@ -44,13 +44,7 @@ cores for this step. Default permutation time is 1000 which may need 12 hrs by 4
 However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 }
 \examples{
-load(system.file("extdata","mee.example.rda",package = "ELMER"))
-gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-exp <- mee@exp
-rownames(exp) <- gene.info$ensembl_gene_id
-exp <- exp[!is.na(rownames(exp)),]
-data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+data(elmer.data.example)
 permu <-get.permu(data = data,
                   geneID=rownames(getExp(data)),
                   rm.probes=c("cg00329272","cg10097755"),
