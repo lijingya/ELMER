@@ -31,9 +31,11 @@ correlation between TF expression and average DNA methylation at motif sites. Th
 relevant TF and top3 TFs will be labeled in a different color.
 }
 \examples{
-load(system.file("extdata","getTF.hypo.TFs.with.motif.pvalue.rda",package="ELMER"))
-TF.rank.plot(motif.pvalue=TF.meth.cor, motif="TP53", TF.label=list(TP53=c("TP53","TP63","TP73")),
-            save=FALSE)
+data(getTF.hypo.TFs.with.motif.pvalue)
+TF.rank.plot(motif.pvalue=TF.meth.cor, 
+            motif="TP53", 
+            TF.label=list(TP53=c("TP53","TP63","TP73")),
+            save=TRUE)
 }
 \author{
 Lijing Yao (maintainer: lijingya@usc.edu)

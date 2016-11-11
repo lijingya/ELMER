@@ -231,13 +231,7 @@ get.diff.meth <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-#' exp <- mee@exp
-#' rownames(exp) <- gene.info$ensembl_gene_id
-#' exp <- exp[!is.na(rownames(exp)),]
-#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' data(elmer.data.example)
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 #'                          geneAnnot=getExp(data))
 #' Hypo.pair <-get.pair(data=data,
@@ -373,13 +367,7 @@ get.pair <- function(data,
 #' However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 #' @export 
 #' @examples
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-#' exp <- mee@exp
-#' rownames(exp) <- gene.info$ensembl_gene_id
-#' exp <- exp[!is.na(rownames(exp)),]
-#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' data(elmer.data.example)
 #' permu <-get.permu(data = data,
 #'                   geneID=rownames(getExp(data)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
@@ -541,8 +529,8 @@ promoterMeth <- function(data,
 #' probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 #' "cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
 #' "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' bg <- rownames(getMeth(mee))
+#' data(elmer.data.example)
+#' bg <- rownames(getMet(data))
 #' enriched.motif <- get.enriched.motif(probes=probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
@@ -673,13 +661,7 @@ get.enriched.motif <- function(probes.motif,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-#' exp <- mee@exp
-#' rownames(exp) <- gene.info$ensembl_gene_id
-#' exp <- exp[!is.na(rownames(exp)),]
-#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' data(elmer.data.example)
 #' enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",

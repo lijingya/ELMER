@@ -47,13 +47,7 @@ This file contains a matrix storing the statistic results for significant associ
 If save is false, a data frame which contains the same content with the first file will be reported.
 }
 \examples{
-load(system.file("extdata","mee.example.rda",package = "ELMER"))
-gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-exp <- mee@exp
-rownames(exp) <- gene.info$ensembl_gene_id
-exp <- exp[!is.na(rownames(exp)),]
-data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+data(elmer.data.example)
 enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",

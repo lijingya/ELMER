@@ -36,13 +36,7 @@
 #'@export
 #'@author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' gene.info <- TCGAbiolinks:::get.GRCh.bioMart()
-#' gene.info <- gene.info[match(gsub("ID","",rownames(mee@exp)),gene.info$entrezgene),]
-#' exp <- mee@exp
-#' rownames(exp) <- gene.info$ensembl_gene_id
-#' exp <- exp[!is.na(rownames(exp)),]
-#' data <- createMultiAssayExperiment(exp = exp, met = mee@meth, TCGA = T, genome = "hg19" )
+#' data(elmer.data.example)
 #' scatter.plot(data,
 #'             byProbe=list(probe=c("cg19403323"),geneNum=20), 
 #'             category="definition", save=FALSE)
