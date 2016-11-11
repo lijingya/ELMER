@@ -5,6 +5,18 @@ getMet <- function(data) {
   return(experiments(data)[["DNA methylation"]])
 }
 
+#' @importFrom MultiAssayExperiment sampleMap
+#' @export
+getMetSamples <- function(data){
+  return(sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"])
+}
+
+#' @importFrom MultiAssayExperiment sampleMap
+#' @export
+getExpSamples <- function(data){
+  return(sampleMap(data)[sampleMap(data)$assay == "Gene expression","primary"])
+}
+
 #' @importFrom MultiAssayExperiment experiments
 #' @export
 getExp <- function(data) {
@@ -37,6 +49,7 @@ getSymbol <- function(data, geneID){
   return(gene)
 }
   
+
 ###Pair -------------------------------------------------------------------
 # initialize
 setMethod(f="initialize",signature="Pair",

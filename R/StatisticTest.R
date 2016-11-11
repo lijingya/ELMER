@@ -30,22 +30,17 @@ Stat.diff.meth <- function(probe,
   
   group1.tmp <- group1.tmp[1:group1.nb]
   group2.tmp <- group2.tmp[1:group2.nb]
-  meth <- c(group2.tmp,group1.tmp)
-  groups <- c(rep(group2,length(group2.tmp)),
-              rep(group1,length(group1.tmp)))
-  
-  ##this is to remove the situation that the normal or tumor are all NA (only one is value)
-  meth_split <- split(meth,groups)
-  meth_split <- unlist(lapply(meth_split,function(x){!is.na(sd(x,na.rm=TRUE))}))
-  
-  if(sd(meth,na.rm=TRUE)>0 & all(meth_split)){
+
+  if(sd(meth,na.rm=TRUE)>0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
-      alternative <- ifelse(Top.m,"less","greater")
+      alternative <- ifelse(Top.m,"greater","less")
     } else {
       alternative <- "two.sided"
     }
-    df <- data.frame(meth=meth,groups=factor(groups))
-    TT <- test(meth~groups,df,alternative=alternative, conf.int = TRUE)
+    # If hyper (top. TRUE alternative greater) group 1 > group 2
+    # If hypo  (top. FALSE alternative greater) group 1 < group 2
+    TT <- test(x = group1.tmp, y = group2.tmp, alternative=alternative, conf.int = TRUE)
+    
     if(length(TT$estimate) == 2) {
       MeanDiff <- TT$estimate[1]-TT$estimate[2]
     } else {

@@ -69,7 +69,8 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 
 ## get differential methylated probes-------------------------
 ## TCGA pipe don't specify dir.out
-#' get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental groups such as normal verus tumor samples.
+#' get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental 
+#' groups such as normal verus tumor samples.
 #' @description 
 #' get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
 #' hypo/hyper-methyalated using proportional samples (defined by percentage option) from control 
@@ -81,12 +82,26 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 #' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
 #' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples from control and experimental groups that are used to identify the differential methylation. Default is 0.2.
-#' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01
-#' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples from control and
+#'  experimental groups that are used to identify the differential methylation. Default is 0.2.
+#' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff 
+#' for selecting significant hypo/hyper-methylated probes. Default is 0.01
+#' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for 
+#' selecting significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
 #' @param test Statistical test to be used. Options: t.test, wilcox.test
 #' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
+#' @details 
+#'  save: 
+#'  When save is TRUE, function will generate two XX.csv files.The first one is named 
+#'  getMethdiff.hypo.probes.csv (or getMethdiff.hyper.probes.csv depends on diff.dir). 
+#'  The first file contains all statistic results for each probe. Based on this
+#'  file, user can change different P value or sig.dir cutoff to select the significant results
+#'  without redo the analysis. The second file is named getMethdiff.hypo.probes.significant.csv
+#'  (or getMethdiff.hyper.probes.significant.csv depends on diff.dir). This file contains
+#'  statistic results for the probes that pass the significant criteria (P value and sig.dir).
+#'  When save is FALSE, a data frame R object will be generate which contains the same
+#'  information with the second file.
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
 #' @importFrom plyr adply
@@ -94,16 +109,17 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' library(MultiAssayExperiment)
-#' load(system.file("extdata","mee.example.rda",package = "ELMER"))
-#' exp.sample <- DataFrame(mee@sample[,c("exp.ID","TN")])
-#' rownames(exp.sample) <- exp.sample$exp.ID; exp.sample$exp.ID <- NULL
-#' met.sample <- DataFrame(mee@sample[,c("meth.ID","TN")])
-#' rownames(met.sample) <- met.sample$meth.ID; met.sample$meth.ID <- NULL
-#' sample <- rbind( exp.sample,met.sample)
-#' mee.mae <- createMultiAssayExperiment(exp = mee@exp, met = mee@meth,pData = sample, 
-#'                                       TCGA =  TRUE, genome = "hg19")
-#' Hypo.probe <- get.diff.meth(mee.mae, diff.dir="hypo",group.col = "TN") # get hypomethylated probes
+#' data(elmer.data.example)
+#' Hypo.probe <- get.diff.meth(data, 
+#'                             diff.dir="hypo",
+#'                             group.col = "definition", 
+#'                             group1 = "Primary solid Tumor", 
+#'                             group2 = "Solid Tissue Normal",
+#'                             sig.dif = 0.1) # get hypomethylated probes
+#' Hyper.probe <- get.diff.meth(data, 
+#'                             diff.dir="hyper",
+#'                             group.col = "definition", 
+#'                             sig.dif = 0.1) # get hypomethylated probes
 get.diff.meth <- function(data,
                           diff.dir="hypo",
                           cores=1,
@@ -122,9 +138,13 @@ get.diff.meth <- function(data,
     stop("Sample information data to do differential analysis.")
   }else if(missing(group.col)){
     stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(data)) for possibilities")
+  } else if (!group.col %in% colnames(pData(data))){
+    stop("Group column not found in phenotypic data and meta-data of the object. See values with pData(data)")
   } else if(missing(group1) | missing(group2)) {
     if(length(unique(pData(data)[,group.col]))<2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
+    } else if(length(unique(pData(data)[,group.col])) > 2){
+      stop("Please set group1 and group2 columns. We found more than one and we cannot choose it automatically.")
     } else {
       # TO be changed
       groups <- pData(data)[,group.col]
@@ -133,6 +153,9 @@ get.diff.meth <- function(data,
       message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
     }
   }
+  
+  message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ", group1, " compared to ", group2))
+  
   parallel <- FALSE
   if (cores > 1){
     if (cores > detectCores()) cores <- detectCores()
@@ -145,7 +168,7 @@ get.diff.meth <- function(data,
                  Stat.diff.meth( probe = x,
                                  percentage = percentage,
                                  meth=assay(getMet(data)),
-                                 groups = pData(data)[,group.col],
+                                 groups = pData(data)[getMetSamples(data),group.col],
                                  group1 = group1,
                                  test = test,
                                  group2 = group2,
