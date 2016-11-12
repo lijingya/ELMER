@@ -690,16 +690,13 @@ get.TFs <- function(data,
   }
   
   if(missing(TFs)){
-    
-    
     # Here we will make some assumptions:
     # TFs has a column Symbol
     # data has the field external_gene_name which should be created by 
     # createMultAssayExperiment function
     # external_gene_name is the default for hg38 in biomart
     # external_gene_id is the default for hg19 in biomart
-    Tfs <- getTF()
-    
+    TFs <- getTF()
   } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
@@ -729,16 +726,16 @@ get.TFs <- function(data,
     parallel = TRUE
   }
   if(all(grepl("ENSG",rownames(getExp(data))))) {
-    gene <-  TFs$ENSEMBL
+    gene <-  TFs$ensembl_gene_id
   } else {
-    gene <- TFs$Symbol
+    gene <- TFs$external_gene_name
   }
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
                            Meths=motif.meth,
-                           Gene=TFs$ENSEMBL,
+                           Gene=TFs$ensembl_gene_id,
                            Top=percentage,
                            Exps=assay(getExp(data)))},
                        .progress = "text", .parallel = parallel
@@ -746,8 +743,9 @@ get.TFs <- function(data,
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
-  rownames(TF.meth.cor) <- TFs$Symbol
+  rownames(TF.meth.cor) <- TFs$external_gene_name
   colnames(TF.meth.cor) <- names(enriched.motif)
+  TF.meth.cor <- na.omit(TF.meth.cor)
   
   cor.summary <- sapply(colnames(TF.meth.cor), 
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
@@ -770,7 +768,9 @@ get.TFs <- function(data,
   } 
   if(!file.exists(sprintf("%s/TFrankPlot",dir.out)))
     dir.create(sprintf("%s/TFrankPlot",dir.out))
-  TF.rank.plot(motif.pvalue=TF.meth.cor, motif=colnames(TF.meth.cor), 
-               dir.out=sprintf("%s/TFrankPlot",dir.out), save=TRUE)
+  TF.rank.plot(motif.pvalue=TF.meth.cor, 
+               motif=colnames(TF.meth.cor), 
+               dir.out=sprintf("%s/TFrankPlot",dir.out), 
+               save=TRUE)
   return(cor.summary)
 }

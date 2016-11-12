@@ -401,6 +401,7 @@ lm_eqn = function(df,Dep,Exp){
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
+#' @importFrom rvest %>%
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
@@ -420,8 +421,33 @@ getTF <- function(genome.build = "hg19"){
   data("human.TF",package = "ELMER.data",envir=newenv)
   human.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
   
-  if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
-  gene <- values(transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"), filter = list(gene_id =human.TF$GeneID)))
+  if(genome.build == "hg38") {
+    gene <- get.GRCh("hg38", human.TF$GeneID)
+  } else {
+    gene <- get.GRCh("hg19",human.TF$GeneID)
+  }
   gene  <- gene[!duplicated(gene),]
+
   return(gene)
+}
+
+#' @importFrom biomaRt getBM useMart listDatasets
+get.GRCh <- function(genome="hg19", genes) {
+  if (genome == "hg19"){
+    # for hg19
+    ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                       host = "feb2014.archive.ensembl.org",
+                       path = "/biomart/martservice" ,
+                       dataset = "hsapiens_gene_ensembl")
+    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
+  } else {
+    # for hg38
+    ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
+  }
+  gene.location <- getBM(attributes = attributes,
+                         filters = c("entrezgene"),
+                         values = list(genes), mart = ensembl)
+  colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+  return(gene.location)
 }
