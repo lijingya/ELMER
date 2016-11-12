@@ -512,19 +512,56 @@ promoterMeth <- function(data,
   return(out)
 }
 
-#' get.enriched.motif
-#' @param probes.motif A matrix contains motifs occurrence within probes regions. 
-#' @param probes A vector lists the probes' names in which motif enrichment will be calculated.
-#' @param background.probes A vector list of probes' names which are considered as 
-#' background for motif.enrichment calculation.
-#' @param lower.OR A number specify the lower boundary of Odds ratio which defines 
-#' the significant enriched motif. 1.1 is default.
-#' @param min.incidence A non-negative integer specify the minimum incidence of 
-#' motif in the given probes set. 10 is default.
-#' @param dir.out A path specify the directory for outputs. Default is current directory
-#' @param label A character labels the outputs.
+#' get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.
+#' @description 
+#' get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
+#' package to calculate the motif enrichment Odds Ratio and  95\% confidence interval for
+#' a given set of probes. If save is TURE, two output files will be saved: 
+#' getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
+#' @usage 
+#' get.enriched.motif(probes.motif, probes, 
+#'                    background.probes, lower.OR = 1.1, min.incidence = 10, 
+#'                    dir.out = "./", label = NULL, save=TRUE)
+#' @param probes.motif A matrix contains motifs occurrence within probes regions. Probes.motif in 
+#' \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif}}).
+#' @param probes A vector lists the name of probes to define the set of probes in which motif enrichment
+#' OR and confidence interval will be calculated.
+#' @param background.probesA vector lists name of probes which are considered as 
+#' background for motif.enrichment  calculation (see detail).
+#' @param lower.OR A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
+#' The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
+#' are the significantly enriched motifs (detail see reference).
+#' @param min.incidenceA non-negative integer specifies the minimum incidence of motif in the given probes set. 
+#' 10 is default.
+#' @param dir.out A path. Specifies the directory for outputs. Default is current directory
+#' @param label A character. Labels the outputs such as "hypo", "hyper"
+#' @param save If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
+#' getMotif.XX.motif.enrichment.csv (see detail).
 #' @return A list contains enriched motifs with the probes regions harboring the motif.
 #' @export 
+#' @details 
+#'   background.probes:
+#'   For enhancer study, it is better to use probes within distal enhancer probes as
+#'   background.probes. For promoter study, it is better to use probes within promoter
+#'   regions as background.probes. Because enhancer and promoter have different CG content
+#'   and harbors different clusters of TFs motif.
+#'   
+#'   save:
+#'   if save is TRUE, two files will be save on the disk. The first file is 
+#'   getMotif.XX.motif.enrichment.csv (XX depends on option label). This file reports 
+#'   the Odds Ratio and 95\% confidence interval for these Odds Ratios which pass the 
+#'   signficant cutoff (lower.OR and min.incidence). The second file is 
+#'   getMotif.XX.enriched.motifs.rda (XX depends on option lable). This file contains
+#'   a list R object with enriched motifs as name and probes containing the enriched 
+#'   motif as contents. This object will be used in \code{\link{get.TFs}} function.
+#'   if save is FALSE, the function will return a R object which is the same with second file.
+#'@return A list (R object) with enriched motifs as name and probes containing the enriched 
+#'   motif as contents. And hypo.motif.enrichment.pdf plot will be generated.
+#' @author 
+#' Lijing Yao (creator: lijingya@usc.edu) 
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 #' "cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
