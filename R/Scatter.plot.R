@@ -110,7 +110,7 @@ scatter.plot <- function(data,
   }
   
   if(length(byTF$TF)!=0){
-    meth <- colMeans(assay(getMeth(data)[byTF$probe,]),na.rm = TRUE)
+    meth <- colMeans(assay(getMet(data)[byTF$probe,]),na.rm = TRUE)
     gene <- getGeneID(data,symbol=byTF$TF)
     exp <- assay(getExp(data)[gene,])
     if(nrow(exp)>1){

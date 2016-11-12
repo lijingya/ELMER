@@ -592,16 +592,19 @@ dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf")
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
 ```{r, echo=FALSE, message=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
-scatter.plot(data,byProbe=list(probe=c("cg19403323"),geneNum=20), 
-             category="TN", save=FALSE) 
+scatter.plot(data,
+             byProbe=list(probe=c("cg19403323"),geneNum=20), 
+             category="definition", 
+             save=FALSE) 
 ```
 
 ###  Scatter plot of one pair
 Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
 
 ```{r,eval=TRUE, fig.cap="Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14."}
-scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ID255928")), 
-             category="TN", save=TRUE,lm_line=TRUE) 
+scatter.plot(data,
+             byPair=list(probe=c("cg19403323"),gene=c("ENSG00000204518")), 
+             category="definition", save=TRUE,lm_line=TRUE) 
 ```
 
 ###  TF expression vs. average DNA methylation
@@ -613,7 +616,7 @@ load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(data,
              byTF=list(TF=c("TP53","TP63","TP73"),
              probe=enriched.motif[["TP53"]]), 
-             category="TN",
+             category="definition",
              save=TRUE,lm_line=TRUE)
 ```
 
@@ -623,9 +626,9 @@ schematic plot, "Pair" object should be generated first.
 
 ```{r,eval=TRUE}
 # Make a "Pair" object for schematic.plot
-pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.significant.withmotif.csv",
-                   probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda",
-                   geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
+#pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.significant.withmotif.csv",
+#                   probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda",
+#                   geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
 ```
 ### Nearby Genes
 Generate schematic plot for one probe with 20 nearby genes and label 
@@ -633,7 +636,9 @@ the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red."}
-schematic.plot(pair=pair, byProbe="cg19403323",save=FALSE)
+schematic.plot(pair=pair, 
+               byProbe="cg19403323",
+               save=FALSE)
 ```
 
 

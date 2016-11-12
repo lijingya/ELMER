@@ -312,9 +312,9 @@ splitmatrix <- function(x,by="row") {
 #' ## input can be a path
 #' pair <- fetch.pair(geneInfo=geneInfo)
 #' getSymbol(pair, geneID="84451")
-getSymbol <- function(mee,geneID){
-  gene <- unique(values(getGeneInfo(mee,geneID=geneID))[,c("GENEID","SYMBOL")])
-  gene <- gene[match(geneID,gene$GENEID),"SYMBOL"]
+getSymbol <- function(data,geneID){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(geneID,gene$ensembl_gene_id),"external_gene_name"]
   return(gene)
 }
 
@@ -329,9 +329,9 @@ getSymbol <- function(mee,geneID){
 #' ## input can be a path
 #' pair <- fetch.pair(geneInfo=geneInfo)
 #' getGeneID(pair, symbol="KIAA1804")
-getGeneID <- function(mee,symbol){
-  gene <- unique(values(getGeneInfo(mee,symbol=symbol))[,c("GENEID","SYMBOL")])
-  gene <- gene[match(symbol,gene$SYMBOL),"GENEID"]
+getGeneID <- function(data,symbol){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(symbol,gene$external_gene_name),"ensembl_gene_id"]
   return(gene)
 }
 
