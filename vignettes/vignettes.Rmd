@@ -340,11 +340,11 @@ pData(data)[1:3,1:5]
 sig.diff <- get.diff.meth(data, 
                           group.col = "definition",
                           group1 =  "Primary solid Tumor",
-                          group2 ="Solid Tissue Normal",
+                          group2 = "Solid Tissue Normal",
                           percentage = 0.2,
                           sig.dif = 0.3,
                           #test = t.test,
-                          diff.dir="hypo", # Search for hypermethylated in group 1
+                          diff.dir="hypo", # Search for hypomethylated probes in group 1
                           cores=detectCores()/2, 
                           dir.out ="./ELMER.example/Result/LUSC", 
                           pvalue = 0.01)
@@ -569,8 +569,6 @@ TF.rank.plot.
 
 ```{r,eval=TRUE}
 ## identify regulatory TF for the enriched motifs
-
-load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 TF <- get.TFs(data=data, 
               enriched.motif=enriched.motif,
               dir.out="./ELMER.example/Result/LUSC", 
