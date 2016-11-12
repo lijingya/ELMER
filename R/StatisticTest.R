@@ -25,11 +25,8 @@ Stat.diff.meth <- function(probe,
     group1.tmp <- sort(meth[groups %in% group1])
     group2.tmp <- sort(meth[groups %in% group2])
   }
-  group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, length(group1.tmp), round(length(group1.tmp) * percentage))
-  group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, length(group2.tmp), round(length(group2.tmp) * percentage))
-  
-  group1.tmp <- group1.tmp[1:group1.nb]
-  group2.tmp <- group2.tmp[1:group2.nb]
+  group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, min(5,length(group1.tmp)), round(length(group1.tmp) * percentage))
+  group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, min(5,length(group2.tmp)), round(length(group2.tmp) * percentage))
 
   if(sd(meth,na.rm=TRUE)>0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
