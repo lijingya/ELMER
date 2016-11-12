@@ -1,14 +1,3 @@
-#' getSample
-#' @param object MEE.data object
-#' @param ID A vector of sample ID. When specified, sample informtion only for 
-#' these samples will be output.
-#' @param cols A vector of columns names of Sample slots of MEE.data object.
-#' @return Sample information.
-#' @exportMethod getSample
-#' @docType methods
-setGeneric(name="getSample",
-           def=function(object,ID,cols){standardGeneric("getSample")})
-
 #' getPair
 #' @param object Pair object
 #' @param geneID A vector of genes' id. When specified, only the pair containing 
@@ -21,32 +10,3 @@ setGeneric(name="getSample",
 setGeneric(name="getPair",
            def=function(object,probe,geneID){standardGeneric("getPair")})
 
-#' getProbeInfo
-#' @param object MEE.data or Pair object
-#' @param probe A vector of probes' name. When specified, only the these probes' 
-#' coordinate will be output.
-#' @param chr A vector of chromosome such chr1, chr2. When specified, only the 
-#' probeInfo locating on these chromosome will be output.
-#' @param range A GRanges object. When specified, only the probeInfo locating 
-#' within these loci will be output.
-#' @return Probe information such as names, coordinates.
-#' @exportMethod getProbeInfo
-#' @docType methods
-setGeneric(name="getProbeInfo",
-           def=function(object,chr,probe,range){standardGeneric("getProbeInfo")})
-
-
-
-#' getGeneInfo
-#' @param object MEE.data or Pair object
-#' @param geneID A vector of genes' id. When specified, only the these genes' 
-#' coordinate will be output.
-#' @param symbol A vector of genes' symbols . When specified, only the these genes' 
-#' coordinate will be output.
-#' @param range A GRanges object. When specified, only the geneInfo locating within
-#'  these loci will be output.
-#' @return Gene annotation information such as gene id, symbol and coordinates.
-#' @exportMethod getGeneInfo
-#' @docType methods
-setGeneric(name="getGeneInfo",
-           def=function(object,geneID,symbol,range){standardGeneric("getGeneInfo")})

@@ -114,60 +114,6 @@ setMethod(f="getPair",signature="Pair",
             return(pair)
           })
 
-#' @rdname getProbeInfo
-#' @aliases getProbeInfo
-#' @examples
-#' probeInfo <- GRanges(seqnames = c("chr1","chr1","chr3"), 
-#' ranges = IRanges(start = c(1,6,20),end = c(2,7,21)),
-#' name=c("cg1","cg2","cg3"))
-#' mee <- fetch.mee(probeInfo=probeInfo)
-#' Probes <- getProbeInfo(mee,chr="chr1") # get probes which locate on the chr1
-#' Probes <- getProbeInfo(mee, probe = "cg1") # get certain probes information
-#' Probes <- getProbeInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(5,20)))
-setMethod(f="getProbeInfo",signature="ANY",
-          function(object,chr,probe,range){
-            if(missing(chr) & missing(probe)){
-              probeInfo <- object@probeInfo
-            }else if(missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[names(object@probeInfo) %in% probe]
-            }else if(!missing(chr) & missing(probe)){
-              probeInfo <- object@probeInfo[as.vector(seqnames(object@probeInfo)) %in% chr]
-            }else if(!missing(chr) & !missing(probe)){
-              probeInfo <- object@probeInfo[names(object@probeInfo) %in% probe & 
-                                              as.vector(seqnames(object@probeInfo)) %in% chr]
-            }
-            if(!missing(range)){
-              over <- findOverlaps(probeInfo,range)
-              probeInfo <- probeInfo[unique(queryHits(over))]
-            }
-            return(probeInfo)
-          })
-
-#' @rdname getGeneInfo
-#' @aliases getGeneInfo
-#'@importFrom GenomicRanges findOverlaps
-#'@examples
-#'geneInfo <- txs()
-#'mee <- fetch.mee(geneInfo=geneInfo)
-#'Genes <- getGeneInfo(mee, geneID = "55811")
-#'Genes <- getGeneInfo(mee, symbol ="ADCY10")
-#'Genes <- getGeneInfo(mee, range = GRanges(seqnames="chr1", ranges=IRanges(1000000,1600000)))
-setMethod(f="getGeneInfo",signature="ANY",
-          function(object,geneID,symbol,range){
-            if(missing(geneID) & missing(symbol)){
-              out <- object@geneInfo
-            }else if(missing(geneID) & !missing(symbol)){
-              out <- object@geneInfo[object@geneInfo$external_gene_name %in% symbol]
-            }else if(!missing(geneID) & missing(symbol)){
-              out <- object@geneInfo[object@geneInfo$ensembl_gene_id %in% geneID]
-            }
-            if(!missing(range)){
-              over <- findOverlaps(out,range)
-              out <- out[unique(queryHits(over))]
-            }
-            return(out)
-          })
-
 ## Construct data structure-----------------------------------------------------
 
 pair.data <- function(pairInfo=NULL,probeInfo=NULL,geneInfo=NULL){
