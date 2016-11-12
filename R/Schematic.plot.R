@@ -16,7 +16,7 @@
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
 #'@param ... Parameters for GetNearGenes
 #'@param dir.out A path specify the directory for outputs. Default is current directory
-#'@param save A logic. If true, figure will be saved to dir.out.
+#'@param save A logic. If true, figures will be saved to dir.out.
 #'@details
 #'byProbes:
 #'When a vector of probes' name are provided,
