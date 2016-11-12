@@ -1,7 +1,15 @@
-#'schematicPlot
+#' schematic.plot to plot schematic plots showing the locations of genes and probes.
+#' @description 
+#' schematic.plot is a function to plot schematic plots showing the locations of genes and probes.
+#' @usage 
+#' schematic.plot(pair, 
+#'                byProbe, 
+#'                byGene, 
+#'                byCoordinate = list(chr = c(), start = c(), end = c()), 
+#'                dir.out = "./", save = TRUE, ...)
 #'@importFrom GenomicRanges GRanges findOverlaps
 #'@importFrom IRanges IRanges
-#'@param pair A pair object. All slots should be included
+#'@param pair A Pair object. All slots of Pair class should be included
 #'@param byProbe A vector of probe names.
 #'@param byGene A vector of gene ID
 #'@param byCoordinate A list contains chr, start and end. 
@@ -9,18 +17,25 @@
 #'@param ... Parameters for GetNearGenes
 #'@param dir.out A path specify the directory for outputs. Default is current directory
 #'@param save A logic. If true, figure will be saved to dir.out.
-#'@details byProbes When a vector of probes' name are provided, 
-#'function will produce schematic plot for each individual probes. 
-#'The schematic plot contains probe, nearby 20 (or the number of gene user specified.) 
-#'genes and the significantly linked gene with the probe.
-#'@details byGene When a vector of gene ID are provided, function will produce 
-#'schematic plot for each individual genes. The schematic plot contains the gene 
-#'and all the significantly linked probes.
-#'@details byCoordinate When a genomic coordinate is provided, function will 
+#'@details
+#'byProbes:
+#'When a vector of probes' name are provided,
+#'function will produce schematic plots for each individual probes.
+#'The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
+#'genes and the significantly linked gene to the probe.
+#'
+#'byGene:
+#'When a vector of gene ID are provided, function will produce schematic plots 
+#'for each individual genes. The schematic plot contains the gene and all the 
+#'significantly linked probes.
+#'
+#'byCoordinate:
+#'When a genomic coordinate is provided, function will 
 #'produce a schematic plot for this coordinate. The schematic plot contains 
 #'all genes and significantly linked probes in the range and the significant links.
-#'@return A schematic plot will be produced.
 #'@export
+#'@author 
+#' Lijing Yao (creator: lijingya@usc.edu) 
 #'@examples
 #' library(grid)
 #' data(elmer.data.example)
