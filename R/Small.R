@@ -302,33 +302,29 @@ splitmatrix <- function(x,by="row") {
   return(out)
 }
 
-#'getSymbol
-#'@param mee A MEE.data or Pair object.
-#'@param geneID A character which is the geneID
-#'@return The gene symbol 
-#'@export
+#'getSymbol to report gene symbol from id
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param geneID A character which is the ensembl_gene_id
+#' @return The gene symbol for input genes.
+#' @export
 #' @examples
-#' geneInfo <- txs()
-#' ## input can be a path
-#' pair <- fetch.pair(geneInfo=geneInfo)
-#' getSymbol(pair, geneID="84451")
+#' data(elmer.data.example)
+#' getSymbol(data, geneID="ENSG00000143067")
 getSymbol <- function(data,geneID){
   gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
   gene <- gene[match(geneID,gene$ensembl_gene_id),"external_gene_name"]
   return(gene)
 }
 
-#'getGeneID
+#'getGeneID to report gene id from symbol
 #'@importFrom S4Vectors values
-#'@param mee A MEE.data or Pair object.
-#'@param symbol A character which is the geneID
-#'@return The gene ID
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#'@param symbol A vector of characters which are gene symbols 
+#'@return The gene ID for these gene symbols
 #'@export
 #'@examples
-#' geneInfo <- txs()
-#' ## input can be a path
-#' pair <- fetch.pair(geneInfo=geneInfo)
-#' getGeneID(pair, symbol="KIAA1804")
+#' data(elmer.data.example)
+#' getGeneID(data, symbol="ZNF697")
 getGeneID <- function(data,symbol){
   gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
   gene <- gene[match(symbol,gene$external_gene_name),"ensembl_gene_id"]
