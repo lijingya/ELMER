@@ -626,9 +626,9 @@ schematic plot, "Pair" object should be generated first.
 
 ```{r,eval=TRUE}
 # Make a "Pair" object for schematic.plot
-#pair <- fetch.pair(pair="./ELMER.example/Result/LUSC/getPair.hypo.pairs.significant.withmotif.csv",
-#                   probeInfo = "./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda",
-#                   geneInfo = "./ELMER.example/Result/LUSC/geneAnnot.rda")
+pair <- fetch.pair(pair=Hypo.pair,
+                   probeInfo = rowRanges(getMet(data)),
+                   geneInfo = rowRanges(getExp(data)))
 ```
 ### Nearby Genes
 Generate schematic plot for one probe with 20 nearby genes and label 
@@ -637,7 +637,7 @@ the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
 ```{r, echo=FALSE, message=FALSE,warning=FALSE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red."}
 schematic.plot(pair=pair, 
-               byProbe="cg19403323",
+               byProbe="cg25312122",
                save=FALSE)
 ```
 
@@ -647,7 +647,7 @@ Generate schematic plot for one gene with the probes which the gene is significa
 linked to. Figure \ref{fig:figure5}
 
 ```{r,eval=TRUE, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
-schematic.plot(pair=pair, byGene="ID255928",save=FALSE)
+schematic.plot(pair=pair, byGene="ENSG00000197965",save=FALSE)
 ```
 
 ## Motif enrichment plot
