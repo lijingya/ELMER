@@ -1,25 +1,29 @@
-## Anaylsis TCGA data pipeline------------
-#' ELMER analysis pipe for TCGA data.
+#' ELMER analysis pipeline for TCGA data.
+#' @description 
+#' ELMER analysis pipeline for TCGA data. This pipeline combine every steps of \pkg{ELMER}
+#' analyses: get.feature.probe, get.diff.meth, get.pair, get.permu, get.enriched.motif and get.TFs.
+#' Every steps' results are saved.
 #' @param disease TCGA short form disease name such as COAD
-#' @param analysis a vector of characters listing the analysis need to be done. 
-#' Analysis are "download","distal.probes","diffMeth","pair","motif","TF.search". 
-#' Default is "all" meaning all the analysis will be processed. 
-#' @param wd a path showing working dirctory. Default is "./"
+#' @param analysis A vector of characters listing the analysis need to be done.
+#' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
+#' Default is "all" meaning all the analysis will be processed.
+#' @param wd A path shows working dirctory. Default is "./"
 #' @param cores A interger which defines number of core to be used in parallel process. 
-#' Default is NULL: don't use parallel process.
-#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes;
-#' "hyper" which is only selecting hypermethylated probes; 
-#' @param Data A path showing the folder containing DNA methylation, expression and clinic data
+#' Default is 1: don't use parallel process.
+#' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes.  
+#' If it is "hypo", get.diff.meth function will identify all significantly hypomethylated
+#' CpG sites; If "hyper", get.diff.meth function will identify all significantly hypermethylated
+#' CpG sites
+#' @param Data A path shows the folder containing DNA methylation, expression and clinic data
 #' @param ... A list of parameters for functions: GetNearGenes, get.feature.probe, 
-#' get.diff.meth, get.pair,
+#' get.diff.meth, get.pair
 #' @return Different analysis results.
 #' @export 
 #' @examples
 #' \dontrun{
-#' distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
+#'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
 #' }
-TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL, diff.dir="hypo",...){
+TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir="hypo",...){
   if(missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://tcga-data.nci.nih.gov/tcga/.")
