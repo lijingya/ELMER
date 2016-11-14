@@ -145,12 +145,19 @@ createMultiAssayExperiment <- function (exp,
     stopifnot(all(substr(colnames(exp),1,15) == substr(colnames(met),1,15)))
     
     # Get clinical information
-    if(missing(pData)) pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
-    
+    if(missing(pData)) {
+      pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = substr(c(colnames(met),colnames(exp)),1,16),
+                             colname=c(colnames(met),colnames(exp)))
+      pData$barcode <- NULL
+      pData <- pData[!duplicated(pData),]      
+      rownames(pData) <- pData$sample
+    }
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
-                                pData = pData,
+                                pData = pData,   sampleMap = sampleMap,
                                 metadata = list(TCGA= TRUE))
     
   } else {
@@ -160,7 +167,7 @@ createMultiAssayExperiment <- function (exp,
     met <- met[,match(ID,colnames(met))]
     exp <- exp[,match(ID,colnames(exp))]
     pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
-    sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(met)))),
+    sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
                            primary = c(colnames(met),colnames(exp)),
                            colname=c(colnames(met),colnames(exp)))
     if(!all(colnames(exp) == colnames(met))) stop("Please, be sure your DNA methylation matrix and gene expression matrix have the samples in the same order")
