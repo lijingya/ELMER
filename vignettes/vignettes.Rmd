@@ -67,7 +67,7 @@ vignette: >
   
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(dpi = 300)
-knitr::opts_chunk$set(cache=FALSE)
+knitr::opts_chunk$set(cache=TRUE)
 ```
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
@@ -280,7 +280,7 @@ It contains the above components and making a Multi Assay Experiment object by `
 component consistent with each other. For example, althougth DNA methylation and gene 
 expression matrixes have different rows (probe for DNA methylation and gene id for gene
 expression), the column (samples) order should be same in the two matrixes. The `createMultiAssayExperiment`
-function will keep them consistent when it generates the createMultiAssayExperiment` object.
+function will keep them consistent when it generates the  Multi Assay Experiment object.
 
 
 ```{r}
@@ -289,13 +289,36 @@ data <- createMultiAssayExperiment(exp = GeneExp, met = Meth,genome = "hg19",TCG
 all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
 
 # See sample information for data
-pData(data)[pData(data)$sample == "TCGA-43-3394-11A",]
+pData(data)[pData(data)$sample == "TCGA-43-3394-11A",1:8]
 
 # See sample names for each experiment
 sampleMap(data)
 
 ```
 
+You can also use your own data and annotations to create  Multi Assay Experiment object. 
+
+```{r}
+# NON TCGA example: matrices has diffetrent column names
+gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
+                       sample2 = c("TP53"=1.6,"PTEN"=2.3))
+dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
+sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+rownames(sample.info) <- colnames(gene.exp)
+mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+
+# NON TCGA example: matrices has diffetrent column names
+gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+                       sample2.exp = c("TP53"=1.6,"PTEN"=2.3))
+dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
+sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+rownames(sample.info) <- c("sample1","sample2")
+sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+                      colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
+```
 # Illustration of ELMER analysis steps
 
 The example data set is a subset of chromosome 1 data from TCGA LUSC.
@@ -630,7 +653,7 @@ dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf")
 ## Scatter plots
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
-```{r, echo=FALSE, message=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+```{r, echo=TRUE, message=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
 scatter.plot(data,
              byProbe=list(probe=c("cg19403323"),geneNum=20), 
              category="definition", 
@@ -663,7 +686,7 @@ scatter.plot(data,
 Schematic plot shows a breif view of linkages between genes and probes. To make a 
 schematic plot, "Pair" object should be generated first.
 
-```{r,eval=TRUE}
+```{r,eval=TRUE, message=FALSE,echo=FALSE}
 # Make a "Pair" object for schematic.plot
 pair <- fetch.pair(pair=Hypo.pair,
                    probeInfo = rowRanges(getMet(data)),
@@ -674,12 +697,11 @@ Generate schematic plot for one probe with 20 nearby genes and label
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
 
-```{r, echo=FALSE, message=FALSE,warning=FALSE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red."}
+```{r, eval=TRUE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
 schematic.plot(pair=pair, 
                byProbe="cg25312122",
                save=FALSE)
 ```
-
 
 ### Nearby Probes
 Generate schematic plot for one gene with the probes which the gene is significantly 

@@ -61,17 +61,17 @@ schematic.plot <- function(pair,
                            dir.out="./",
                            save=TRUE,...){
   if(missing(pair)) stop("Pair option is empty.")
-  if(nrow(getPair(pair))==0 | length(getProbeInfo(pair))==0 | length(getGeneInfo(pair))==0) 
+  if(nrow(getPair(pair))==0 | length(pair@probeInfo)==0 | length(pair@geneInfo)==0) 
     stop("All slot should be included in pair object.")
   args <- list(...)
   if(!missing(byProbe)){
     params <- args[names(args) %in% c("geneNum","cores")]
-    nearGenes <- do.call(GetNearGenes,c(list(TRange=getProbeInfo(pair,probe=byProbe),
-                                             geneAnnot=getGeneInfo(pair)),params))
+    nearGenes <- do.call(GetNearGenes,c(list(TRange=pair@probeInfo[byProbe,],
+                                             geneAnnot=pair@geneInfo),params))
     for(i in byProbe){
       significant <- getPair(pair,probe=i)
-      schematic(probe.range= getProbeInfo(pair,probe=i), 
-                gene.range=getGeneInfo(pair, geneID=nearGenes[[i]]$GeneID),
+      schematic(probe.range= pair@probeInfo[i,], 
+                gene.range=pair@geneInfo[nearGenes[[i]]$GeneID,],
                 special=list(names= c(i,significant$Symbol), 
                              colors=c("blue",rep("red",length(significant$Symbol)))),
                 label=sprintf("%s/%s.schematic.byProbe",dir.out,i), save=save)
@@ -83,8 +83,8 @@ schematic.plot <- function(pair,
       if(nrow(significant) ==0 ){
         warning(sprintf("gene %s don't have signficantly linked probes.",i))
       }else{
-        schematic(probe.range= getProbeInfo(pair,probe=unique(significant$Probe)), 
-                  gene.range=getGeneInfo(pair, geneID=i),
+        schematic(probe.range= pair@probeInfo[unique(significant$Probe),], 
+                  gene.range=pair@geneInfo[i,],
                   special=list(names= c(significant$Symbol,significant$Probe), 
                                colors=c("red",rep("blue",length(significant$Probe)))),
                   label=sprintf("%s/%s.schematic.byGene",dir.out,i), save=save)
@@ -96,7 +96,7 @@ schematic.plot <- function(pair,
     for(i in 1:length(byCoordinate$chr)){
       coordinate <- GRanges(seqnames = byCoordinate$chr[i], 
                             ranges =IRanges(byCoordinate$start[i],byCoordinate$end[i]))
-      p.over <- findOverlaps(getProbeInfo(pair), coordinate)
+      p.over <- findOverlaps(pair@probeInfo, coordinate)
       probe.range <- getProbeInfo(pair,probe=unique(getPair(pair)$Probe), range=coordinate) ## probe need to be significant
       gene.range <- getGeneInfo(pair, range=coordinate)   ## gene don't need
       significant <- getPair(pair,geneID=unique(gene.range$GENEID),probe=unique(gene.range$name))
