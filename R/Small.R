@@ -239,13 +239,17 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
   return(met)
 }
 
-#' fetch.pair
-#' @param pair A data.frame or path of csv file containing pair information.
-#' @param probeInfo A GRnage object or path of rda file only containing 
-#' a GRange of probe information 
-#' @param geneInfo A GRnage object or path of rda file only containing 
-#' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
-#' @return A pair.data object
+#' fetch.pair to generate Pair class object.
+#' @description 
+#' fetch.pair is a funtion to take in enhancer-gene linkage prediction information,
+#' probe information and gene annotation generating a Pair class object, which is the 
+#' input for plotting functions. Options (pair, probeInfo, geneInfo) can
+#' take in R object or read files by specifying file paths. 
+#' @param pair A data.frame (R object) or a path of XX.csv file containing pair information such as
+#' output of function \code{\link{get.pair}}.
+#' @param probeInfoA GRnage object or a path of XX.rda file which only contains a GRange of probe information.
+#' @param geneInfo A GRnage object or path of XX.rda file which only contains a GRange of gene 
+#' information such as Coordinates, GENEID and SYMBOL. 
 #' @export 
 #' @examples
 #' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
