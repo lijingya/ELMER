@@ -3,7 +3,8 @@
 \name{createMultiAssayExperiment}
 \alias{createMultiAssayExperiment}
 \usage{
-createMultiAssayExperiment(exp, met, pData, genome = NULL, TCGA = FALSE)
+createMultiAssayExperiment(exp, met, pData, sampleMap, genome = NULL,
+  TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -12,6 +13,11 @@ either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 \item{met}{A Summaerized Experiment, a matrix or path of rda file only containing the data.}
 
 \item{pData}{A DataFrame or data.frame of the phenotype data for all participants}
+
+\item{sampleMap}{A DataFrame or data.frame of the matching samples and colnames
+of the gene expression and DNA methylation matrix. This should be used if your matrix
+have different columns names. 
+This object must have columns primary (sample ID) and colname (names of the columns of the matrix).}
 
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
 
@@ -26,7 +32,7 @@ This function will receive a gene expression and DNA methylation data objects
 and create a Multi Assay Experiment.
 }
 \examples{
-# NON TCGA example
+# NON TCGA example: matrices has diffetrent column names
 gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
 )
@@ -36,6 +42,19 @@ dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
 mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+
+# NON TCGA example: matrices has diffetrent column names
+gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+                       sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
+)
+dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+)
+sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+rownames(sample.info) <- c("sample1","sample2")
+sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+                      colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
 \dontrun{
    # TCGA example using TCGAbiolinks
    # Testing creating MultyAssayExperiment object

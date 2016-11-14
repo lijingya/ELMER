@@ -7,13 +7,17 @@
 #' either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)
 #' @param genome Which is the default genome to make gene information. Options hg19 and hg38
 #' @param pData A DataFrame or data.frame of the phenotype data for all participants
+#' @param sampleMap  A DataFrame or data.frame of the matching samples and colnames
+#'  of the gene expression and DNA methylation matrix. This should be used if your matrix
+#'  have different columns names. 
+#'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
 #' @examples
-#' # NON TCGA example
+#' # NON TCGA example: matrices has diffetrent column names
 #' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
 #'                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
 #' )
@@ -23,6 +27,19 @@
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- colnames(gene.exp)
 #' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+#' 
+#' # NON TCGA example: matrices has diffetrent column names
+#' gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+#'                        sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
+#' )
+#' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+#' )
+#' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+#' rownames(sample.info) <- c("sample1","sample2")
+#' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+#'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
 #'    # Testing creating MultyAssayExperiment object
@@ -94,6 +111,7 @@
 createMultiAssayExperiment <- function (exp, 
                                         met, 
                                         pData, 
+                                        sampleMap,
                                         genome = NULL,
                                         TCGA = FALSE) {
   
@@ -162,20 +180,55 @@ createMultiAssayExperiment <- function (exp,
     
   } else {
     if(missing(pData)) stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
-    # Check that we have the same number of samples
-    ID <- intersect(colnames(met), colnames(exp))
-    met <- met[,match(ID,colnames(met))]
-    exp <- exp[,match(ID,colnames(exp))]
-    pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
-    sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
-                           primary = c(colnames(met),colnames(exp)),
-                           colname=c(colnames(met),colnames(exp)))
-    if(!all(colnames(exp) == colnames(met))) stop("Please, be sure your DNA methylation matrix and gene expression matrix have the samples in the same order")
-    mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
-                                                 "Gene expression" = exp),
-                                pData = pData,
-                                sampleMap = sampleMap,
-                                metadata = list(TCGA=FALSE))
+    if(missing(sampleMap)){
+      # Check that we have the same number of samples
+      message("Removing samples not found in both DNA methylation and gene expression (we are considering the names of the gene expression and DNA methylation columns to be the same) ")
+      ID <- intersect(colnames(met), colnames(exp))
+      met <- met[,match(ID,colnames(met))]
+      exp <- exp[,match(ID,colnames(exp))]
+      if(!all(colnames(exp) == colnames(met))) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = c(colnames(met),colnames(exp)),
+                             colname=c(colnames(met),colnames(exp)))
+      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
+                                                   "Gene expression" = exp),
+                                  pData = pData,
+                                  sampleMap = sampleMap,
+                                  metadata = list(TCGA=FALSE))
+    } else {
+      # Check that we have the same number of samples
+      if(!all(c("primary","colname") %in% colnames(sampleMap))) 
+        stop("sampleMap should have the following columns: primary (sample ID) and colname(DNA methylation and gene expression sample [same as the colnames of the matrix])")
+      if(!any(rownames(pData) %in% sampleMap$primary))
+        stop("pData row names should be mapped to sampleMap primary column ")
+      # Find which samples are DNA methylation and gene expression
+      sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
+      sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
+      
+      # Which ones have both DNA methylation and gene expresion?
+      commun.samples <- intersect(sampleMap.met$primary,sampleMap.exp$primary)
+      
+      # Remove the one that does not have both data
+      sampleMap.met <- sampleMap.met[match(sampleMap.met$primary,commun.samples),,drop = FALSE]
+      sampleMap.exp <- sampleMap.exp[match(sampleMap.exp$primary,commun.samples),,drop = FALSE]
+      
+      # Ordering samples to be matched
+      met <- met[,sampleMap.met$colname,drop = FALSE]
+      exp <- exp[,sampleMap.exp$colname,drop = FALSE]
+      
+      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
+      pData <- pData[match(commun.samples,rownames(pData)),,drop = FALSE]
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = commun.samples,
+                             colname=c(colnames(met),colnames(exp)))
+      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
+                                                   "Gene expression" = exp),
+                                  pData = pData,
+                                  sampleMap = sampleMap,
+                                  metadata = list(TCGA=FALSE))
+    }
   }
   return(mae)
 }
@@ -434,7 +487,7 @@ getTF <- function(genome.build = "hg19"){
     gene <- get.GRCh("hg19",human.TF$GeneID)
   }
   gene  <- gene[!duplicated(gene),]
-
+  
   return(gene)
 }
 
