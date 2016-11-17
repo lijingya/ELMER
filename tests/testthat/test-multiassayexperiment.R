@@ -1,0 +1,113 @@
+context("Testing Multi Assay Experiment creation")
+
+test_that("The creation of a using matrices and no TCGA data with equal colnames in DNA methylation and Gene Expression", {
+  # NON TCGA example: matrices has diffetrent column names
+  gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
+                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
+  )
+  dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9)
+  )
+  sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+  rownames(sample.info) <- colnames(gene.exp)
+  mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+  expect_equal(metadata(mae)$genome,"hg38")
+  expect_false(metadata(mae)$TCGA)
+  expect_equal(dim(getExp(mae)),c(2,2))
+  expect_equal(dim(getMet(mae)),c(2,2))
+  expect_equal(assay(getMet(mae)),as.matrix(dna.met))
+  expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
+  expect_equal(pData(mae),sample.info)
+  expect_true(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression"))
+})  
+
+test_that("The creation of a using matrices and no TCGA data with different colnames in DNA methylation and Gene Expression", {
+  # NON TCGA example: matrices has diffetrent column names
+  gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+                        sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
+  )
+  dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+  )
+  sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+  rownames(sample.info) <- c("sample1","sample2")
+  sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+                         colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+  mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  expect_equal(metadata(mae)$genome,"hg19")
+  expect_false(metadata(mae)$TCGA)
+  expect_equal(dim(getExp(mae)),c(2,2))
+  expect_equal(dim(getMet(mae)),c(2,2))
+  expect_equal(assay(getMet(mae)),as.matrix(dna.met))
+  expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
+  expect_equal(pData(mae),sample.info)
+  expect_true(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression"))
+  expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae.hg19)))))
+})
+
+test_that("The creation of a using Summarized Experiment objects and TCGA data", {
+  # NON TCGA example: matrices has diffetrent column names
+  gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+                        sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
+  )
+  dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+  )
+  sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+  rownames(sample.info) <- c("sample1","sample2")
+  sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+                         colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+  mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  expect_equal(metadata(mae)$genome,"hg19")
+  expect_false(metadata(mae)$TCGA)
+  expect_equal(dim(getExp(mae)),c(2,2))
+  expect_equal(dim(getMet(mae)),c(2,2))
+  expect_equal(assay(getMet(mae)),as.matrix(dna.met))
+  expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
+  expect_equal(pData(mae),sample.info)
+  expect_true(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression"))
+  expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae.hg19)))))
+  
+})
+
+test_that("The creation of a using Summarized Experiment objects and TCGA data", {
+  
+  # TCGA example using TCGAbiolinks
+  # Testing creating MultyAssayExperiment object
+  # Load library
+  # Consisering it is TCGA and SE
+  data("elmer.data.example")
+  mae <- createMultiAssayExperiment(exp = getExp(data), met =  getMet(data), TCGA = TRUE, genome = "hg19")
+  expect_equal(metadata(mae)$genome,"hg19")
+  expect_true(metadata(mae)$TCGA)
+  expect_true(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression"))
+  expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae.hg19)))))
+  expect_equal(dim(getMet(mae)),c(101,234))
+  expect_equal(dim(getExp(mae)),c(1026,234))
+  
+  mae <- createMultiAssayExperiment(exp = getExp(data), met =  getMet(data), TCGA = TRUE, genome = "hg38")
+  expect_equal(metadata(mae)$genome,"hg38")
+  expect_true(metadata(mae)$TCGA)
+  expect_true(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression"))
+  expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae.hg19)))))
+  expect_equal(dim(getMet(mae)),c(101,234))
+  expect_equal(dim(getExp(mae)),c(1026,234))
+  
+  # Consisering it is TCGA and not SE
+  mae <- createMultiAssayExperiment(exp = assay(getExp(data)), met =  assay(getMet(data)), TCGA = TRUE, genome = "hg19")
+  expect_equal(metadata(mae)$genome,"hg19")
+  
+  mae <- createMultiAssayExperiment(exp = assay(getExp(data)), met =  assay(getMet(data)), TCGA = TRUE, genome = "hg38")
+  expect_equal(metadata(mae)$genome,"hg38")
+  
+  # Consisering it is not TCGA and SE
+  # DNA methylation and gene expression Objects should have same sample names in columns
+  not.tcga.exp <- assay(getExp(data)) 
+  colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
+  not.tcga.met <- assay(getMet(data)) 
+  colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
+  
+  phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
+  mae <- createMultiAssayExperiment(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+  
+})
