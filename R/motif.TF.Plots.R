@@ -29,6 +29,7 @@
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #'@export
+#'@importFrom grid gpar
 #'@examples
 #'motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
 #'                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
@@ -56,13 +57,13 @@ motif.enrichment.plot <- function(motif.enrichment,
   motif.enrichment$motif <- factor(motif.enrichment$motif,
                                    levels=as.character(motif.enrichment$motif[nrow(motif.enrichment):1]))
   limits <- aes(ymax = upperOR, ymin=lowerOR)
-  P <- ggplot(motif.enrichment, aes(x=motif, y=OR))+
-    geom_point()+
-    geom_errorbar(limits, width=0.3)+
-    coord_flip()+
+  P <- ggplot(motif.enrichment, aes(x=motif, y=OR)) +
+    geom_point() +
+    geom_errorbar(limits, width=0.3) +
+    coord_flip() +
     geom_abline(intercept = 1, slope = 0, linetype = "3313")+
-    theme_bw()+
-    theme(panel.grid.major = element_blank())+
+    theme_bw() +
+    theme(panel.grid.major = element_blank()) +
     xlab("Motifs") + ylab("Odds Ratio") +
     scale_y_continuous(breaks=c(1,pretty(motif.enrichment$OR, n = 5)))
   if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
