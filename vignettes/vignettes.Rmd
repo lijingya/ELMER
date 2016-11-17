@@ -397,8 +397,8 @@ Both files contain four columns: probe, pvalue, ExperimentMinControl, adjust.p.
 library(MultiAssayExperiment)
 ## createMultiAssayExperiment can take path as input.
 data <- createMultiAssayExperiment(exp = "./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda", 
-                           met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
-                           genome = "hg19",TCGA = TRUE)
+                                   met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
+                                   genome = "hg19",TCGA = TRUE)
 colnames(pData(data))
 pData(data)[1:3,1:5]
 sig.diff <- get.diff.meth(data, 
@@ -500,14 +500,14 @@ nearGenes <-GetNearGenes(TRange=getMet(data)[Sig.probes,],
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
-                     probes=Sig.probes,
-                     nearGenes=nearGenes,
-                     permu.dir="./ELMER.example/Result/LUSC/permu",
-                     permu.size=200,
-                     Pe = 0.01,
-                     dir.out="./ELMER.example/Result/LUSC",
-                     cores=detectCores()/2,
-                     label= "hypo")
+                      probes=Sig.probes,
+                      nearGenes=nearGenes,
+                      permu.dir="./ELMER.example/Result/LUSC/permu",
+                      permu.size=200,
+                      Pe = 0.01,
+                      dir.out="./ELMER.example/Result/LUSC",
+                      cores=detectCores()/2,
+                      label= "hypo")
 
 head(Hypo.pair)  ## significant probe-gene pairs
 
@@ -571,11 +571,11 @@ Sig.probes.paired <- read.csv("./ELMER.example/Result/LUSC/getPair.hypo.pairs.si
                               stringsAsFactors=FALSE)[,1]  
 head(Sig.probes.paired) # significantly hypomethylated probes with putative target genes
 
-enriched.motif <-get.enriched.motif(probes=Sig.probes.paired, 
-                                    dir.out="./ELMER.example/Result/LUSC", 
-                                    label="hypo",
-                                    min.incidence = 10,
-                                    lower.OR = 1.1)
+enriched.motif <- get.enriched.motif(probes=Sig.probes.paired, 
+                                     dir.out="./ELMER.example/Result/LUSC", 
+                                     label="hypo",
+                                     min.incidence = 10,
+                                     lower.OR = 1.1)
 names(enriched.motif)  # enriched motifs
 head(enriched.motif["TP53"]) ## probes in the given set that have TP53 motif.
 
@@ -683,22 +683,16 @@ scatter.plot(data,
 ```
 
 ## Schematic plot
-Schematic plot shows a breif view of linkages between genes and probes. To make a 
-schematic plot, "Pair" object should be generated first.
+Schematic plot shows a breif view of linkages between genes and probes.
 
-```{r,eval=TRUE, message=FALSE,echo=FALSE}
-# Make a "Pair" object for schematic.plot
-pair <- fetch.pair(pair=Hypo.pair,
-                   probeInfo = rowRanges(getMet(data)),
-                   geneInfo = rowRanges(getExp(data)))
-```
 ### Nearby Genes
 Generate schematic plot for one probe with 20 nearby genes and label 
 the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
 
 ```{r, eval=TRUE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
-schematic.plot(pair=pair, 
+schematic.plot(pair=Hypo.pair, 
+               data = data,
                byProbe="cg25312122",
                save=FALSE)
 ```
@@ -708,7 +702,7 @@ Generate schematic plot for one gene with the probes which the gene is significa
 linked to. Figure \ref{fig:figure5}
 
 ```{r,eval=TRUE, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
-schematic.plot(pair=pair, byGene="ENSG00000197965",save=FALSE)
+schematic.plot(pair=pair, data = data, byGene="ENSG00000197965",save=FALSE)
 ```
 
 ## Motif enrichment plot
