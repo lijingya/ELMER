@@ -62,7 +62,7 @@ schematic.plot <- function(data,
       significant <- pair[pair$Probe==probe,]
       gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
       probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
-      new.schematic(gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save)
+      schematic(gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save)
     }
   }
   if(!missing(byGeneID)){
@@ -70,7 +70,7 @@ schematic.plot <- function(data,
       significant <- pair[pair$GeneID==gene,]
       gene.gr <- rowRanges(getExp(data))[gene,]
       probe.gr <- rowRanges(getMet(data))[significant$Probe,]
-      new.schematic(gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save)
+      schematic(gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save)
     }
     
   }
@@ -82,7 +82,7 @@ schematic.plot <- function(data,
       probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
       gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
       significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
-      new.schematic(gene.gr, probe.gr, significant,
+      schematic(gene.gr, probe.gr, significant,
                     label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
                                   dir.out,byCoordinate$chr[i],byCoordinate$start[i],
                                   byCoordinate$end[i]), save=save)
@@ -90,6 +90,7 @@ schematic.plot <- function(data,
   }
 }
 
+#' @importFrom GenomicRanges seqnames
 schematic <- function(gene.gr,  
                       probe.gr, 
                       significant, 
@@ -104,9 +105,10 @@ schematic <- function(gene.gr,
   
   # We will find which is the significant pairs of genes
   fill <- rep("blue", length(values(gene.gr)$ensembl_gene_id))
-  sig.colors <- rainbow(nrow(significant))
-  for(i in seq_len(nrow(significant))) {
-    fill[values(gene.gr)$ensembl_gene_id %in% significant[i,"GeneID"]] <- sig.colors[i]
+ 
+  sig.colors <- rainbow(length(unique(significant$Probe)))
+  for(i in seq_len(length(unique(significant$Probe)))) {
+    fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],"GeneID"]] <- sig.colors[i]
   }
   genetrack <- GeneRegionTrack(gene.gr, name = "Gene", 
                                fill = fill, 

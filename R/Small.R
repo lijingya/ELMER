@@ -120,7 +120,7 @@ createMultiAssayExperiment <- function (exp,
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
-  
+
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
@@ -151,7 +151,6 @@ createMultiAssayExperiment <- function (exp,
       }
     }
   } 
-  
   if(TCGA){
     message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
     # If it is not TCGA we will assure the sample has both DNA methylation and gene expression
