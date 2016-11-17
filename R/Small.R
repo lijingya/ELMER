@@ -176,7 +176,7 @@ createMultiAssayExperiment <- function (exp,
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
                                 pData = pData,   sampleMap = sampleMap,
-                                metadata = list(TCGA= TRUE))
+                                metadata = list(TCGA= TRUE, genome = genome))
     
   } else {
     if(missing(pData)) stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
@@ -195,7 +195,7 @@ createMultiAssayExperiment <- function (exp,
                                                    "Gene expression" = exp),
                                   pData = pData,
                                   sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE))
+                                  metadata = list(TCGA=FALSE, genome = genome))
     } else {
       # Check that we have the same number of samples
       if(!all(c("primary","colname") %in% colnames(sampleMap))) 
@@ -227,7 +227,7 @@ createMultiAssayExperiment <- function (exp,
                                                    "Gene expression" = exp),
                                   pData = pData,
                                   sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE))
+                                  metadata = list(TCGA=FALSE, genome = genome))
     }
   }
   return(mae)

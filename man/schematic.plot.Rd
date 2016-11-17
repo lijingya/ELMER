@@ -15,8 +15,6 @@ schematic.plot(pair,
 
 \item{byProbe}{A vector of probe names.}
 
-\item{byGene}{A vector of gene ID}
-
 \item{byCoordinate}{A list contains chr, start and end. 
 byCoordinate=list(chr=c(),start=c(),end=c()).}
 
@@ -25,6 +23,8 @@ byCoordinate=list(chr=c(),start=c(),end=c()).}
 \item{save}{A logic. If true, figures will be saved to dir.out.}
 
 \item{...}{Parameters for GetNearGenes}
+
+\item{byGene}{A vector of gene ID}
 }
 \description{
 schematic.plot is a function to plot schematic plots showing the locations of genes and probes.
@@ -47,25 +47,13 @@ produce a schematic plot for this coordinate. The schematic plot contains
 all genes and significantly linked probes in the range and the significant links.
 }
 \examples{
-library(grid)
 data(elmer.data.example)
-nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-                         geneAnnot=getExp(data))
-Hypo.pair <-get.pair(data=data,probes=c("cg00329272","cg10097755"),
-                    nearGenes=nearGenes,permu.size=5,Pe = 0.2,dir.out="./",
-                    label= "hypo")
-pair <- fetch.pair(pair=Hypo.pair,
-                  probeInfo = rowRanges(getMet(data)),
-                  geneInfo = rowRanges(getExp(data)))
-# a. generate schematic plot of one probe with nearby 20 genes and label 
-#the gene significantly linked with the probe.
-grid.newpage()
-schematic.plot(pair=pair, byProbe="cg00329272" ,save=FALSE)
-#b. generate schematic plot of ont gene with the probe which the gene significanlty linked to.
-grid.newpage()
-schematic.plot(pair=pair, byGene="ENSG00000078900",save=FALSE)
-}
-\author{
-Lijing Yao (creator: lijingya@usc.edu)
+pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
+                   GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+                   Symbol = c("TRAF3IP3","LAMB3","LAMB3"), 
+                   Pe = c(0.001,0.00001,0.001))
+new.schematic.plot(data, pair, byProbe = "cg19403323")
+new.schematic.plot(data, pair, byGeneID = "ENSG00000009790")
+new.schematic.plot(data, pair, byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
 }
 
