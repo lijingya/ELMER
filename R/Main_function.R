@@ -703,12 +703,12 @@ get.enriched.motif <- function(probes.motif,
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
-#' TF <- get.TFs(data, enriched.motif, 
-#'               TFs=data.frame(GeneID=c("7157","8626","7161"),
-#'               Symbol=c("TP53","TP63","TP73"),
-#'                ENSEMBL= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
-#'               stringsAsFactors = FALSE),
-#'               label="hypo")
+#' TF <- get.TFs(data, 
+#'               enriched.motif, 
+#'               TFs=data.frame(external_gene_name=c("TP53","TP63","TP73"),
+#'                              ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
+#'                              stringsAsFactors = FALSE),
+#'              label="hypo")
 get.TFs <- function(data, 
                     enriched.motif, 
                     TFs, 
@@ -790,7 +790,7 @@ get.TFs <- function(data,
                           top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
                           potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
                           out <- data.frame("motif" = x,
-                                            "top potential TF" = potential.TF[1],
+                                            "top potential TF" = ifelse(!is.null(potential.TF[1]),potential.TF[1],""),
                                             "potential TFs" = paste(potential.TF, collapse = ";"),
                                             "top_5percent" = paste(top,collapse = ";"))
                         },                                         
