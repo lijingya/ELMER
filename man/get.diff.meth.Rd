@@ -6,10 +6,12 @@
 groups such as normal verus tumor samples.}
 \usage{
 get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
-  pvalue = 0.01, group.col, group1, group2, test = wilcox.test,
-  sig.dif = 0.3, dir.out = "./", save = TRUE)
+  pvalue = 0.01, group.col, group1, group2, test = t.test, sig.dif = 0.3,
+  dir.out = "./", save = TRUE)
 }
 \arguments{
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+
 \item{diff.dir}{A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites}
@@ -22,7 +24,7 @@ experimental groups that are used to identify the differential methylation. Defa
 \item{pvalue}{A number specifies the significant P value (adjusted P value by BH) cutoff 
 for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 
-\item{test}{Statistical test to be used. Options: t.test, wilcox.test}
+\item{test}{Statistical test to be used. Options: t.test (DEFAULT), wilcox.test}
 
 \item{sig.dif}{A number specifies the smallest DNA methylation difference as a cutoff for 
 selecting significant hypo/hyper-methylated probes. Default is 0.3.}
@@ -30,8 +32,6 @@ selecting significant hypo/hyper-methylated probes. Default is 0.3.}
 \item{dir.out}{A path specify the directory for outputs. Default is is current directory.}
 
 \item{save}{A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)}
-
-\item{mee}{A MEE.data object containing at least meth and probeInfo.}
 }
 \value{
 Statistics for all probes and significant hypo or hyper-methylated probes.

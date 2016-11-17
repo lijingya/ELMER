@@ -77,7 +77,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
 #' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
 #'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
-#' @param mee A MEE.data object containing at least meth and probeInfo.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 #' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 #' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
@@ -89,7 +89,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for 
 #' selecting significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
-#' @param test Statistical test to be used. Options: t.test, wilcox.test
+#' @param test Statistical test to be used. Options: t.test (DEFAULT), wilcox.test
 #' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
 #' @details 
 #'  save: 
@@ -128,7 +128,7 @@ get.diff.meth <- function(data,
                           group.col, 
                           group1,
                           group2,
-                          test = wilcox.test,
+                          test = t.test,
                           sig.dif=0.3,
                           dir.out="./",
                           save=TRUE){

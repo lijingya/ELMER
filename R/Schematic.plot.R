@@ -34,200 +34,112 @@
 #'produce a schematic plot for this coordinate. The schematic plot contains 
 #'all genes and significantly linked probes in the range and the significant links.
 #'@export
-#'@author 
-#' Lijing Yao (creator: lijingya@usc.edu) 
-#'@examples
-#' library(grid)
+#' @import Gviz lattice
+#' @examples 
 #' data(elmer.data.example)
-#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-#'                          geneAnnot=getExp(data))
-#' Hypo.pair <-get.pair(data=data,probes=c("cg00329272","cg10097755"),
-#'                     nearGenes=nearGenes,permu.size=5,Pe = 0.2,dir.out="./",
-#'                     label= "hypo")
-#'pair <- fetch.pair(pair=Hypo.pair,
-#'                   probeInfo = rowRanges(getMet(data)),
-#'                   geneInfo = rowRanges(getExp(data)))
-#'# a. generate schematic plot of one probe with nearby 20 genes and label 
-#'#the gene significantly linked with the probe.
-#'grid.newpage()
-#'schematic.plot(pair=pair, byProbe="cg00329272" ,save=FALSE)
-#'#b. generate schematic plot of ont gene with the probe which the gene significanlty linked to.
-#'grid.newpage()
-#'schematic.plot(pair=pair, byGene="ENSG00000078900",save=FALSE)
-schematic.plot <- function(pair, 
+#' pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
+#'                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+#'                    Symbol = c("TRAF3IP3","LAMB3","LAMB3"), 
+#'                    Pe = c(0.001,0.00001,0.001))
+#' new.schematic.plot(data, pair, byProbe = "cg19403323")
+#' new.schematic.plot(data, pair, byGeneID = "ENSG00000009790")
+#' new.schematic.plot(data, pair, byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
+schematic.plot <- function(data,
+                           pair, 
                            byProbe, 
-                           byGene, 
+                           byGeneID, 
                            byCoordinate=list(chr=c(), start=c(), end=c()),
                            dir.out="./",
                            save=TRUE,...){
-  if(missing(pair)) stop("Pair option is empty.")
-  if(nrow(getPair(pair))==0 | length(pair@probeInfo)==0 | length(pair@geneInfo)==0) 
-    stop("All slot should be included in pair object.")
-  args <- list(...)
+  # Begin of new schematic plot
+  # For a probe get nearby genes
   if(!missing(byProbe)){
+    args <- list(...)
     params <- args[names(args) %in% c("geneNum","cores")]
-    nearGenes <- do.call(GetNearGenes,c(list(TRange=pair@probeInfo[byProbe,],
-                                             geneAnnot=pair@geneInfo),params))
-    for(i in byProbe){
-      significant <- getPair(pair,probe=i)
-      schematic(probe.range= pair@probeInfo[i,], 
-                gene.range=pair@geneInfo[nearGenes[[i]]$GeneID,],
-                special=list(names= c(i,significant$Symbol), 
-                             colors=c("blue",rep("red",length(significant$Symbol)))),
-                label=sprintf("%s/%s.schematic.byProbe",dir.out,i), save=save)
+    nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
+                                             geneAnnot=rowRanges(getExp(data))),params))
+    for(probe in byProbe){
+      significant <- pair[pair$Probe==probe,]
+      gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
+      probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
+      new.schematic(gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save)
     }
   }
-  if(!missing(byGene)){
-    for(i in byGene){
-      significant <- getPair(pair,geneID=i)
-      if(nrow(significant) ==0 ){
-        warning(sprintf("gene %s don't have signficantly linked probes.",i))
-      }else{
-        schematic(probe.range= pair@probeInfo[unique(significant$Probe),], 
-                  gene.range=pair@geneInfo[i,],
-                  special=list(names= c(significant$Symbol,significant$Probe), 
-                               colors=c("red",rep("blue",length(significant$Probe)))),
-                  label=sprintf("%s/%s.schematic.byGene",dir.out,i), save=save)
-      }
+  if(!missing(byGeneID)){
+    for(gene in byGeneID){
+      significant <- pair[pair$GeneID==gene,]
+      gene.gr <- rowRanges(getExp(data))[gene,]
+      probe.gr <- rowRanges(getMet(data))[significant$Probe,]
+      new.schematic(gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save)
     }
+    
   }
-  
   if(length(byCoordinate$chr)!=0){
     for(i in 1:length(byCoordinate$chr)){
       coordinate <- GRanges(seqnames = byCoordinate$chr[i], 
-                            ranges =IRanges(byCoordinate$start[i],byCoordinate$end[i]))
-      p.over <- findOverlaps(pair@probeInfo, coordinate)
-      probe.range <- getProbeInfo(pair,probe=unique(getPair(pair)$Probe), range=coordinate) ## probe need to be significant
-      gene.range <- getGeneInfo(pair, range=coordinate)   ## gene don't need
-      significant <- getPair(pair,geneID=unique(gene.range$GENEID),probe=unique(gene.range$name))
-      schematic(probe.range=probe.range , gene.range=gene.range,
-                special=list(names= c(unique(significant$Symbol),unique(significant$Probe)), 
-                             colors=c(rep("red",length(unique(significant$Symbol))),
-                                      rep("blue",length(unique(significant$Probe))))),
-                label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
-                              dir.out,byCoordinate$chr[i],byCoordinate$start[i],
-                              byCoordinate$end[i]), 
-                interaction=list(probe=significant$Probe, gene= significant$Symbol),save=save)
+                            ranges = IRanges(byCoordinate$start[i],byCoordinate$end[i]))
+      probe.gr  <- rowRanges(getMet(data))[pair$Probe,]
+      probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
+      gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
+      significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
+      new.schematic(gene.gr, probe.gr, significant,
+                    label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
+                                  dir.out,byCoordinate$chr[i],byCoordinate$start[i],
+                                  byCoordinate$end[i]), save=save)
     }
   }
 }
 
-
-#'schematicPlot
-#'@param probe.range A GRanges object contains probes coordinates.
-#'@param gene.range A GRanges object contains gene TSS coordinates.
-#'@param special A list: special=list(names=c(), colors=c()) show the name of 
-#'feature you want to highlight and specify the color respectively.
-#'@param interaction A list: interaction=list(probe=c(),gene=c(),colors=c()) 
-#'show the interacted features and specify the color respectively.
-#'@param label A character labels the outputs figure.
-#'@param save A logic. If true, figure will be saved to dir.out.
-#'@return A schematic plot.
-#'@details byProbes When a vector of probes' name are provided, function will 
-#'produce schematic plot for each individual probes. The schematic plot contains 
-#'probe, nearby 20 (or the number of gene user specified.) genes and the significantly
-#' linked gene with the probe.
-#'@details byGene When a vector of gene ID are provided, function will produce
-#' schematic plot for each individual genes. The schematic plot contains the gene 
-#' and all the significantly linked probes.
-#'@details byCoordinate When a genomic coordinate is provided, function will 
-#'produce a schematic plot for this coordinate. The schematic plot contains all 
-#'genes and significantly linked probes in the range and the significant links.
-#'@importFrom GenomicRanges seqnames
-#'@importFrom grid grid.text grid.lines grid.curve arrow unit grid.circle viewport gpar
-schematic <- function(probe.range, gene.range, special=list(names=c(),colors=c()),
-                      interaction=list(probe=c(),gene=c(),colors=c()) ,label, save=TRUE){
-  if(!unique(seqnames(probe.range)) %in% unique(seqnames(gene.range))) 
-    stop("probe and gene should be in the same chromosome.")
-  Sequences <- data.frame(name = gene.range$external_gene_name, 
-                          position=start(gene.range),
-                          Type=rep("arrow",length(gene.range)),
-                          dir=as.vector(strand(gene.range)), 
-                          stringsAsFactors = FALSE )
-  Sequences <- rbind(Sequences, data.frame(name = names(probe.range), 
-                                           position=start(probe.range), 
-                                           Type=rep("circle",length(probe.range)), 
-                                           dir=as.vector(strand(probe.range)),
-                                           stringsAsFactors = FALSE ))
-  Sequences <- do.call(rbind,lapply(split(Sequences,Sequences$name), 
-                                    function(x){return(x[1,])}))
-  Sequences <- Sequences[order(Sequences$position),]
-  Sequences$colors <- rep("black", nrow(Sequences))
-  Sequences$colors[match(special$names, Sequences$name)] <- special$colors
-  Range <- range(Sequences$position)
-  Sequences$dis <- 0.15 + 0.75*(Sequences$position - Sequences$position[1])/(Range[2]-Range[1])
+schematic <- function(gene.gr,  
+                      probe.gr, 
+                      significant, 
+                      label, 
+                      save=TRUE){
+  
   if(save) pdf(paste0(label,".pdf"))
-  vp <- viewport(height=3, width=6)
-  grid.text(paste0(unique(seqnames(gene.range)),":",Range[1],"-",Range[2]),0.5,0.9,gp=gpar(lwd=3))
-  grid.lines(c(0.2,0.3),c(0.75,0.75),gp=gpar(lwd=3))
-  grid.text(paste0(round((Range[2]-Range[1])/1000000,digits=2),"Mb"),0.25,0.78,gp=gpar(lwd=3))
-  grid.lines(c(0.1,0.9),c(0.3,0.3),gp=gpar(lwd=3))
+  chr <- as.character(seqnames(probe.gr))
   
-  ## plot gene
-  sub.seq <- Sequences[Sequences$Type %in% "arrow" & Sequences$dir %in% "-",]
-  if(nrow(sub.seq) >0){
-    grid.curve(x1=sub.seq$dis, y1=0.3, x2=sub.seq$dis+(-0.025), y2=0.35,
-               arrow=arrow(length = unit(0.01,"npc")),shape=0,
-               gp=gpar(col=sub.seq$colors,lwd=3))
+  idxTrack <- IdeogramTrack(genome = metadata(data)$genome, chromosome = chr)
+  axTrack <- GenomeAxisTrack()
+  
+  # We will find which is the significant pairs of genes
+  fill <- rep("blue", length(values(gene.gr)$ensembl_gene_id))
+  sig.colors <- rainbow(nrow(significant))
+  for(i in seq_len(nrow(significant))) {
+    fill[values(gene.gr)$ensembl_gene_id %in% significant[i,"GeneID"]] <- sig.colors[i]
   }
-  sub.seq <- Sequences[Sequences$Type %in% "arrow" & Sequences$dir %in% "+",]
-  if(nrow(sub.seq) >0){
-    grid.curve(x1=sub.seq$dis, y1=0.3, x2=sub.seq$dis+(0.025), y2=0.35, 
-               arrow=arrow(length = unit(0.01,"npc")),shape=0,
-               gp=gpar(col=sub.seq$colors,lwd=3),curvature = -1)
-  }
+  genetrack <- GeneRegionTrack(gene.gr, name = "Gene", 
+                               fill = fill, 
+                               symbol = values(gene.gr)$external_gene_name,
+                               shape = "arrow")
   
-  ## plot probe
-  sub.seq <- Sequences[Sequences$Type %in% "circle",]
-  grid.circle(x = sub.seq$dis, y = 0.3,r=0.01,
-              gp=gpar(col=sub.seq$col, fill=sub.seq$col))
-  
-  ## label gene 
-  sub.seq <- Sequences[Sequences$Type %in% "arrow" & 
-                         !Sequences$colors %in% "black",]
-  n <- 0.6
-  for(i in 1:nrow(sub.seq)){
-    x <- sub.seq[i,]
-    grid.lines(x=c(x$dis,x$dis), y=c(0.35,n),gp=gpar(lwd=2))
-    grid.text(x$name,x$dis,n+0.02,gp=gpar(lwd=3))
-    n <- n-0.05
-    if(n < 0.45) n<- 0.6
+  details <- function(identifier, ...) {
+    d <- data.frame(signal = assay(getMet(data))[identifier, ], group = pData(data)$definition)
+    print(densityplot(~signal, group = group, data = d, auto.key = TRUE,
+                      main = list(label = identifier, cex = 0.7),
+                      scales = list(draw = FALSE, x = list(draw = TRUE)),
+                      ylab = "", xlab = "", ), newpage = FALSE,
+          prefix = "plot")
   }
   
-  
-  ## label probe
-  sub.seq <- Sequences[Sequences$Type %in% "circle" &
-                         !Sequences$colors %in% "black",]
-  n <- 0.25
-  for(i in 1:nrow(sub.seq)){
-    x <- sub.seq[i,]
-    if(i > 1){
-      if(x$dis-sub.seq$dis[i-1] < 0.15 & n == 0.25){
-        n <- 0.22
-      }else if(x$dis-sub.seq$dis[i-1] < 0.15 & n != 0.22){
-        n <- 0.25
-      }
-    }
-    grid.text(x$name,x$dis,n+0.02,gp=gpar(lwd=3))
-  }
-  ## interaction
-  if(length(interaction$probe)!=0 & length(interaction$gene)!=0){
-    if(length(colors)==0) colors<- rep("black", length(Sequences))
-    df <- data.frame(probe.seq=Sequences$dis[match(interaction$probe, Sequences$name)],
-                     gene.seq=Sequences$dis[match(interaction$gene, Sequences$name)],
-                     colors=interaction$colors)
-    df$dir <- df$probe.seq-df$gene.seq
-    
-    ## curvature -1
-    sub.df <- df[df$dir < 0,]
-    grid.curve(x1=sub.df$probe.seq, y1=0.3, x2=sub.df$gene.seq, y2=0.35,
-               gp=gpar(col=as.character(sub.df$colors),lwd=3),curvature = -1,
-               ncp=8,square=0,angle=70)
-    sub.df <- df[df$dir > 0,]
-    grid.curve(x1=sub.df$probe.seq, y1=0.3, x2=sub.df$gene.seq, y2=0.35,
-               gp=gpar(col=as.character(sub.df$colors),lwd=3),ncp=8,
-               square=0,angle=-70)
-  }
+  deTrack <- AnnotationTrack(range = probe.gr, 
+                             genome = metadata(data)$genome, 
+                             showId = FALSE, 
+                             groupAnnotation = "group",
+                             chromosome = chr, 
+                             fill = sig.colors, # We need to select the color based on the group
+                             detailsConnector.col="red",
+                             detailsBorder.col="red",
+                             col.line="red",
+                             detailsBorder.lwd=0,
+                             id = names(probe.gr), name = "probe details",
+                             stacking = "squish", fun = details)
+  plotTracks(list(idxTrack,  axTrack, genetrack,deTrack),  
+             background.title = "darkblue",
+             detailsBorder.col = "white",
+             sizes=c(1,1,1,8), 
+             details.ratio = 1,
+             details.size = 0.8,col = NULL,
+             geneSymbols=TRUE)
   if(save) dev.off()
-  return(vp)
 }
