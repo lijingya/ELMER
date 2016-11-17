@@ -1,222 +1,314 @@
-#---------------return sample type function-------------------- -------
-# Returns type: tumor, bloodNormal, tissueNormal
-#according to the sampletypes
-# Returns type: tumor, bloodNormal, tissueNormal
-# tcgaSampleType.
-#x A TCGA sample barcode.
-# Tissue type: Tumor, Normal, Control, TRB, cell_line, XP, XCL
-tcgaSampleType <- function(x){
-  # "Code","Definition","Short Letter Code"
-  # "01","Primary solid Tumor","TP"
-  # "02","Recurrent Solid Tumor","TR"
-  # "03","Primary Blood Derived Cancer - Peripheral Blood","TB"
-  # "04","Recurrent Blood Derived Cancer - Bone Marrow","TRBM"
-  # "05","Additional - New Primary","TAP"
-  # "06","Metastatic","TM"
-  # "07","Additional Metastatic","TAM"
-  # "08","Human Tumor Original Cells","THOC"
-  # "09","Primary Blood Derived Cancer - Bone Marrow","TBM"
-  # "10","Blood Derived Normal","NB"
-  # "11","Solid Tissue Normal","NT"
-  # "12","Buccal Cell Normal","NBC"
-  # "13","EBV Immortalized Normal","NEBV"
-  # "14","Bone Marrow Normal","NBM"
-  # "20","Control Analyte","CELLC"
-  # "40","Recurrent Blood Derived Cancer - Peripheral Blood","TRB"
-  # "50","Cell Lines","CELL"
-  # "60","Primary Xenograft Tissue","XP"
-  # "61","Cell Line Derived Xenograft Tissue","XCL"  
-  code<-substring(x,14,15)
-  if (code < 10){
-    out <- "Tumor"
-  }else if ((code == 10) || (code == 11) || (code == 13) || (code == 14)){
-    out <- "Normal"
-  }else if (code==20){
-    out <- "Control"
-  }else if (code==40){
-    out <- "TRB"
-  }else if (code==50){
-    out <- "cell_line"
-  }else if (code==60){
-    out <- "XP"
-  }else if (code==61){
-    out <- "XCL"
-  }else{
-    out <- "other"
-  }
-  return(out)
-}
-
-# tcgaSampleType.
-# param tcgaId A vector list TCGA sample barcode.
-# return Standardized TCGA IDs
-standardizeTcgaId<-function(tcgaId){
-  out<-substring(tcgaId,1,15)
-  return(out)
-}
-
-
-
-
-
-
-
-
-##############-----------fetch data
-## Construct MEE.data from load local data.
-#' fetch.mee
-#' @param meth A matrix or path of rda file only containing a matrix of 
-#' DNA methylation data.
-#' @param exp A matrix or path of rda file only containing a matrix of 
-#' expression data.
-#' @param sample A data frame or path of rda file only containing sample 
-#' information in data frame format.
-#' @param probeInfo A GRnage object or path of rda file only containing 
-#' a GRange of probe information 
-#' @param geneInfo A GRnage object or path of rda file only containing 
-#' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
-#' @param probes A vector lists probes' name. If probes are specified, 
-#' the methylation and probeInfo will only contain this list of probes.
-#' @param genes A vector lists genes' ID. If gene are specified, 
-#' the methylation and probeInfo will only contain this list of probes.
+## Construct Multi Assay Experiment
+#' @description 
+#' This function will receive a gene expression and DNA methylation data objects 
+#' and create a Multi Assay Experiment.
+#' @param met A Summaerized Experiment, a matrix or path of rda file only containing the data.
+#' @param exp A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
+#' either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)
+#' @param genome Which is the default genome to make gene information. Options hg19 and hg38
+#' @param pData A DataFrame or data.frame of the phenotype data for all participants
+#' @param sampleMap  A DataFrame or data.frame of the matching samples and colnames
+#'  of the gene expression and DNA methylation matrix. This should be used if your matrix
+#'  have different columns names. 
+#'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
-#' @return A MEE.data object
+#' @return A MultiAssayExperiment object
 #' @export 
+#' @importFrom MultiAssayExperiment MultiAssayExperiment
 #' @examples
-#' meth <- matrix(data=c(1:20),ncol=5,dimnames=list(paste0("probe",1:4),paste0("sample",1:5)))
-#' exp <- matrix(data=c(101:110),ncol=5,dimnames=list(c("gene1","gene2"),paste0("sample",1:5)))
-#' mee <- fetch.mee(meth=meth, exp=exp)
-#' ## only fetch probe 1 and 3
-#' mee <- fetch.mee(meth=meth, exp=exp, probes=c("probe1","probe3")) 
-#' ## only fetch gene 1
-#' mee <- fetch.mee(meth=meth, exp=exp, genes="gene1")
-fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
-                      genes=NULL,TCGA=FALSE){
-  if(!missing(meth)){
-    if(is.character(meth)){
-      newenv <- new.env()
-      load(meth, envir=newenv)
-      meth <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-    }
-  }else{
-    meth <- NULL
+#' # NON TCGA example: matrices has diffetrent column names
+#' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
+#'                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
+#' )
+#' dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'                        sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9)
+#' )
+#' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+#' rownames(sample.info) <- colnames(gene.exp)
+#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+#' 
+#' # NON TCGA example: matrices has diffetrent column names
+#' gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
+#'                        sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
+#' )
+#' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+#' )
+#' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
+#' rownames(sample.info) <- c("sample1","sample2")
+#' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+#'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
+#' \dontrun{
+#'    # TCGA example using TCGAbiolinks
+#'    # Testing creating MultyAssayExperiment object
+#'    # Load library
+#'    library(TCGAbiolinks)
+#'    library(SummarizedExperiment)
+#'    
+#'    samples <- c("TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
+#'                 "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV")
+#'    
+#'    #1) Get gene expression matrix
+#'    query.exp <- GDCquery(project = "TCGA-HNSC", 
+#'                          data.category = "Transcriptome Profiling", 
+#'                          data.type = "Gene Expression Quantification", 
+#'                          workflow.type = "HTSeq - FPKM-UQ",
+#'                          barcode = samples)
+#'    
+#'    GDCdownload(query.exp)
+#'    exp.hg38 <- GDCprepare(query = query.exp)
+#'    
+#'    
+#'    # Aligned against Hg19
+#'    query.exp.hg19 <- GDCquery(project = "TCGA-HNSC", 
+#'                               data.category = "Gene expression",
+#'                               data.type = "Gene expression quantification",
+#'                               platform = "Illumina HiSeq", 
+#'                               file.type  = "normalized_results",
+#'                               experimental.strategy = "RNA-Seq",
+#'                               barcode = samples,
+#'                               legacy = TRUE)
+#'    GDCdownload(query.exp.hg19)
+#'    exp.hg19 <- GDCprepare(query.exp.hg19)
+#'    
+#'    # DNA Methylation
+#'    query.met <- GDCquery(project = "TCGA-HNSC",
+#'                          legacy = TRUE,
+#'                          data.category = "DNA methylation",
+#'                          barcode = samples,
+#'                          platform = "Illumina Human Methylation 450")
+#'    
+#'    GDCdownload(query.met)
+#'    met <- GDCprepare(query = query.met)
+#'    
+#'    
+#'    # Consisering it is TCGA and SE
+#'    mae.hg19 <- createMultiAssayExperiment(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+#'    values(getExp(mae.hg19))
+#'    
+#'    mae.hg38 <- createMultiAssayExperiment(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+#'    values(getExp(mae.hg38))
+#'    
+#'    # Consisering it is TCGA and not SE
+#'    mae.hg19.test <- createMultiAssayExperiment(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+#'    
+#'    mae.hg38 <- createMultiAssayExperiment(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+#'    values(getExp(mae.hg38))
+#'    
+#'    # Consisering it is not TCGA and SE
+#'    # DNA methylation and gene expression Objects should have same sample names in columns
+#'    not.tcga.exp <- exp.hg19 
+#'    colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
+#'    not.tcga.met <- exp.hg19 
+#'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
+#'    
+#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
+#'    mae.hg19 <- createMultiAssayExperiment(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+#' }
+#' createMultiAssayExperiment
+createMultiAssayExperiment <- function (exp, 
+                                        met, 
+                                        pData, 
+                                        sampleMap,
+                                        genome = NULL,
+                                        TCGA = FALSE) {
+  
+  if(missing(genome)) stop("Please specify the genome (hg38, hg19)")
+  
+  # Check if input are path to rda files
+  if(is.character(exp)) exp <- get(load(exp))
+  if(is.character(met)) met <- get(load(met))
+
+  # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
+  required.cols <- c("external_gene_name", "ensembl_gene_id")
+  # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
+  if(class(exp) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome)
   }
   
-  if(!missing(exp)){
-    if(is.character(exp)){
-      newenv <- new.env()
-      load(exp, envir=newenv)
-      exp <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-    }
-  }else{
-    exp <- NULL
-  }
-  if(!missing(sample)){
-    if(is.character(sample)){
-      newenv <- new.env()
-      load(sample, envir=newenv)
-      sample <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-      sample$ID <- as.character(sample$ID)
-    }
-  }else if(TCGA){
-    if(!is.null(meth) & is.null(exp)){
-      TN <- sapply(colnames(meth),tcgaSampleType)
-      TN[TN %in% "Tumor"] <- "Experiment"
-      TN[TN %in% "Normal"] <- "Control"
-      sample <- data.frame(ID=standardizeTcgaId(colnames(meth)),
-                           meth.ID=colnames(meth),
-                           TN=TN,
-                           stringsAsFactors = FALSE)
-    }else if(is.null(meth) & !is.null(exp)){
-      TN <- sapply(colnames(exp),tcgaSampleType)
-      TN[TN %in% "Tumor"] <- "Experiment"
-      TN[TN %in% "Normal"] <- "Control"
-      sample <- data.frame(ID=standardizeTcgaId(colnames(exp)),
-                           exp.ID=colnames(exp),
-                           TN=TN,
-                           stringsAsFactors = FALSE)
-    }else if(!is.null(meth) & !is.null(exp)){
-      ID <- intersect(standardizeTcgaId(colnames(meth)),standardizeTcgaId(colnames(exp)))
-      TN <- sapply(ID,tcgaSampleType)
-      TN[TN %in% "Tumor"] <- "Experiment"
-      TN[TN %in% "Normal"] <- "Control"
-      meth.ID <- colnames(meth)
-      exp.ID <- colnames(exp)
-      sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,standardizeTcgaId(meth.ID))],
-                           exp.ID=exp.ID[match(ID,standardizeTcgaId(exp.ID))],
-                           TN=TN,stringsAsFactors = FALSE)
-      
-    }
-  }else if(!is.null(meth) & !is.null(exp)){
-    ID <- intersect(colnames(meth),colnames(exp))
-    if(length(ID)==0) 
-      stop("Sample naming should consistant in methylation and expression data.")
-    meth.ID <- colnames(meth)
-    exp.ID <- colnames(exp)
-    sample <- data.frame(ID=ID,meth.ID=meth.ID[match(ID,meth.ID)],
-                         exp.ID=exp.ID[match(ID,exp.ID)],stringsAsFactors = FALSE)
-  }else{
-    sample <- NULL
-  }
-  if(!missing(probeInfo)){
-    if(is.character(probeInfo)){
-      newenv <- new.env()
-      load(probeInfo, envir=newenv)
-      probeInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-    }
-    if(!is.null(probes)){
-      probeInfo <- probeInfo[probeInfo$name %in% probes]
-    }
-  }else{
-    probeInfo <- NULL
+  if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    met <- makeSummarizedExperimentFromDNAMethylation(met, genome)
   }
   
-  if(!missing(geneInfo)){
-    if(is.character(geneInfo)){
-      newenv <- new.env()
-      load(geneInfo, envir=newenv)
-      geneInfo <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-    }
-    if(!is.null(genes)){
-      geneInfo <- geneInfo[geneInfo$GENEID %in% genes]
-    }
-  }else{
-    geneInfo <- NULL
-  }
-  
-  if(!is.null(probeInfo) & !is.null(meth)){
-    meth <- meth[rownames(meth) %in% as.character(probeInfo$name),]
-    probeInfo <- probeInfo[as.character(probeInfo$name) %in% rownames(meth)]
-  } 
-  if(!is.null(geneInfo) & !is.null(exp)){
-    exp <- exp[rownames(exp)%in% as.character(geneInfo$GENEID),]
-    geneInfo <- geneInfo[as.character(geneInfo$GENEID) %in% rownames(exp)]
-  } 
-  if(!is.null(meth) & !is.null(exp)){
-      if(TCGA){
-          meth <- meth[,sample$meth.ID]
-          exp <- exp[,sample$exp.ID]
-      }else{
-          meth <- meth[,sample$ID]
-          exp <- exp[,sample$ID]
+  # We will need to check if the fields that we need exists.
+  # Otherwise we will need to create them
+  if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    required.cols <- required.cols[!required.cols %in% colnames(values(exp))]
+    if(length(required.cols) > 0) {
+      gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+      colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
+      if(all(grepl("ENSG",rownames(exp)))) {
+        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
+        colnames(extra) <- required.cols
+        values(exp) <- cbind(values(exp),extra)
+      } else {
+        message("We will consider your gene expression row names are Gene Symbols")
+        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+        colnames(extra) <- required.cols
+        values(exp) <- cbind(values(exp),extra)
       }
+    }
+  } 
+  if(TCGA){
+    message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
+    # If it is not TCGA we will assure the sample has both DNA methylation and gene expression
+    ID <- intersect(substr(colnames(met),1,15), substr(colnames(exp),1,15))
     
+    # Get only samples with both DNA methylation and Gene expression
+    met <- met[,match(ID,substr(colnames(met),1,15))]
+    exp <- exp[,match(ID,substr(colnames(exp),1,15))]
+    stopifnot(all(substr(colnames(exp),1,15) == substr(colnames(met),1,15)))
+    
+    # Get clinical information
+    if(missing(pData)) {
+      pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = substr(c(colnames(met),colnames(exp)),1,16),
+                             colname=c(colnames(met),colnames(exp)))
+      pData$barcode <- NULL
+      pData <- pData[!duplicated(pData),]      
+      rownames(pData) <- pData$sample
+    }
+    message("Creating MultiAssayExperiment")
+    mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
+                                                 "Gene expression" = exp),
+                                pData = pData,   sampleMap = sampleMap,
+                                metadata = list(TCGA= TRUE, genome = genome))
+    
+  } else {
+    if(missing(pData)) stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
+    if(missing(sampleMap)){
+      # Check that we have the same number of samples
+      message("Removing samples not found in both DNA methylation and gene expression (we are considering the names of the gene expression and DNA methylation columns to be the same) ")
+      ID <- intersect(colnames(met), colnames(exp))
+      met <- met[,match(ID,colnames(met))]
+      exp <- exp[,match(ID,colnames(exp))]
+      if(!all(colnames(exp) == colnames(met))) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = c(colnames(met),colnames(exp)),
+                             colname=c(colnames(met),colnames(exp)))
+      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
+                                                   "Gene expression" = exp),
+                                  pData = pData,
+                                  sampleMap = sampleMap,
+                                  metadata = list(TCGA=FALSE, genome = genome))
+    } else {
+      # Check that we have the same number of samples
+      if(!all(c("primary","colname") %in% colnames(sampleMap))) 
+        stop("sampleMap should have the following columns: primary (sample ID) and colname(DNA methylation and gene expression sample [same as the colnames of the matrix])")
+      if(!any(rownames(pData) %in% sampleMap$primary))
+        stop("pData row names should be mapped to sampleMap primary column ")
+      # Find which samples are DNA methylation and gene expression
+      sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
+      sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
+      
+      # Which ones have both DNA methylation and gene expresion?
+      commun.samples <- intersect(sampleMap.met$primary,sampleMap.exp$primary)
+      
+      # Remove the one that does not have both data
+      sampleMap.met <- sampleMap.met[match(sampleMap.met$primary,commun.samples),,drop = FALSE]
+      sampleMap.exp <- sampleMap.exp[match(sampleMap.exp$primary,commun.samples),,drop = FALSE]
+      
+      # Ordering samples to be matched
+      met <- met[,sampleMap.met$colname,drop = FALSE]
+      exp <- exp[,sampleMap.exp$colname,drop = FALSE]
+      
+      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
+      pData <- pData[match(commun.samples,rownames(pData)),,drop = FALSE]
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = commun.samples,
+                             colname=c(colnames(met),colnames(exp)))
+      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
+                                                   "Gene expression" = exp),
+                                  pData = pData,
+                                  sampleMap = sampleMap,
+                                  metadata = list(TCGA=FALSE, genome = genome))
+    }
   }
-  mee <- mee.data(meth=meth,exp=exp,sample=sample,
-                  probeInfo=probeInfo,geneInfo=geneInfo)
-  invisible(gc())
-  return(mee)
+  return(mae)
 }
 
+makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
+  message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+  message("Creating a SummarizedExperiment from gene expression input")
+  gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+  gene.info$chromosome_name <- paste0("chr",gene.info$chromosome_name)
+  colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
+  gene.info$strand[gene.info$strand == 1] <- "+"
+  gene.info$strand[gene.info$strand == -1] <- "-"
+  exp <- as.data.frame(exp)
+  required.cols <- c("external_gene_name", "ensembl_gene_id")
+  
+  if(all(grepl("ENSG",rownames(exp)))) {
+    exp$ensembl_gene_id <- rownames(exp)
+    aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
+    aux <- aux[!duplicated(aux$ensembl_gene_id),]
+    rownames(aux) <- aux$ensembl_gene_id
+    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
+                                                 start.field="start_position",
+                                                 end.field=c("end_position"))
+    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
+    colnames(extra) <- required.cols
+    values(exp) <- cbind(values(exp),extra)
+  } else {
+    message("We will consider your gene expression row names are Gene Symbols")
+    exp$external_gene_name <- rownames(exp)
+    aux <- merge(exp, gene.info, by = "external_gene_name", sort = FALSE)
+    aux <- aux[!duplicated(aux$external_gene_name),]
+    rownames(aux) <- aux$external_gene_name
+    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
+                                                 start.field="start_position",
+                                                 end.field=c("end_position"))
+    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+    colnames(extra) <- required.cols
+    values(exp) <- cbind(values(exp),extra)
+  }
+  return(exp)
+}
 
-#' fetch.pair
-#' @param pair A data.frame or path of csv file containing pair information.
-#' @param probeInfo A GRnage object or path of rda file only containing 
-#' a GRange of probe information 
-#' @param geneInfo A GRnage object or path of rda file only containing 
-#' a GRange of gene information (Coordinates, GENEID and SYMBOL) 
-#' @return A pair.data object
+#' @importFrom downloader download
+makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
+  message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
+  message("Creating a SummarizedExperiment from DNA methylation input")
+  if(nrow(met) > 800000) {
+    plat <- "EPIC"
+    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/EPIC/EPIC.manifest.rda"
+    message(paste0("EPIC platform identified.\nAdding annotation from: ",annotation))
+  } else {
+    plat <- "450K"
+    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
+    message(paste0("450K platform identified.\nAdding annotation from: ",annotation))
+  }
+  
+  if(genome == "hg38") annotation <- gsub(".rda",".hg38.rda", annotation)
+  
+  if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
+  if(!file.exists(basename(annotation))) download(annotation, basename(annotation), mode = mode)
+  annotation <- get(load(basename(annotation)))
+  rowRanges <- annotation[rownames(met),]
+  colData <-  DataFrame(samples = colnames(met))
+  assay <- data.matrix(met)
+  met <- SummarizedExperiment(assays=assay,
+                              rowRanges=rowRanges,
+                              colData=colData)
+  return(met)
+}
+
+#' fetch.pair to generate Pair class object.
+#' @description 
+#' fetch.pair is a funtion to take in enhancer-gene linkage prediction information,
+#' probe information and gene annotation generating a Pair class object, which is the 
+#' input for plotting functions. Options (pair, probeInfo, geneInfo) can
+#' take in R object or read files by specifying file paths. 
+#' @param pair A data.frame (R object) or a path of XX.csv file containing pair information such as
+#' output of function \code{\link{get.pair}}.
+#' @param probeInfoA GRnage object or a path of XX.rda file which only contains a GRange of probe information.
+#' @param geneInfo A GRnage object or path of XX.rda file which only contains a GRange of gene 
+#' information such as Coordinates, GENEID and SYMBOL. 
 #' @export 
 #' @examples
 #' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
@@ -226,7 +318,6 @@ fetch.mee <- function(meth,exp,sample,probeInfo,geneInfo,probes=NULL,
 #' geneInfo <- txs()
 #' ## input can be a path
 #' pair <- fetch.pair(pair = df, geneInfo=geneInfo)
-
 fetch.pair <- function(pair,probeInfo,geneInfo){
   if(!missing(pair)){
     if(is.character(pair)){
@@ -274,36 +365,32 @@ splitmatrix <- function(x,by="row") {
   return(out)
 }
 
-#'getSymbol
-#'@param mee A MEE.data or Pair object.
-#'@param geneID A character which is the geneID
-#'@return The gene symbol 
-#'@export
+#'getSymbol to report gene symbol from id
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param geneID A character which is the ensembl_gene_id
+#' @return The gene symbol for input genes.
+#' @export
 #' @examples
-#' geneInfo <- txs()
-#' ## input can be a path
-#' pair <- fetch.pair(geneInfo=geneInfo)
-#' getSymbol(pair, geneID="84451")
-getSymbol <- function(mee,geneID){
-  gene <- unique(values(getGeneInfo(mee,geneID=geneID))[,c("GENEID","SYMBOL")])
-  gene <- gene[match(geneID,gene$GENEID),"SYMBOL"]
+#' data(elmer.data.example)
+#' getSymbol(data, geneID="ENSG00000143067")
+getSymbol <- function(data,geneID){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(geneID,gene$ensembl_gene_id),"external_gene_name"]
   return(gene)
 }
 
-#'getGeneID
+#'getGeneID to report gene id from symbol
 #'@importFrom S4Vectors values
-#'@param mee A MEE.data or Pair object.
-#'@param symbol A character which is the geneID
-#'@return The gene ID
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#'@param symbol A vector of characters which are gene symbols 
+#'@return The gene ID for these gene symbols
 #'@export
 #'@examples
-#' geneInfo <- txs()
-#' ## input can be a path
-#' pair <- fetch.pair(geneInfo=geneInfo)
-#' getGeneID(pair, symbol="KIAA1804")
-getGeneID <- function(mee,symbol){
-  gene <- unique(values(getGeneInfo(mee,symbol=symbol))[,c("GENEID","SYMBOL")])
-  gene <- gene[match(symbol,gene$SYMBOL),"GENEID"]
+#' data(elmer.data.example)
+#' getGeneID(data, symbol="ZNF697")
+getGeneID <- function(data,symbol){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(symbol,gene$external_gene_name),"ensembl_gene_id"]
   return(gene)
 }
 
@@ -349,31 +436,35 @@ lm_eqn = function(df,Dep,Exp){
 }
 
 
-## txs
-#' txs Fetch USCS gene annotation (transcripts level) from Bioconductor package 
-#' Homo.sapians. If upstream and downstream are specified in TSS list, promoter 
-#' regions of USCS gene will be generated.
-#' @param TSS A list contains upstream and downstream like TSS=list(upstream, downstream).
-#' When upstream and downstream is specified, coordinates of promoter regions with 
-#' gene annotation will be generated. 
-#' @return UCSC gene annotation if TSS is not specified. Coordinates
-#' of UCSC gene promoter regions with each gene annotation if TSS
-#' is specified.
-#' @importFrom GenomicFeatures transcripts
+#' txs to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians. 
+#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
+#' @description 
+#' txs is a function to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians.
+#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
+#' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
+#'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
+#' @param genome.build Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
+#' Options: hg19 (default) and hg38.
+#' @return UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.
 #' @examples
 #' # get UCSC gene annotation (transcripts level)
 #' \dontrun{
-#' txs <- txs()
+#'     txs <- txs()
+#'     txs <- txs(genome.build = "hg38")
 #' }
-#' # get coordinate of all UCSC promoter regions
+#' # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
 #' \dontrun{
 #' txs <- txs(TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @export
-#' @importFrom GenomicRanges unlist
+#' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
-txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
-  gene <- transcripts(Homo.sapiens, columns=c('TXNAME','GENEID','SYMBOL'))
+#' @importFrom GenomicFeatures transcripts
+#' @importFrom rvest %>%
+#' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
+txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
+  if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
+  gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
   gene$SYMBOL <- unlist(gene$SYMBOL)
@@ -381,4 +472,41 @@ txs <- function(TSS=list(upstream=NULL, downstream=NULL)){
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     gene <- promoters(gene, upstream = TSS$upstream, downstream = TSS$downstream)
   return(gene)
+}
+
+# list of TF from this paper:  http://www.sciencedirect.com/science/article/pii/S0092867410000796 
+getTF <- function(genome.build = "hg19"){
+  newenv <- new.env()
+  data("human.TF",package = "ELMER.data",envir=newenv)
+  human.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+  
+  if(genome.build == "hg38") {
+    gene <- get.GRCh("hg38", human.TF$GeneID)
+  } else {
+    gene <- get.GRCh("hg19",human.TF$GeneID)
+  }
+  gene  <- gene[!duplicated(gene),]
+  
+  return(gene)
+}
+
+#' @importFrom biomaRt getBM useMart listDatasets
+get.GRCh <- function(genome="hg19", genes) {
+  if (genome == "hg19"){
+    # for hg19
+    ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                       host = "feb2014.archive.ensembl.org",
+                       path = "/biomart/martservice" ,
+                       dataset = "hsapiens_gene_ensembl")
+    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
+  } else {
+    # for hg38
+    ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
+  }
+  gene.location <- getBM(attributes = attributes,
+                         filters = c("entrezgene"),
+                         values = list(genes), mart = ensembl)
+  colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+  return(gene.location)
 }

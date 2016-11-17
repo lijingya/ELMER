@@ -9,42 +9,43 @@
 #' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 #' hypermethylated probe is TRUE.
 #' @return Statistic test results to identify differentially methylated probes.
-Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL){
+Stat.diff.meth <- function(probe,
+                           meths,
+                           groups,
+                           group1,
+                           group2,
+                           test=t.test,
+                           percentage=0.2,
+                           Top.m=NULL){
   meth <- meths[probe,]
   if(Top.m){
-    tumor.tmp <- sort(meth[TN %in% "Experiment"],decreasing=TRUE)
-    normal.tmp <- sort(meth[TN %in% "Control"],decreasing=TRUE)
+    group1.tmp <- sort(meth[groups %in% group1],decreasing=TRUE)
+    group2.tmp <- sort(meth[groups %in% group2],decreasing=TRUE)
   }else{
-    tumor.tmp <- sort(meth[TN %in% "Experiment"])
-    normal.tmp <- sort(meth[TN %in% "Control"])
+    group1.tmp <- sort(meth[groups %in% group1])
+    group2.tmp <- sort(meth[groups %in% group2])
   }
-  if(round(length(normal.tmp)*percentage)< 5){
-    if(length(normal.tmp) < 5) {
-      Normal.number <- length(normal.tmp)
-    }else{
-      Normal.number <- 5
-    }
-  }else{
-    Normal.number <- round(length(normal.tmp)*percentage)
-  }
-  tumor.tmp <- tumor.tmp[1:round(length(tumor.tmp)*percentage)]
-  normal.tmp <- normal.tmp[1:Normal.number]
-  meth <- c(normal.tmp,tumor.tmp)
-  TN <- c(rep("Control",length(normal.tmp)),rep("Experiment",length(tumor.tmp)))
+  group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, min(5,length(group1.tmp)), round(length(group1.tmp) * percentage))
+  group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, min(5,length(group2.tmp)), round(length(group2.tmp) * percentage))
+
+  group1.tmp <- group1.tmp[1:group1.nb]
+  group2.tmp <- group2.tmp[1:group2.nb]
   
-  ##this is to remove the situation that the normal or tumor are all NA (only one is value)
-  meth_split <- split(meth,TN)
-  meth_split <- unlist(lapply(meth_split,function(x){!is.na(sd(x,na.rm=TRUE))}))
-  
-  if(sd(meth,na.rm=TRUE)>0 & all(meth_split)){
+  if(sd(meth,na.rm=TRUE)>0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
-      alternative <- ifelse(Top.m,"less","greater")
-    }else{
+      alternative <- ifelse(Top.m,"greater","less")
+    } else {
       alternative <- "two.sided"
     }
-    df <- data.frame(meth=meth,TN=factor(TN))
-    TT <- test(meth~TN,df,alternative=alternative)
-    MeanDiff <- TT$estimate[2]-TT$estimate[1]
+    # If hyper (top. TRUE alternative greater) group 1 > group 2
+    # If hypo  (top. FALSE alternative greater) group 1 < group 2
+    TT <- test(x = group1.tmp, y = group2.tmp, alternative=alternative, conf.int = TRUE)
+    
+    if(length(TT$estimate) == 2) {
+      MeanDiff <- TT$estimate[1]-TT$estimate[2]
+    } else {
+      MeanDiff <- TT$estimate
+    }
     PP <- TT$p.value
     out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
   }else{
@@ -61,36 +62,32 @@ Stat.diff.meth <- function(probe,meths,TN,test=t.test,percentage=0.2,Top.m=NULL)
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @param permu.dir A path to store permuation data.
 #' @return U test results
-Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.dir=NULL){
-  if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
-  Exp <- Exps[Gene,]
-  if(is.vector(Meths)){
-    Meth <- Meths
-  }else{
-    Meth <- Meths[Probe,]
-  }
-  unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-  methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
-  Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
-  Fa[unmethy] <- -1
-  Fa[methy] <- 1
-  Exp <- Exp[,!is.na(Fa)]
-  Fa <- Fa[!is.na(Fa)]
-  test.p <- unlist(lapply(splitmatrix(Exp),
-                          function(x,Factor) 
-                            {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],alternative = "greater",exact=FALSE)$p.value},
-							Factor=Fa))
-  out <- data.frame(GeneID=Gene,
-                    Raw.p=test.p[match(Gene, names(test.p))], 
-                    stringsAsFactors = FALSE) 
+Stat.nonpara.permu <- function(Probe,
+                               Gene,
+                               Top=0.2,
+                               Meths=Meths,
+                               Exps=Exps,
+                               permu.dir=NULL){
+  idx <- order(Meths)
+  nb <- round(length(Meths)*Top)
+  unmethy <- head(idx, n = nb) 
+  methy <- tail(idx, n = nb) 
+
+  test.p <- unlist(lapply(splitmatrix(Exps),
+                          function(x) {
+                            wilcox.test(x[unmethy],x[methy],alternative = "greater",exact=FALSE)$p.value
+                          }))
+  
+  test.p <- data.frame(GeneID=Gene,
+                       Raw.p=test.p[match(Gene, names(test.p))], 
+                       stringsAsFactors = FALSE) 
   if(is.null(permu.dir)){
-    return(out)
+    return(test.p)
   }else{
-    write.table(out,file=sprintf("%s/%s",permu.dir,Probe),
+    write.table(test.p,file=sprintf("%s/%s",permu.dir,Probe),
                 quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE)
   }
 }
-
 
 #' U test (non parameter test) for permutation. This is one probe vs nearby gene 
 #' which is good for computing each probes for nearby genes.
@@ -101,7 +98,12 @@ Stat.nonpara.permu <- function(Probe,Gene,Top=0.2,Meths=Meths,Exps=Exps,permu.di
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @return U test results
-Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
+Stat.nonpara <- function(Probe,
+                         NearGenes,
+                         K,
+                         Top=NULL,
+                         Meths=Meths,
+                         Exps=Exps){
   if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,]
@@ -110,26 +112,23 @@ Stat.nonpara <- function(Probe,NearGenes,K,Top=NULL,Meths=Meths,Exps=Exps){
   if( Meth_B >0.95 | Meth_B < 0.05 ){
     test.p <- NA
   }else{
-    unmethy <- order(Meth)[1:round(length(Meth)*Top)] 
-    methy <- order(Meth,decreasing=TRUE)[1:round(length(Meth)*Top)] 
-    Fa <- factor(rep(NA,length(Meth)),levels=c(-1,1))
-    Fa[unmethy] <- -1
-    Fa[methy] <- 1
+    idx <- order(Meth)
+    nb <- round(length(Meth)*Top)
+    unmethy <- head(idx, n = nb) 
+    methy <- tail(idx, n = nb) 
+    # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
     if(!is.vector(Exp)){
-      Exp <- Exp[,!is.na(Fa)]
-      Fa <- Fa[!is.na(Fa)]
+      Exps <- Exps[,c(unmethy,methy)]
       test.p <- unlist(lapply(splitmatrix(Exp),
                               function(x,Factor) 
-                              {wilcox.test(x[Factor %in% -1],x[Factor %in% 1],
+                              {wilcox.test(x[unmethy],x[methy],
                                            alternative = "greater",
                                            exact=FALSE)$p.value},
                               Factor=Fa))
     }else{
-      Exp <- Exp[!is.na(Fa)]
-      Fa <- Fa[!is.na(Fa)]
-      test.p <- wilcox.test(Exp[Fa %in% -1],Exp[Fa %in% 1],
-                                           alternative = "greater",
-                                           exact=FALSE)$p.value
+      test.p <- wilcox.test(Exps[unmethy],Exps[methy],
+                            alternative = "greater",
+                            exact=FALSE)$p.value
     }
   }
   
@@ -163,9 +162,8 @@ Get.Pvalue.p <- function(U.matrix,permu){
     Gene <- as.character(x["GeneID"])
     if(is.na(Raw.p)){
       out <- NA
-    }else{
-      out <- (sum(permu[as.character(Gene),]  < Raw.p | 
-                    permu[Gene,] == Raw.p,na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
+    } else {
+      out <- (sum(permu[as.character(Gene),]  <= Raw.p, na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }
