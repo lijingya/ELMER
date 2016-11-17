@@ -665,7 +665,7 @@ Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
 
 ```{r,eval=TRUE, fig.cap="Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14."}
 scatter.plot(data,
-             byPair=list(probe=c("cg19403323"),gene=c("ENSG00000204518")), 
+             byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143469")), 
              category="definition", save=TRUE,lm_line=TRUE) 
 ```
 
