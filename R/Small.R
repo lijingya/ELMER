@@ -26,7 +26,7 @@
 #' )
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- colnames(gene.exp)
-#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+#' mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
 #' 
 #' # NON TCGA example: matrices has diffetrent column names
 #' gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
@@ -39,7 +39,7 @@
 #' rownames(sample.info) <- c("sample1","sample2")
 #' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
 #'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-#' mae <- createMultiAssayExperiment(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
+#' mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
 #'    # Testing creating MultyAssayExperiment object
@@ -85,16 +85,16 @@
 #'    
 #'    
 #'    # Consisering it is TCGA and SE
-#'    mae.hg19 <- createMultiAssayExperiment(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
 #'    values(getExp(mae.hg19))
 #'    
-#'    mae.hg38 <- createMultiAssayExperiment(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
-#'    mae.hg19.test <- createMultiAssayExperiment(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
 #'    
-#'    mae.hg38 <- createMultiAssayExperiment(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is not TCGA and SE
@@ -105,10 +105,10 @@
 #'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
 #'    
 #'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
-#'    mae.hg19 <- createMultiAssayExperiment(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+#'    mae.hg19 <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
 #' }
-#' createMultiAssayExperiment
-createMultiAssayExperiment <- function (exp, 
+#' createMAE
+createMAE <- function (exp, 
                                         met, 
                                         pData, 
                                         sampleMap,
@@ -366,7 +366,7 @@ splitmatrix <- function(x,by="row") {
 }
 
 #'getSymbol to report gene symbol from id
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param geneID A character which is the ensembl_gene_id
 #' @return The gene symbol for input genes.
 #' @export
@@ -381,7 +381,7 @@ getSymbol <- function(data,geneID){
 
 #'getGeneID to report gene id from symbol
 #'@importFrom S4Vectors values
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #'@param symbol A vector of characters which are gene symbols 
 #'@return The gene ID for these gene symbols
 #'@export

@@ -52,12 +52,12 @@ enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
-TF <- get.TFs(data, enriched.motif, 
-              TFs=data.frame(GeneID=c("7157","8626","7161"),
-              Symbol=c("TP53","TP63","TP73"),
-               ENSEMBL= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
-              stringsAsFactors = FALSE),
-              label="hypo")
+TF <- get.TFs(data, 
+              enriched.motif, 
+              TFs=data.frame(external_gene_name=c("TP53","TP63","TP73"),
+                             ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
+                             stringsAsFactors = FALSE),
+             label="hypo")
 }
 \author{
 Lijing Yao (creator: lijingya@usc.edu) 

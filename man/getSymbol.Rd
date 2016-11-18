@@ -9,7 +9,7 @@ getSymbol(data, geneID)
 getSymbol(data, geneID)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
 
 \item{geneID}{A character which is the ensembl_gene_id}
 
