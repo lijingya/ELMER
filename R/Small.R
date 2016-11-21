@@ -109,18 +109,18 @@
 #' }
 #' createMAE
 createMAE <- function (exp, 
-                                        met, 
-                                        pData, 
-                                        sampleMap,
-                                        genome = NULL,
-                                        TCGA = FALSE) {
+                       met, 
+                       pData, 
+                       sampleMap,
+                       genome = NULL,
+                       TCGA = FALSE) {
   
   if(missing(genome)) stop("Please specify the genome (hg38, hg19)")
   
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
-
+  
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps

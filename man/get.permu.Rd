@@ -8,7 +8,7 @@ each enhancer-gene linkage.}
 get.permu(data, geneID, percentage = 0.2, rm.probes = NULL, portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = 1)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
 
 \item{geneID}{A vector lists the genes' ID.}
 

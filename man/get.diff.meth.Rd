@@ -10,7 +10,7 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
   dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
 
 \item{diff.dir}{A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 get.diff.meth function will identify all significantly hypomethylated CpG sites; 

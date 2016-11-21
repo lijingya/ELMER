@@ -77,7 +77,7 @@ get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstrea
 #' and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
 #' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
 #'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 #' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 #' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
@@ -205,7 +205,7 @@ get.diff.meth <- function(data,
 #' get.pair(data, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
 #'          Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = 1, portion=0.3,   
 #'          label = NULL, save=TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -338,7 +338,7 @@ get.pair <- function(data,
 #' real enhancer-gene pair (see reference).
 #' @usage 
 #' get.permu(data, geneID, percentage = 0.2, rm.probes = NULL, portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = 1)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -665,7 +665,7 @@ get.enriched.motif <- function(probes.motif,
 #' between the probes containing a particular motif and expression of all known TFs. If save is ture, 
 #' two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
 #' @usage get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
 #' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
 #' If missing, human.TF list will be used (human.TF data in ELMER.data). 

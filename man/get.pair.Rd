@@ -9,7 +9,7 @@ get.pair(data, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.di
          label = NULL, save=TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
 
 \item{nearGenes}{Can be either a list containing output of GetNearGenes 
 function or path of rda file containing output of GetNearGenes function.}
