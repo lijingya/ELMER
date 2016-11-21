@@ -270,16 +270,27 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   return(exp)
 }
 
+
+
 #' @importFrom downloader download
 makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
-  if(nrow(met) > 800000) {
-    plat <- "EPIC"
+  annotation <-   getDNAMetAnnotaiotn(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
+  rowRanges <- annotation[rownames(met),]
+  colData <-  DataFrame(samples = colnames(met))
+  assay <- data.matrix(met)
+  met <- SummarizedExperiment(assays=assay,
+                              rowRanges=rowRanges,
+                              colData=colData)
+  return(met)
+}
+
+getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
+  if(plat == "EPIC") {
     annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/EPIC/EPIC.manifest.rda"
     message(paste0("EPIC platform identified.\nAdding annotation from: ",annotation))
   } else {
-    plat <- "450K"
     annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
     message(paste0("450K platform identified.\nAdding annotation from: ",annotation))
   }
@@ -289,13 +300,7 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
   if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
   if(!file.exists(basename(annotation))) download(annotation, basename(annotation), mode = mode)
   annotation <- get(load(basename(annotation)))
-  rowRanges <- annotation[rownames(met),]
-  colData <-  DataFrame(samples = colnames(met))
-  assay <- data.matrix(met)
-  met <- SummarizedExperiment(assays=assay,
-                              rowRanges=rowRanges,
-                              colData=colData)
-  return(met)
+  return(annotation)  
 }
 
 #' fetch.pair to generate Pair class object.
@@ -462,8 +467,8 @@ lm_eqn = function(df,Dep,Exp){
 #' @importFrom GenomicFeatures transcripts
 #' @importFrom rvest %>%
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
-txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
-  if(genome.build == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
+txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
+  if(genome == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
   gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
@@ -474,8 +479,63 @@ txs <- function(genome.build = "hg19",TSS=list(upstream=NULL, downstream=NULL)){
   return(gene)
 }
 
+#' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
+#' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
+#' @description 
+#' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
+#' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
+#' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
+#'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
+#' @param genome Which genome build will be used: hg38 (default) or hg19.
+#' @return GENCODE gene annotation if TSS is not specified. Coordinates of GENCODE gene promoter regions if TSS is specified.
+#' @examples
+#' # get UCSC gene annotation (transcripts level)
+#' \dontrun{
+#'     txs <- txs()
+#'     txs <- txs(genome.build = "hg38")
+#' }
+#' # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
+#' \dontrun{
+#' txs <- txs(TSS=list(upstream=1000, downstream=1000))
+#' }
+#' @export
+#' @author Lijing Yao (maintainer: lijingya@usc.edu)
+#' @import GenomeInfoDb
+#' @importFrom GenomicFeatures transcripts
+#' @importFrom rvest %>%
+#' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
+getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
+  if (genome == "hg19"){
+    # for hg19
+    ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                       host = "feb2014.archive.ensembl.org",
+                       path = "/biomart/martservice" ,
+                       dataset = "hsapiens_gene_ensembl")
+  } else {
+    # for hg38
+    ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    
+  }
+  attributes <- c("chromosome_name",
+                  "transcript_start",
+                  "transcript_end", "strand")
+  message(paste0("Downloading genome information. Using: ",
+                 listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
+  chrom <- c(1:22, "X", "Y","M","*")
+  tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+  tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
+  tss$strand[tss$strand == 1] <- "+" 
+  tss$strand[tss$strand == -1] <- "-" 
+  tss <- makeGRangesFromDataFrame(tss,keep.extra.columns = TRUE)
+  
+  if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
+    tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+  
+  return(tss)
+}
+
 # list of TF from this paper:  http://www.sciencedirect.com/science/article/pii/S0092867410000796 
-getTF <- function(genome.build = "hg19"){
+getTF <- function(genome.build = "hg38"){
   newenv <- new.env()
   data("human.TF",package = "ELMER.data",envir=newenv)
   human.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
@@ -491,7 +551,7 @@ getTF <- function(genome.build = "hg19"){
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets
-get.GRCh <- function(genome="hg19", genes) {
+get.GRCh <- function(genome="hg38", genes) {
   if (genome == "hg19"){
     # for hg19
     ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",

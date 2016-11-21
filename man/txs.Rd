@@ -5,14 +5,14 @@
 \title{txs to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians. 
 If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.}
 \usage{
-txs(genome.build = "hg19", TSS = list(upstream = NULL, downstream = NULL))
+txs(genome = "hg38", TSS = list(upstream = NULL, downstream = NULL))
 }
 \arguments{
-\item{genome.build}{Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
-Options: hg19 (default) and hg38.}
-
 \item{TSS}{A list. Contains upstream and downstream like TSS=list(upstream, downstream).
 When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.}
+
+\item{genome.build}{Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
+Options: hg19 (default) and hg38.}
 }
 \value{
 UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.

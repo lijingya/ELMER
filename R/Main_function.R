@@ -7,6 +7,9 @@
 #' @param promoter A logical.If TRUE, function will ouput the promoter probes.
 #' If FALSE, function will ouput the distal probes overlaping with features. The 
 #' default is FALSE.
+#' @param platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
+#' @param genome Genome  GENCODE
+#' 
 #' @param feature A GRange object containing biofeature coordinate such as 
 #' enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
 #' feature option is only usable when promoter option is FALSE.
@@ -27,45 +30,41 @@
 #' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(feature,TSS,TSS.range=list(upstream=2000,downstream=2000),
-                              promoter=FALSE,rm.chr=NULL){
-  probe <- getAnnotation(IlluminaHumanMethylation450kanno.ilmn12.hg19, what="Locations")
-  probe <- GRanges(seqnames=probe$chr,
-                   ranges=IRanges(probe$pos,
-                                  width=1,
-                                  names=rownames(probe)),
-                   strand=probe$strand,
-                   name=rownames(probe))
+get.feature.probe <- function(feature,
+                              TSS,
+                              genome = "hg38",
+                              platform = "450K",
+                              TSS.range=list(upstream=2000,downstream=2000),
+                              promoter=FALSE,
+                              rm.chr=NULL){
+  probe <- getInfiniumAnnotation(platform,genome)
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(!promoter){
     if(missing(TSS)){
-      newenv <- new.env()
-      data("Combined.TSS",package = "ELMER.data",envir=newenv)
-      TSS <- get(ls(newenv)[1],envir=newenv)   
+      # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
+      TSS.gencode <- getTSS(genome = genome)
+      # The function txs gets the transcription coordinantes from USCS
+      TSS.uscs <- txs(genome)
+      TSS <- c(TSS.gencode, TSS.uscs)
     }
     TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
                                       downstream = TSS.range[["downstream"]]))
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
-    if(missing(feature)){
-      newenv <- new.env()
-      data("Union.enhancer",package = "ELMER.data",envir=newenv)
-      feature <- get(ls(newenv)[1],envir=newenv)   
-      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
-    }else if(is(feature,"GRange")){             
-      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-    }else{
-      stop("feature is not GRange object.")
-    }
-  }else{
+  } else {
     if(missing(TSS)){
-      TSS <- txs()
+      # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
+      TSS.gencode <- getTSS(genome = genome)
+      # The function txs gets the transcription coordinantes from USCS
+      TSS.uscs <- txs(genome)
+      TSS <- c(TSS.gencode, TSS.uscs)
     }
-    TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
+    promoters <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
                                       downstream = TSS.range[["downstream"]]))
-    probe <- probe[unique(queryHits(findOverlaps(probe,TSS)))]
+    probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
   }
   return(probe)
 }
+
 
 ## get differential methylated probes-------------------------
 ## TCGA pipe don't specify dir.out
@@ -414,7 +413,7 @@ get.permu <- function(data,
                        Exps=exp.data[geneID,])},
                    .progress = "text", .parallel = parallel
     )
-
+    
     permu <- sapply(permu,
                     function(x,geneID){ 
                       x <- x[match(geneID,x[,1]),2]},
