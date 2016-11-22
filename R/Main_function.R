@@ -61,9 +61,11 @@ get.feature.probe <- function(feature,
       TSS.uscs <- txs(genome)
       TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
-    promoters <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
-                                            downstream = TSS.range[["downstream"]]))
-    probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
+    suppressWarnings({
+      promoters <- promoters(TSS,upstream = TSS.range[["upstream"]], 
+                             downstream = TSS.range[["downstream"]])
+      probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
+    })
   }
   return(probe)
 }
