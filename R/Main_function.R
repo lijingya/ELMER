@@ -45,21 +45,24 @@ get.feature.probe <- function(feature,
       TSS.gencode <- getTSS(genome = genome)
       # The function txs gets the transcription coordinantes from USCS
       TSS.uscs <- txs(genome)
-      TSS <- c(TSS.gencode, TSS.uscs)
+      TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
-    TSS <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
-                                      downstream = TSS.range[["downstream"]]))
-    probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
+    suppressWarnings({
+      TSS <- promoters(TSS,upstream = TSS.range[["upstream"]], 
+                       downstream = TSS.range[["downstream"]])
+      
+      probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
+    })
   } else {
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
       TSS.gencode <- getTSS(genome = genome)
       # The function txs gets the transcription coordinantes from USCS
       TSS.uscs <- txs(genome)
-      TSS <- c(TSS.gencode, TSS.uscs)
+      TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
     promoters <- suppressWarnings(promoters(TSS,upstream = TSS.range[["upstream"]], 
-                                      downstream = TSS.range[["downstream"]]))
+                                            downstream = TSS.range[["downstream"]]))
     probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
   }
   return(probe)
@@ -766,8 +769,7 @@ get.TFs <- function(data,
   } else {
     gene <- TFs$external_gene_name
   }
-  gene <- gene[gene %in% rownames(getExp(data))]
-  
+  gene <- TFs[gene %in% rownames(getExp(data)),"external_gene_name"]
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 

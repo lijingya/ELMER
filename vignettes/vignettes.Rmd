@@ -3,70 +3,70 @@ title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes an
 author: "Lijing Yao, Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb], Simon Coetzee [ctb], Tiago Chedraoui Silva [ctb]"
 date: "`r Sys.Date()`"
 output: 
-    BiocStyle::html_document:
-        toc: true
-        number_sections: true
-        toc_depth: 3
-        highlight: haddock
-        fig_caption: yes
-    BiocStyle::pdf_document2:
-        toc: true
-        number_sections: true
-        toc_depth: 3
-        highlight: haddock
-        fig_caption: yes        
-        
+BiocStyle::html_document:
+toc: true
+number_sections: true
+toc_depth: 3
+highlight: haddock
+fig_caption: yes
+BiocStyle::pdf_document2:
+toc: true
+number_sections: true
+toc_depth: 3
+highlight: haddock
+fig_caption: yes        
+
 references:        
 - id: zhou2016comprehensive
-  title: Comprehensive characterization, annotation and innovative use of Infinium DNA methylation BeadChip probes
-  author: 
-  - family: Zhou, Wanding and Laird, Peter W and Shen, Hui
-    given:
-  journal: Nucleic Acids Research
-  URL: "http://doi.org/10.1093/nar/gkw967"
-  DOI: "10.1093/nar/gkw967"
-  volume: 159
-  number: 3
-  pages: 676-690
-  issued:
-    year: 2016         
+title: Comprehensive characterization, annotation and innovative use of Infinium DNA methylation BeadChip probes
+author: 
+- family: Zhou, Wanding and Laird, Peter W and Shen, Hui
+given:
+journal: Nucleic Acids Research
+URL: "http://doi.org/10.1093/nar/gkw967"
+DOI: "10.1093/nar/gkw967"
+volume: 159
+number: 3
+pages: 676-690
+issued:
+year: 2016         
 
 - id: tcgabiolinks2
-  title: "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages"
-  author: 
-  - family:  Silva, TC and Colaprico, A and Olsen, C and D'Angelo, F and Bontempi, G and Ceccarelli, M and Noushmehr, H
-  given:
-  journal: F1000Research
-  URL: "http://dx.doi.org/10.12688/f1000research.8923.1"
-  DOI: "10.12688/f1000research.8923.1"
-  volume: 5
-  number: 1542
-  issued:
-   year: 2016 
+title: "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages"
+author: 
+- family:  Silva, TC and Colaprico, A and Olsen, C and D'Angelo, F and Bontempi, G and Ceccarelli, M and Noushmehr, H
+given:
+journal: F1000Research
+URL: "http://dx.doi.org/10.12688/f1000research.8923.1"
+DOI: "10.12688/f1000research.8923.1"
+volume: 5
+number: 1542
+issued:
+year: 2016 
 
 - id: tcgabiolinks1
-  title: "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data"
-  author: 
-  - family:  Colaprico, Antonio and Silva, Tiago C. and Olsen, Catharina and Garofano, Luciano and Cava, Claudia and Garolini, Davide and Sabedot, Thais S. and Malta, Tathiane M. and Pagnotta, Stefano M. and Castiglioni, Isabella and Ceccarelli, Michele and Bontempi, Gianluca and Noushmehr, Houtan
-  given:
-  journal: Nucleic Acids Research
-  URL: "http://dx.doi.org/10.1093/nar/gkv1507"
-  DOI: "10.1093/nar/gkv1507"
-  volume: 44
-  number: 8
-  pages: e71
-  issued:
-   year: 2016 
+title: "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data"
+author: 
+- family:  Colaprico, Antonio and Silva, Tiago C. and Olsen, Catharina and Garofano, Luciano and Cava, Claudia and Garolini, Davide and Sabedot, Thais S. and Malta, Tathiane M. and Pagnotta, Stefano M. and Castiglioni, Isabella and Ceccarelli, Michele and Bontempi, Gianluca and Noushmehr, Houtan
+given:
+journal: Nucleic Acids Research
+URL: "http://dx.doi.org/10.1093/nar/gkv1507"
+DOI: "10.1093/nar/gkv1507"
+volume: 44
+number: 8
+pages: e71
+issued:
+year: 2016 
 
 
 vignette: >
   %\VignetteIndexEntry{Vignette Title}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
----
+  ---
   
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(dpi = 300)
+  ```{r setup, include=FALSE}
+  knitr::opts_chunk$set(dpi = 300)
 knitr::opts_chunk$set(cache=TRUE)
 ```
 
@@ -221,9 +221,9 @@ When TCGA data were used, group labels (control and experiment) will be automati
 ```{r}
 library(MultiAssayExperiment)
 data <- createMAE(exp = GeneExp, 
-                                   met = Meth, 
-                                   genome = "hg19",
-                                   TCGA = TRUE)
+                  met = Meth, 
+                  genome = "hg19",
+                  TCGA = TRUE)
 data
 pData(data)[1:3,1:5]
 
@@ -246,10 +246,10 @@ phenotype.data <- data.frame(row.names = colnames(not.tcga.exp),
                                        rep("group2", ncol(GeneExp)/2)))
 
 data.hg19 <- createMAE(exp = not.tcga.exp, 
-                                        met =  not.tcga.met, 
-                                        TCGA = FALSE, 
-                                        genome = "hg19", 
-                                        pData = phenotype.data)
+                       met =  not.tcga.met, 
+                       TCGA = FALSE, 
+                       genome = "hg19", 
+                       pData = phenotype.data)
 data.hg19
 
 # The samples that does not have data for both DNA methylation and Gene exprssion will be removed even for the phenotype data
@@ -261,10 +261,10 @@ phenotype.data <- data.frame(row.names = colnames(not.tcga.met),
                                        rep("group4", ncol(Meth)/4)))
 
 data.hg38 <- createMAE(exp = not.tcga.exp, 
-                                        met =  not.tcga.met, 
-                                        TCGA = FALSE, 
-                                        genome = "hg38", 
-                                        pData = phenotype.data)
+                       met =  not.tcga.met, 
+                       TCGA = FALSE, 
+                       genome = "hg38", 
+                       pData = phenotype.data)
 data.hg38
 pData(data.hg38)[1:3,1:2]
 ```
@@ -304,9 +304,9 @@ function will keep them consistent when it generates the  Multi Assay Experiment
 
 ```{r}
 data <- createMAE(exp = GeneExp, 
-                                   met = Meth,
-                                   genome = "hg19",
-                                   TCGA = TRUE)
+                  met = Meth,
+                  genome = "hg19",
+                  TCGA = TRUE)
 
 # For TGCA data 1-12 represents the patient and 1-15 represents the sample ID (i.e. primary solid tumor samples )
 all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
@@ -324,15 +324,15 @@ You can also use your own data and annotations to create  Multi Assay Experiment
 ```{r}
 # NON TCGA example: matrices has diffetrent column names
 gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
-                       sample2 = c("TP53"=1.6,"PTEN"=2.3))
+                      sample2 = c("TP53"=1.6,"PTEN"=2.3))
 dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
+                     sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
 mae <- createMAE(exp = gene.exp,
-                                  met = dna.met,
-                                  pData = sample.info, 
-                                  genome = "hg38") 
+                 met = dna.met,
+                 pData = sample.info, 
+                 genome = "hg38") 
 
 # NON TCGA example: matrices has diffetrent column names
 gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
@@ -346,13 +346,13 @@ sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- c("sample1","sample2")
 
 sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
-                      colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 
 mae <- createMAE(exp = gene.exp, 
-                                  met = dna.met, 
-                                  sampleMap = sampleMap, 
-                                  pData = sample.info, 
-                                  genome = "hg38") 
+                 met = dna.met, 
+                 sampleMap = sampleMap, 
+                 pData = sample.info, 
+                 genome = "hg38") 
 ```
 # Illustration of ELMER analysis steps
 
@@ -432,9 +432,9 @@ Both files contain four columns: probe, pvalue, ExperimentMinControl, adjust.p.
 library(MultiAssayExperiment)
 ## createMAE can take path as input.
 data <- createMAE(exp = "./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda", 
-                                   met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
-                                   genome = "hg19",
-                                   TCGA = TRUE)
+                  met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
+                  genome = "hg19",
+                  TCGA = TRUE)
 colnames(pData(data))
 pData(data)[1:3,1:5]
 sig.diff <- get.diff.meth(data, 
@@ -712,7 +712,7 @@ with certain motif. Figure \ref{fig:figure3}
 load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(data,
              byTF=list(TF=c("TP53","TP63","TP73"),
-             probe=enriched.motif[["TP53"]]), 
+                       probe=enriched.motif[["TP53"]]), 
              category="definition",
              save=TRUE,lm_line=TRUE)
 ```
@@ -766,7 +766,7 @@ load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
 gg <- TF.rank.plot(motif.pvalue=TF.meth.cor, 
                    motif="TP53",
                    TF.label=list(TP53=c("TP53","TP63","TP73")),
-                    save=FALSE) 
+                   save=FALSE) 
 png("TFrankPlot.png")
 grid::grid.draw(gg[[1]])
 dev.off()

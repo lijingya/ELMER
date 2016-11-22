@@ -276,7 +276,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
 makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
-  annotation <-   getDNAMetAnnotaiotn(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
+  annotation <-   getInfiniumAnnotation(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
   rowRanges <- annotation[rownames(met),]
   colData <-  DataFrame(samples = colnames(met))
   assay <- data.matrix(met)
@@ -289,16 +289,16 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
   if(plat == "EPIC") {
     annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/EPIC/EPIC.manifest.rda"
-    message(paste0("EPIC platform identified.\nAdding annotation from: ",annotation))
   } else {
     annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
-    message(paste0("450K platform identified.\nAdding annotation from: ",annotation))
   }
-  
   if(genome == "hg38") annotation <- gsub(".rda",".hg38.rda", annotation)
+  message(paste0("Adding annotation from: ",annotation))
   
-  if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-  if(!file.exists(basename(annotation))) download(annotation, basename(annotation), mode = mode)
+  if(!file.exists(basename(annotation))) {
+    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
+    download(annotation, basename(annotation), mode = mode)
+  }
   annotation <- get(load(basename(annotation)))
   return(annotation)  
 }
@@ -469,7 +469,7 @@ lm_eqn = function(df,Dep,Exp){
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
-  gene <- transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID"))
+  gene <- suppressMessages(transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID")))
   gene$GENEID <- unlist(gene$GENEID)
   gene$TXNAME <- unlist(gene$TXNAME)
   gene$SYMBOL <- unlist(gene$SYMBOL)
@@ -519,10 +519,17 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   attributes <- c("chromosome_name",
                   "transcript_start",
                   "transcript_end", "strand")
-  message(paste0("Downloading genome information. Using: ",
-                 listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description))
   chrom <- c(1:22, "X", "Y","M","*")
-  tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+  description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+  message(paste0("Downloading genome information. Using: ", description))
+
+  filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
+  if(!file.exists(filename)) {
+    tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+    save(tss, file = filename)
+  } else {
+    tss <- get(load(filename))  
+  }  
   tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
   tss$strand[tss$strand == 1] <- "+" 
   tss$strand[tss$strand == -1] <- "-" 
