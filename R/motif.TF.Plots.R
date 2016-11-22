@@ -146,43 +146,25 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
       theme(legend.position="none")+
       labs(x="Rank", y="-log10 P value", title=i)
     
+    P <- P + geom_label_repel(
+      data = subset(df, label %in% "Yes"),
+      aes(label = Gene),
+      min.segment.length = unit(0.0, "lines"),
+      size = 4,
+      show.legend = FALSE,
+      fontface = 'bold', color = 'black',
+      box.padding = unit(0.35, "lines"),
+      point.padding = unit(1.0, "lines")
+    ) 
     
-    TF.text <- list()
-    delta <- ceiling(max(df$pvalue))/45
-    for(i in df$Gene[df$label %in% "Yes"]){
-      yposition <- df$pvalue[df$Gene %in% i]
-      xposition <- df$rank[df$Gene %in% i]
-      if(length(TF.text)>0){
-        if(last.y-delta < yposition)
-          yposition <- last.y-delta
-      }
-      # Create the text Grobs
-      TF.text[[i]] = textGrob(i,gp=gpar(fontsize=10))
-      # Draw the plot
-      P = P + annotation_custom(grob = TF.text[[i]],  xmin = -370, xmax = -370, 
-                                ymin = yposition, ymax = yposition) +
-        annotation_custom(grob = linesGrob(), xmin = -270, xmax = xposition, 
-                          ymin = yposition, ymax =df$pvalue[df$Gene %in% i] )
-      last.y <- yposition
-    }
-    if(yposition < 0 ){
-      y.margin <- abs(yposition)
-    }else{
-      y.margin <- 0
-    }
-    P <- P + theme(plot.margin = unit(c(y.margin, 0.5, 0, 2), "cm"))
-    
-    # Code to override clipping
-    gt <- ggplot_gtable(ggplot_build(P))
-    gt$layout$clip[gt$layout$name=="panel"] <- "off"
-    
+
     if(save){
       pdf(sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),
-          useDingbats=FALSE, width=7, height = 6+y.margin)
-      grid.draw(gt)
+          useDingbats=FALSE, width=15, height = 12)
+      plot(P)
       invisible(dev.off())
     }else{
-      Plots[[i]] <- arrangeGrob(gt)
+      plot(P)
     }
   }
   if(!save) return(Plots)
