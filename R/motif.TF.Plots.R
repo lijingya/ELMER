@@ -81,8 +81,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' relevant TF and top3 TFs will be labeled in a different color.
 #'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter 
 #'@importFrom ggplot2 annotation_custom unit ggplot_gtable ggplot_build
-#'@importFrom ggrepel geom_label_repel
-#'@importFrom gridExtra arrangeGrob
+#'@importFrom ggrepel geom_text_repel
 #'@param motif.pvalue A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"
 #'which is output of getTF. 
 #'@param motif A vector of characters specify the motif to plot
@@ -146,14 +145,17 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
       theme(legend.position="none")+
       labs(x="Rank", y="-log10 P value", title=i)
     
-    P <- P + geom_label_repel(
-      data = subset(df, label %in% "Yes"),
+    df$Gene <- as.character(df$Gene)
+    df$Gene[df$label %in% "No"] <- "" 
+    P <- P + geom_text_repel(
+      data = df,
       aes(label = Gene),
       min.segment.length = unit(0.0, "lines"),
-      size = 4,
+      size = 3,
+      nudge_x = 10,
       show.legend = FALSE,
       fontface = 'bold', color = 'black',
-      box.padding = unit(0.35, "lines"),
+      box.padding = unit(0.5, "lines"),
       point.padding = unit(1.0, "lines")
     ) 
     
@@ -163,9 +165,8 @@ TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE)
           useDingbats=FALSE, width=15, height = 12)
       plot(P)
       invisible(dev.off())
-    }else{
-      plot(P)
     }
+    Plots[[i]] <- P
   }
   if(!save) return(Plots)
 }
