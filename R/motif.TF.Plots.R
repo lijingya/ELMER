@@ -81,7 +81,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' relevant TF and top3 TFs will be labeled in a different color.
 #'@importFrom ggplot2 scale_color_manual geom_vline geom_text position_jitter 
 #'@importFrom ggplot2 annotation_custom unit ggplot_gtable ggplot_build
-#'@importFrom grid textGrob linesGrob grid.draw
+#'@importFrom ggrepel geom_label_repel
 #'@importFrom gridExtra arrangeGrob
 #'@param motif.pvalue A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"
 #'which is output of getTF. 

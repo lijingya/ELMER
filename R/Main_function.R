@@ -769,11 +769,14 @@ get.TFs <- function(data,
     parallel = TRUE
   }
   if(all(grepl("ENSG",rownames(getExp(data))))) {
-    gene <-  TFs$ensembl_gene_id
+    TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
+    gene <- TFs$ensembl_gene_id
   } else {
+    TFs <- TFs[TFs$external_gene_name %in% rownames(getExp(data)),]
     gene <- TFs$external_gene_name
   }
-  gene <- TFs[gene %in% rownames(getExp(data)),"external_gene_name"]
+  gene.name <- TFs$external_gene_name # For plotting purposes 
+  
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
@@ -787,7 +790,7 @@ get.TFs <- function(data,
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
-  rownames(TF.meth.cor) <- gene
+  rownames(TF.meth.cor) <- gene.name
   colnames(TF.meth.cor) <- names(enriched.motif)
   TF.meth.cor <- na.omit(TF.meth.cor)
   
