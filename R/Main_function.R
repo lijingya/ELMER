@@ -37,7 +37,9 @@ get.feature.probe <- function(feature,
                               TSS.range=list(upstream=2000,downstream=2000),
                               promoter=FALSE,
                               rm.chr=NULL){
-  probe <- getInfiniumAnnotation(platform,genome)
+  probe <- getInfiniumAnnotation(toupper(platform),genome)
+  # We will rmeove the rs probes, as they should not be used in the analysis
+  probe <- probe[!grepl("rs",names(probe)),]
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(!promoter){
     if(missing(TSS)){
@@ -596,7 +598,7 @@ get.enriched.motif <- function(probes.motif,
   if(missing(background.probes)){
     if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
       background.probes <- get(load(sprintf("%s/probeInfo_feature_distal.rda",dir.out)))
-      background.probes <- as.character(background.probes$name)
+      background.probes <- as.character(names(background.probes))
     }else{
       background.probes <- rownames(all.probes.TF)
     }
@@ -608,7 +610,7 @@ get.enriched.motif <- function(probes.motif,
   probes.TF.num <- colSums(probes.TF, na.rm=TRUE)
   sub.enrich.TF <- colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-colMeans(probes.TF))
   SE <- sqrt(1/colSums(probes.TF) + 1/(nrow(probes.TF)-colSums(probes.TF)) +
-               1/colSums(bg.probes.TF)+ 1/(nrow(bg.probes.TF)-colSums(bg.probes.TF)))
+               1/colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-colSums(bg.probes.TF)))
   sub.enrich.TF.lower <- exp(log(sub.enrich.TF)-1.96*SE)
   sub.enrich.TF.upper <- exp(log(sub.enrich.TF)+1.96*SE)
   ## summary

@@ -380,7 +380,7 @@ own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
 ```{r}
 #get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
 #enhancers on chromosome 1
-Probe <- get.feature.probe(rm.chr=paste0("chr",c(2:22,"X","Y")))
+Probe <- get.feature.probe(genome = "hg19",platform =  "450K", rm.chr=paste0("chr",c(2:22,"X","Y")))
 save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda")
 ```
 
