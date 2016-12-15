@@ -270,14 +270,18 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   return(exp)
 }
 
-
-
 #' @importFrom downloader download
 makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
+  
+  # Instead of looking on the size, it is better to set it as a argument as the annotation is different
   annotation <-   getInfiniumAnnotation(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
   rowRanges <- annotation[rownames(met),]
+  
+  # Remove masked probes, besed on the annotation
+  rowRanges <- rowRanges[!rowRanges$MASK.mapping]
+  
   colData <-  DataFrame(samples = colnames(met))
   assay <- data.matrix(met)
   met <- SummarizedExperiment(assays=assay,
@@ -522,7 +526,7 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   chrom <- c(1:22, "X", "Y","M","*")
   description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
   message(paste0("Downloading genome information. Using: ", description))
-
+  
   filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
   if(!file.exists(filename)) {
     tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
@@ -576,4 +580,132 @@ get.GRCh <- function(genome="hg38", genes) {
                          values = list(genes), mart = ensembl)
   colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
   return(gene.location)
+}
+
+
+# To find for each probe the know motif we will use HOMER software (http://homer.salk.edu/homer/)
+# Step:
+# 1 - get DNA methylation probes annotation with the regions
+# 2 - Make a bed file from it
+# 3 - Execute section: Finding Instance of Specific Motifs from http://homer.salk.edu/homer/ngs/peakMotifs.html to the HOCOMOCO TF motifs
+# Also, As HOMER is using more RAM than the available we will split the files in to 100k probes.
+# Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
+# The false posives will be removed latter with some statistical tests.
+getBedForDNAmethylation <- function(){
+  TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
+  if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
+  for(plat in c("450K","EPIC")){
+    for(gen in c("hg19","hg38")){
+      
+      file <- paste0(plat,gen,".txt")
+      print(file)
+      if(!file.exists(file)){
+        # STEP 1
+        gr <- getInfiniumAnnotation(plat = plat,genome =  gen)
+        
+        # This will remove masked probes. They have poor quality and might be arbitrarily positioned (Wanding Zhou)
+        print(table(gr$MASK.mapping))
+        gr <- gr[!gr$MASK.mapping]
+        print(table(gr$MASK.mapping))
+        
+        df <- data.frame(seqnames=seqnames(gr),
+                         starts=as.integer(start(gr)),
+                         ends=end(gr),
+                         names=names(gr),
+                         scores=c(rep(".", length(gr))),
+                         strands=strand(gr))
+        step <- 100000 # nb of lines in each file 100K was selected to not explode RAM
+        n <- nrow(df)
+        for(j in 0:floor(n/step)){
+          # STEP 2
+          file.aux <- paste0(plat,gen,"_",j,".bed")
+          if(!file.exists(gsub(".bed",".txt",file.aux))){
+            end <- ifelse(((j + 1) * step) > n, n,((j + 1) * step))
+            write.table(df[((j * step) + 1):end,], file = file.aux, col.names = F, quote = F,row.names = F,sep = "\t")
+            
+            # STEP 3
+            cmd <- paste0("source ~/.bash_rc; annotatePeaks.pl " ,file.aux, " ", gen, " -m ", basename(TFBS.motif), " -size 500 -cpu 12 > ", gsub(".bed",".txt",file.aux))
+            system(cmd)
+          }
+        }
+        # We will merge the results from each file into one
+        peaks <- NULL
+        for(j in 0:floor(n/step)){
+          aux <-  read_tsv(paste0(plat,gen,"_",j,".txt"))
+          colnames(aux)[1] <- "PeakID"
+          if(is.null(peaks)) {
+            peaks <- aux
+          } else {
+            peaks <- rbind(peaks, aux)
+          }
+        }
+        write_tsv(peaks,path=file,col_names = TRUE)
+        print("DONE!")
+        gc()
+      }
+    }
+  }
+}
+
+prepare_object <- function(){
+  # command 
+  # annotatePeaks.pl /Users/chedraouisil/ELMER/450Khg19.bed hg19 -m HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif > 450hg19.txt
+  for(plat in c("450K","EPIC")){
+    for(gen in c("hg19","hg38")){
+      file <- paste0(plat,gen,".txt")
+      motifs <- readr::read_tsv(file)
+      # From 1 to 21 we have annotations then we have 640 motifs
+      matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = 640,sparse = TRUE)
+      print(object.size(matrix))
+      colnames(matrix) <- colnames(matrix)[-c(1:21)]
+      rownames(matrix) <- motifs$PeakID
+      print(object.size(matrix))
+      matrix[!is.na(motifs[,-c(1:21)])] <- 1
+      assign(paste0("Probes.motif.",gen,".",plat),matrix) # For each probe that there is a bind to the motif, we will add as 1 in the matrix. (Are hg38, hg19,450k,epic matrices equal?)
+      rm(matrix)
+      rm(motifs)
+      gc()
+    }
+  }
+  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda")
+  save(Probes.motif.hg38.450K, file = "Probes.motif.hg38.450K.rda")
+  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda")
+  save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
+}
+
+
+getBedForDNAmethylation <- function(){
+  TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
+  if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
+  for(plat in c("450K","EPIC")){
+    for(gen in c("hg19","hg38")){
+      
+      file <- paste0(plat,gen,".txt")
+      print(file)
+      if(!file.exists(file)){
+        gr <- getInfiniumAnnotation(plat = plat,genome =  gen)
+        df <- data.frame(seqnames=seqnames(gr),
+                         starts=as.integer(start(gr)),
+                         ends=end(gr),
+                         names=names(gr),
+                         scores=c(rep(".", length(gr))),
+                         strands=strand(gr))
+        print(dim(df))
+        step <- 100000
+        n <- nrow(df)
+        for(j in 0:floor(n/step)){
+          file.aux <- paste0(plat,gen,"_",j,".bed")
+          if(!file.exists(gsub(".bed",".txt",file.aux))){
+            end <- ifelse(((j + 1) * step) > n, n,((j + 1) * step))
+            print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=---=")
+            print((j * step) + 1)
+            print(end)
+            write.table(df[((j * step) + 1):end,], file = file.aux, col.names = F)
+            cmd <- paste0("source ~/.bash_rc; annotatePeaks.pl " ,file.aux, " ", gen, " -m ", basename(TFBS.motif), " -size 500 -cpu 12 > ", gsub(".bed",".txt",file.aux))
+            #system(cmd)
+          }
+        }
+      }
+    }
+  }
 }
