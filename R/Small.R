@@ -647,6 +647,9 @@ getBedForDNAmethylation <- function(){
   }
 }
 
+# This code will read the table with the motifs, save it as a sparce matrix
+# and save all as a .rda that will be placed in ELMER.data
+# Should this code be moved to ELMER.data?
 prepare_object <- function(){
   # command 
   # annotatePeaks.pl /Users/chedraouisil/ELMER/450Khg19.bed hg19 -m HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif > 450hg19.txt
@@ -657,10 +660,11 @@ prepare_object <- function(){
       # From 1 to 21 we have annotations then we have 640 motifs
       matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = 640,sparse = TRUE)
       print(object.size(matrix))
-      colnames(matrix) <- colnames(matrix)[-c(1:21)]
+      colnames(matrix) <- gsub("Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
       rownames(matrix) <- motifs$PeakID
       print(object.size(matrix))
       matrix[!is.na(motifs[,-c(1:21)])] <- 1
+      matrix <- as(matrix, "nsparseMatrix")
       assign(paste0("Probes.motif.",gen,".",plat),matrix) # For each probe that there is a bind to the motif, we will add as 1 in the matrix. (Are hg38, hg19,450k,epic matrices equal?)
       rm(matrix)
       rm(motifs)
@@ -669,43 +673,22 @@ prepare_object <- function(){
   }
   save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda")
   save(Probes.motif.hg38.450K, file = "Probes.motif.hg38.450K.rda")
-  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda")
+  save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda")
   save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
 }
 
-
-getBedForDNAmethylation <- function(){
-  TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
-  if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
-  for(plat in c("450K","EPIC")){
-    for(gen in c("hg19","hg38")){
-      
-      file <- paste0(plat,gen,".txt")
-      print(file)
-      if(!file.exists(file)){
-        gr <- getInfiniumAnnotation(plat = plat,genome =  gen)
-        df <- data.frame(seqnames=seqnames(gr),
-                         starts=as.integer(start(gr)),
-                         ends=end(gr),
-                         names=names(gr),
-                         scores=c(rep(".", length(gr))),
-                         strands=strand(gr))
-        print(dim(df))
-        step <- 100000
-        n <- nrow(df)
-        for(j in 0:floor(n/step)){
-          file.aux <- paste0(plat,gen,"_",j,".bed")
-          if(!file.exists(gsub(".bed",".txt",file.aux))){
-            end <- ifelse(((j + 1) * step) > n, n,((j + 1) * step))
-            print("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=--=-=---=")
-            print((j * step) + 1)
-            print(end)
-            write.table(df[((j * step) + 1):end,], file = file.aux, col.names = F)
-            cmd <- paste0("source ~/.bash_rc; annotatePeaks.pl " ,file.aux, " ", gen, " -m ", basename(TFBS.motif), " -size 500 -cpu 12 > ", gsub(".bed",".txt",file.aux))
-            #system(cmd)
-          }
-        }
-      }
-    }
-  }
+createMotifRelevantTfs <- function(){
+  # Download from http://hocomoco.autosome.ru/human/mono
+  tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
+  tf.family <- tf.family[[1]]
+  family <- split(tf.family,f = tf.family$`TF family`)
+  motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
+    f <- x[6]
+    if(is.na(f)) return(x[3]) # Casse without family, we will get only the same object
+    return(family[as.character(f)][[1]]$`Transcription factor`)
+  })
+  names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+  attr(motif.relavent.TFs,which="split_type") <- NULL
+  attr(motif.relavent.TFs,which="split_labels") <- NULL
+  save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
 }
