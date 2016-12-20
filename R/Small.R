@@ -552,14 +552,8 @@ getTF <- function(genome.build = "hg38"){
   fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
   format <- "format=tab"
   human.TF <- readr::read_tsv(paste0(uniprotURL,paste(query, fields,format, sep = "&"))) 
-  
-  if(genome.build == "hg38") {
-    gene <- get.GRCh("hg38", human.TF$GeneID)
-  } else {
-    gene <- get.GRCh("hg19",human.TF$GeneID)
-  }
+  gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
   gene  <- gene[!duplicated(gene),]
-  
   return(gene)
 }
 
@@ -696,7 +690,7 @@ createMotifRelevantTfs <- function(){
   # Cleaning object
   attr(motif.relavent.TFs,which="split_type") <- NULL
   attr(motif.relavent.TFs,which="split_labels") <- NULL
-  save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+  return(motif.relavent.TFs)
 }
 
 

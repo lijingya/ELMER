@@ -574,7 +574,8 @@ promoterMeth <- function(data,
 #' "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
 #' data(elmer.data.example)
 #' bg <- rownames(getMet(data))
-#' enriched.motif <- get.enriched.motif(probes=probes,
+#' enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
+#'                                      probes=probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
 get.enriched.motif <- function(probes.motif, 
@@ -586,13 +587,9 @@ get.enriched.motif <- function(probes.motif,
                                label=NULL,
                                save=TRUE){
   if(missing(probes.motif)){
-    newenv <- new.env()
-    data("Probes.motif",package = "ELMER.data",envir=newenv)
-    all.probes.TF <- get(ls(newenv)[1],envir=newenv) 
-    # The data is in the one and only variable
-  }else{
-    all.probes.TF <- probes.motif
-  }
+    stop("Please set probes.motif argument. See ELMER data")
+  }  
+  all.probes.TF <- probes.motif
   ## here need to be add motif search part.
   if(missing(probes)) stop("probes option should be specified.")
   if(missing(background.probes)){
@@ -603,14 +600,15 @@ get.enriched.motif <- function(probes.motif,
       background.probes <- rownames(all.probes.TF)
     }
   }
+  background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
   bg.probes.TF <- all.probes.TF[background.probes,]
-  bg.Probes.TF.percent <- colMeans(bg.probes.TF)
+  bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF)
   ## load probes for enriched motif ----------------------------------------------
   probes.TF <- all.probes.TF[probes,]
-  probes.TF.num <- colSums(probes.TF, na.rm=TRUE)
-  sub.enrich.TF <- colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-colMeans(probes.TF))
-  SE <- sqrt(1/colSums(probes.TF) + 1/(nrow(probes.TF)-colSums(probes.TF)) +
-               1/colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-colSums(bg.probes.TF)))
+  probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
+  sub.enrich.TF <- Matrix::colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-Matrix::colMeans(probes.TF))
+  SE <- sqrt(1/Matrix::colSums(probes.TF) + 1/(nrow(probes.TF)-Matrix::colSums(probes.TF)) +
+               1/Matrix::colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-Matrix::colSums(bg.probes.TF)))
   sub.enrich.TF.lower <- exp(log(sub.enrich.TF)-1.96*SE)
   sub.enrich.TF.upper <- exp(log(sub.enrich.TF)+1.96*SE)
   ## summary
@@ -705,7 +703,7 @@ get.enriched.motif <- function(probes.motif,
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' data(elmer.data.example)
-#' enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
+#' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
@@ -715,6 +713,10 @@ get.enriched.motif <- function(probes.motif,
 #'                              ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
 #'                              stringsAsFactors = FALSE),
 #'              label="hypo")
+#' # This case will use Uniprot dabase to get list of Trasncription factors              
+#' TF <- get.TFs(data, 
+#'               enriched.motif, 
+#'               label="hypo")              
 get.TFs <- function(data, 
                     enriched.motif, 
                     TFs, 
@@ -745,9 +747,7 @@ get.TFs <- function(data,
   }
   
   if(missing(motif.relavent.TFs)){
-    newenv <- new.env()
-    data("motif.relavent.TFs",package = "ELMER.data",envir=newenv)
-    motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+    motif.relavent.TFs <- createMotifRelevantTfs()
   } else if(is.character(motif.relavent.TFs)){
     motif.relavent.TFs <- get(load(motif.relavent.TFs)) # The data is in the one and only variable
   }
