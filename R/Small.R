@@ -660,7 +660,7 @@ prepare_object <- function(){
       # From 1 to 21 we have annotations then we have 640 motifs
       matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = 640,sparse = TRUE)
       print(object.size(matrix))
-      colnames(matrix) <- gsub("Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
+      colnames(matrix) <- gsub(" Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
       rownames(matrix) <- motifs$PeakID
       print(object.size(matrix))
       matrix[!is.na(motifs[,-c(1:21)])] <- 1
@@ -676,7 +676,7 @@ prepare_object <- function(){
   save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda")
   save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
 }
-
+#' @importFrom rvest read_html html_table
 createMotifRelevantTfs <- function(){
   # Download from http://hocomoco.autosome.ru/human/mono
   tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
@@ -688,8 +688,9 @@ createMotifRelevantTfs <- function(){
     f <- x$`TF family`
     if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
     return(family[as.character(f)][[1]]$`Transcription factor`)
-  })
-  names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+  },.progress = "text")
+  #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+  names(motif.relavent.TFs) <- tf.family$Model
   # Cleaning object
   attr(motif.relavent.TFs,which="split_type") <- NULL
   attr(motif.relavent.TFs,which="split_labels") <- NULL
