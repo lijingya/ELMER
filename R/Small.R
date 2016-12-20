@@ -545,11 +545,13 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   return(tss)
 }
 
-# list of TF from this paper:  http://www.sciencedirect.com/science/article/pii/S0092867410000796 
+# This function gets the last version of TF list from the UNiprot database
 getTF <- function(genome.build = "hg38"){
-  newenv <- new.env()
-  data("human.TF",package = "ELMER.data",envir=newenv)
-  human.TF <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
+  uniprotURL <- "http://www.uniprot.org/uniprot/?"
+  query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
+  fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
+  format <- "format=tab"
+  human.TF <- readr::read_tsv(paste0(uniprotURL,paste(query, fields,format, sep = "&"))) 
   
   if(genome.build == "hg38") {
     gene <- get.GRCh("hg38", human.TF$GeneID)
@@ -696,3 +698,5 @@ createMotifRelevantTfs <- function(){
   attr(motif.relavent.TFs,which="split_labels") <- NULL
   save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
 }
+
+
