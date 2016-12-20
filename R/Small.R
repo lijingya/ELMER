@@ -681,13 +681,16 @@ createMotifRelevantTfs <- function(){
   # Download from http://hocomoco.autosome.ru/human/mono
   tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
   tf.family <- tf.family[[1]]
+  # Split TF for each family, this will help us map for each motif which are the some ones in the family
+  # basicaly: for a TF get its family then get all TF in that family
   family <- split(tf.family,f = tf.family$`TF family`)
   motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
-    f <- x[6]
-    if(is.na(f)) return(x[3]) # Casse without family, we will get only the same object
+    f <- x$`TF family`
+    if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
     return(family[as.character(f)][[1]]$`Transcription factor`)
   })
   names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+  # Cleaning object
   attr(motif.relavent.TFs,which="split_type") <- NULL
   attr(motif.relavent.TFs,which="split_labels") <- NULL
   save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
