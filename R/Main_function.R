@@ -1,5 +1,7 @@
-##get.distal.en
-#' get.feature.probe
+#' @title get.feature.probe to select probes within promoter regions or distal regions.
+#' @description 
+#' get.feature.probe is a function to select the probes falling into 
+#' distal feature regions or promoter regions.
 #' @importFrom GenomicRanges promoters 
 #' @importFrom minfi getAnnotation
 #' @description This function selects the probes on HM450K that either overlap 
@@ -11,14 +13,30 @@
 #' @param genome Genome  GENCODE
 #' 
 #' @param feature A GRange object containing biofeature coordinate such as 
-#' enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
+#' enhancer coordinates. Default is comprehensive genomic enhancer regions from 
+#' REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}.
 #' feature option is only usable when promoter option is FALSE.
-#' @param TSS A GRange object containing the transcription start site. Default is UCSC gene TSS.
+#' @param TSS A GRange object contains the transcription start sites. When promoter is FALSE, Union.TSS
+#' in \pkg{ELMER.data} will be used for default. When promoter is TRUE, UCSC gene TSS will
+#' be used as default (see detail). User can specify their own preference TSS annotation. 
 #' @param TSS.range A list specify how to define promoter regions. 
 #' Default is upstream =2000bp and downstream=2000bp.
 #' @param rm.chr A vector of chromosome need to be remove from probes such as chrX chrY or chrM
 #' @return A GRange object containing probes that satisfy selecting critiria.
 #' @export 
+#' @details 
+#'  In order to get real distal probes, we use more comprehensive annotated TSS by both 
+#'  GENCODE and UCSC. However, to get probes within promoter regions need more
+#'  accurate annotated TSS such as UCSC. Therefore, there are different settings for
+#'  promoter and distal probe selection. But user can specify their own favorable
+#'  TSS annotation. Then there won't be any difference between promoter and distal
+#'  probe selection.
+#'  @return A GRanges object contains the coordinate of probes which locate 
+#'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+#'  @usage get.feature.probe(feature, 
+#'                           TSS, 
+#'                           TSS.range = list(upstream = 2000, downstream = 2000), 
+#'                           promoter = FALSE, rm.chr = NULL)
 #' @examples 
 #' # get distal enhancer probe
 #' \dontrun{
@@ -55,6 +73,17 @@ get.feature.probe <- function(feature,
       
       probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
     })
+    
+    if(missing(feature)){
+      newenv <- new.env()
+      data("Union.enhancer",package = "ELMER.data",envir=newenv)
+      feature <- get(ls(newenv)[1],envir=newenv)   
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
+    }else if(is(feature,"GRange")){             
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    }else{
+      stop("feature is not GRange object.")
+    }
   } else {
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)

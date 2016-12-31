@@ -104,14 +104,23 @@
 #'    not.tcga.met <- exp.hg19 
 #'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
 #'    
-#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
-#'    mae.hg19 <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
+#'                                 samples = colnames(not.tcga.exp), 
+#'                                 group = c(rep("group1",4),rep("group2",4)))
+#'    dital.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+#'    mae.hg19 <- createMAE(exp = not.tcga.exp, 
+#'                          met =  not.tcga.met, 
+#'                          TCGA = FALSE, 
+#'                          filter.probes = dital.enhancer,
+#'                          genome = "hg19", 
+#'                          pData = phenotype.data)
 #' }
 #' createMAE
 createMAE <- function (exp, 
                        met, 
                        pData, 
                        sampleMap,
+                       filter.probes = NULL,
                        genome = NULL,
                        TCGA = FALSE) {
   
@@ -132,6 +141,15 @@ createMAE <- function (exp,
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome)
   }
   
+  # Select the regions from DNA methylation that overlaps enhancer.
+  if(!is.null(filter.probes)){
+    if(is.character(filter.probes)){
+      filter.probes <- get(load(filter.probes))
+    }
+  } 
+  if(!is.null(probeInfo) & !is.null(met)){
+    met <- met[rownames(met) %in% names(filter.probes),]
+  } 
   # We will need to check if the fields that we need exists.
   # Otherwise we will need to create them
   if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
@@ -144,10 +162,10 @@ createMAE <- function (exp,
         colnames(extra) <- required.cols
         values(exp) <- cbind(values(exp),extra)
       } else {
-        message("We will consider your gene expression row names are Gene Symbols")
-        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-        colnames(extra) <- required.cols
-        values(exp) <- cbind(values(exp),extra)
+        stop("Please the gene expression matrix should receive ENSEMBLE IDs")
+        #extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+        #colnames(extra) <- required.cols
+        #values(exp) <- cbind(values(exp),extra)
       }
     }
   } 
@@ -174,20 +192,27 @@ createMAE <- function (exp,
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
-                                pData = pData,   sampleMap = sampleMap,
+                                pData = pData,   
+                                sampleMap = sampleMap,
                                 metadata = list(TCGA= TRUE, genome = genome))
-    
   } else {
-    if(missing(pData)) stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
+    
+    if(missing(pData)) 
+      stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
+    
     if(missing(sampleMap)){
       # Check that we have the same number of samples
       message("Removing samples not found in both DNA methylation and gene expression (we are considering the names of the gene expression and DNA methylation columns to be the same) ")
       ID <- intersect(colnames(met), colnames(exp))
       met <- met[,match(ID,colnames(met))]
       exp <- exp[,match(ID,colnames(exp))]
-      if(!all(colnames(exp) == colnames(met))) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
+      if(!all(colnames(exp) == colnames(met))) 
+        stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
       pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
+                                      rep("Gene expression", length(colnames(exp)))),
                              primary = c(colnames(met),colnames(exp)),
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
@@ -216,10 +241,12 @@ createMAE <- function (exp,
       met <- met[,sampleMap.met$colname,drop = FALSE]
       exp <- exp[,sampleMap.exp$colname,drop = FALSE]
       
-      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) 
+        stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
       pData <- pData[match(commun.samples,rownames(pData)),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
+                                      rep("Gene expression", length(colnames(exp)))),
                              primary = commun.samples,
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
@@ -672,7 +699,8 @@ prepare_object <- function(){
   save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda")
   save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
 }
-#' @importFrom rvest read_html html_table
+#' @importFrom rvest html_table
+#' @importFrom xml2 read_html 
 createMotifRelevantTfs <- function(){
   # Download from http://hocomoco.autosome.ru/human/mono
   tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()

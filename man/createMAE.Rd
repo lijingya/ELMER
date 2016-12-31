@@ -3,7 +3,8 @@
 \name{createMAE}
 \alias{createMAE}
 \usage{
-createMAE(exp, met, pData, sampleMap, genome = NULL, TCGA = FALSE)
+createMAE(exp, met, pData, sampleMap, filter.probes = NULL, genome = NULL,
+  TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -118,8 +119,16 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    not.tcga.met <- exp.hg19 
    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
    
-   phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
-   mae.hg19 <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+   phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
+                                samples = colnames(not.tcga.exp), 
+                                group = c(rep("group1",4),rep("group2",4)))
+   dital.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+   mae.hg19 <- createMAE(exp = not.tcga.exp, 
+                         met =  not.tcga.met, 
+                         TCGA = FALSE, 
+                         filter.probes = dital.enhancer,
+                         genome = "hg19", 
+                         pData = phenotype.data)
 }
 createMAE
 }
