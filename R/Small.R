@@ -104,7 +104,7 @@
 #'    # DNA methylation and gene expression Objects should have same sample names in columns
 #'    not.tcga.exp <- exp.hg19 
 #'    colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
-#'    not.tcga.met <- exp.hg19 
+#'    not.tcga.met <- met 
 #'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
 #'    
 #'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
