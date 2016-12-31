@@ -86,18 +86,19 @@
 #'    GDCdownload(query.met)
 #'    met <- GDCprepare(query = query.met)
 #'    
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
 #'    
 #'    # Consisering it is TCGA and SE
-#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg19))
 #'    
-#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
-#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
 #'    
-#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is not TCGA and SE
