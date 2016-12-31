@@ -76,7 +76,8 @@ get.feature.probe <- function(feature,
     
     if(missing(feature)){
       newenv <- new.env()
-      data("Union.enhancer",package = "ELMER.data",envir=newenv)
+      if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
+      if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
     }else if(is(feature,"GRange")){             

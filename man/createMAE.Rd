@@ -3,8 +3,8 @@
 \name{createMAE}
 \alias{createMAE}
 \usage{
-createMAE(exp, met, pData, sampleMap, filter.probes = NULL, genome = NULL,
-  TCGA = FALSE)
+createMAE(exp, met, pData, sampleMap, filter.probes = NULL,
+  met.platform = "450k", genome = NULL, TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -88,6 +88,9 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    GDCdownload(query.exp.hg19)
    exp.hg19 <- GDCprepare(query.exp.hg19)
    
+   # Our object needs to have emsembl gene id as rownames
+   rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
+   
    # DNA Methylation
    query.met <- GDCquery(project = "TCGA-HNSC",
                          legacy = TRUE,
@@ -122,11 +125,11 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
                                 samples = colnames(not.tcga.exp), 
                                 group = c(rep("group1",4),rep("group2",4)))
-   dital.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
    mae.hg19 <- createMAE(exp = not.tcga.exp, 
                          met =  not.tcga.met, 
                          TCGA = FALSE, 
-                         filter.probes = dital.enhancer,
+                         filter.probes = distal.enhancer,
                          genome = "hg19", 
                          pData = phenotype.data)
 }

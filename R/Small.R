@@ -73,6 +73,9 @@
 #'    GDCdownload(query.exp.hg19)
 #'    exp.hg19 <- GDCprepare(query.exp.hg19)
 #'    
+#'    # Our object needs to have emsembl gene id as rownames
+#'    rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
+#'    
 #'    # DNA Methylation
 #'    query.met <- GDCquery(project = "TCGA-HNSC",
 #'                          legacy = TRUE,
@@ -107,11 +110,11 @@
 #'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
 #'                                 samples = colnames(not.tcga.exp), 
 #'                                 group = c(rep("group1",4),rep("group2",4)))
-#'    dital.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
 #'    mae.hg19 <- createMAE(exp = not.tcga.exp, 
 #'                          met =  not.tcga.met, 
 #'                          TCGA = FALSE, 
-#'                          filter.probes = dital.enhancer,
+#'                          filter.probes = distal.enhancer,
 #'                          genome = "hg19", 
 #'                          pData = phenotype.data)
 #' }
@@ -121,6 +124,7 @@ createMAE <- function (exp,
                        pData, 
                        sampleMap,
                        filter.probes = NULL,
+                       met.platform = "450k",
                        genome = NULL,
                        TCGA = FALSE) {
   
@@ -138,7 +142,7 @@ createMAE <- function (exp,
   }
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
-    met <- makeSummarizedExperimentFromDNAMethylation(met, genome)
+    met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
   }
   
   # Select the regions from DNA methylation that overlaps enhancer.
@@ -147,7 +151,7 @@ createMAE <- function (exp,
       filter.probes <- get(load(filter.probes))
     }
   } 
-  if(!is.null(probeInfo) & !is.null(met)){
+  if(!is.null(filter.probes) & !is.null(met)){
     met <- met[rownames(met) %in% names(filter.probes),]
   } 
   # We will need to check if the fields that we need exists.
@@ -281,35 +285,24 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
     extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
     colnames(extra) <- required.cols
     values(exp) <- cbind(values(exp),extra)
-  } else {
-    message("We will consider your gene expression row names are Gene Symbols")
-    exp$external_gene_name <- rownames(exp)
-    aux <- merge(exp, gene.info, by = "external_gene_name", sort = FALSE)
-    aux <- aux[!duplicated(aux$external_gene_name),]
-    rownames(aux) <- aux$external_gene_name
-    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
-                                                 start.field="start_position",
-                                                 end.field=c("end_position"))
-    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-    colnames(extra) <- required.cols
-    values(exp) <- cbind(values(exp),extra)
-  }
+  } 
   return(exp)
 }
 
 #' @importFrom downloader download
-makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
+makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
   
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
-  annotation <-   getInfiniumAnnotation(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
+  annotation <-   getInfiniumAnnotation(met.platform, genome)
   rowRanges <- annotation[rownames(met),]
   
   # Remove masked probes, besed on the annotation
   rowRanges <- rowRanges[!rowRanges$MASK.mapping]
   
   colData <-  DataFrame(samples = colnames(met))
+  met <- met[rownames(met) %in% names(rowRanges),]
   assay <- data.matrix(met)
   met <- SummarizedExperiment(assays=assay,
                               rowRanges=rowRanges,
