@@ -13,6 +13,9 @@
 #'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
+#' @param filter.probes A GRanges object contains the coordinate of probes which locate 
+#'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+#'  See \code{\link{get.feature.probe}} function.
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment

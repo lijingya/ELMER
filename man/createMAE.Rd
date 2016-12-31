@@ -19,6 +19,10 @@ of the gene expression and DNA methylation matrix. This should be used if your m
 have different columns names. 
 This object must have columns primary (sample ID) and colname (names of the columns of the matrix).}
 
+\item{filter.probes}{A GRanges object contains the coordinate of probes which locate 
+within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+See \code{\link{get.feature.probe}} function.}
+
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
 
 \item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default). 
