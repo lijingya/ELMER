@@ -798,13 +798,9 @@ get.TFs <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  if(all(grepl("ENSG",rownames(getExp(data))))) {
-    TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
-    gene <- TFs$ensembl_gene_id
-  } else {
-    TFs <- TFs[TFs$external_gene_name %in% rownames(getExp(data)),]
-    gene <- TFs$external_gene_name
-  }
+  # rownames are ensemble gene id
+  TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
+  gene <- TFs$ensembl_gene_id
   gene.name <- TFs$external_gene_name # For plotting purposes 
   
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,

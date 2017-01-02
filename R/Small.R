@@ -696,8 +696,14 @@ prepare_object <- function(){
   save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda")
   save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
 }
+
+#' @title Get family of transcription factors
+#' @description This function will use TF Class database to create the object
+#' that maps for each TF the members of its family. TF in the same family have 
+#' high correlared PWM.
 #' @importFrom rvest html_table
 #' @importFrom xml2 read_html 
+#' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
   # Download from http://hocomoco.autosome.ru/human/mono
   tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
@@ -708,7 +714,7 @@ createMotifRelevantTfs <- function(){
   motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
     f <- x$`TF family`
     if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
-    return(family[as.character(f)][[1]]$`Transcription factor`)
+    return(unique(family[as.character(f)][[1]]$`Transcription factor`))
   },.progress = "text")
   #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
   names(motif.relavent.TFs) <- tf.family$Model
