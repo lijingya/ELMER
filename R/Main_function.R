@@ -824,10 +824,14 @@ get.TFs <- function(data,
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
                           cor <- sort(TF.meth.cor[,x])
                           top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                          potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                          print(any(top %in% motif.relavent.TFs[[x]]))
+                          potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
+                                                     top[top %in% motif.relavent.TFs[[x]]],NA)
                           out <- data.frame("motif" = x,
-                                            "top potential TF" = ifelse(!is.null(potential.TF[1]),potential.TF[1],""),
-                                            "potential TFs" = paste(potential.TF, collapse = ";"),
+                                            "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
+                                            "potential TFs" = ifelse(!is.na(potential.TF),
+                                                                     paste(potential.TF, collapse = ";"),
+                                                                     NA),
                                             "top_5percent" = paste(top,collapse = ";"))
                         },                                         
                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)

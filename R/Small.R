@@ -569,13 +569,18 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   return(tss)
 }
 
-# This function gets the last version of TF list from the UNiprot database
+#' @title  Get human TF list from the UNiprot database
+#' @description This function gets the last version of human TF list from the UNiprot database
+#' @importFrom readr read_tsv
+#' @return A data frame with the ensemble gene id and entrezgene and gene symbol.
 getTF <- function(genome.build = "hg38"){
   uniprotURL <- "http://www.uniprot.org/uniprot/?"
   query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
   fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
   format <- "format=tab"
-  human.TF <- readr::read_tsv(paste0(uniprotURL,paste(query, fields,format, sep = "&"))) 
+  human.TF <- readr::read_tsv(paste0(uniprotURL,
+                                     paste(query, fields,format, sep = "&")),
+                              col_types = "ccccccc") 
   gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
   gene  <- gene[!duplicated(gene),]
   return(gene)
