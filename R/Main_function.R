@@ -824,7 +824,6 @@ get.TFs <- function(data,
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
                           cor <- sort(TF.meth.cor[,x])
                           top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                          print(any(top %in% motif.relavent.TFs[[x]]))
                           potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
                                                      top[top %in% motif.relavent.TFs[[x]]],NA)
                           out <- data.frame("motif" = x,
