@@ -28,6 +28,12 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   expect_true(TF$top.potential.TF %in% TF$top_5percent)
   expect_true(TF$top.potential.TF %in% TF$potential.TFs)
   expect_true(TF$potential.TFs %in% TF$top_5percent)
+  
+  # In this example TP53 is the one with lower raw p-value, so it shoud be the one
+  # in top_5percent and in the other columns 
+  expect_true(TF$potential.TFs == "TP73")
+  expect_true(TF$top.potential.TF == "TP73")
+  expect_true(TF$top_5percent == "TP73")
 })  
 
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {

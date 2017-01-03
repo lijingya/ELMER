@@ -710,6 +710,7 @@ prepare_object <- function(){
 #' @importFrom xml2 read_html 
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
+  if(!file.exists("motif.relavent.TFs.rda")){
   # Download from http://hocomoco.autosome.ru/human/mono
   tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
   tf.family <- tf.family[[1]]
@@ -726,6 +727,10 @@ createMotifRelevantTfs <- function(){
   # Cleaning object
   attr(motif.relavent.TFs,which="split_type") <- NULL
   attr(motif.relavent.TFs,which="split_labels") <- NULL
+  save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+  } else {
+    motif.relavent.TFs <- get(load("motif.relavent.TFs.rda"))
+  }
   return(motif.relavent.TFs)
 }
 

@@ -723,7 +723,7 @@ get.enriched.motif <- function(probes.motif,
 #' This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column). 
 #' If save is false, a data frame which contains the same content with the first file will be reported.
 #' @importFrom pbapply pbsapply
-#' @importFrom plyr alply
+#' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
@@ -777,20 +777,11 @@ get.TFs <- function(data,
   }
   
   if(missing(motif.relavent.TFs)){
+    message("Accessing TF families from TFClass database to indentify known potential TF")
     motif.relavent.TFs <- createMotifRelevantTfs()
   } else if(is.character(motif.relavent.TFs)){
     motif.relavent.TFs <- get(load(motif.relavent.TFs)) # The data is in the one and only variable
   }
-  
-  motif.meth <- lapply(enriched.motif, 
-                       function(x,meth){
-                         if(length(x)<2) { 
-                           return(meth[x,])
-                         } else {
-                           return(colMeans(meth[x,],na.rm = TRUE))
-                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),])
-  
-  motif.meth <- do.call(rbind, motif.meth)
   
   parallel <- FALSE
   if (cores > 1){
@@ -798,12 +789,43 @@ get.TFs <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
+  
+  # This will calculate the average methylation at all motif-adjacent probes 
+  message("Calculating the average methylation at all motif-adjacent probes ")
+  
+  motif.meth <- ldply(enriched.motif, 
+                       function(x,meth){
+                         if(length(x)<2) { 
+                           return(meth[x,])
+                         } else {
+                           return(colMeans(meth[x,],na.rm = TRUE))
+                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),],
+                      .progress = "text", .parallel = parallel, .id = "rownames"
+  )
+  rownames(motif.meth) <- motif.meth$rownames
+  motif.meth$rownames <- NULL
+  
+  # motif.meth matrix 
+  # - rows: average methylation at all motif-adjacent probes (rownames will be the motif)
+  # - cols: each patient
+  
   # rownames are ensemble gene id
   TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
   gene <- TFs$ensembl_gene_id
   gene.name <- TFs$external_gene_name # For plotting purposes 
   
-  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
+  # Definition:
+  # M group: 20% of samples with the highest average methylation at all motif-adjacent probes
+  # U group: 20% of samples with the lowest 
+  
+  # The Mann-Whitney U test was used to test 
+  # the null hypothesis that overall gene expression in group M was greater or equal 
+  # than that in group U.
+  message("Performing Mann-Whitney U test")
+  
+  # For each motif (x) split the Meths object into U and M and evaluate the expression
+  # of all TF Exps (obj)
+  TF.meth.cor <- adply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
@@ -811,19 +833,27 @@ get.TFs <- function(data,
                            Gene=gene,
                            Top=percentage,
                            Exps=assay(getExp(data))[gene,])},
-                       .progress = "text", .parallel = parallel
+                       .progress = "text", .parallel = parallel, .id = NULL
   )
-  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
-  TF.meth.cor <- do.call(cbind,TF.meth.cor)
+  TF.meth.cor$GeneID <- NULL
   ## check row and col names
   rownames(TF.meth.cor) <- gene.name
   colnames(TF.meth.cor) <- names(enriched.motif)
   TF.meth.cor <- na.omit(TF.meth.cor)
   
-  cor.summary <- sapply(colnames(TF.meth.cor), 
+  # TF.meth.cor matrix with raw p-value (Pr)
+  # - rows: TFs
+  # - cols: motifs
+  # lower Raw p-values means that TF expression in M group is lower than in 
+  # U group. That means, the Unmethylated with more TF expression
+  # have a higher correlation.
+  
+  message("Finding potential TF and known potential TF")
+  # For each motif evaluate TF
+  cor.summary <- adply(colnames(TF.meth.cor), 
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
-                          cor <- sort(TF.meth.cor[,x])
-                          top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
+                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
+                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
                           potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
                                                      top[top %in% motif.relavent.TFs[[x]]],NA)
                           out <- data.frame("motif" = x,
@@ -833,8 +863,9 @@ get.TFs <- function(data,
                                                                      NA),
                                             "top_5percent" = paste(top,collapse = ";"))
                         },                                         
-                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
-  cor.summary <- do.call(rbind, cor.summary)
+                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
+                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
+  rownames(cor.summary) <- cor.summary$motif
   if(save){
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
