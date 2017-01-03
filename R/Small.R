@@ -205,8 +205,14 @@ createMAE <- function (exp,
                                 metadata = list(TCGA= TRUE, genome = genome))
   } else {
     
-    if(missing(pData)) 
-      stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
+    if(missing(pData)){
+      message <- paste("Please set pData argument. A data frame with samples", 
+                       "information. All rownames should be colnames of DNA",
+                       "methylation and gene expression. An example is showed",
+                       "in MultiAssayExperiment documentation",
+                       "(access it with ?MultiAssayExperiment)")
+      stop(message)
+    }
     
     if(missing(sampleMap)){
       # Check that we have the same number of samples
@@ -283,6 +289,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
     aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
     aux <- aux[!duplicated(aux$ensembl_gene_id),]
     rownames(aux) <- aux$ensembl_gene_id
+    aux$entrezgene <- NULL
     exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
                                                  start.field="start_position",
                                                  end.field=c("end_position"))
@@ -300,13 +307,13 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
   
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
   annotation <-   getInfiniumAnnotation(met.platform, genome)
-  rowRanges <- annotation[rownames(met),]
+  rowRanges <- annotation[rownames(met),,drop=FALSE]
   
   # Remove masked probes, besed on the annotation
   rowRanges <- rowRanges[!rowRanges$MASK.mapping]
   
   colData <-  DataFrame(samples = colnames(met))
-  met <- met[rownames(met) %in% names(rowRanges),]
+  met <- met[rownames(met) %in% names(rowRanges),,drop = FALSE]
   assay <- data.matrix(met)
   met <- SummarizedExperiment(assays=assay,
                               rowRanges=rowRanges,
@@ -711,23 +718,23 @@ prepare_object <- function(){
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
   if(!file.exists("motif.relavent.TFs.rda")){
-  # Download from http://hocomoco.autosome.ru/human/mono
-  tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
-  tf.family <- tf.family[[1]]
-  # Split TF for each family, this will help us map for each motif which are the some ones in the family
-  # basicaly: for a TF get its family then get all TF in that family
-  family <- split(tf.family,f = tf.family$`TF family`)
-  motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
-    f <- x$`TF family`
-    if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
-    return(unique(family[as.character(f)][[1]]$`Transcription factor`))
-  },.progress = "text")
-  #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
-  names(motif.relavent.TFs) <- tf.family$Model
-  # Cleaning object
-  attr(motif.relavent.TFs,which="split_type") <- NULL
-  attr(motif.relavent.TFs,which="split_labels") <- NULL
-  save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+    # Download from http://hocomoco.autosome.ru/human/mono
+    tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
+    tf.family <- tf.family[[1]]
+    # Split TF for each family, this will help us map for each motif which are the some ones in the family
+    # basicaly: for a TF get its family then get all TF in that family
+    family <- split(tf.family,f = tf.family$`TF family`)
+    motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
+      f <- x$`TF family`
+      if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
+      return(unique(family[as.character(f)][[1]]$`Transcription factor`))
+    },.progress = "text")
+    #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+    names(motif.relavent.TFs) <- tf.family$Model
+    # Cleaning object
+    attr(motif.relavent.TFs,which="split_type") <- NULL
+    attr(motif.relavent.TFs,which="split_labels") <- NULL
+    save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
   } else {
     motif.relavent.TFs <- get(load("motif.relavent.TFs.rda"))
   }

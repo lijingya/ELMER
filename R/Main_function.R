@@ -799,7 +799,7 @@ get.TFs <- function(data,
                            return(meth[x,])
                          } else {
                            return(colMeans(meth[x,],na.rm = TRUE))
-                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),],
+                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
                       .progress = "text", .parallel = parallel, .id = "rownames"
   )
   rownames(motif.meth) <- motif.meth$rownames

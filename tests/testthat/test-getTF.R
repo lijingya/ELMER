@@ -60,3 +60,44 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
   }
 })  
 
+test_that("Test if the results is right", {
+  
+  # We will create the data where whe have 3 cases: 
+  # 1) no changes in expression
+  # 2) Unmethylated group has lower TF expression
+  # 3) Unmethylated group has a higher TF expression
+  # 4) Unmethylated group has highest TF expression
+  # The case 4 is the potential TF
+  
+  # We have the 3 cases for 6 patients
+  exp <- t(data.frame("ENSG00000141510" = c(1,1,1,1,1,1), # No change in expression
+                      "ENSG00000073282" = c(0,0,0,1,1,1), # Change in the other direction
+                      "ENSG00000135776" = c(0.2,0.4,0.6,0.8,0.9,1), # raw p-value should be higher than the best case
+                      "ENSG00000078900" = c(1,1,1,0,0,0))) # Should be true
+  colnames(exp) <- c(as.character(1:6))
+  exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome = "hg19")
+  
+  # First 3 patients are Unmethylated
+  met <- t(data.frame("cg00329272" = c(0,0,0,1,1,1)))
+  colnames(met) <- c(as.character(1:6))
+  met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
+  
+  pData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
+  # Create datas
+  data <- createMAE(exp,met, genome = "hg19", pData = pData)
+  
+  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
+  
+  TF <- get.TFs(data, 
+                enriched.motif, 
+                TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73"),
+                               ensembl_gene_id= c("ENSG00000141510",
+                                                  "ENSG00000073282",
+                                                  "ENSG00000078900"),
+                stringsAsFactors = FALSE),
+                label = "hypo")
+  
+  expect_true(TF$potential.TFs == "TP73")
+  expect_true(TF$top.potential.TF == "TP73")
+  expect_true(TF$top_5percent == "TP73")
+})
