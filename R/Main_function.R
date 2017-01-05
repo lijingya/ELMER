@@ -636,6 +636,11 @@ get.enriched.motif <- function(probes.motif,
   ## load probes for enriched motif ----------------------------------------------
   probes.TF <- all.probes.TF[probes,]
   probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
+  
+  # Odds ratio
+  #      p/(1-p)   p * (1-P)   where p = a/(a + b) probes with motif
+  # OR =---------=----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
+  #      P/(1-P)   P * (1-p)
   sub.enrich.TF <- Matrix::colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-Matrix::colMeans(probes.TF))
   SE <- sqrt(1/Matrix::colSums(probes.TF) + 1/(nrow(probes.TF)-Matrix::colSums(probes.TF)) +
                1/Matrix::colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-Matrix::colSums(bg.probes.TF)))
@@ -657,11 +662,14 @@ get.enriched.motif <- function(probes.motif,
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
-  enriched.motif <- sapply(en.motifs, 
+  enriched.motif <- plyr::alply(en.motifs, 
                            function(x, probes.TF) {
-                             names(probes.TF[probes.TF[,x]==1,x])
+                             rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
                            },
-                           probes.TF=probes.TF)
+                           probes.TF=probes.TF,.margins = 1, .dims = FALSE)
+  attributes(enriched.motif) <- NULL
+  names(enriched.motif) <- en.motifs
+
   if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
   ## make plot----

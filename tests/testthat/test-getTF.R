@@ -183,3 +183,8 @@ test_that("Test if the results is right", {
   expect_true(TF$top.potential.TF == "TP53")
   expect_true(TF$top_5percent == "TP53")
 })
+
+test_that("It creates a PDF with the TF rankgin plot", {
+  expect_true(file.exists("P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+})
+  
