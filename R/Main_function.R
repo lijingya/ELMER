@@ -246,7 +246,7 @@ get.diff.meth <- function(data,
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
 #'  Default is 1: don't use parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
+#' @param percentage A number ranges from 0 to 0.5 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
@@ -595,6 +595,7 @@ promoterMeth <- function(data,
 #'   motif as contents. And hypo.motif.enrichment.pdf plot will be generated.
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
+#' @importFrom magrittr divide_by multiply_by %>% add
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -632,20 +633,33 @@ get.enriched.motif <- function(probes.motif,
   }
   background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
   bg.probes.TF <- all.probes.TF[background.probes,]
-  bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF)
+  bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
+  
   ## load probes for enriched motif ----------------------------------------------
   probes.TF <- all.probes.TF[probes,]
   probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
   
   # Odds ratio
-  #      p/(1-p)   p * (1-P)   where p = a/(a + b) probes with motif
-  # OR =---------=----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
-  #      P/(1-P)   P * (1-p)
-  sub.enrich.TF <- Matrix::colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-Matrix::colMeans(probes.TF))
-  SE <- sqrt(1/Matrix::colSums(probes.TF) + 1/(nrow(probes.TF)-Matrix::colSums(probes.TF)) +
-               1/Matrix::colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-Matrix::colSums(bg.probes.TF)))
-  sub.enrich.TF.lower <- exp(log(sub.enrich.TF)-1.96*SE)
-  sub.enrich.TF.upper <- exp(log(sub.enrich.TF)+1.96*SE)
+  #      p/(1-p)     p * (1-P)   where p = a/(a + b) probes with motif
+  # OR =--------- = -----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
+  #      P/(1-P)     P * (1-p)
+  p <- Matrix::colMeans(probes.TF)
+  P <- bg.Probes.TF.percent
+  sub.enrich.TF <- multiply_by(p,(1-P)) %>%  divide_by(P)  %>%  divide_by(1-p)  
+  
+  # SD = sqrt(1/a + 1/b + 1/c + 1/d)
+  # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
+  # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
+  # c and d are the same counts within the entire enhancer probe set (background)
+  # lower boundary of 95% conf idence interval = exp (ln OR − SD)
+  a <- Matrix::colSums(probes.TF)
+  b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
+  c <- Matrix::colSums(bg.probes.TF )
+  d <- nrow(bg.probes.TF) - Matrix::colSums(bg.probes.TF)
+  SD <- add(1/a,1/b) %>% add(1/c) %>% add(1/d) %>% sqrt
+  sub.enrich.TF.lower <- exp(log(sub.enrich.TF) - 1.96 * SD)
+  sub.enrich.TF.upper <- exp(log(sub.enrich.TF) + 1.96 * SD)
+  
   ## summary
   Summary <- data.frame(motif = colnames(probes.TF), 
                         NumOfProbes = probes.TF.num,
@@ -716,7 +730,7 @@ get.enriched.motif <- function(probes.motif,
 #'  for each list element or a path of XX.rda file containing a list as above. 
 #' If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
 #' For detail information, refer the reference paper.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.
+#' @param percentage A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.
 #' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.

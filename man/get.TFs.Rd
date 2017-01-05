@@ -20,7 +20,7 @@ For detail information, refer the reference paper.}
 If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
 For detail information, refer the reference paper.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.}
+\item{percentage}{A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.}
 
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
 
