@@ -67,7 +67,8 @@ probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
 data(elmer.data.example)
 bg <- rownames(getMet(data))
-enriched.motif <- get.enriched.motif(probes=probes,
+enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
+                                     probes=probes,
                                      background.probes = bg,
                                      min.incidence=2, label="hypo")
 }

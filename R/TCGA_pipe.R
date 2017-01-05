@@ -23,7 +23,13 @@
 #' \dontrun{
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
 #' }
-TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir="hypo",...){
+TCGA.pipe <- function(disease,
+                      analysis="all",
+                      wd="./",
+                      cores=1,
+                      Data=NULL, 
+                      diff.dir="hypo",
+                      ...){
   if(missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://tcga-data.nci.nih.gov/tcga/.")
@@ -43,7 +49,7 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
     do.call(getTCGA,params)
     analysis <- analysis[!analysis %in% "download"]
   }
-    
+  
   ## select distal enhancer probes
   if("distal.probes" %in% analysis){
     message("###################\nSelect distal enhancer probes\n###################\n\n")
@@ -100,14 +106,14 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
     }
     ## construct geneAnnot for finding nearby gene
     geneAnnot <- args[names(args) %in% "geneAnnot"]
-    if(length(geneAnnot)==0){
+    if(length(geneAnnot) == 0){
       geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
-      if(!file.exists(geneAnnot)){
-        geneInfo <- txs(TSS=list(upstream=0, downstream=0))
+      if (!file.exists(geneAnnot)){
+        geneInfo <- txs(TSS = list(upstream=0, downstream=0))
         geneInfo$GENEID <- paste0("ID",geneInfo$GENEID)
-        save(geneInfo,file=geneAnnot)
+        save(geneInfo,file = geneAnnot)
       }
-    }else{
+    } else {
       geneAnnot <- geneAnnot[["geneAnnot"]]
     }
     ## get distal probe info
@@ -116,10 +122,10 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
       params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
       distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
     }
-   
-    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
-                    geneInfo=geneAnnot,TCGA=TRUE)
-
+    
+    mee <- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
+                     geneInfo=geneAnnot,TCGA=TRUE)
+    
     ## calculation
     message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
     #Construct data.
@@ -166,9 +172,9 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
     write.csv(SigPair, file=sprintf("%s/getPair.%s.pairs.significant.csv",
                                     dir.out, diff.dir),
               row.names=FALSE)
-
-                                               
-    if(length(analysis)==1){
+    
+    
+    if(length(analysis) == 1){
       return(SigPair)
     }else{
       analysis <- analysis[!analysis %in% "pair"]
@@ -202,8 +208,8 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
       invisible(gc())
     }
   }
-   
-   #search responsible TFs
+  
+  #search responsible TFs
   if("TF.search" %in% analysis){
     message("###################\nSearch responsible TFs\n###################\n\n")
     ## make mee 
@@ -222,9 +228,9 @@ TCGA.pipe <- function(disease,analysis="all",wd="./",cores=1,Data=NULL, diff.dir
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, c(list(mee=mee, enriched.motif=enriched.motif,
-                            dir.out=dir.out, cores=cores, 
-                            label=diff.dir),
-                       params))
+                                   dir.out=dir.out, cores=cores, 
+                                   label=diff.dir),
+                              params))
   }
 }
 

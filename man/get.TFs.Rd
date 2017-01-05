@@ -48,7 +48,7 @@ If save is false, a data frame which contains the same content with the first fi
 }
 \examples{
 data(elmer.data.example)
-enriched.motif <- list("TP53"= c("cg00329272", "cg10097755", "cg08928189",
+enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
@@ -58,6 +58,10 @@ TF <- get.TFs(data,
                              ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
                              stringsAsFactors = FALSE),
              label="hypo")
+# This case will use Uniprot dabase to get list of Trasncription factors              
+TF <- get.TFs(data, 
+              enriched.motif, 
+              label="hypo")              
 }
 \author{
 Lijing Yao (creator: lijingya@usc.edu) 

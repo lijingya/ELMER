@@ -13,6 +13,9 @@
 #'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
+#' @param filter.probes A GRanges object contains the coordinate of probes which locate 
+#'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+#'  See \code{\link{get.feature.probe}} function.
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
@@ -73,6 +76,9 @@
 #'    GDCdownload(query.exp.hg19)
 #'    exp.hg19 <- GDCprepare(query.exp.hg19)
 #'    
+#'    # Our object needs to have emsembl gene id as rownames
+#'    rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
+#'    
 #'    # DNA Methylation
 #'    query.met <- GDCquery(project = "TCGA-HNSC",
 #'                          legacy = TRUE,
@@ -83,35 +89,46 @@
 #'    GDCdownload(query.met)
 #'    met <- GDCprepare(query = query.met)
 #'    
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
 #'    
 #'    # Consisering it is TCGA and SE
-#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg19))
 #'    
-#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
-#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
 #'    
-#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is not TCGA and SE
 #'    # DNA methylation and gene expression Objects should have same sample names in columns
 #'    not.tcga.exp <- exp.hg19 
 #'    colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
-#'    not.tcga.met <- exp.hg19 
+#'    not.tcga.met <- met 
 #'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
 #'    
-#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
-#'    mae.hg19 <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
+#'                                 samples = colnames(not.tcga.exp), 
+#'                                 group = c(rep("group1",4),rep("group2",4)))
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+#'    mae.hg19 <- createMAE(exp = not.tcga.exp, 
+#'                          met =  not.tcga.met, 
+#'                          TCGA = FALSE, 
+#'                          filter.probes = distal.enhancer,
+#'                          genome = "hg19", 
+#'                          pData = phenotype.data)
 #' }
 #' createMAE
 createMAE <- function (exp, 
                        met, 
                        pData, 
                        sampleMap,
+                       filter.probes = NULL,
+                       met.platform = "450k",
                        genome = NULL,
                        TCGA = FALSE) {
   
@@ -129,9 +146,18 @@ createMAE <- function (exp,
   }
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
-    met <- makeSummarizedExperimentFromDNAMethylation(met, genome)
+    met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
   }
   
+  # Select the regions from DNA methylation that overlaps enhancer.
+  if(!is.null(filter.probes)){
+    if(is.character(filter.probes)){
+      filter.probes <- get(load(filter.probes))
+    }
+  } 
+  if(!is.null(filter.probes) & !is.null(met)){
+    met <- met[rownames(met) %in% names(filter.probes),]
+  } 
   # We will need to check if the fields that we need exists.
   # Otherwise we will need to create them
   if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
@@ -144,10 +170,10 @@ createMAE <- function (exp,
         colnames(extra) <- required.cols
         values(exp) <- cbind(values(exp),extra)
       } else {
-        message("We will consider your gene expression row names are Gene Symbols")
-        extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-        colnames(extra) <- required.cols
-        values(exp) <- cbind(values(exp),extra)
+        stop("Please the gene expression matrix should receive ENSEMBLE IDs")
+        #extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
+        #colnames(extra) <- required.cols
+        #values(exp) <- cbind(values(exp),extra)
       }
     }
   } 
@@ -174,20 +200,33 @@ createMAE <- function (exp,
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
-                                pData = pData,   sampleMap = sampleMap,
+                                pData = pData,   
+                                sampleMap = sampleMap,
                                 metadata = list(TCGA= TRUE, genome = genome))
-    
   } else {
-    if(missing(pData)) stop("Please set pData argument. A data frame with samples information. All rownames should be colnames of DNA methylation and gene expression")
+    
+    if(missing(pData)){
+      message <- paste("Please set pData argument. A data frame with samples", 
+                       "information. All rownames should be colnames of DNA",
+                       "methylation and gene expression. An example is showed",
+                       "in MultiAssayExperiment documentation",
+                       "(access it with ?MultiAssayExperiment)")
+      stop(message)
+    }
+    
     if(missing(sampleMap)){
       # Check that we have the same number of samples
       message("Removing samples not found in both DNA methylation and gene expression (we are considering the names of the gene expression and DNA methylation columns to be the same) ")
       ID <- intersect(colnames(met), colnames(exp))
       met <- met[,match(ID,colnames(met))]
       exp <- exp[,match(ID,colnames(exp))]
-      if(!all(colnames(exp) == colnames(met))) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
+      if(!all(colnames(exp) == colnames(met))) 
+        stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      
       pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
+                                      rep("Gene expression", length(colnames(exp)))),
                              primary = c(colnames(met),colnames(exp)),
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
@@ -216,10 +255,12 @@ createMAE <- function (exp,
       met <- met[,sampleMap.met$colname,drop = FALSE]
       exp <- exp[,sampleMap.exp$colname,drop = FALSE]
       
-      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
+      if(!all(sampleMap.met$primary == sampleMap.exp$primary)) 
+        stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
       pData <- pData[match(commun.samples,rownames(pData)),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
+                                      rep("Gene expression", length(colnames(exp)))),
                              primary = commun.samples,
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
@@ -248,41 +289,31 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
     aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
     aux <- aux[!duplicated(aux$ensembl_gene_id),]
     rownames(aux) <- aux$ensembl_gene_id
+    aux$entrezgene <- NULL
     exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
                                                  start.field="start_position",
                                                  end.field=c("end_position"))
     extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
     colnames(extra) <- required.cols
     values(exp) <- cbind(values(exp),extra)
-  } else {
-    message("We will consider your gene expression row names are Gene Symbols")
-    exp$external_gene_name <- rownames(exp)
-    aux <- merge(exp, gene.info, by = "external_gene_name", sort = FALSE)
-    aux <- aux[!duplicated(aux$external_gene_name),]
-    rownames(aux) <- aux$external_gene_name
-    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene|ensembl_gene_id",colnames(aux))],    
-                                                 start.field="start_position",
-                                                 end.field=c("end_position"))
-    extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-    colnames(extra) <- required.cols
-    values(exp) <- cbind(values(exp),extra)
-  }
+  } 
   return(exp)
 }
 
 #' @importFrom downloader download
-makeSummarizedExperimentFromDNAMethylation <- function(met, genome) {
+makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
   
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
-  annotation <-   getInfiniumAnnotation(ifelse(nrow(met) > 800000,"EPIC","450K"), genome)
-  rowRanges <- annotation[rownames(met),]
+  annotation <-   getInfiniumAnnotation(met.platform, genome)
+  rowRanges <- annotation[rownames(met),,drop=FALSE]
   
   # Remove masked probes, besed on the annotation
   rowRanges <- rowRanges[!rowRanges$MASK.mapping]
   
   colData <-  DataFrame(samples = colnames(met))
+  met <- met[rownames(met) %in% names(rowRanges),,drop = FALSE]
   assay <- data.matrix(met)
   met <- SummarizedExperiment(assays=assay,
                               rowRanges=rowRanges,
@@ -545,13 +576,18 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   return(tss)
 }
 
-# This function gets the last version of TF list from the UNiprot database
+#' @title  Get human TF list from the UNiprot database
+#' @description This function gets the last version of human TF list from the UNiprot database
+#' @importFrom readr read_tsv
+#' @return A data frame with the ensemble gene id and entrezgene and gene symbol.
 getTF <- function(genome.build = "hg38"){
   uniprotURL <- "http://www.uniprot.org/uniprot/?"
   query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
   fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
   format <- "format=tab"
-  human.TF <- readr::read_tsv(paste0(uniprotURL,paste(query, fields,format, sep = "&"))) 
+  human.TF <- readr::read_tsv(paste0(uniprotURL,
+                                     paste(query, fields,format, sep = "&")),
+                              col_types = "ccccccc") 
   gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
   gene  <- gene[!duplicated(gene),]
   return(gene)
@@ -673,24 +709,36 @@ prepare_object <- function(){
   save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda", compress = "xz")
   
 }
-#' @importFrom rvest read_html html_table
+
+#' @title Get family of transcription factors
+#' @description This function will use TF Class database to create the object
+#' that maps for each TF the members of its family. TF in the same family have 
+#' high correlared PWM.
+#' @importFrom rvest html_table
+#' @importFrom xml2 read_html 
+#' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
-  # Download from http://hocomoco.autosome.ru/human/mono
-  tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
-  tf.family <- tf.family[[1]]
-  # Split TF for each family, this will help us map for each motif which are the some ones in the family
-  # basicaly: for a TF get its family then get all TF in that family
-  family <- split(tf.family,f = tf.family$`TF family`)
-  motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
-    f <- x$`TF family`
-    if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
-    return(family[as.character(f)][[1]]$`Transcription factor`)
-  },.progress = "text")
-  #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
-  names(motif.relavent.TFs) <- tf.family$Model
-  # Cleaning object
-  attr(motif.relavent.TFs,which="split_type") <- NULL
-  attr(motif.relavent.TFs,which="split_labels") <- NULL
+  if(!file.exists("motif.relavent.TFs.rda")){
+    # Download from http://hocomoco.autosome.ru/human/mono
+    tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
+    tf.family <- tf.family[[1]]
+    # Split TF for each family, this will help us map for each motif which are the some ones in the family
+    # basicaly: for a TF get its family then get all TF in that family
+    family <- split(tf.family,f = tf.family$`TF family`)
+    motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
+      f <- x$`TF family`
+      if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
+      return(unique(family[as.character(f)][[1]]$`Transcription factor`))
+    },.progress = "text")
+    #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
+    names(motif.relavent.TFs) <- tf.family$Model
+    # Cleaning object
+    attr(motif.relavent.TFs,which="split_type") <- NULL
+    attr(motif.relavent.TFs,which="split_labels") <- NULL
+    save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+  } else {
+    motif.relavent.TFs <- get(load("motif.relavent.TFs.rda"))
+  }
   return(motif.relavent.TFs)
 }
 

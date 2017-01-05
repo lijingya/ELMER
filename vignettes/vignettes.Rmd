@@ -631,7 +631,7 @@ DNA methylation which is carried out by function get.TFs.
 
 For each motif considered to be enriched within a particular probe set, function will
 compare the average DNA methylation at all distal enhancer probes within +/- 100bp 
-of a motif occurrence, to the expression of 1,982 human TFs A statistical test 
+of a motif occurrence, to the expression of human TFs. A statistical test 
 was performed for each motif-TF pair, as follows. The samples (all control and 
 experiment samples) were divided into two groups: the M group, which consisted 
 of the 20% of samples with the highest average methylation at all motif-adjacent 
@@ -642,7 +642,7 @@ cases. For each candidate motif-TF pair, the Mann-Whitney U test was used to tes
 the null hypothesis that overall gene expression in group M was greater or equal 
 than that in group U. This non-parametric test was used in order to minimize the 
 effects of expression outliers, which can occur across a very wide dynamic range. 
-For each motif tested, this resulted in a raw p-value (Pr) for each of the 1982 TFs.
+For each motif tested, this resulted in a raw p-value (Pr) for each of the human TFs.
 All TFs were ranked by the -log10(Pr), and those falling within the top 5% of 
 this ranking were considered candidate upstream regulators. The best upstream 
 TFs which are known recognized the motif was automatically extracted as putative 

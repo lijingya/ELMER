@@ -3,7 +3,8 @@
 \name{createMAE}
 \alias{createMAE}
 \usage{
-createMAE(exp, met, pData, sampleMap, genome = NULL, TCGA = FALSE)
+createMAE(exp, met, pData, sampleMap, filter.probes = NULL,
+  met.platform = "450k", genome = NULL, TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -17,6 +18,10 @@ either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 of the gene expression and DNA methylation matrix. This should be used if your matrix
 have different columns names. 
 This object must have columns primary (sample ID) and colname (names of the columns of the matrix).}
+
+\item{filter.probes}{A GRanges object contains the coordinate of probes which locate 
+within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+See \code{\link{get.feature.probe}} function.}
 
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
 
@@ -87,6 +92,9 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    GDCdownload(query.exp.hg19)
    exp.hg19 <- GDCprepare(query.exp.hg19)
    
+   # Our object needs to have emsembl gene id as rownames
+   rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
+   
    # DNA Methylation
    query.met <- GDCquery(project = "TCGA-HNSC",
                          legacy = TRUE,
@@ -97,29 +105,38 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    GDCdownload(query.met)
    met <- GDCprepare(query = query.met)
    
+   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
    
    # Consisering it is TCGA and SE
-   mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19")
+   mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
    values(getExp(mae.hg19))
    
-   mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38")
+   mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
    values(getExp(mae.hg38))
    
    # Consisering it is TCGA and not SE
-   mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19")
+   mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
    
-   mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38")
+   mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
    values(getExp(mae.hg38))
    
    # Consisering it is not TCGA and SE
    # DNA methylation and gene expression Objects should have same sample names in columns
    not.tcga.exp <- exp.hg19 
    colnames(not.tcga.exp) <- substr(colnames(not.tcga.exp),1,15)
-   not.tcga.met <- exp.hg19 
+   not.tcga.met <- met 
    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
    
-   phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), samples = colnames(not.tcga.exp), group = c(rep("group1",4),rep("group2",4)))
-   mae.hg19 <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+   phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
+                                samples = colnames(not.tcga.exp), 
+                                group = c(rep("group1",4),rep("group2",4)))
+   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+   mae.hg19 <- createMAE(exp = not.tcga.exp, 
+                         met =  not.tcga.met, 
+                         TCGA = FALSE, 
+                         filter.probes = distal.enhancer,
+                         genome = "hg19", 
+                         pData = phenotype.data)
 }
 createMAE
 }

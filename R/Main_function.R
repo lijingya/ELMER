@@ -1,5 +1,7 @@
-##get.distal.en
-#' get.feature.probe
+#' @title get.feature.probe to select probes within promoter regions or distal regions.
+#' @description 
+#' get.feature.probe is a function to select the probes falling into 
+#' distal feature regions or promoter regions.
 #' @importFrom GenomicRanges promoters 
 #' @importFrom minfi getAnnotation
 #' @description This function selects the probes on HM450K that either overlap 
@@ -11,14 +13,30 @@
 #' @param genome Genome  GENCODE
 #' 
 #' @param feature A GRange object containing biofeature coordinate such as 
-#' enhancer coordinates. Default is comprehensive genomic enhancer regions from REMC and FANTOM5.
+#' enhancer coordinates. Default is comprehensive genomic enhancer regions from 
+#' REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}.
 #' feature option is only usable when promoter option is FALSE.
-#' @param TSS A GRange object containing the transcription start site. Default is UCSC gene TSS.
+#' @param TSS A GRange object contains the transcription start sites. When promoter is FALSE, Union.TSS
+#' in \pkg{ELMER.data} will be used for default. When promoter is TRUE, UCSC gene TSS will
+#' be used as default (see detail). User can specify their own preference TSS annotation. 
 #' @param TSS.range A list specify how to define promoter regions. 
 #' Default is upstream =2000bp and downstream=2000bp.
 #' @param rm.chr A vector of chromosome need to be remove from probes such as chrX chrY or chrM
 #' @return A GRange object containing probes that satisfy selecting critiria.
 #' @export 
+#' @details 
+#'  In order to get real distal probes, we use more comprehensive annotated TSS by both 
+#'  GENCODE and UCSC. However, to get probes within promoter regions need more
+#'  accurate annotated TSS such as UCSC. Therefore, there are different settings for
+#'  promoter and distal probe selection. But user can specify their own favorable
+#'  TSS annotation. Then there won't be any difference between promoter and distal
+#'  probe selection.
+#'  @return A GRanges object contains the coordinate of probes which locate 
+#'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
+#'  @usage get.feature.probe(feature, 
+#'                           TSS, 
+#'                           TSS.range = list(upstream = 2000, downstream = 2000), 
+#'                           promoter = FALSE, rm.chr = NULL)
 #' @examples 
 #' # get distal enhancer probe
 #' \dontrun{
@@ -55,6 +73,18 @@ get.feature.probe <- function(feature,
       
       probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
     })
+    
+    if(missing(feature)){
+      newenv <- new.env()
+      if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
+      if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
+      feature <- get(ls(newenv)[1],envir=newenv)   
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
+    }else if(is(feature,"GRange")){             
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    }else{
+      stop("feature is not GRange object.")
+    }
   } else {
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
@@ -606,6 +636,11 @@ get.enriched.motif <- function(probes.motif,
   ## load probes for enriched motif ----------------------------------------------
   probes.TF <- all.probes.TF[probes,]
   probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
+  
+  # Odds ratio
+  #      p/(1-p)   p * (1-P)   where p = a/(a + b) probes with motif
+  # OR =---------=----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
+  #      P/(1-P)   P * (1-p)
   sub.enrich.TF <- Matrix::colMeans(probes.TF)*(1-bg.Probes.TF.percent)/bg.Probes.TF.percent/(1-Matrix::colMeans(probes.TF))
   SE <- sqrt(1/Matrix::colSums(probes.TF) + 1/(nrow(probes.TF)-Matrix::colSums(probes.TF)) +
                1/Matrix::colSums(bg.probes.TF )+ 1/(nrow(bg.probes.TF)-Matrix::colSums(bg.probes.TF)))
@@ -627,11 +662,14 @@ get.enriched.motif <- function(probes.motif,
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
-  enriched.motif <- sapply(en.motifs, 
+  enriched.motif <- plyr::alply(en.motifs, 
                            function(x, probes.TF) {
-                             names(probes.TF[probes.TF[,x]==1,x])
+                             rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
                            },
-                           probes.TF=probes.TF)
+                           probes.TF=probes.TF,.margins = 1, .dims = FALSE)
+  attributes(enriched.motif) <- NULL
+  names(enriched.motif) <- en.motifs
+
   if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
   ## make plot----
@@ -693,7 +731,7 @@ get.enriched.motif <- function(probes.motif,
 #' This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column). 
 #' If save is false, a data frame which contains the same content with the first file will be reported.
 #' @importFrom pbapply pbsapply
-#' @importFrom plyr alply
+#' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
@@ -747,20 +785,11 @@ get.TFs <- function(data,
   }
   
   if(missing(motif.relavent.TFs)){
+    message("Accessing TF families from TFClass database to indentify known potential TF")
     motif.relavent.TFs <- createMotifRelevantTfs()
   } else if(is.character(motif.relavent.TFs)){
     motif.relavent.TFs <- get(load(motif.relavent.TFs)) # The data is in the one and only variable
   }
-  
-  motif.meth <- lapply(enriched.motif, 
-                       function(x,meth){
-                         if(length(x)<2) { 
-                           return(meth[x,])
-                         } else {
-                           return(colMeans(meth[x,],na.rm = TRUE))
-                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),])
-  
-  motif.meth <- do.call(rbind, motif.meth)
   
   parallel <- FALSE
   if (cores > 1){
@@ -768,16 +797,43 @@ get.TFs <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  if(all(grepl("ENSG",rownames(getExp(data))))) {
-    TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
-    gene <- TFs$ensembl_gene_id
-  } else {
-    TFs <- TFs[TFs$external_gene_name %in% rownames(getExp(data)),]
-    gene <- TFs$external_gene_name
-  }
+  
+  # This will calculate the average methylation at all motif-adjacent probes 
+  message("Calculating the average methylation at all motif-adjacent probes ")
+  
+  motif.meth <- ldply(enriched.motif, 
+                       function(x,meth){
+                         if(length(x)<2) { 
+                           return(meth[x,])
+                         } else {
+                           return(colMeans(meth[x,],na.rm = TRUE))
+                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
+                      .progress = "text", .parallel = parallel, .id = "rownames"
+  )
+  rownames(motif.meth) <- motif.meth$rownames
+  motif.meth$rownames <- NULL
+  
+  # motif.meth matrix 
+  # - rows: average methylation at all motif-adjacent probes (rownames will be the motif)
+  # - cols: each patient
+  
+  # rownames are ensemble gene id
+  TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
+  gene <- TFs$ensembl_gene_id
   gene.name <- TFs$external_gene_name # For plotting purposes 
   
-  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
+  # Definition:
+  # M group: 20% of samples with the highest average methylation at all motif-adjacent probes
+  # U group: 20% of samples with the lowest 
+  
+  # The Mann-Whitney U test was used to test 
+  # the null hypothesis that overall gene expression in group M was greater or equal 
+  # than that in group U.
+  message("Performing Mann-Whitney U test")
+  
+  # For each motif (x) split the Meths object into U and M and evaluate the expression
+  # of all TF Exps (obj)
+  TF.meth.cor <- adply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
@@ -785,27 +841,39 @@ get.TFs <- function(data,
                            Gene=gene,
                            Top=percentage,
                            Exps=assay(getExp(data))[gene,])},
-                       .progress = "text", .parallel = parallel
+                       .progress = "text", .parallel = parallel, .id = NULL
   )
-  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
-  TF.meth.cor <- do.call(cbind,TF.meth.cor)
+  TF.meth.cor$GeneID <- NULL
   ## check row and col names
   rownames(TF.meth.cor) <- gene.name
   colnames(TF.meth.cor) <- names(enriched.motif)
   TF.meth.cor <- na.omit(TF.meth.cor)
   
-  cor.summary <- sapply(colnames(TF.meth.cor), 
+  # TF.meth.cor matrix with raw p-value (Pr)
+  # - rows: TFs
+  # - cols: motifs
+  # lower Raw p-values means that TF expression in M group is lower than in 
+  # U group. That means, the Unmethylated with more TF expression
+  # have a higher correlation.
+  
+  message("Finding potential TF and known potential TF")
+  # For each motif evaluate TF
+  cor.summary <- adply(colnames(TF.meth.cor), 
                         function(x, TF.meth.cor, motif.relavent.TFs){ 
-                          cor <- sort(TF.meth.cor[,x])
-                          top <- names(cor[1:floor(0.05*nrow(TF.meth.cor))])
-                          potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
+                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
+                          potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
+                                                     top[top %in% motif.relavent.TFs[[x]]],NA)
                           out <- data.frame("motif" = x,
-                                            "top potential TF" = ifelse(!is.null(potential.TF[1]),potential.TF[1],""),
-                                            "potential TFs" = paste(potential.TF, collapse = ";"),
+                                            "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
+                                            "potential TFs" = ifelse(!is.na(potential.TF),
+                                                                     paste(potential.TF, collapse = ";"),
+                                                                     NA),
                                             "top_5percent" = paste(top,collapse = ";"))
                         },                                         
-                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, simplify=FALSE)
-  cor.summary <- do.call(rbind, cor.summary)
+                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
+                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
+  rownames(cor.summary) <- cor.summary$motif
   if(save){
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
