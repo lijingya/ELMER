@@ -667,10 +667,11 @@ prepare_object <- function(){
       gc()
     }
   }
-  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda")
-  save(Probes.motif.hg38.450K, file = "Probes.motif.hg38.450K.rda")
-  save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda")
-  save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda")
+  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda", compress = "xz")
+  save(Probes.motif.hg38.450K, file = "Probes.motif.hg38.450K.rda", compress = "xz")
+  save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda", compress = "xz")
+  save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda", compress = "xz")
+  
 }
 #' @importFrom rvest read_html html_table
 createMotifRelevantTfs <- function(){
