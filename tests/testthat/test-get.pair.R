@@ -2,9 +2,9 @@ context("Checking get pair function")
 
 test_that("Function uses correctly the permu.dir", {
   data(elmer.data.example)
-  nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                            geneAnnot=getExp(data))
-  Hypo.pair <-get.pair(data=data,
+  Hypo.pair <- get.pair(data=data,
                        nearGenes=nearGenes,
                        permu.size=5,
                        Pe = 0.2,
@@ -16,28 +16,41 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 5)
   # Result correctly use a gene from the nearGene list
   expect_true(all(Hypo.pair[Hypo.pair$Probe %in% "cg00329272" ,]$GeneID %in% nearGenes$cg00329272$GeneID))
-
+  
   # If we add one more probe the value should be saved
-  Hypo.pair <-get.pair(data=data,
-                       nearGenes=nearGenes,
-                       permu.size=6,
-                       Pe = 0.2,
-                       dir.out="./",
-                       permu.dir = "permu_test",
-                       label= "hypo")
+  Hypo.pair <- get.pair(data=data,
+                        nearGenes=nearGenes,
+                        permu.size=6,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label= "hypo")
   # Folder was crreated correcly
   expect_true(file.exists("permu_test/permu.rda"))
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 6)
   
-  Hypo.pair <-get.pair(data=data,
-                       nearGenes=nearGenes,
-                       permu.size=5,
-                       Pe = 0.01,
-                       dir.out="./",
-                       label= "hypo")
+  # If we reduce the number of probes
+  Hypo.pair <- get.pair(data=data,
+                        nearGenes=nearGenes,
+                        permu.size=5,
+                        Pe = 0.01,
+                        dir.out="./",
+                        label= "hypo")
   # Pe filter is working
   expect_true(nrow(Hypo.pair) == 0)
-
+  
+  # If we add new genes
+  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755","cg22396959"),],
+                            geneAnnot=getExp(data))
+  Hypo.pair <- get.pair(data=data,
+                        nearGenes=nearGenes,
+                        permu.size=7,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label= "hypo")
+  
+  
 })
 
 test_that("Test calculation of Pe (empirical pvalue) from Raw-pvalue is working", {

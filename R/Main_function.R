@@ -436,15 +436,34 @@ get.permu <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
+  
+  
+  # We have two cases to consider:
+  # 1) Permutation was not done before
+  # 2) It was done before
+  # 2.a) We have more probes to evaluate
+  # 2.b) We have more genes to evaluate
+  # 2.c) More genes and more probes
+  # 2.d) No more genes or probes
+  # For 1) just do for all genes and probes
+  # For 2 a-c do it for new probes, then do for new genes for all probes
+  # For 2.d just subset
   permu <- NULL
   tmp.probes <- probes.permu
+  tmp.genes <- geneID
+  missing.genes <- NULL
+  # Case 2) Permutation already done
   file <- file.path(permu.dir,"permu.rda")
-  if(!is.null(permu.dir)){
-    if(file.exists(file)){
+  if (!is.null(permu.dir)) {
+    if (file.exists(file)) {
       temp.space <- new.env()
       permu.file <- get(load(file, temp.space), temp.space)
       rm(temp.space)
       tmp.probes <- probes.permu[!probes.permu %in%  colnames(permu.file)]
+      if(!all(geneID %in% rownames(permu.file))) { 
+        tmp.genes <- rownames(permu.file)
+        missing.genes <- geneID[!geneID %in% tmp.genes]
+      }
     }
   }  
   permu.meth <- assay(getMet(data)[tmp.probes,] )
@@ -458,7 +477,7 @@ get.permu <- function(data,
                      Stat.nonpara.permu(
                        Probe = x,
                        Meths=permu.meth[x,],
-                       Gene=geneID,
+                       Gene=tmp.genes,
                        Top=percentage,
                        Exps=exp.data)},
                    .progress = "text", .parallel = parallel
@@ -468,12 +487,13 @@ get.permu <- function(data,
                     function(x,geneID){ 
                       x <- x[match(geneID,x[,1]),2]
                     },
-                    geneID=geneID,simplify=FALSE)
+                    geneID=tmp.genes,simplify=FALSE)
     
     permu <- do.call(cbind,permu)
-    rownames(permu) <- geneID
+    rownames(permu) <- tmp.genes
     colnames(permu) <- tmp.probes
   } 
+  
   if(!is.null(permu) & length(file) > 0) {
     if(file.exists(file)){
       # Put genes in the same order before rbind it
@@ -481,6 +501,39 @@ get.permu <- function(data,
       permu <- cbind(permu, permu.file)
     }
   }
+  
+  # For the missing genes calculate for all probes
+  if(length(missing.genes) > 0) {
+    # Get all probes
+    permu.meth <- assay(getMet(data)[colnames(permu),] )
+    permu.genes <- alply(.data = colnames(permu), .margins = 1,
+                         .fun = function(x) {
+                           Stat.nonpara.permu(
+                             Probe = x,
+                             Meths=permu.meth[x,],
+                             Gene=missing.genes,
+                             Top=percentage,
+                             Exps=exp.data)},
+                         .progress = "text", .parallel = parallel
+    )
+    
+    permu.genes <- sapply(permu.genes,
+                          function(x,geneID){ 
+                            x <- x[match(geneID,x[,1]),2]
+                          },
+                          geneID=missing.genes,simplify=FALSE)
+    
+    permu.genes <- do.call(cbind,permu.genes)
+    rownames(permu.genes) <- missing.genes
+    colnames(permu.genes) <- colnames(permu)
+    # Adding new genes
+    # Make sure probes are in the same order
+    permu.genes <- permu.genes[,match(colnames(permu.genes),colnames(permu))]
+    permu <- rbind(permu,permu.genes)
+    permu <- permu[match(rownames(permu),geneID),
+                   match(colnames(permu),probes.permu)]
+  }
+  
   if(!is.null(permu.dir) & !is.null(permu)) {
     dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
     save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
