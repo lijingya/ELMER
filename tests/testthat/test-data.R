@@ -17,3 +17,11 @@ test_that("Get list of TF from uniprot database", {
   expect_true(all(c("TP53", "TP63", "TP73") %in% tf$external_gene_name))
   expect_true(all(c("ensembl_gene_id", "external_gene_name") %in% colnames(tf)))
 })
+
+test_that("Mapping from entrez gene ID to emsemble gene ID is right", {
+  genes <- c("100887754","100873766","100874231")
+  mapping <- get.GRCh(genome = "hg19",genes)
+  expect_equal(mapping[mapping$entrezgene == genes[1],]$ensembl_gene_id,"ENSG00000243300" )
+  expect_equal(mapping[mapping$entrezgene == genes[2],]$ensembl_gene_id,"ENSG00000252952" )
+  expect_equal(mapping[mapping$entrezgene == genes[3],]$ensembl_gene_id,"ENSG00000227213" )
+})

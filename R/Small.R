@@ -100,9 +100,13 @@
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
-#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
+#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), 
+#'                               TCGA = TRUE, genome = "hg19",  
+#'                               filter.probes = distal.enhancer)
 #'    
-#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
+#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), 
+#'                          TCGA = TRUE, genome = "hg38",  
+#'                          filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is not TCGA and SE
@@ -616,6 +620,7 @@ get.GRCh <- function(genome="hg38", genes) {
                          filters = c("entrezgene"),
                          values = list(genes), mart = ensembl)
   colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+  gene.location <- gene.location[match(genes,gene.location$entrezgene),]
   return(gene.location)
 }
 
