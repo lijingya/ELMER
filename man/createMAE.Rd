@@ -3,8 +3,9 @@
 \name{createMAE}
 \alias{createMAE}
 \usage{
-createMAE(exp, met, pData, sampleMap, filter.probes = NULL,
-  met.platform = "450k", genome = NULL, TCGA = FALSE)
+createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
+  filter.probes = NULL, met.platform = "450k", genome = NULL,
+  TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -18,6 +19,8 @@ either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 of the gene expression and DNA methylation matrix. This should be used if your matrix
 have different columns names. 
 This object must have columns primary (sample ID) and colname (names of the columns of the matrix).}
+
+\item{linearize.exp}{Take log2(exp + 1) in order to linearize relation between methylation and expression}
 
 \item{filter.probes}{A GRanges object contains the coordinate of probes which locate 
 within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.

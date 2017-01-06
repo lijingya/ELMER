@@ -11,6 +11,7 @@
 #'  of the gene expression and DNA methylation matrix. This should be used if your matrix
 #'  have different columns names. 
 #'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
+#' @param linearize.exp Take log2(exp + 1) in order to linearize relation between methylation and expression  
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @param filter.probes A GRanges object contains the coordinate of probes which locate 
@@ -127,6 +128,7 @@ createMAE <- function (exp,
                        met, 
                        pData, 
                        sampleMap,
+                       linearize.exp = FALSE,
                        filter.probes = NULL,
                        met.platform = "450k",
                        genome = NULL,
@@ -137,6 +139,9 @@ createMAE <- function (exp,
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
+  
+  # Add this here ?
+  if(linearize.exp) exp <- log2(exp + 1)
   
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
