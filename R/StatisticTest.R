@@ -27,7 +27,7 @@ Stat.diff.meth <- function(probe,
   }
   group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, min(5,length(group1.tmp)), round(length(group1.tmp) * percentage))
   group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, min(5,length(group2.tmp)), round(length(group2.tmp) * percentage))
-
+  
   group1.tmp <- group1.tmp[1:group1.nb]
   group2.tmp <- group2.tmp[1:group2.nb]
   
@@ -60,19 +60,17 @@ Stat.diff.meth <- function(probe,
 #' @param Top A number determines the percentage of top methylated/unmethylated samples.
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
-#' @param permu.dir A path to store permuation data.
 #' @return U test results
 Stat.nonpara.permu <- function(Probe,
                                Gene,
                                Top=0.2,
                                Meths=Meths,
-                               Exps=Exps,
-                               permu.dir=NULL){
+                               Exps=Exps){
   idx <- order(Meths)
   nb <- round(length(Meths)*Top)
   unmethy <- head(idx, n = nb) 
   methy <- tail(idx, n = nb) 
-
+  
   test.p <- unlist(lapply(splitmatrix(Exps),
                           function(x) {
                             wilcox.test(x[unmethy],x[methy],alternative = "greater",exact=FALSE)$p.value
@@ -81,12 +79,7 @@ Stat.nonpara.permu <- function(Probe,
   test.p <- data.frame(GeneID=Gene,
                        Raw.p=test.p[match(Gene, names(test.p))], 
                        stringsAsFactors = FALSE) 
-  if(is.null(permu.dir)){
-    return(test.p)
-  }else{
-    write.table(test.p,file=sprintf("%s/%s",permu.dir,Probe),
-                quote=FALSE,sep="\t",row.names=FALSE,col.names=FALSE)
-  }
+  return(test.p)
 }
 
 #' U test (non parameter test) for permutation. This is one probe vs nearby gene 

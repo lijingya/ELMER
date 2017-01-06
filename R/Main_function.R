@@ -430,69 +430,64 @@ get.permu <- function(data,
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
-  if(is.null(permu.dir)){
-    permu.meth <- assay(getMet(data)[probes.permu,] )
-    
-    parallel <- FALSE
-    if (cores > 1){
-      if (cores > detectCores()) cores <- detectCores()
-      registerDoParallel(cores)
-      parallel = TRUE
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  permu <- NULL
+  tmp.probes <- probes.permu
+  file <- file.path(permu.dir,"permu.rda")
+  if(!is.null(permu.dir)){
+    if(file.exists(file)){
+      temp.space <- new.env()
+      permu.file <- get(load(file, temp.space), temp.space)
+      rm(temp.space)
+      tmp.probes <- probes.permu[!probes.permu %in%  colnames(permu.file)]
     }
-    exp.data <- assay(getExp(data))
-    permu <- alply(.data = probes.permu, .margins = 1,
+  }  
+  permu.meth <- assay(getMet(data)[tmp.probes,] )
+  exp.data <- assay(getExp(data))
+  
+  # Should Exps=exp.data[geneID,] to improve performance ?
+  # in that case For a second run we will need to look if gene is in the matrix and also probe
+  if(length(tmp.probes) > 0) {
+    permu <- alply(.data = tmp.probes, .margins = 1,
                    .fun = function(x) {
                      Stat.nonpara.permu(
                        Probe = x,
                        Meths=permu.meth[x,],
                        Gene=geneID,
                        Top=percentage,
-                       Exps=exp.data[geneID,])},
+                       Exps=exp.data)},
                    .progress = "text", .parallel = parallel
     )
     
     permu <- sapply(permu,
                     function(x,geneID){ 
-                      x <- x[match(geneID,x[,1]),2]},
+                      x <- x[match(geneID,x[,1]),2]
+                    },
                     geneID=geneID,simplify=FALSE)
-  } else {
-    ## if file already there don't need to calculate.
-    if(!file.exists(permu.dir)){
-      dir.create(permu.dir,recursive = TRUE)
+    
+    permu <- do.call(cbind,permu)
+    rownames(permu) <- geneID
+    colnames(permu) <- tmp.probes
+  } 
+  if(!is.null(permu) & length(file) > 0) {
+    if(file.exists(file)){
+      # Put genes in the same order before rbind it
+      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),]
+      permu <- cbind(permu, permu.file)
     }
-    if(!all(probes.permu %in% dir(permu.dir))){
-      tmp.probes <- probes.permu[!probes.permu %in% dir(permu.dir)]
-      permu.meth <-  assay(getMet(data)[tmp.probes,])
-      parallel <- FALSE
-      if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
-      }
-      exp.data <- assay(getExp(data))
-      permu <- alply(.data = tmp.probes, .margins = 1,
-                     .fun = function(x) {
-                       Stat.nonpara.permu(
-                         Probe = x,
-                         Meths=permu.meth[x,],
-                         Gene=geneID, # How to do it  
-                         Top=percentage,
-                         Exps=exp.data,
-                         permu.dir=permu.dir)},
-                     .progress = "text", .parallel = parallel
-      )
-      
-    }
-    permu.p <- paste0(permu.dir,"/",probes.permu)
-    permu <- sapply(permu.p,
-                    function(x,geneID){ 
-                      tmp <- read.table(x,stringsAsFactors=FALSE)
-                      tmp <- tmp[match(geneID,tmp[,1]),2]},
-                    geneID=geneID,simplify=FALSE)
   }
-  permu <- do.call(cbind,permu)
-  rownames(permu) <- geneID
-  colnames(permu) <- probes.permu
+  if(!is.null(permu.dir) & !is.null(permu)) {
+    dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
+    save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
+  }
+  if(is.null(permu)) {
+    permu <- permu.file[geneID,probes.permu]
+  }
   return(permu)
 }
 
