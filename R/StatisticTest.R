@@ -163,10 +163,16 @@ Get.Pvalue.p <- function(U.matrix,permu){
     if(is.na(Raw.p)){
       out <- NA
     } else {
-      out <- (sum(permu[as.character(Gene),]  <= Raw.p, na.rm=TRUE)+1)/(sum(!is.na(permu[Gene,])) + 1)
+      #       num( Pp ≤ Pr) + 1
+      # Pe = ---------------------
+      #            x + 1
+      # Pp = pvalue probe (Raw.p)
+      # Pr = pvalue random probe (permu matrix)
+      out <- (sum(permu[as.character(Gene),]  <= Raw.p, na.rm=TRUE) + 1) / (sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }
+  message("Calculate empirical P value.\n")
   Pvalue <- unlist(apply(U.matrix,1,.Pvalue,permu=permu))
   U.matrix$Pe <- Pvalue
   return(U.matrix)

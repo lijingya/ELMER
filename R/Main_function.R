@@ -332,9 +332,9 @@ get.pair <- function(data,
                      portion = portion,
                      permu.dir=permu.dir,
                      cores=cores)
-  #get empirical p-value
-  message("Calculate empirical P value.\n")
+  # Get empirical p-value
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
+  
   Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
   if(save) write.csv(Probe.gene.Pe, 
                      file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
@@ -596,6 +596,7 @@ promoterMeth <- function(data,
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' @importFrom magrittr divide_by multiply_by %>% add
+#' @importFrom plyr alply
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -676,19 +677,22 @@ get.enriched.motif <- function(probes.motif,
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
-  enriched.motif <- plyr::alply(en.motifs, 
-                           function(x, probes.TF) {
-                             rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
-                           },
-                           probes.TF=probes.TF,.margins = 1, .dims = FALSE)
+  enriched.motif <- alply(en.motifs, 
+                          function(x, probes.TF) {
+                            rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
+                          },
+                          probes.TF=probes.TF,.margins = 1, .dims = FALSE)
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
-
+  
   if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
-  ## make plot----
-  motif.enrichment.plot(motif.enrichment=Summary, 
-                        significant=list(OR=1.3), dir.out =dir.out,label=label, save=TRUE)
+  ## make plot 
+  motif.enrichment.plot(motif.enrichment = Summary, 
+                        significant = list(OR = 1.3), 
+                        dir.out = dir.out,
+                        label=label, 
+                        save=TRUE)
   
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
@@ -816,12 +820,12 @@ get.TFs <- function(data,
   message("Calculating the average methylation at all motif-adjacent probes ")
   
   motif.meth <- ldply(enriched.motif, 
-                       function(x,meth){
-                         if(length(x)<2) { 
-                           return(meth[x,])
-                         } else {
-                           return(colMeans(meth[x,],na.rm = TRUE))
-                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
+                      function(x,meth){
+                        if(length(x)<2) { 
+                          return(meth[x,])
+                        } else {
+                          return(colMeans(meth[x,],na.rm = TRUE))
+                        }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
                       .progress = "text", .parallel = parallel, .id = "rownames"
   )
   rownames(motif.meth) <- motif.meth$rownames
@@ -873,20 +877,20 @@ get.TFs <- function(data,
   message("Finding potential TF and known potential TF")
   # For each motif evaluate TF
   cor.summary <- adply(colnames(TF.meth.cor), 
-                        function(x, TF.meth.cor, motif.relavent.TFs){ 
-                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
-                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
-                          potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
-                                                     top[top %in% motif.relavent.TFs[[x]]],NA)
-                          out <- data.frame("motif" = x,
-                                            "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
-                                            "potential TFs" = ifelse(!is.na(potential.TF),
-                                                                     paste(potential.TF, collapse = ";"),
-                                                                     NA),
-                                            "top_5percent" = paste(top,collapse = ";"))
-                        },                                         
-                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
-                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
+                       function(x, TF.meth.cor, motif.relavent.TFs){ 
+                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
+                         top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
+                         potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
+                                                top[top %in% motif.relavent.TFs[[x]]],NA)
+                         out <- data.frame("motif" = x,
+                                           "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
+                                           "potential TFs" = ifelse(!is.na(potential.TF),
+                                                                    paste(potential.TF, collapse = ";"),
+                                                                    NA),
+                                           "top_5percent" = paste(top,collapse = ";"))
+                       },                                         
+                       TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
+                       .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
   rownames(cor.summary) <- cor.summary$motif
   if(save){
     save(TF.meth.cor, 
