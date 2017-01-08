@@ -4,6 +4,7 @@
 #' analyses: get.feature.probe, get.diff.meth, get.pair, get.permu, get.enriched.motif and get.TFs.
 #' Every steps' results are saved.
 #' @param disease TCGA short form disease name such as COAD
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param analysis A vector of characters listing the analysis need to be done.
 #' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
 #' Default is "all" meaning all the analysis will be processed.
@@ -24,23 +25,33 @@
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
 #' }
 TCGA.pipe <- function(disease,
+                      genome = "hg38",
                       analysis="all",
                       wd="./",
                       cores=1,
                       Data=NULL, 
                       diff.dir="hypo",
                       ...){
-  if(missing(disease)) 
+  if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
-         please check https://tcga-data.nci.nih.gov/tcga/.")
-  if(analysis[1] == "all") analysis=c("download","distal.enhancer",
-                                      "diffMeth","pair","motif","TF.search")
+         please check https://gdc-portal.nci.nih.gov")
+  
+  available.analysis <- c("download","distal.enhancer",
+                          "diffMeth","pair",
+                          "motif","TF.search","all")
+  if (analysis[1] == "all") analysis = available.analysis[1:6]
+  
+  if(any(!analysis %in% tolower(analysis))) 
+    stop(paste0("Availbale options for analysis argument are: ",
+                paste(c("",available.analysis), collapse = "\n=> ")))
+  
   disease <- toupper(disease)
   dir.out <- sprintf("%s/Result/%s",wd,disease)
   if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE)
   args <- list(...)
-  #Download 
-  if("download" %in% analysis){
+  
+  # Download 
+  if("download" %in% tolower(analysis)){
     message("###################\nDownload data\n###################\n\n")
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
     params <- args[names(args) %in% c("RNAtype","Methfilter")]
@@ -51,20 +62,20 @@ TCGA.pipe <- function(disease,
   }
   
   ## select distal enhancer probes
-  if("distal.probes" %in% analysis){
+  if("distal.probes" %in% tolower(analysis)){
     message("###################\nSelect distal enhancer probes\n###################\n\n")
     params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
-    save(probeInfo,file=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
-    if(length(analysis)==1){
+    save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    if(length(analysis) == 1){
       return(probeInfo)
-    }else{
+    } else {
       analysis <- analysis[!analysis %in% "distal.probes"]
       invisible(gc())
     }
   }
   #get differential DNA methylation
-  if("diffMeth" %in% analysis){
+  if("diffMeth" %in% tolower(analysis)){
     message("###################\nGet differential DNA methylation loci\n###################\n\n")
     #refine meth data: filter out non tumor or normal samples--------------
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
@@ -73,26 +84,28 @@ TCGA.pipe <- function(disease,
       load(sprintf("%s/%s_meth.rda",Data,disease))
       TN <- sapply(colnames(Meth),tcgaSampleType)
       Meth <- Meth[,TN %in% c("Tumor","Normal")]
-      save(Meth,file= sprintf("%s/%s_meth_refined.rda",dir.out,disease))
+      save(Meth,file = sprintf("%s/%s_meth_refined.rda",dir.out,disease))
       rm(Meth)
     }
-    mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
-                     probeInfo=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    mae <- createMAE(met = meth.file, TCGA=TRUE, filter.probes = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    #mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
+    #                 probeInfo=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    
     params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
     params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
-    diff.meth <- do.call(get.diff.meth,c(params,list(mee=mee)))
+    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae)))
     if(length(analysis)==1){
       return(diff.meth)
     }else{
       analysis <- analysis[!analysis %in% "diffMeth"]
-      rm(mee,diff.meth)
+      rm(mae,diff.meth)
       invisible(gc())
     }
   }
   
   
   #predict pair
-  if("pair" %in% analysis){
+  if("pair" %in% tolower(analysis)){
     message("###################\nPredict pairs\n###################\n\n")
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
@@ -162,8 +175,12 @@ TCGA.pipe <- function(disease,
     promoter.probe <- suppressWarnings(get.feature.probe(promoter=TRUE, 
                                                          TSS.range=list(upstream=100,
                                                                         downstream=700)))
-    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=promoter.probe, 
-                    geneInfo=geneAnnot,TCGA=TRUE, genes=unique(SigPair$GeneID))
+    mee <- fetch.mee(meth = meth.file, 
+                     exp=exp.file, 
+                     probeInfo=promoter.probe, 
+                     geneInfo = geneAnnot,
+                     TCGA=TRUE, 
+                     genes=unique(SigPair$GeneID))
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(mee=mee, sig.pvalue=0.01, save=FALSE),
                                              params))
@@ -176,7 +193,7 @@ TCGA.pipe <- function(disease,
     
     if(length(analysis) == 1){
       return(SigPair)
-    }else{
+    } else {
       analysis <- analysis[!analysis %in% "pair"]
       rm(mee,SigPair)
       invisible(gc())
@@ -184,7 +201,7 @@ TCGA.pipe <- function(disease,
   }
   
   # search enriched motif
-  if("motif" %in% analysis){
+  if("motif" %in% tolower(analysis)){
     message("###################\nMotif search\n###################\n\n")
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
@@ -200,9 +217,9 @@ TCGA.pipe <- function(disease,
                                                          label=diff.dir),
                                                     params))
     
-    if(length(analysis)==1){
+    if(length(analysis) == 1){
       return(enriched.motif)
-    }else{
+    } else {
       analysis <- analysis[!analysis %in% "motif"]
       rm(enriched.motif)
       invisible(gc())
@@ -210,7 +227,7 @@ TCGA.pipe <- function(disease,
   }
   
   #search responsible TFs
-  if("TF.search" %in% analysis){
+  if("TF.search" %in% tolower(analysis)){
     message("###################\nSearch responsible TFs\n###################\n\n")
     ## make mee 
     #construct RNA seq data
