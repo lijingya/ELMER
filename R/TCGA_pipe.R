@@ -163,7 +163,7 @@ TCGA.pipe <- function(disease,
       if(!file.exists(nearGenes.file)){
         params <- args[names(args) %in% c("geneNum")]
         nearGenes <- do.call(GetNearGenes,
-                             c(list(TRange=getMet(mae)[probe=Sig.probes,],
+                             c(list(TRange=subset(getMet(mae), rownames(getMet(mae)) %in% Sig.probes),
                                     geneAnnot=getExp(mae),
                                     cores=cores),
                                params))
