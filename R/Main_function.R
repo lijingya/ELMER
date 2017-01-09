@@ -548,19 +548,34 @@ get.permu <- function(data,
 }
 
 #'promoterMeth
-#'@param mee A MEE.data object must contains meth, exp, probeInfo, geneInfo four component.
-#'@param sig.pvalue A number specify significant cutoff for gene silenced by promoter
-#'methylation. Default is 0.01
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of 
-#' samples used to link probes to genes. Default is 0.2.
+#' @title
+#' promoterMeth to calculate associations of gene expression with DNA methylation
+#' at promoter regions
+#' @description 
+#' promoterMeth is a function to calculate associations of gene expression with DNA methylation
+#' at promoter regions.
+#' @usage 
+#' promoterMeth(mee, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
+#'@param mee A Multi Assay Experiment object with DNA methylation and 
+#' gene expression Summarized Experiment objects
+#'@param sig.pvalue A number specifies significant cutoff for gene silenced by promoter
+#' methylation. Default is 0.01. P value is raw P value without adjustment.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of
+#'  samples of control and experimental groups used to link promoter DNA methylation to genes.
+#'  Default is 0.2.
+#' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
-#' @return A data frame contains genes whose expression significantly anti-correlated 
+#' @return A data frame contains genes whose expression significantly anti-correlated
 #' with promoter methylation.
+#' @examples 
+#' data(elmer.data.example)
+#' Gene.promoter <- promoterMeth(data) 
 #' @export
 promoterMeth <- function(data,
-                         sig.pvalue=0.01,
-                         percentage=0.2,
-                         save=TRUE){
+                         sig.pvalue = 0.01,
+                         percentage = 0.2,
+                         save = TRUE){
+  message("Calculating associations of gene expression with DNA methylation at promoter regions")
   TSS_2K <- promoters(rowRanges(getExp(data)), upstream = 100, downstream = 700)
   probes <- rowRanges(getMet(data))
   overlap <- findOverlaps(probes, TSS_2K)
@@ -568,7 +583,7 @@ promoterMeth <- function(data,
                    GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
   if(nrow(df)==0){
     out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
-  }else{
+  } else {
     df <- unique(df)
     ProbeInTSS <- split(df$Probe,df$GeneID)
     
@@ -586,7 +601,7 @@ promoterMeth <- function(data,
     ## make fake NearGene 
     Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
                        GeneID = rownames(Gene.promoter),
-                       Distance= 1,
+                       Distance = 1,
                        Side = 1, stringsAsFactors=FALSE)
     Fake <- split(Fake, Fake$GeneID)
     out <- lapply(rownames(Gene.promoter),Stat.nonpara, NearGenes=Fake,K=0.3,Top=0.2,
@@ -594,8 +609,10 @@ promoterMeth <- function(data,
     out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }
-  if(save) write.csv(out, file="Genes_significant_anticorrelated_promoter_methylation.csv",
-                     row.names=FALSE)
+  if(nrow(out) == 0) message("No assossiation was found")
+  if(save) write.csv(out, 
+                     file = "Genes_significant_anticorrelated_promoter_methylation.csv",
+                     row.names = FALSE)
   return(out)
 }
 

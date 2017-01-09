@@ -143,8 +143,6 @@ TCGA.pipe <- function(disease,
     message("#######################################")
     message("Predict pairs")
     message("#######################################")
-    ## calculation
-    message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
     
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){
@@ -157,6 +155,8 @@ TCGA.pipe <- function(disease,
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
     ## Get nearby genes-----------------------
+    message("Get neatby genes")
+    
     nearGenes.file <- args[names(args) %in% "nearGenes"]
     if(length(nearGenes.file)==0){
       nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
@@ -169,9 +169,12 @@ TCGA.pipe <- function(disease,
                                params))
         save(nearGenes,file=nearGenes.file)
       }
-    }else{
+    } else {
       nearGenes.file <- nearGenes.file[["nearGenes"]]
     }
+    ## calculation
+    message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
+    
     ## get pair
     permu.dir <- paste0(dir.out,"/permu")
     params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
