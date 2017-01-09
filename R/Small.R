@@ -144,8 +144,6 @@ createMAE <- function (exp,
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
   
-  # Add this here ?
-  if(linearize.exp) exp <- log2(exp + 1)
   
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
@@ -153,6 +151,8 @@ createMAE <- function (exp,
   if(class(exp) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome)
   }
+  # Add this here ?
+  if(linearize.exp) exp <- log2(assay(exp) + 1)
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
