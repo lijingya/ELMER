@@ -135,6 +135,7 @@ createMAE <- function (exp,
                        sampleMap,
                        linearize.exp = FALSE,
                        filter.probes = NULL,
+                       filter.genes = NULL,
                        met.platform = "450k",
                        genome = NULL,
                        TCGA = FALSE) {

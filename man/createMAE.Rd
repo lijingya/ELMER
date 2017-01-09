@@ -4,8 +4,8 @@
 \alias{createMAE}
 \usage{
 createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
-  filter.probes = NULL, met.platform = "450k", genome = NULL,
-  TCGA = FALSE)
+  filter.probes = NULL, filter.genes = NULL, met.platform = "450k",
+  genome = NULL, TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -26,12 +26,12 @@ This object must have columns primary (sample ID) and colname (names of the colu
 within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
 See \code{\link{get.feature.probe}} function.}
 
+\item{filter.genes}{List of genes ensemble ids to filter from object}
+
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
 
 \item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 TRUE indicates data is from TCGA and sample section will automatically filled in.}
-
-\item{filter.genes}{List of genes ensemble ids to filter from object}
 }
 \value{
 A MultiAssayExperiment object
