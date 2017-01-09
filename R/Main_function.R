@@ -58,6 +58,7 @@ get.feature.probe <- function(feature,
   probe <- getInfiniumAnnotation(toupper(platform),genome)
   # We will rmeove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
+  probe <- probe[!probe$MASK.mapping,]
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(!promoter){
     if(missing(TSS)){
@@ -705,7 +706,7 @@ get.enriched.motif <- function(probes.motif,
   bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
   
   ## load probes for enriched motif ----------------------------------------------
-  probes.TF <- all.probes.TF[probes,]
+  probes.TF <- all.probes.TF[rownames(all.probes.TF) %in% probes,]
   probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
   
   # Odds ratio
@@ -853,7 +854,7 @@ get.TFs <- function(data,
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
-    enriched.motif <- get(enriched.motif) # The data is in the one and only variable
+    enriched.motif <- get(load(enriched.motif)) # The data is in the one and only variable
   }else if(!is.list(enriched.motif)){
     stop("enriched.motif option should be a list object.")
   }

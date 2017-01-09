@@ -237,8 +237,8 @@ TCGA.pipe <- function(disease,
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
     
     newenv <- new.env()
-    if(genome == "hg19") data("Probes.motif.hg19.450K",package = "ELMER.data",envir=newenv)
-    if(genome == "hg38") data("Probes.motif.hg38.450K",package = "ELMER.data",envir=newenv)
+    if(genome == "hg19") data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
+    if(genome == "hg38") data("Probes.motif.hg38.450K", package = "ELMER.data",envir=newenv)
     probes.motif <- get(ls(newenv)[1],envir=newenv)   
     
     enriched.motif <- do.call(get.enriched.motif, 
@@ -252,7 +252,7 @@ TCGA.pipe <- function(disease,
   }
   
   #search responsible TFs
-  if("TF.search" %in% tolower(analysis)){
+  if(tolower("TF.search") %in% tolower(analysis)){
     message("#######################################")
     message("Search responsible TFs")
     message("#######################################")
