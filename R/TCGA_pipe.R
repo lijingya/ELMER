@@ -22,7 +22,8 @@
 #' @export 
 #' @examples
 #' \dontrun{
-#'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
+#'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+#'   TCGA.pipe(disease = "PRAD",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
 #' }
 TCGA.pipe <- function(disease,
                       genome = "hg38",
@@ -188,15 +189,20 @@ TCGA.pipe <- function(disease,
                               label=diff.dir),
                          params))
     
+    message("calculate associations of gene expression with DNA methylation at promoter regions")
+    
     ## promoter methylation correlation.
     # get promoter 
     suppressWarnings({
       promoter.probe <- get.feature.probe(promoter=TRUE, 
                                           TSS.range=list(upstream=100, downstream=700))
     })
+    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
+    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     mae <- createMAE(met = meth.file, 
                      exp = exp.file,  
-                     linearize.exp = TRUE, 
+                     linearize.exp = TRUE,
+                     genome = genome, 
                      filter.probes=promoter.probe, 
                      TCGA = TRUE, 
                      filter.genes=unique(SigPair$GeneID)) # Should add filter genes
