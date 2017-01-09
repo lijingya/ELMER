@@ -160,20 +160,22 @@ TCGA.pipe <- function(disease,
     ## get pair
     permu.dir <- paste0(dir.out,"/permu")
     params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
-    SigPair <- do.call(get.pair,c(list(mee=mee,
-                                       probes=Sig.probes,
-                                       nearGenes=nearGenes.file,
-                                       permu.dir=permu.dir,
-                                       dir.out=dir.out,
-                                       cores=cores,
-                                       label=diff.dir),
-                                  params))
+    SigPair <- do.call(get.pair,
+                       c(list(data=mee,
+                              probes=Sig.probes,
+                              nearGenes=nearGenes.file,
+                              permu.dir=permu.dir,
+                              dir.out=dir.out,
+                              cores=cores,
+                              label=diff.dir),
+                         params))
     
     ## promoter methylation correlation.
     # get promoter 
-    promoter.probe <- suppressWarnings(get.feature.probe(promoter=TRUE, 
-                                                         TSS.range=list(upstream=100,
-                                                                        downstream=700)))
+    suppressWarnings({
+      promoter.probe <- get.feature.probe(promoter=TRUE, 
+                                          TSS.range=list(upstream=100, downstream=700))
+    })
     mae <- createMAE(met = meth.file, 
                      exp = exp.file,  
                      linearize.exp = TRUE, 
@@ -184,9 +186,9 @@ TCGA.pipe <- function(disease,
     Promoter.meth <- do.call(promoterMeth, c(list(mee=mee, sig.pvalue=0.01, save=FALSE),
                                              params))
     add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
-    SigPair <- cbind(SigPair, GSbPM.pvalue=add)
-    write.csv(SigPair, file=sprintf("%s/getPair.%s.pairs.significant.csv",
-                                    dir.out, diff.dir),
+    SigPair <- cbind(SigPair, GSbPM.pvalue = add)
+    write.csv(SigPair, 
+              file = sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir),
               row.names=FALSE)
     
     if(length(analysis) == 1) return(SigPair)
@@ -200,7 +202,7 @@ TCGA.pipe <- function(disease,
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
                                             dir.out, diff.dir), 
                                     stringsAsFactors=FALSE)$Probe)
-    }else{
+    } else {
       stop(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
     }
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
@@ -210,11 +212,12 @@ TCGA.pipe <- function(disease,
     if(genome == "hg38") data("Probes.motif.hg38.450K",package = "ELMER.data",envir=newenv)
     probes.motif <- get(ls(newenv)[1],envir=newenv)   
     
-    enriched.motif <- do.call(get.enriched.motif, c(list(probes.motif = probes.motif,
-                                                         probes = Sig.probes,
-                                                         dir.out = dir.out,
-                                                         label = diff.dir),
-                                                    params))
+    enriched.motif <- do.call(get.enriched.motif, 
+                              c(list(probes.motif = probes.motif,
+                                     probes = Sig.probes,
+                                     dir.out = dir.out,
+                                     label = diff.dir),
+                                params))
     
     if(length(analysis) == 1) return(enriched.motif)
   }
@@ -237,12 +240,13 @@ TCGA.pipe <- function(disease,
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out, diff.dir)
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
-    TFs <- do.call(get.TFs, c(list(data=mae, 
-                                   enriched.motif=enriched.motif,
-                                   dir.out=dir.out, 
-                                   cores=cores, 
-                                   label=diff.dir),
-                              params))
+    TFs <- do.call(get.TFs, 
+                   c(list(data=mae, 
+                          enriched.motif=enriched.motif,
+                          dir.out=dir.out, 
+                          cores=cores, 
+                          label=diff.dir),
+                     params))
   }
 }
 
