@@ -104,15 +104,16 @@ getRNAseq <- function(disease,
                       legacy = TRUE)
   }
   tryCatch({
-    GDCdownload(query,directory = dir.rna,chunks.per.download = 50)
+    GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
   }, error = function(e) {
-    GDCdownload(query,directory = dir.rna, chunks.per.download = 10)
+    GDCdownload(query, directory = dir.rna, chunks.per.download = 10)
   })
-  rna <- GDCprepare(query)
-  message(paste0("1 - expression = log2(expression + 1): ",
-                 "To linearize \n    relation between ",
-                 "methylation and expression"))
-  assay(rna) <- log2(assay(rna)+1)
+  rna <- GDCprepare(query, 
+                    directory = dir.rna,
+                    summarizedExperiment = TRUE)
+  if(genome == "hg19"){
+    rownames(rna) <- Map2EnsembleID(rownames(rna))
+  }
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
   message(paste0("Saving Gene Expression to: ", fout))
   save(rna,file=fout)
@@ -177,6 +178,7 @@ get450K <- function(disease,
 #' getClinic is a function to download latest version of clinic data for all samples of certain cancer types from TCGA website.
 #' @param disease A character specifies the disease to download from TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @importFrom TCGAbiolinks GDCquery_clinic
 #' @return Download all clinic information for the specified disease.
 getClinic <- function(disease, basedir="./Data")
 {
@@ -192,10 +194,11 @@ getClinic <- function(disease, basedir="./Data")
 }
 
 #Gene make rowname separat -------------------------------------
-GeneIDName <- function(x){
-  tmp <- strsplit(rownames(x),"\\|")
-  GeneID <- unlist(lapply(tmp,function(x) x[2]))
-  GeneID <- paste0("ID",GeneID)
-  row.names(x) <- GeneID
+Map2EnsembleID <- function(x){
+  if(all(grepl("\\|", x))) {
+    tmp <- strsplit(x,"\\|")
+    x <- unlist(lapply(tmp,function(x) x[2]))
+  }
+  x <- get.GRCh("hg19", x)
   return(x)
 }
