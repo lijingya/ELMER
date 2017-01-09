@@ -920,7 +920,7 @@ get.TFs <- function(data,
   
   # For each motif (x) split the Meths object into U and M and evaluate the expression
   # of all TF Exps (obj)
-  TF.meth.cor <- adply(.data = names(enriched.motif), .margins = 1,
+  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
@@ -928,9 +928,10 @@ get.TFs <- function(data,
                            Gene=gene,
                            Top=percentage,
                            Exps=assay(getExp(data))[gene,])},
-                       .progress = "text", .parallel = parallel, .id = NULL
+                       .progress = "text", .parallel = parallel
   )
-  TF.meth.cor$GeneID <- NULL
+  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
+  TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
   rownames(TF.meth.cor) <- gene.name
   colnames(TF.meth.cor) <- names(enriched.motif)

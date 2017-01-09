@@ -100,18 +100,20 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'             motif="TP53", 
 #'             TF.label=list(TP53=c("TP53","TP63","TP73")),
 #'             save=TRUE)
-TF.rank.plot <- function(motif.pvalue, motif, TF.label, dir.out="./", save=TRUE){
+TF.rank.plot <- function(motif.pvalue, 
+                         motif, 
+                         TF.label, 
+                         dir.out="./", 
+                         save=TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
   if(is.character(motif.pvalue)){
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
   if(missing(TF.label)){
-    newenv <- new.env()
-    data("motif.relavent.TFs",package = "ELMER.data",envir=newenv)
-    motif.relavent.TFs <- get(ls(newenv)[1],envir=newenv) # The data is in the one and only variable
-    TF.label <- motif.relavent.TFs[motif]
-    specify <- "No"
+      motif.relavent.TFs <- createMotifRelevantTfs()
+      TF.label <- motif.relavent.TFs[motif]
+      specify <- "No"
   }else{
     specify <- "Yes"
   }
