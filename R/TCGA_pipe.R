@@ -57,6 +57,7 @@ TCGA.pipe <- function(disease,
     params <- args[names(args) %in% c("RNAtype","Methfilter")]
     params$disease <- disease
     params$basedir <- sprintf("%s/Data",wd)
+    params$genome <- genome
     do.call(getTCGA,params)
     analysis <- analysis[!analysis %in% "download"]
   }

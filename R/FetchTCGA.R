@@ -7,6 +7,7 @@
 #' @param Meth A logic if TRUE HM450K DNA methylation data will download.
 #' @param RNA A logic if TRUE RNA-seq Hiseq-V2 from TCGA level 3 will be download.
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param basedir A path shows where the data will be stored.
 #' @param RNAtype A charactor to specify whether use isoform level or gene level. 
 #' When RNAtype=gene, gene level gene expression will be used.
@@ -24,12 +25,13 @@ getTCGA <- function(disease,
                     Clinic=TRUE,
                     basedir="./Data",
                     RNAtype="gene",
+                    genome = "hg38",
                     Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
   if(Meth){
     message("################\nDownloading DNA methylation\n################\n\n")
     test.meth <- tryCatch({
-      get450K(disease, basedir,filter = Methfilter)
+      get450K(disease, basedir,filter = Methfilter, genome = genome)
     }, error = function(err){
       return("error")
     })
@@ -38,7 +40,7 @@ getTCGA <- function(disease,
   if(RNA){
     message("################\nDownloading RNA\n################\n\n")
     test.rna <- tryCatch({
-      getRNAseq(disease, basedir)
+      getRNAseq(disease, basedir, genome = genome)
     }, error=function(err){
       return("error")
     })
@@ -57,17 +59,17 @@ getTCGA <- function(disease,
     warning(
       sprintf("Failed to download DNA methylation data. Possible possibility: 
               1. No 450K DNA methylation data for %s patients; 
-              2.Download error.",disease))
+              2. Download error.",disease))
   if(RNA && test.rna == "error") 
     warning(
       sprintf("Failed to download RNA-seq data. Possible possibility: 
-              1. No RNA-seq data for %s patients; 
-               2.Download error.",disease))
+               1. No RNA-seq data for %s patients; 
+               2. Download error.",disease))
   if(Clinic && test.clinic == "error") 
     warning(
       sprintf("Failed to download clinic data. Possible possibility:
-              1. No clinical data for %s patients; 
-               2.Download error.", disease))
+               1. No clinical data for %s patients; 
+               2. Download error.", disease))
 }
 
 #' getRNAseq to download all RNAseq data for a certain cancer type from TCGA.
@@ -147,12 +149,12 @@ get450K <- function(disease,
                       platform = "Illumina Human Methylation 450")
   } else {
     query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                      data.category = "DNA Methylation",
+                      data.category = "DNA methylation",
                       legacy = TRUE,
                       platform = "Illumina Human Methylation 450")
   }  
   tryCatch({
-    GDCdownload(query,directory = dir.meth,chunks.per.download = 10)
+    GDCdownload(query,directory = dir.meth,chunks.per.download = 5)
   }, error = function(e) {
     GDCdownload(query,directory = dir.meth,  method = "client")
   })

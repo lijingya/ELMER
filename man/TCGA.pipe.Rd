@@ -4,11 +4,13 @@
 \alias{TCGA.pipe}
 \title{ELMER analysis pipeline for TCGA data.}
 \usage{
-TCGA.pipe(disease, analysis = "all", wd = "./", cores = 1, Data = NULL,
-  diff.dir = "hypo", ...)
+TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
+  cores = 1, Data = NULL, diff.dir = "hypo", ...)
 }
 \arguments{
 \item{disease}{TCGA short form disease name such as COAD}
+
+\item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
 
 \item{analysis}{A vector of characters listing the analysis need to be done.
 Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".

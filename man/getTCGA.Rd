@@ -21,6 +21,8 @@ getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE,
 \item{RNAtype}{A charactor to specify whether use isoform level or gene level. 
 When RNAtype=gene, gene level gene expression will be used.}
 
+\item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
+
 \item{Methfilter}{A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.}
 }
 \value{

@@ -16,6 +16,8 @@ get450K(disease, basedir = "./Data")
 
 \item{filter}{For each probe, the percentage of NA among the all the samples
 should smaller than filter.}
+
+\item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
 }
 \value{
 Download all DNA methylation from HM450K level 3 data for

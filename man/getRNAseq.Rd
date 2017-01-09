@@ -10,6 +10,8 @@ getRNAseq(disease, basedir = "./Data")
 \item{disease}{A character specifies disease in TCGA such as BLCA}
 
 \item{basedir}{Download all RNA seq level 3 data for the specified disease.}
+
+\item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
 }
 \value{
 Download all RNA seq level 3 data for the specified disease.
