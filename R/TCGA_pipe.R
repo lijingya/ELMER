@@ -37,9 +37,9 @@ TCGA.pipe <- function(disease,
          please check https://gdc-portal.nci.nih.gov")
   
   available.analysis <- c("download","distal.enhancer",
-                          "diffMeth","pair",
+                          "createMAE","diffMeth","pair",
                           "motif","TF.search","all")
-  if (analysis[1] == "all") analysis = available.analysis[1:6]
+  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = T, invert = T)
   
   if(any(!tolower(analysis) %in% tolower(analysis))) 
     stop(paste0("Availbale options for analysis argument are: ",
@@ -64,7 +64,7 @@ TCGA.pipe <- function(disease,
   
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
-    message("###################\nSelect distal enhancer probes\n###################\n\n")
+    message("###################\nSelect distal enhancer probes\n###################\n")
     params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
@@ -75,10 +75,8 @@ TCGA.pipe <- function(disease,
       invisible(gc())
     }
   }
-  #get differential DNA methylation
-  if(tolower("diffMeth") %in% tolower(analysis)){
-    message("###################\nGet differential DNA methylation loci\n###################\n\n")
-    #refine meth data: filter out non tumor or normal samples--------------
+  if(tolower("createMAE") %in% tolower(analysis)){
+    message("###################\nCreating Multi Assay Experiment\n###################\n")
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     if(!file.exists(meth.file)){
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
@@ -89,14 +87,36 @@ TCGA.pipe <- function(disease,
         message("There are no samples for Solid Tissue Normal")
         return(NULL)
       }
-        rm(met)
+      rm(met)
     }
-    mae <- createMAE(met = meth.file, 
-                     TCGA=TRUE, 
-                     filter.probes = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
-    #mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
-    #                 probeInfo=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
+    if(!file.exists(exp.file)){
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      load(sprintf("%s/%s_RNA.rda",Data,disease))
+      rna <- rna[,rna$definition %in% c("Primary solid Tumor","Solid Tissue Normal")]
+      save(rna,file= sprintf("%s/%s_RNA_refined.rda",dir.out,disease))
+      rm(rna)
+    }
+    ## get distal probe info
+    distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
+    if(!file.exists(distal.probe)){
+      params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
+      distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
+    }
     
+    mee <- createMAE(met = meth.file, 
+                     exp = exp.file, 
+                     filter.probes = distal.probe,
+                     genome = genome,
+                     met.platform = "450K",
+                     linearize.exp = TRUE,
+                     TCGA = TRUE)
+  }
+  
+  #get differential DNA methylation
+  if(tolower("diffMeth") %in% tolower(analysis)){
+    message("###################\nGet differential DNA methylation loci\n###################\n\n")
+    #refine meth data: filter out non tumor or normal samples--------------
     params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
     params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
     diff.meth <- do.call(get.diff.meth,c(params,list(data=mae)))
@@ -113,38 +133,6 @@ TCGA.pipe <- function(disease,
   #predict pair
   if("pair" %in% tolower(analysis)){
     message("###################\nPredict pairs\n###################\n\n")
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
-    if(!file.exists(exp.file)){
-      load(sprintf("%s/%s_RNA.rda",Data,disease))
-      TN <- sapply(colnames(GeneExp),tcgaSampleType)
-      GeneExp <- GeneExp[,TN %in% c("Tumor","Normal")]
-      GeneExp <- log2(GeneExp+1)
-      save(GeneExp,file= sprintf("%s/%s_RNA_refined.rda",dir.out,disease))
-      rm(GeneExp)
-    }
-    ## construct geneAnnot for finding nearby gene
-    geneAnnot <- args[names(args) %in% "geneAnnot"]
-    if(length(geneAnnot) == 0){
-      geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
-      if (!file.exists(geneAnnot)){
-        geneInfo <- txs(TSS = list(upstream=0, downstream=0))
-        geneInfo$GENEID <- paste0("ID",geneInfo$GENEID)
-        save(geneInfo,file = geneAnnot)
-      }
-    } else {
-      geneAnnot <- geneAnnot[["geneAnnot"]]
-    }
-    ## get distal probe info
-    distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
-    if(!file.exists(distal.probe)){
-      params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
-      distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
-    }
-    
-    mee <- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
-                     geneInfo=geneAnnot,TCGA=TRUE)
-    
     ## calculation
     message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
     #Construct data.

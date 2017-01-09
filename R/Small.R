@@ -337,7 +337,7 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
     annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
   }
   if(genome == "hg38") annotation <- gsub(".rda",".hg38.rda", annotation)
-  message(paste0("Adding annotation from: ",annotation))
+  message(paste0("Adding annotation for DNA methylation from: ",annotation))
   
   if(!file.exists(basename(annotation))) {
     if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
