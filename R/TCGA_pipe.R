@@ -41,7 +41,7 @@ TCGA.pipe <- function(disease,
                           "motif","TF.search","all")
   if (analysis[1] == "all") analysis = available.analysis[1:6]
   
-  if(any(!analysis %in% tolower(analysis))) 
+  if(any(!tolower(analysis) %in% tolower(analysis))) 
     stop(paste0("Availbale options for analysis argument are: ",
                 paste(c("",available.analysis), collapse = "\n=> ")))
   
@@ -63,7 +63,7 @@ TCGA.pipe <- function(disease,
   }
   
   ## select distal enhancer probes
-  if("distal.probes" %in% tolower(analysis)){
+  if(tolower("distal.probes") %in% tolower(analysis)){
     message("###################\nSelect distal enhancer probes\n###################\n\n")
     params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
@@ -76,19 +76,24 @@ TCGA.pipe <- function(disease,
     }
   }
   #get differential DNA methylation
-  if("diffMeth" %in% tolower(analysis)){
+  if(tolower("diffMeth") %in% tolower(analysis)){
     message("###################\nGet differential DNA methylation loci\n###################\n\n")
     #refine meth data: filter out non tumor or normal samples--------------
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     if(!file.exists(meth.file)){
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
       load(sprintf("%s/%s_meth.rda",Data,disease))
-      TN <- sapply(colnames(Meth),tcgaSampleType)
-      Meth <- Meth[,TN %in% c("Tumor","Normal")]
-      save(Meth,file = sprintf("%s/%s_meth_refined.rda",dir.out,disease))
-      rm(Meth)
+      met <- met[,met$definition %in% c("Primary solid Tumor","Solid Tissue Normal")]
+      save(met,file = sprintf("%s/%s_meth_refined.rda",dir.out,disease))
+      if(!all(c("Primary solid Tumor","Solid Tissue Normal") %in% met$definition)){
+        message("There are no samples for Solid Tissue Normal")
+        return(NULL)
+      }
+        rm(met)
     }
-    mae <- createMAE(met = meth.file, TCGA=TRUE, filter.probes = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    mae <- createMAE(met = meth.file, 
+                     TCGA=TRUE, 
+                     filter.probes = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
     #mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
     #                 probeInfo=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
     
