@@ -207,7 +207,7 @@ TCGA.pipe <- function(disease,
                      TCGA = TRUE, 
                      filter.genes=unique(SigPair$GeneID)) # Should add filter genes
     params <- args[names(args) %in% "percentage"]
-    Promoter.meth <- do.call(promoterMeth, c(list(mee=mee, sig.pvalue=0.01, save=FALSE),
+    Promoter.meth <- do.call(promoterMeth, c(list(data=mae, sig.pvalue=0.01, save=FALSE),
                                              params))
     add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
     SigPair <- cbind(SigPair, GSbPM.pvalue = add)
