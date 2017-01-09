@@ -191,7 +191,6 @@ get.diff.meth <- function(data,
   }
   
   message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ", group1, " compared to ", group2))
-  message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ", group1, " compared to ", group2))
   message(paste0("Number of probes: ",nrow(getMet(data))))
   
   parallel <- FALSE

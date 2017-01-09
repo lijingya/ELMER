@@ -17,6 +17,7 @@
 #' @param filter.probes A GRanges object contains the coordinate of probes which locate 
 #'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
 #'  See \code{\link{get.feature.probe}} function.
+#' @param filter.genes List of genes ensemble ids to filter from object  
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
@@ -166,7 +167,16 @@ createMAE <- function (exp,
   } 
   if(!is.null(filter.probes) & !is.null(met)){
     met <- met[rownames(met) %in% names(filter.probes),]
+  }
+  if(!is.null(filter.genes)){
+    if(is.character(filter.genes)){
+      filter.genes <- get(load(filter.genes))
+    }
   } 
+  if(!is.null(filter.genes) & !is.null(exp)){
+    exp <- exp[rownames(exp) %in% names(filter.genes),]
+  } 
+  
   # We will need to check if the fields that we need exists.
   # Otherwise we will need to create them
   if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){

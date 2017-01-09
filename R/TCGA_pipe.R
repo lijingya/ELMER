@@ -145,7 +145,14 @@ TCGA.pipe <- function(disease,
     message("#######################################")
     ## calculation
     message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
-    #Construct data.
+    
+    mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
+    if(!file.exists(mae.file)){
+      message("MAE not found, please run pipe with createMAE or all options")
+      return(NULL)
+    }
+    load(mae.file)
+    
     Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
@@ -156,8 +163,9 @@ TCGA.pipe <- function(disease,
       if(!file.exists(nearGenes.file)){
         params <- args[names(args) %in% c("geneNum")]
         nearGenes <- do.call(GetNearGenes,
-                             c(list(TRange=getProbeInfo(mee,probe=Sig.probes),
-                                    geneAnnot=getGeneInfo(mee),cores=cores),
+                             c(list(TRange=getMet(mae)[probe=Sig.probes,],
+                                    geneAnnot=getExp(mae),
+                                    cores=cores),
                                params))
         save(nearGenes,file=nearGenes.file)
       }
@@ -168,7 +176,7 @@ TCGA.pipe <- function(disease,
     permu.dir <- paste0(dir.out,"/permu")
     params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
     SigPair <- do.call(get.pair,
-                       c(list(data=mee,
+                       c(list(data=mae,
                               probes=Sig.probes,
                               nearGenes=nearGenes.file,
                               permu.dir=permu.dir,
@@ -188,7 +196,7 @@ TCGA.pipe <- function(disease,
                      linearize.exp = TRUE, 
                      filter.probes=promoter.probe, 
                      TCGA = TRUE, 
-                     genes=unique(SigPair$GeneID)) # Should add filter genes
+                     filter.genes=unique(SigPair$GeneID)) # Should add filter genes
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(mee=mee, sig.pvalue=0.01, save=FALSE),
                                              params))

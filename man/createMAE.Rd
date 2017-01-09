@@ -30,6 +30,8 @@ See \code{\link{get.feature.probe}} function.}
 
 \item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 TRUE indicates data is from TCGA and sample section will automatically filled in.}
+
+\item{filter.genes}{List of genes ensemble ids to filter from object}
 }
 \value{
 A MultiAssayExperiment object
