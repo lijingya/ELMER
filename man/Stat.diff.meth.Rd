@@ -4,13 +4,13 @@
 \alias{Stat.diff.meth}
 \title{Stat.diff.meth}
 \usage{
-Stat.diff.meth(probe, meths, groups, group1, group2, test = t.test,
+Stat.diff.meth(probe, meth, groups, group1, group2, test = t.test,
   percentage = 0.2, Top.m = NULL)
 }
 \arguments{
 \item{probe}{A charactor specify probe name}
 
-\item{meths}{A matrix contain DNA methylation data.}
+\item{meth}{A matrix contain DNA methylation data.}
 
 \item{test}{A function specify which statistic test will be used.}
 

@@ -1,7 +1,7 @@
 ## get differential methylated probes-------------------------
 #' Stat.diff.meth
 #' @param probe A charactor specify probe name
-#' @param meths A matrix contain DNA methylation data.
+#' @param meth A matrix contain DNA methylation data.
 #' @param TN A vector of category of samples.
 #' @param test A function specify which statistic test will be used.
 #' @param percentage A number specify the percentage of normal and tumor 
@@ -10,14 +10,13 @@
 #' hypermethylated probe is TRUE.
 #' @return Statistic test results to identify differentially methylated probes.
 Stat.diff.meth <- function(probe,
-                           meths,
+                           meth,
                            groups,
                            group1,
                            group2,
                            test=t.test,
                            percentage=0.2,
                            Top.m=NULL){
-  meth <- meths[probe,]
   if(Top.m){
     group1.tmp <- sort(meth[groups %in% group1],decreasing=TRUE)
     group2.tmp <- sort(meth[groups %in% group2],decreasing=TRUE)
