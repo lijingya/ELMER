@@ -153,7 +153,7 @@ createMAE <- function (exp,
     exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome)
   }
   # Add this here ?
-  if(linearize.exp) exp <- log2(assay(exp) + 1)
+  if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
