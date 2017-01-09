@@ -112,7 +112,7 @@ getRNAseq <- function(disease,
                     directory = dir.rna,
                     summarizedExperiment = TRUE)
   if(genome == "hg19"){
-    rownames(rna) <- Map2EnsembleID(rownames(rna))
+    rownames(rna) <- values(rna)$ensembl_gene_id
   }
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
   message(paste0("Saving Gene Expression to: ", fout))
@@ -191,14 +191,4 @@ getClinic <- function(disease, basedir="./Data")
   Clinic <- GDCquery_clinic(project = paste0("TCGA-",toupper(disease)))
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
   return("OK")
-}
-
-#Gene make rowname separat -------------------------------------
-Map2EnsembleID <- function(x){
-  if(all(grepl("\\|", x))) {
-    tmp <- strsplit(x,"\\|")
-    x <- unlist(lapply(tmp,function(x) x[2]))
-  }
-  x <- get.GRCh("hg19", x)
-  return(x)
 }
