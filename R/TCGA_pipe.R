@@ -155,7 +155,7 @@ TCGA.pipe <- function(disease,
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
     ## Get nearby genes-----------------------
-    message("Get neatby genes")
+    message("Get nearby genes")
     
     nearGenes.file <- args[names(args) %in% "nearGenes"]
     if(length(nearGenes.file)==0){

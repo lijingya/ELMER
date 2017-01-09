@@ -309,6 +309,7 @@ get.pair <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
+  message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
@@ -317,15 +318,14 @@ get.pair <- function(data,
                                      K=portion,
                                      Top=percentage,
                                      Exps=assay(getExp(data)))},
-                      .progress = "text", .parallel = parallel
+                      .progress = "text", .parallel = parallel, .id = NULL
   )
-  Probe.gene[,1] <- NULL
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
   #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
   GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
-  message("Permutation\n")
+  message(paste0("Calculating Pr (random probe - gene). Permutating ",permu.size, " probes"))
   # get permutation
   permu <- get.permu(data,
                      geneID=GeneID, 
