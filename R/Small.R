@@ -169,11 +169,6 @@ createMAE <- function (exp,
   if(!is.null(filter.probes) & !is.null(met)){
     met <- met[rownames(met) %in% names(filter.probes),]
   }
-  if(!is.null(filter.genes)){
-    if(is.character(filter.genes)){
-      filter.genes <- get(load(filter.genes))
-    }
-  } 
   if(!is.null(filter.genes) & !is.null(exp)){
     exp <- exp[rownames(exp) %in% names(filter.genes),]
   } 

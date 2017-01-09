@@ -190,6 +190,7 @@ TCGA.pipe <- function(disease,
                          params))
     
     message("calculate associations of gene expression with DNA methylation at promoter regions")
+    message("Fetching promoter regions")
     
     ## promoter methylation correlation.
     # get promoter 
@@ -199,6 +200,7 @@ TCGA.pipe <- function(disease,
     })
     exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
+    message("Preparing MAE file for analysis...")
     mae <- createMAE(met = meth.file, 
                      exp = exp.file,  
                      linearize.exp = TRUE,
