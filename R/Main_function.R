@@ -58,15 +58,16 @@ get.feature.probe <- function(feature,
   probe <- getInfiniumAnnotation(toupper(platform),genome)
   # We will rmeove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
-  probe <- probe[!probe$MASK.mapping,]
+  probe <- probe[!probe$MASK.mapping,] # remove masked probes
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   if(!promoter){
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
       TSS.gencode <- getTSS(genome = genome)
       # The function txs gets the transcription coordinantes from USCS
-      TSS.uscs <- txs(genome)
-      TSS <- c(TSS.gencode, reduce(TSS.uscs))
+       TSS <- TSS.gencode
+      # TSS.uscs <- txs(genome)
+      # TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
     suppressWarnings({
       TSS <- promoters(TSS,upstream = TSS.range[["upstream"]], 
