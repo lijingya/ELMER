@@ -618,7 +618,6 @@ promoterMeth <- function(data,
                      row.names = FALSE)
   return(out)
 }
-
 #' get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.
 #' @description 
 #' get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
@@ -640,6 +639,14 @@ promoterMeth <- function(data,
 #' are the significantly enriched motifs (detail see reference).
 #' @param min.incidenceA non-negative integer specifies the minimum incidence of motif in the given probes set. 
 #' 10 is default.
+#' @param min.motif.quality Minimum motif quality score to consider. 
+#' Possible valules: A, B (default), C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all) 
+#' Description: Each PWM has a quality rating from A to D where 
+#' A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
+#' limited applications for quantitative analyses. 
+#' Special S quality marks the single-box motifs (secondary motif). 
+#' Source: http://hocomoco.autosome.ru/help#description_quality_score
+#' More information: \url{http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8}
 #' @param dir.out A path. Specifies the directory for outputs. Default is current directory
 #' @param label A character. Labels the outputs such as "hypo", "hyper"
 #' @param save If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
@@ -682,7 +689,8 @@ promoterMeth <- function(data,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
 get.enriched.motif <- function(probes.motif, 
-                               probes, 
+                               probes,
+                               min.motif.quality = "B",
                                background.probes,
                                lower.OR=1.1,
                                min.incidence=10, 
@@ -747,6 +755,11 @@ get.enriched.motif <- function(probes.motif,
   en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
                                            !sub.enrich.TF.lower %in% "Inf" & 
                                            probes.TF.num > min.incidence])
+  # Subset by quality
+  message("Filtering: Considering only motifs with quality from A up to ", min.motif.quality)
+  enriched.motif <- enriched.motif[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
+                                        names(enriched.motif), value = T)]
+  
   message(sprintf("%s motifs are enriched.",length(en.motifs)))
   enriched.motif <- alply(en.motifs, 
                           function(x, probes.TF) {

@@ -41,7 +41,8 @@ Every steps' results are saved.
 }
 \examples{
 \dontrun{
-  distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
+  distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+  TCGA.pipe(disease = "PRAD",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
 }
 }
 

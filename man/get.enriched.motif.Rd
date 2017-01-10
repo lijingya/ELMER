@@ -15,6 +15,15 @@ get.enriched.motif(probes.motif, probes,
 \item{probes}{A vector lists the name of probes to define the set of probes in which motif enrichment
 OR and confidence interval will be calculated.}
 
+\item{min.motif.quality}{Minimum motif quality score to consider. 
+Possible valules: A, B (default), C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all) 
+Description: Each PWM has a quality rating from A to D where 
+A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
+limited applications for quantitative analyses. 
+Special S quality marks the single-box motifs (secondary motif). 
+Source: http://hocomoco.autosome.ru/help#description_quality_score
+More information: \url{http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8}}
+
 \item{lower.OR}{A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
 The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
 are the significantly enriched motifs (detail see reference).}
