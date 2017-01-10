@@ -65,7 +65,7 @@ TCGA.pipe <- function(disease,
   
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
-    print.section("Select distal enhancer probes")
+    print.header("Select distal enhancer probes")
     params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
@@ -77,7 +77,7 @@ TCGA.pipe <- function(disease,
     }
   }
   if(tolower("createMAE") %in% tolower(analysis)){
-    print.section("Creating Multi Assay Experiment")
+    print.header("Creating Multi Assay Experiment")
 
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     if(!file.exists(meth.file)){
@@ -118,7 +118,7 @@ TCGA.pipe <- function(disease,
   
   #get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
-    print.section("Get differential DNA methylation loci")
+    print.header("Get differential DNA methylation loci")
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
@@ -133,7 +133,7 @@ TCGA.pipe <- function(disease,
   
   #predict pair
   if("pair" %in% tolower(analysis)){
-    print.section("Predict pairs")
+    print.header("Predict pairs")
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
@@ -211,7 +211,7 @@ TCGA.pipe <- function(disease,
   
   # search enriched motif
   if("motif" %in% tolower(analysis)){
-    print.section("Motif search")
+    print.header("Motif search")
 
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
@@ -240,7 +240,7 @@ TCGA.pipe <- function(disease,
   
   #search responsible TFs
   if(tolower("TF.search") %in% tolower(analysis)){
-    print.section("Search responsible TFs")
+    print.header("Search responsible TFs")
     ## load mae
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){

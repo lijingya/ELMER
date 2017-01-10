@@ -752,15 +752,19 @@ get.enriched.motif <- function(probes.motif,
                                             dir.out,label))
   
   ## enriched motif and probes
-  en.motifs <- names(sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
-                                           !sub.enrich.TF.lower %in% "Inf" & 
-                                           probes.TF.num > min.incidence])
+  en.motifs <- sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
+                                     !sub.enrich.TF.lower %in% "Inf" & 
+                                     probes.TF.num > min.incidence]
   # Subset by quality
-  message("Filtering: Considering only motifs with quality from A up to ", min.motif.quality)
-  enriched.motif <- enriched.motif[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                        names(enriched.motif), value = T)]
+  print.header("Filtering motifs based on quality", "subsection")
+  message("Number of enriched motifs with quality:")
+  message("-----------")
+  for(q in c("A","B","C","D","S")) message(paste0(" => ",q,": ", length(grep(paste0("H10MO.",q),names(en.motifs)))))
+  message("-----------")
   
-  message(sprintf("%s motifs are enriched.",length(en.motifs)))
+  en.motifs <- names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
+                                    names(en.motifs), value = T)])
+  message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
   enriched.motif <- alply(en.motifs, 
                           function(x, probes.TF) {
                             rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
@@ -772,12 +776,13 @@ get.enriched.motif <- function(probes.motif,
   if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
   ## make plot 
-  motif.enrichment.plot(motif.enrichment = Summary, 
-                        significant = list(OR = 1.3), 
-                        dir.out = dir.out,
-                        label=label, 
-                        save=TRUE)
-  
+  suppressWarnings({
+    motif.enrichment.plot(motif.enrichment = Summary, 
+                          significant = list(OR = 1.3), 
+                          dir.out = dir.out,
+                          label=label, 
+                          save=TRUE)
+  })
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
     sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label), 
