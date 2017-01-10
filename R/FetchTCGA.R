@@ -29,7 +29,7 @@ getTCGA <- function(disease,
                     Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
   if(Meth){
-    message("################\nDownloading DNA methylation\n################\n\n")
+    print.header("Downloading DNA methylation", "subsection")
     test.meth <- tryCatch({
       get450K(disease, basedir,filter = Methfilter, genome = genome)
     }, error = function(err){
@@ -38,7 +38,7 @@ getTCGA <- function(disease,
   }
   
   if(RNA){
-    message("################\nDownloading RNA\n################\n\n")
+    print.header("Downloading RNA", "subsection")
     test.rna <- tryCatch({
       getRNAseq(disease, basedir, genome = genome)
     }, error=function(err){
@@ -47,7 +47,7 @@ getTCGA <- function(disease,
   }
   
   if(Clinic){
-    message("################\nDownloading Clinic \n################\n\n")
+    print.header("Downloading Clinic", "subsection")
     test.clinic <- tryCatch({
       getClinic(disease, basedir)
     }, error=function(err){
@@ -104,19 +104,25 @@ getRNAseq <- function(disease,
                       legacy = TRUE)
   }
   tryCatch({
-    GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
+    GDCdownload(query, directory = dir.rna, chunks.per.download = 200)
   }, error = function(e) {
-    GDCdownload(query, directory = dir.rna, chunks.per.download = 10)
+    GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
   })
-  rna <- GDCprepare(query, 
-                    directory = dir.rna,
-                    summarizedExperiment = TRUE)
-  if(genome == "hg19"){
-    rownames(rna) <- values(rna)$ensembl_gene_id
-  }
+  
+  # Preparing to save output if it does not exists
   fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
-  message(paste0("Saving Gene Expression to: ", fout))
-  save(rna,file=fout)
+  if(!file.exists(fout)){
+    rna <- GDCprepare(query, 
+                      directory = dir.rna,
+                      summarizedExperiment = TRUE)
+    if(genome == "hg19"){
+      rownames(rna) <- values(rna)$ensembl_gene_id
+    }
+    message(paste0("Saving Gene Expression to: ", fout))
+    save(rna,file=fout)
+  } else {
+    message(paste("Gene Expression object already exists:", fout))
+  }
   return("OK")
 }
 
@@ -160,16 +166,20 @@ get450K <- function(disease,
     GDCdownload(query,directory = dir.meth,  method = "client")
   })
   
-  met <- GDCprepare(query = query,
-                    directory = dir.meth,
-                    summarizedExperiment = TRUE)
-  
-  # Remove probes that has more than 20% of its values as NA
-  met <- met[rowMeans(is.na(assay(met))) < filter,]
-  
+  # Preparing to save output if it does not exists
   fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
-  message(paste0("Saving DNA methylation to: ", fout))
-  save(met,file = fout)
+  if(!file.exists(fout)){
+    met <- GDCprepare(query = query,
+                      directory = dir.meth,
+                      summarizedExperiment = TRUE)
+    
+    # Remove probes that has more than 20% of its values as NA
+    met <- met[rowMeans(is.na(assay(met))) < filter,]
+    message(paste0("Saving DNA methylation to: ", fout))
+    save(met,file = fout)
+  } else {
+    message(paste("DNA methylation object already exists:", fout))
+  }
   return("OK")
 }
 
@@ -191,4 +201,10 @@ getClinic <- function(disease, basedir="./Data")
   Clinic <- GDCquery_clinic(project = paste0("TCGA-",toupper(disease)))
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
   return("OK")
+}
+
+print.header <- function(text, type ="section"){
+  message(paste(rep("-",nchar(text) + 3),collapse = ""))
+  message(paste(ifelse(type=="section","o","oo"),text))
+  message(paste(rep("-",nchar(text)+ 3),collapse = ""))
 }

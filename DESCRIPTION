@@ -15,7 +15,6 @@ Description: ELMER is designed to use DNA methylation and gene expression from a
     factor network in primary tissue.
 Depends:
     R (>= 3.2.0),
-    IlluminaHumanMethylation450kanno.ilmn12.hg19,
     Homo.sapiens,
     ELMER.data
 License: GPL-3
@@ -37,7 +36,8 @@ Imports:
 Suggests:
     parallel,
     BiocStyle,
-    knitr
+    knitr,
+    testthat
 biocViews: 
     DNAMethylation, 
     GeneExpression, 

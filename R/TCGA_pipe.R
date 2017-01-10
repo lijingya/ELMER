@@ -53,9 +53,7 @@ TCGA.pipe <- function(disease,
   
   # Download 
   if("download" %in% tolower(analysis)){
-    message("#######################################")
-    message("Download data")
-    message("#######################################")
+    print.header("Download data")
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
     params <- args[names(args) %in% c("RNAtype","Methfilter")]
     params$disease <- disease
@@ -67,9 +65,7 @@ TCGA.pipe <- function(disease,
   
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
-    message("#######################################")
-    message("Select distal enhancer probes")
-    message("#######################################")
+    print.section("Select distal enhancer probes")
     params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
@@ -81,10 +77,8 @@ TCGA.pipe <- function(disease,
     }
   }
   if(tolower("createMAE") %in% tolower(analysis)){
-    message("#######################################")
-    message("Creating Multi Assay Experiment")
-    message("#######################################")
-    
+    print.section("Creating Multi Assay Experiment")
+
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     if(!file.exists(meth.file)){
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
@@ -124,9 +118,7 @@ TCGA.pipe <- function(disease,
   
   #get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
-    message("#######################################")
-    message("Get differential DNA methylation loci")
-    message("#######################################")
+    print.section("Get differential DNA methylation loci")
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
@@ -141,10 +133,7 @@ TCGA.pipe <- function(disease,
   
   #predict pair
   if("pair" %in% tolower(analysis)){
-    message("#######################################")
-    message("Predict pairs")
-    message("#######################################")
-    
+    print.section("Predict pairs")
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
@@ -222,10 +211,8 @@ TCGA.pipe <- function(disease,
   
   # search enriched motif
   if("motif" %in% tolower(analysis)){
-    message("#######################################")
-    message("Motif search")
-    message("#######################################")
-    
+    print.section("Motif search")
+
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
@@ -253,9 +240,7 @@ TCGA.pipe <- function(disease,
   
   #search responsible TFs
   if(tolower("TF.search") %in% tolower(analysis)){
-    message("#######################################")
-    message("Search responsible TFs")
-    message("#######################################")
+    print.section("Search responsible TFs")
     ## load mae
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
     if(!file.exists(mae.file)){

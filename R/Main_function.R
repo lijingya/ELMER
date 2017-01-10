@@ -65,7 +65,7 @@ get.feature.probe <- function(feature,
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
       TSS.gencode <- getTSS(genome = genome)
       # The function txs gets the transcription coordinantes from USCS
-       TSS <- TSS.gencode
+      TSS <- TSS.gencode
       # TSS.uscs <- txs(genome)
       # TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
@@ -78,7 +78,7 @@ get.feature.probe <- function(feature,
     
     if(missing(feature)){
       newenv <- new.env()
-      if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
+      if(genome == "hg19") {print("hey");data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)}
       if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
@@ -91,9 +91,10 @@ get.feature.probe <- function(feature,
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
       TSS.gencode <- getTSS(genome = genome)
+      TSS <- TSS.gencode
       # The function txs gets the transcription coordinantes from USCS
-      TSS.uscs <- txs(genome)
-      TSS <- c(TSS.gencode, reduce(TSS.uscs))
+      #TSS.uscs <- txs(genome)
+      #TSS <- c(TSS.gencode, reduce(TSS.uscs))
     }
     suppressWarnings({
       promoters <- promoters(TSS,upstream = TSS.range[["upstream"]], 
