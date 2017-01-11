@@ -1,7 +1,7 @@
 context("Get TF")
 
 test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
-  data(elmer.data.example)
+  data("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
@@ -147,6 +147,7 @@ test_that("Test if the results is right", {
   data <- createMAE(exp,met, genome = "hg19", pData = pData)
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
+  sink("/dev/null");
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -184,7 +185,7 @@ test_that("Test if the results is right", {
   expect_true(TF$top_5percent == "TP53")
 })
 
-test_that("It creates a PDF with the TF rankgin plot", {
-  expect_true(file.exists("P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+test_that("It creates a PDF with the TF ranking plot", {
+  expect_true(file.exists("TFrankPlot/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
 })
   

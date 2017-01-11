@@ -21,6 +21,7 @@
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
+#' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame 
 #' @examples
 #' # NON TCGA example: matrices has diffetrent column names
 #' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
