@@ -811,7 +811,7 @@ get.enriched.motif <- function(probes.motif,
 #' get.TFs to identify regulatory TFs.
 #' @description 
 #' get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis 
-#' between the probes containing a particular motif and expression of all known TFs. If save is ture, 
+#' between the probes containing a particular motif and expression of all known TFs. If save is true, 
 #' two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
 #' @usage get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
@@ -829,7 +829,6 @@ get.enriched.motif <- function(probes.motif,
 #' @param label A character labels the outputs.
 #' @param save A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and 
 #' getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.
-#' @return Potential responsible TFs will be reported.
 #' @export 
 #' @details 
 #' save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
@@ -840,6 +839,14 @@ get.enriched.motif <- function(probes.motif,
 #' @importFrom pbapply pbsapply
 #' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
+#' @return 
+#'  Potential responsible TFs will be reported in a dataframe with 4 columns:
+#'  \itemize{
+#'    \item{motif: the names of motif.}
+#'    \item{top.potential.TF: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.}
+#'    \item{potential.TFs: TFs which are within top 5\% list and are known recognized the motif.}
+#'    \item{top_5percent: all TFs which are within top 5\% list.}
+#'  }
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)

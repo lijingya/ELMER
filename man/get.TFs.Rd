@@ -32,11 +32,17 @@ For detail information, refer the reference paper.}
 getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.}
 }
 \value{
-Potential responsible TFs will be reported.
+Potential responsible TFs will be reported in a dataframe with 4 columns:
+ \itemize{
+   \item{motif: the names of motif.}
+   \item{top.potential.TF: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.}
+   \item{potential.TFs: TFs which are within top 5\% list and are known recognized the motif.}
+   \item{top_5percent: all TFs which are within top 5\% list.}
+ }
 }
 \description{
 get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis 
-between the probes containing a particular motif and expression of all known TFs. If save is ture, 
+between the probes containing a particular motif and expression of all known TFs. If save is true, 
 two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
 }
 \details{
