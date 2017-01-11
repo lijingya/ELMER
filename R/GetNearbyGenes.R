@@ -11,9 +11,19 @@ NearGenes <- function (Target=NULL,
                        Gene=NULL,
                        geneNum=20,
                        TRange=NULL){
-  
-  # Is this necessary ?
-  # How to define a default for this ?
+  # Algorithm:
+  # 1) get the follow gene (overlapping genes are diconsidered) to be the first in L1 (index variable)
+  #                 probe
+  #     -------       O      ------
+  #    |      |      ||     |     |
+  #    -------       ||     ------
+  #  follow gene          precede gene
+  # 2) Sort genes (by start) 
+  # 3.1) Get 9 genes before index (L1)
+  #      If we only have l genes (l < 9) due to end of genomic region, get the l ones and get more 10-l to the right
+  # 3.2) Get 10 after index (L1)
+  #      If we only have r genes (r < 10) due to end of genomic region, get the r ones and get more 10-r to the left 
+  # Where 10 is genum/2
   Gene$GENEID <- Gene$ensembl_gene_id
   Gene$SYMBOL <- Gene$external_gene_name
   
@@ -52,12 +62,12 @@ NearGenes <- function (Target=NULL,
     }else{
       Left <- index
       while(length(Left) < Leftlimit){
-        if(!as.character(Gene$GENEID[index-n])%in%as.character(Gene$GENEID[Left]))
-          Left <- c((index-n),Left) 
-        if((index-n)==1){
-          Leftlimit <- length(Left)
-        } 
-        n <- n+1
+        # If the gene is not in the list already add it, otherwise go to the next
+        if(!as.character(Gene$GENEID[index-n]) %in% as.character(Gene$GENEID[Left])) Left <- c((index-n),Left) 
+        
+        # Is it the first gene? If so there is nothing in the left anymore
+        if((index-n)==1) Leftlimit <- length(Left)
+        n <- n + 1
       }
     }
     
@@ -106,14 +116,16 @@ NearGenes <- function (Target=NULL,
     Distances <-  suppressWarnings(distance(Gene[Whole],regionInfo))
     if(Rightlimit < 1){
       Sides <- paste0("L",length(Left):1)
-    }else if( Leftlimit < 1){
+    } else if( Leftlimit < 1){
       Sides <- paste0("R",1:length(Right))
-    }else{
+    } else{
       Sides <- c(paste0("L",length(Left):1),paste0("R",1:length(Right)))
     }
+    
     Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,
                         Symbol=Symbols,Distance=Distances, Side=Sides, 
                         stringsAsFactors = FALSE)
+    Final <- Final[order(Final$Side,Final$Distance),]
   }
   return(Final)
 }
@@ -132,10 +144,11 @@ NearGenes <- function (Target=NULL,
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
-#' @importFrom GenomicRanges strand follow distance
+#' @importFrom GenomicRanges strand follow distance 
 #' @importFrom pbapply pbsapply
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
+#' @importFrom SummarizedExperiment rowRanges
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -151,10 +164,10 @@ GetNearGenes <- function(geneAnnot=NULL,
                          cores=1){
   
   if(is.null(TRange)){
-    stop(" TRange must be defined")
+    stop("TRange must be defined")
   }
   if(is.null(geneAnnot)){
-    stop(" geneAnnot must be defined")
+    stop("geneAnnot must be defined")
   }
   
   if(class(TRange) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){

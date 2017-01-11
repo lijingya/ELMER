@@ -21,7 +21,7 @@
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
-#' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame 
+#' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame assay assay<-
 #' @examples
 #' # NON TCGA example: matrices has diffetrent column names
 #' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
@@ -312,7 +312,9 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
     extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
     colnames(extra) <- required.cols
     values(exp) <- cbind(values(exp),extra)
-  } 
+  } else {
+    stop("Please the gene expression matrix should receive ENSEMBLE IDs (ENSG)")
+  }
   return(exp)
 }
 
@@ -562,14 +564,22 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
                        host = "feb2014.archive.ensembl.org",
                        path = "/biomart/martservice" ,
                        dataset = "hsapiens_gene_ensembl")
+    attributes <- c("chromosome_name",
+                    "start_position",
+                    "end_position", "strand",
+                    "ensembl_transcript_id",
+                    "ensembl_gene_id", "entrezgene",
+                    "external_gene_id")
   } else {
     # for hg38
     ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-    
+    attributes <- c("chromosome_name",
+                    "start_position",
+                    "end_position", "strand",
+                    "ensembl_gene_id", 
+                    "ensembl_transcript_id",
+                    "external_gene_name")
   }
-  attributes <- c("chromosome_name",
-                  "transcript_start",
-                  "transcript_end", "strand")
   chrom <- c(1:22, "X", "Y","M","*")
   description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
   message(paste0("Downloading genome information. Using: ", description))
@@ -577,15 +587,16 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
   if(!file.exists(filename)) {
     tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+    tss <- tss[!duplicated(tss$ensembl_transcript_id),]
     save(tss, file = filename)
   } else {
     tss <- get(load(filename))  
-  }  
+  } 
   tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
   tss$strand[tss$strand == 1] <- "+" 
   tss$strand[tss$strand == -1] <- "-" 
-  tss <- makeGRangesFromDataFrame(tss,keep.extra.columns = TRUE)
-  
+  tss <- makeGRangesFromDataFrame(tss,start.field = "start_position", end.field = "end_position", keep.extra.columns = TRUE)
+  if(genome == "hg19") tss$external_gene_name <- tss$external_gene_id
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
   
