@@ -970,14 +970,17 @@ get.TFs <- function(data,
                        function(x, TF.meth.cor, motif.relavent.TFs){ 
                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
-                         potential.TF <- ifelse(any(top %in% motif.relavent.TFs[[x]]),
-                                                top[top %in% motif.relavent.TFs[[x]]],NA)
+                         if (any(top %in% motif.relavent.TFs[[x]])) {
+                           potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                         } else {
+                           potential.TF <- NA
+                         }
                          out <- data.frame("motif" = x,
                                            "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
-                                           "potential TFs" = ifelse(!is.na(potential.TF),
-                                                                    paste(potential.TF, collapse = ";"),
-                                                                    NA),
-                                           "top_5percent" = paste(top,collapse = ";"))
+                                           "potential TFs" = ifelse(!any(sapply(potential.TF,is.na)),paste(potential.TF, collapse = ";"),NA),
+                                           "top_5percent" = paste(top,collapse = ";"),
+                                           stringsAsFactors = FALSE)
+                         return(out)
                        },                                         
                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
@@ -991,6 +994,7 @@ get.TFs <- function(data,
   } 
   if(!file.exists(sprintf("%s/TFrankPlot",dir.out)))
     dir.create(sprintf("%s/TFrankPlot",dir.out))
+  print.header("Creating plots", "subsection")
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
                dir.out=sprintf("%s/TFrankPlot",dir.out), 

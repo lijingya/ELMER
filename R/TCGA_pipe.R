@@ -249,8 +249,8 @@ TCGA.pipe <- function(disease,
     }
     load(mae.file)
     #construct RNA seq data
-    message(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
-                    diff.dir))
+    print.header(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
+                    diff.dir), "subsection")
     enriched.motif <- args[names(args) %in% "enriched.motif"]
     if(length(enriched.motif)==0){
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out, diff.dir)
@@ -263,6 +263,7 @@ TCGA.pipe <- function(disease,
                           cores=cores, 
                           label=diff.dir),
                      params))
+    if(length(analysis) == 1) return(TFs)
   }
 }
 
