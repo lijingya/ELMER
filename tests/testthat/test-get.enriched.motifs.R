@@ -20,6 +20,7 @@ test_that("get enriched motif function returns the expected result", {
 
   enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
                                        probes=probes,lower.OR = 0.1,
+                                       min.motif.quality = "D",
                                        background.probes = bg,
                                        label="hypo")
 
@@ -36,6 +37,7 @@ test_that("get enriched motif function returns the expected result", {
   
   enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
                                        probes=probes,
+                                       min.motif.quality = "D",
                                        background.probes = bg,
                                        label="hypo")
   expect_equal(names(enriched.motif), "MAFG_HUMAN.H10MO.C")
@@ -64,6 +66,7 @@ test_that("min.incidence works", {
                                        probes=probes,
                                        min.incidence = 20,
                                        lower.OR = 0.1,
+                                       min.motif.quality = "D",
                                        background.probes = bg,
                                        label="hypo")
   expect_true(length(enriched.motif) == 0)
@@ -72,7 +75,17 @@ test_that("min.incidence works", {
                                        probes=probes,
                                        min.incidence = 0,
                                        lower.OR = 0.0,
+                                       min.motif.quality = "D",
                                        background.probes = bg,
                                        label="hypo")
   expect_true(length(enriched.motif) == ncol(Probes.motif))
+  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                       probes=probes,
+                                       min.incidence = 0,
+                                       lower.OR = 0.0,
+                                       min.motif.quality = "B",
+                                       background.probes = bg,
+                                       label="hypo")
+  expect_true(length(enriched.motif) == 0)
+  
 })
