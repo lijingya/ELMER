@@ -78,7 +78,7 @@ get.feature.probe <- function(feature,
     
     if(missing(feature)){
       newenv <- new.env()
-      if(genome == "hg19") {print("hey");data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)}
+      if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
       if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
@@ -203,7 +203,7 @@ get.diff.meth <- function(data,
     parallel = TRUE
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
-  out <- adply(.data = rownames(getMet(data)), .margins = 1,
+  out <- alply(.data = rownames(getMet(data)), .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth(probe = x,
                                 percentage = percentage,
@@ -213,8 +213,10 @@ get.diff.meth <- function(data,
                                 test = test,
                                 group2 = group2,
                                 Top.m=Top.m)},
-               .progress = "text", .parallel = parallel, .id = NULL
+               .progress = "text", .parallel = parallel
   )
+  out <- do.call(rbind,out)
+  out <- as.data.frame(out,stringsAsFactors = FALSE)
   diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
   out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
@@ -226,7 +228,7 @@ get.diff.meth <- function(data,
               row.names=FALSE)
   }
   
-  result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,]
+  result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif &  !is.na(out$adjust.p),]
   if(nrow(result) == 0 ) {
     message("No relevant probes found")
   } else {
