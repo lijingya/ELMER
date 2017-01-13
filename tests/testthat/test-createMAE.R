@@ -146,9 +146,9 @@ test_that("Number of probes in MAE matches the distal probes", {
   genome <- "hg38"
   distal.probe <- get.feature.probe(genome = genome,platform = "450K")
   mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
-  expect_equal(nrow(distal.probe), nrow(getMet(mae)))
+  expect_equal(length(distal.probe), nrow(getMet(mae)))
   genome <- "hg19"
   distal.probe <- get.feature.probe(genome = genome,platform = "450K")
   mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
-  expect_equal(nrow(distal.probe), nrow(getMet(mae)))
+  expect_equal(length(distal.probe), nrow(getMet(mae)))
 })
