@@ -2,6 +2,7 @@
 % Please edit documentation in R/Small.R
 \name{createMAE}
 \alias{createMAE}
+\title{Construct a Multi Assay Experiment for ELMER analysis}
 \usage{
 createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
   filter.probes = NULL, filter.genes = NULL, met.platform = "450k",

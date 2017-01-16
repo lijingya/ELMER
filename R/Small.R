@@ -1,4 +1,4 @@
-## Construct Multi Assay Experiment
+#' @title  Construct a Multi Assay Experiment for ELMER analysis
 #' @description 
 #' This function will receive a gene expression and DNA methylation data objects 
 #' and create a Multi Assay Experiment.
