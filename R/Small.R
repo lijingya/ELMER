@@ -452,28 +452,6 @@ getGeneID <- function(data,symbol){
   return(gene)
 }
 
-# binary data
-# @param x A matrix.
-# @param Break A value to binarize the data.
-# @param Break2 A value to cut value to 3 categories.
-# @return A binarized matrix.
-Binary <- function(x,Break=0.3,Break2=NULL){
-  if(!is.numeric(x)) stop("x need to be numeric") 
-  change <- x
-  if(is.null(Break2)){
-    change[x > Break] <- 1
-    change[x < Break | x== Break] <- 0
-  }else{
-    change[x < Break | x== Break] <- 0
-    change[x> Break & x < Break2] <- NA
-    change[x > Break2 | x== Break2] <-1 
-  }
-  
-  return(change)    
-}
-
-
-
 # lable linear regression formula 
 # @param df A data.frame object contains two variables: dependent 
 # variable (Dep) and explanation variable (Exp).

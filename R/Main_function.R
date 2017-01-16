@@ -424,11 +424,9 @@ get.permu <- function(data,
                       permu.size=10000, 
                       permu.dir=NULL,
                       cores=1){
-  # Desire for reproducible results
-  set.seed(200)
   
   ## get usable probes
-  binary.m <- rowMeans(Binary(assay(getMet(data)),portion),na.rm = TRUE)
+  binary.m <- rowMeans(assay(getMet(data)) > portion, na.rm = TRUE)
   usable.probes <- names(binary.m[binary.m < 0.95 & binary.m > 0.05 & !is.na(binary.m)])
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
@@ -436,6 +434,8 @@ get.permu <- function(data,
                  set a smaller permu.size.",permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
 
+  # Desire for reproducible results
+  set.seed(200)
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
   parallel <- FALSE

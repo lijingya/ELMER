@@ -95,7 +95,7 @@ Stat.nonpara <- function(Probe,
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,]
   Meth <- Meths[Probe,]
-  Meth_B <- mean(Binary(Meth,Break=K),na.rm = TRUE)
+  Meth_B <- mean(Meth > K, na.rm = TRUE)
   if( Meth_B >0.95 | Meth_B < 0.05 ){
     test.p <- NA
   }else{
