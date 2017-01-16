@@ -115,3 +115,40 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   mae <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
   
 })
+
+
+test_that("Number of probes in MAE matches the distal probes", {
+  library(TCGAbiolinks)
+  library(dplyr)
+  gcimp.samples <- TCGAquery_subtype("lgg") %>% dplyr::filter(base::grepl("G-CIMP",Supervised.DNA.Methylation.Cluster,ignore.case = T))
+  #-----------------------------------
+  # 2 - Get data
+  # ----------------------------------
+  #-----------------------------------
+  # 2.1 - DNA Methylation
+  # ----------------------------------
+  query <- GDCquery(project = "TCGA-LGG", 
+                    data.category = "DNA Methylation",
+                    platform = "Illumina Human Methylation 450", 
+                    barcode =  gcimp.samples$patient[1:3])
+  GDCdownload(query)
+  met <- GDCprepare(query, save = FALSE)
+  #-----------------------------------
+  # 2 - Expression
+  # ----------------------------------
+  query <- GDCquery(project = "TCGA-LGG", 
+                    data.category = "Transcriptome Profiling", 
+                    data.type = "Gene Expression Quantification", 
+                    workflow.type = "HTSeq - FPKM-UQ",
+                    barcode =   gcimp.samples$patient[1:3])
+  GDCdownload(query)
+  exp <- GDCprepare(query, save = FALSE)
+  genome <- "hg38"
+  distal.probe <- get.feature.probe(genome = genome,platform = "450K")
+  mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
+  expect_equal(length(distal.probe), nrow(getMet(mae)))
+  genome <- "hg19"
+  distal.probe <- get.feature.probe(genome = genome,platform = "450K")
+  mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
+  expect_equal(length(distal.probe), nrow(getMet(mae)))
+})
