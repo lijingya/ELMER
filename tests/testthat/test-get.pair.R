@@ -3,14 +3,14 @@ context("Checking get pair function")
 test_that("Function uses correctly the permu.dir", {
   data(elmer.data.example)
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-                           geneAnnot=getExp(data))
+                            geneAnnot=getExp(data))
   Hypo.pair <- get.pair(data=data,
-                       nearGenes=nearGenes,
-                       permu.size=5,
-                       Pe = 0.2,
-                       dir.out="./",
-                       permu.dir = "permu_test",
-                       label= "hypo")
+                        nearGenes=nearGenes,
+                        permu.size=5,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label= "hypo")
   # Folder was crreated correcly
   expect_true(file.exists("permu_test/permu.rda"))
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 5)
@@ -73,4 +73,26 @@ test_that("Test calculation of Pe (empirical pvalue) from Raw-pvalue is working"
   expect_true(Pe[Pe$GeneID== "ENSG00000157916","Pe"] == min(Pe$Pe))
   expect_true(Pe[Pe$GeneID== "ENSG00000149527","Pe"] < max(Pe$Pe) & Pe[Pe$GeneID== "ENSG00000149527","Pe"] > min(Pe$Pe))
   expect_true(Pe[Pe$GeneID== "ENSG00000116213","Pe"] == max(Pe$Pe))
+})
+test_that("Ramdom probe sleection is the same for every run", {
+  probes <- paste0("cg",000000:450000)
+  set.seed(200); probes.permu <- sample(probes, size = 10000, replace = FALSE)
+  set.seed(200); probes.permu.rep <- sample(probes, size = 10000, replace = FALSE)
+  expect_true(all(probes.permu == probes.permu.rep))
+  
+  data(elmer.data.example)
+  permu <- get.permu(data = data,
+                     permu.dir = "test_permu_1",
+                     geneID=rownames(getExp(data))[1],
+                     rm.probes=c("cg00329272","cg10097755"),
+                     permu.size=51)
+  permu <- get.permu(data = data,
+                     permu.dir = "test_permu_2",
+                     geneID=rownames(getExp(data))[1],
+                     rm.probes=c("cg00329272","cg10097755"),
+                     permu.size=51)
+  probes.permu <- colnames(get(load("test_permu_1/permu.rda")))
+  probes.permu.rep <-  colnames(get(load("test_permu_2/permu.rda")))
+  expect_true(all(probes.permu == probes.permu.rep))
+  
 })

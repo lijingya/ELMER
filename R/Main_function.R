@@ -424,8 +424,7 @@ get.permu <- function(data,
                       permu.size=10000, 
                       permu.dir=NULL,
                       cores=1){
-  
-  # Why a const seed?
+  # Desire for reproducible results
   set.seed(200)
   
   ## get usable probes
@@ -436,6 +435,7 @@ get.permu <- function(data,
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
                  set a smaller permu.size.",permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
+
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
   
   parallel <- FALSE
@@ -474,7 +474,7 @@ get.permu <- function(data,
       }
     }
   }  
-  permu.meth <- assay(getMet(data)[tmp.probes,] )
+  permu.meth <- assay(getMet(data)[tmp.probes,,drop=FALSE] )
   exp.data <- assay(getExp(data))
   
   # Should Exps=exp.data[geneID,] to improve performance ?
@@ -487,7 +487,7 @@ get.permu <- function(data,
                        Meths=permu.meth[x,],
                        Gene=tmp.genes,
                        Top=percentage,
-                       Exps=exp.data)},
+                       Exps=exp.data[tmp.genes,,drop=FALSE])},
                    .progress = "text", .parallel = parallel
     )
     
@@ -521,7 +521,7 @@ get.permu <- function(data,
                              Meths=permu.meth[x,],
                              Gene=missing.genes,
                              Top=percentage,
-                             Exps=exp.data)},
+                             Exps=exp.data[missing.genes,,drop=FALSE])},
                          .progress = "text", .parallel = parallel
     )
     
