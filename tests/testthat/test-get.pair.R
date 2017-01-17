@@ -35,11 +35,11 @@ test_that("Function uses correctly the permu.dir", {
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=5,
-                        pvalue =  0.2,
+                        pvalue =  0.02,
                         calculate.empirical.p = TRUE,
                         dir.out="./",
                         label= "hypo")
-  # Pe filter is working
+  # Pvalue filter is working
   expect_true(nrow(Hypo.pair) == 0)
   
   # If we add new genes

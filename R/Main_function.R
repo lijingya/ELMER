@@ -204,11 +204,14 @@ get.diff.meth <- function(data,
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
   groups.info <- pData(data)[getMetSamples(data),group.col]
-  out <- alply(.data = rownames(getMet(data)), .margins = 1,
+  save(data,groups.info, group1,group2, Top.m, test,file = "test.rda")
+  met <- assay(getMet(data))
+  probes <- rownames(getMet(data))
+  out <- alply(.data = probes, .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth(probe = x,
                                 percentage = percentage,
-                                meth = assay(getMet(data))[x,],
+                                meth = met[x,],
                                 groups = groups.info,
                                 group1 = group1,
                                 test = test,

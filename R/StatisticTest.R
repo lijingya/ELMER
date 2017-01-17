@@ -17,10 +17,13 @@ Stat.diff.meth <- function(probe,
                            test=t.test,
                            percentage=0.2,
                            Top.m=NULL){
-  group1.tmp <- sort(meth[groups %in% group1],decreasing = Top.m)
-  group2.tmp <- sort(meth[groups %in% group2],decreasing = Top.m)
-  group1.nb <- ifelse(round(length(group1.tmp) * percentage) < 5, min(5,length(group1.tmp)), round(length(group1.tmp) * percentage))
-  group2.nb <- ifelse(round(length(group2.tmp) * percentage) < 5, min(5,length(group2.tmp)), round(length(group2.tmp) * percentage))
+  g1 <- meth[groups %in% group1]
+  g2 <- meth[groups %in% group2]
+  group1.nb <- ifelse(round(length(g1) * percentage) < 5, min(5,length(g1)), round(length(g1) * percentage))
+  group2.nb <- ifelse(round(length(g2) * percentage) < 5, min(5,length(g2)), round(length(g2) * percentage))
+  
+  group1.tmp <- sort(g1, decreasing = Top.m)
+  group2.tmp <- sort(g2, decreasing = Top.m)
   
   group1.tmp <- group1.tmp[1:group1.nb]
   group2.tmp <- group2.tmp[1:group2.nb]
@@ -35,11 +38,7 @@ Stat.diff.meth <- function(probe,
     # If hypo  (top. FALSE alternative greater) group 1 < group 2
     TT <- test(x = group1.tmp, y = group2.tmp, alternative = alternative, conf.int = TRUE)
     
-    if(length(TT$estimate) == 2) {
-      MeanDiff <- TT$estimate[1]-TT$estimate[2]
-    } else {
-      MeanDiff <- TT$estimate
-    }
+    MeanDiff <- ifelse(length(TT$estimate) == 2, TT$estimate[1]-TT$estimate[2],TT$estimate)
     PP <- TT$p.value
     out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
   }else{
