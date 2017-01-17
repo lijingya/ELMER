@@ -288,7 +288,8 @@ createMAE <- function (exp,
   }
   if(save) {
   if(missing(save.filename)) save.filename <- paste0("mae_",genome,"_",met.platform,".rda")
-    save(mae, file = save.filename,compress = "zx")
+    save(mae, file = save.filename,compress = "xz")
+    massage("MAE saved as: ", save.filename)
   }
   return(mae)
 }
