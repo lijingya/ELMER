@@ -703,22 +703,31 @@ promoterMeth <- function(data,
 #'                                      probes=probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
+#'  # If the MAE is set, the background and the probes.motif will be automatically set                                     
+#' enriched.motif <- get.enriched.motif(data = data,
+#'                                      min.motif.quality = "DS",
+#'                                      probes=probes,
+#'                                      min.incidence=2, 
+#'                                      label="hypo")
 get.enriched.motif <- function(data,
                                probes.motif, 
                                probes,
-                               min.motif.quality = "B",
+                               min.motif.quality = "C",
                                background.probes,
-                               lower.OR=1.1,
-                               min.incidence=10, 
+                               lower.OR = 1.1,
+                               min.incidence = 10, 
                                dir.out="./",
                                label=NULL,
                                save=TRUE){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
-    file <- paste0("Probes.motif.",metadata(mae)$genome,".",metadata(mae)$met.platform)
+    file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
     message("Loading object: ",file)
     newenv <- new.env()
-    data(file, package = "ELMER.data",envir=newenv)
+    if(file == "Probes.motif.hg38.450K") data("Probes.motif.hg38.450K", package = "ELMER.data",envir=newenv)
+    if(file == "Probes.motif.hg19.450K") data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
+    if(file == "Probes.motif.hg38.EPIC") data("Probes.motif.hg38.EPIC", package = "ELMER.data",envir=newenv)
+    if(file == "Probes.motif.hg19.EPIC") data("Probes.motif.hg19.EPIC", package = "ELMER.data",envir=newenv)
     probes.motif <- get(ls(newenv)[1],envir=newenv)   
   }  
   all.probes.TF <- probes.motif
