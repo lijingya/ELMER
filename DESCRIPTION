@@ -3,13 +3,15 @@ Title:
     Inferring Regulatory Element Landscapes and Transcription Factor
     Networks Using Cancer Methylomes
 Version: 2.0.0
-Authors: c(person("Lijing", "Yao", role = "aut", email = "lijingya@usc.edu"),
+Author: c(person("Lijing", "Yao", role = "aut", email = "lijingya@usc.edu"),
 		       person("Ben", "Berman", role = "aut"),
 		       person("Peggy", "Farnham", role = "aut"),
 		       person("Hui", "Shen", role = "ctb"),
 		       person("Peter", "Laird", role = "ctb"),
 		       person("Simon","Coetzee", role = c("cre","ctb"), email = "Simon.Coetzee@cshs.org"),
 		       person("Tiago","Chedraoui Silva", role = c("ctb")))
+Maintainer: 		
+ Tiago Chedraoui Silva <tiagochst@usp.br>
 Description: ELMER is designed to use DNA methylation and gene expression from a
     large number of samples to infere regulatory element landscape and transcription
     factor network in primary tissue.

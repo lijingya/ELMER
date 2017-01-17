@@ -382,7 +382,7 @@ get.pair <- function(data,
                      row.names=FALSE)
   invisible(gc())
   return(selected)
-  }
+}
 
 ### permutation
 #permu.size can be all which mean all the usable probes.
@@ -445,7 +445,7 @@ get.permu <- function(data,
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
                  set a smaller permu.size.",permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
-
+  
   # Desire for reproducible results
   set.seed(200)
   probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
@@ -497,10 +497,10 @@ get.permu <- function(data,
                    .fun = function(x) {
                      Stat.nonpara.permu(
                        Probe = x,
-                       Meths=permu.meth[x,],
-                       Gene=tmp.genes,
-                       Top=percentage,
-                       Exps=exps)},
+                       Meths = permu.meth[x,],
+                       Gene  = tmp.genes,
+                       Top   = percentage,
+                       Exps  = exps)},
                    .progress = "text", .parallel = parallel
     )
     
@@ -607,6 +607,7 @@ promoterMeth <- function(data,
     ProbeInTSS <- split(df$Probe,df$GeneID)
     
     ## calculate average methylation of promoter
+    met <- assay(getMet(data))
     Gene.promoter <- lapply(ProbeInTSS, 
                             function(x, METH){
                               meth <- METH[x,]
@@ -615,7 +616,7 @@ promoterMeth <- function(data,
                               }  
                               return(meth)
                             },   
-                            METH=assay(getMet(data)))
+                            METH=met)
     Gene.promoter <- do.call(rbind, Gene.promoter)
     ## make fake NearGene 
     Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
@@ -623,8 +624,14 @@ promoterMeth <- function(data,
                        Distance = 1,
                        Side = 1, stringsAsFactors=FALSE)
     Fake <- split(Fake, Fake$GeneID)
-    out <- lapply(rownames(Gene.promoter),Stat.nonpara, NearGenes=Fake,K=0.3,Top=0.2,
-                  Meths=Gene.promoter,Exps=assay(getExp(data)))
+    exps <- assay(getExp(data))
+    out <- lapply(rownames(Gene.promoter),
+                  Stat.nonpara, 
+                  NearGenes=Fake,
+                  K=0.3,
+                  Top=0.2,
+                  Meths=Gene.promoter,
+                  Exps=exps)
     out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }
@@ -828,13 +835,14 @@ get.enriched.motif <- function(data,
                           stringsAsFactors=FALSE)
     if(all(sig.Pairs$Probe %in% rownames(probes.TF))){
       motif.Info <- sapply(sig.Pairs$Probe,
-                           function(x, probes.TF,en.motifs)
-                           {TFs <- names(probes.TF[x,probes.TF[x,]==1])
-                           non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
-                           en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                           out <- data.frame(non_enriched_motifs=non.en.motif, 
-                                             enriched_motifs=en.motif, stringsAsFactors = FALSE)
-                           return(out)},
+                           function(x, probes.TF,en.motifs){
+                             TFs <- names(probes.TF[x,probes.TF[x,]==1])
+                             non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
+                             en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
+                             out <- data.frame(non_enriched_motifs=non.en.motif, 
+                                               enriched_motifs=en.motif, stringsAsFactors = FALSE)
+                             return(out)
+                           },
                            probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
       
       motif.Info <- do.call(rbind,motif.Info)
@@ -986,6 +994,7 @@ get.TFs <- function(data,
   
   # For each motif (x) split the Meths object into U and M and evaluate the expression
   # of all TF Exps (obj)
+  exps <- assay(getExp(data))[gene,]
   TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
@@ -993,7 +1002,7 @@ get.TFs <- function(data,
                            Meths=motif.meth[x,],
                            Gene=gene,
                            Top=percentage,
-                           Exps=assay(getExp(data))[gene,])},
+                           Exps=exps)},
                        .progress = "text", .parallel = parallel
   )
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
