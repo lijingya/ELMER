@@ -160,29 +160,29 @@ get.feature.probe <- function(feature,
 #'                             group.col = "definition", 
 #'                             sig.dif = 0.1) # get hypomethylated probes
 get.diff.meth <- function(data,
-                          diff.dir="hypo",
-                          cores=1,
-                          percentage=0.2,
-                          pvalue=0.01,
+                          diff.dir = "hypo",
+                          cores = 1,
+                          percentage = 0.2,
+                          pvalue = 0.01,
                           group.col, 
                           group1,
                           group2,
                           test = t.test,
-                          sig.dif=0.3,
-                          dir.out="./",
-                          save=TRUE){
+                          sig.dif = 0.3,
+                          dir.out = "./",
+                          save = TRUE){
   if(is.null(getMet(data)))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(pData(data))==0){
     stop("Sample information data to do differential analysis.")
-  }else if(missing(group.col)){
+  } else if (missing(group.col)){
     stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(data)) for possibilities")
   } else if (!group.col %in% colnames(pData(data))){
     stop("Group column not found in phenotypic data and meta-data of the object. See values with pData(data)")
-  } else if(missing(group1) | missing(group2)) {
+  } else if (missing(group1) | missing(group2)) {
     if(length(unique(pData(data)[,group.col]))<2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
-    } else if(length(unique(pData(data)[,group.col])) > 2){
+    } else if (length(unique(pData(data)[,group.col])) > 2){
       stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
     } else {
       # TO be changed
@@ -292,7 +292,7 @@ get.pair <- function(data,
                      permu.dir=NULL, 
                      pvalue = 0.001,
                      dir.out="./",
-                     calculate.empirical.p = FALSE,
+                     calculate.empirical.p = TRUE,
                      diffExp=FALSE,
                      cores=1,
                      portion = 0.3, 
