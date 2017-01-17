@@ -492,6 +492,7 @@ get.permu <- function(data,
   # Should Exps=exp.data[geneID,] to improve performance ?
   # in that case For a second run we will need to look if gene is in the matrix and also probe
   if(length(tmp.probes) > 0) {
+    exps <- exp.data[tmp.genes,,drop=FALSE]
     permu <- alply(.data = tmp.probes, .margins = 1,
                    .fun = function(x) {
                      Stat.nonpara.permu(
@@ -499,7 +500,7 @@ get.permu <- function(data,
                        Meths=permu.meth[x,],
                        Gene=tmp.genes,
                        Top=percentage,
-                       Exps=exp.data[tmp.genes,,drop=FALSE])},
+                       Exps=exps)},
                    .progress = "text", .parallel = parallel
     )
     
@@ -526,14 +527,15 @@ get.permu <- function(data,
   if(length(missing.genes) > 0) {
     # Get all probes
     permu.meth <- assay(getMet(data)[colnames(permu),] )
+    exps <- exp.data[missing.genes,,drop=FALSE]
     permu.genes <- alply(.data = colnames(permu), .margins = 1,
                          .fun = function(x) {
                            Stat.nonpara.permu(
                              Probe = x,
-                             Meths=permu.meth[x,],
-                             Gene=missing.genes,
-                             Top=percentage,
-                             Exps=exp.data[missing.genes,,drop=FALSE])},
+                             Meths = permu.meth[x,],
+                             Gene  = missing.genes,
+                             Top   = percentage,
+                             Exps  = exps)},
                          .progress = "text", .parallel = parallel
     )
     
