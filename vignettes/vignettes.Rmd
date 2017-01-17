@@ -330,12 +330,12 @@ You can also use your own data and annotations to create  Multi Assay Experiment
 ```{r, message=FALSE}
 # NON TCGA example: matrices has diffetrent column names
  gene.exp <- DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-                        sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3)
-  )
+                        sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
                      sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
+
 mae <- createMAE(exp = gene.exp,
                  met = dna.met,
                  save = FALSE,
@@ -384,7 +384,7 @@ own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
 ```{r}
 #get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
 #enhancers on chromosome 1
-Probe <- get.feature.probe(genome = "hg19", met.platform =  "450K", rm.chr=paste0("chr",c(2:22,"X","Y")))
+Probe <- get.feature.probe(genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
 save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda")
 ```
 
@@ -449,7 +449,7 @@ sig.diff <- get.diff.meth(data,
                           group2 = "Solid Tissue Normal",
                           percentage = 0.2,
                           sig.dif = 0.3,
-                          diff.dir="hypo", # Search for hypomethylated probes in group 1
+                          diff.dir = "hypo", # Search for hypomethylated probes in group 1
                           cores=detectCores()/2, 
                           dir.out ="./ELMER.example/Result/LUSC", 
                           pvalue = 0.01)
@@ -550,18 +550,17 @@ Sig.probes <- read.csv("./ELMER.example/Result/LUSC/getMethdiff.hypo.probes.sign
 head(Sig.probes)  # significantly hypomethylated probes
 
 ## Collect nearby 20 genes for Sig.probes
-nearGenes <- GetNearGenes(data = data,probe = Sig.probes, cores=detectCores()/2)
+nearGenes <- GetNearGenes(data = data, probe = Sig.probes, cores = detectCores()/2)
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
-                      probes = Sig.probes,
                       nearGenes = nearGenes,
                       permu.dir = "./ELMER.example/Result/LUSC/permu",
                       permu.size = 200,
                       pvalue = 0.01,
-                      dir.out="./ELMER.example/Result/LUSC",
-                      cores=detectCores()/2,
-                      label= "hypo")
+                      dir.out = "./ELMER.example/Result/LUSC",
+                      cores = detectCores()/2,
+                      label = "hypo")
 
 head(Hypo.pair)  ## significant probe-gene pairs
 
@@ -634,9 +633,9 @@ head(Sig.probes.paired) # significantly hypomethylated probes with putative targ
 
 enriched.motif <- get.enriched.motif(data = data,
                                      min.motif.quality = "B", # Default: options A, B, C, D
-                                     probes=Sig.probes.paired, 
-                                     dir.out="./ELMER.example/Result/LUSC", 
-                                     label="hypo",
+                                     probes = Sig.probes.paired, 
+                                     dir.out = "./ELMER.example/Result/LUSC", 
+                                     label = "hypo",
                                      min.incidence = 10,
                                      lower.OR = 1.1)
 names(enriched.motif)  # enriched motifs
@@ -718,9 +717,9 @@ Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylat
 
 ```{r, echo=TRUE, message=FALSE,warning=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
 scatter.plot(data,
-             byProbe=list(probe=c("cg19403323"),geneNum=20), 
-             category="definition", 
-             save=FALSE) 
+             byProbe = list(probe = c("cg19403323"), geneNum = 20), 
+             category = "definition", 
+             save = FALSE) 
 ```
 
 ###  Scatter plot of one pair
@@ -728,8 +727,8 @@ Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
 
 ```{r,eval=TRUE, fig.cap="Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14."}
 scatter.plot(data,
-             byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143469")), 
-             category="definition", save=TRUE,lm_line=TRUE) 
+             byPair = list(probe = c("cg19403323"), gene = c("ENSG00000143469")), 
+             category = "definition", save = TRUE, lm_line = TRUE) 
 ```
 
 ###  TF expression vs. average DNA methylation
@@ -739,10 +738,10 @@ with certain motif. Figure \ref{fig:figure3}
 ```{r,eval=TRUE, fig.cap="Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively."}
 load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(data,
-             byTF=list(TF=c("TP53","TP63","TP73"),
-                       probe=enriched.motif[["P73_HUMAN.H10MO.A"]]), 
-             category="definition",
-             save=TRUE,lm_line=TRUE)
+             byTF = list(TF    = c("TP53","TP63","TP73"),
+                         probe = enriched.motif[["P73_HUMAN.H10MO.A"]]), 
+             category = "definition",
+             save = TRUE, lm_line = TRUE)
 ```
 
 ## Schematic plot
@@ -754,10 +753,10 @@ the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 
 
 ```{r, eval=TRUE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
-schematic.plot(pair=Hypo.pair, 
-               data = data,
-               byProbe="cg25312122",
-               save=FALSE)
+schematic.plot(pair    = Hypo.pair, 
+               data    = data,
+               byProbe = "cg25312122",
+               save    = FALSE)
 ```
 
 ### Nearby Probes
@@ -765,7 +764,7 @@ Generate schematic plot for one gene with the probes which the gene is significa
 linked to. Figure \ref{fig:figure5}
 
 ```{r,eval=TRUE, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
-schematic.plot(pair=Hypo.pair, data = data, byGene="ENSG00000197965", save=FALSE)
+schematic.plot(pair = Hypo.pair, data = data, byGene = "ENSG00000197965", save = FALSE)
 ```
 
 ## Motif enrichment plot
@@ -783,10 +782,10 @@ of TFs expression level with average DNA methylation level at sites with a given
 
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
-TF.rank.plot(motif.pvalue=TF.meth.cor, 
-             motif="P73_HUMAN.H10MO.A",
-             TF.label=list(TP53=c("TP53","TP63","TP73")),
-             save=FALSE) 
+TF.rank.plot(motif.pvalue = TF.meth.cor, 
+             motif = "P73_HUMAN.H10MO.A",
+             TF.label = list(TP53 = c("TP53","TP63","TP73")),
+             save = FALSE) 
 ```
 
 # Session Information
