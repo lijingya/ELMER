@@ -109,8 +109,8 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   
   phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
                                samples = colnames(not.tcga.exp), 
-                               group = c(rep("group1",length(colnames(not.tcga.exp))/2), 
-                                         rep("group2",length(colnames(not.tcga.exp))/2)))
+                               group = c(rep("group1", length(colnames(not.tcga.exp)) / 2 ), 
+                                         rep("group2", length(colnames(not.tcga.exp)) /2 )))
   
   mae <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
   
@@ -143,12 +143,16 @@ test_that("Number of probes in MAE matches the distal probes", {
                     barcode =   gcimp.samples$patient[1:3])
   GDCdownload(query)
   exp <- GDCprepare(query, save = FALSE)
-  genome <- "hg38"
-  distal.probe <- get.feature.probe(genome = genome,platform = "450K")
-  mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
-  expect_equal(length(distal.probe), nrow(getMet(mae)))
-  genome <- "hg19"
-  distal.probe <- get.feature.probe(genome = genome,platform = "450K")
-  mae <- createMAE(exp = exp, met = met,genome = genome, met.platform = "450K", linearize.exp = TRUE,   filter.probes = distal.probe, TCGA = TRUE) 
-  expect_equal(length(distal.probe), nrow(getMet(mae)))
+  for(genome in c("hg38","hg19")){
+    distal.probe <- get.feature.probe(genome = genome, met.platform = "450K")
+    mae <- createMAE(exp           = exp, 
+                     met           = met,
+                     genome        = genome, 
+                     met.platform  = "450K", 
+                     linearize.exp = TRUE, 
+                     filter.probes = distal.probe, 
+                     TCGA          = TRUE) 
+    expect_equal(length(distal.probe), nrow(getMet(mae)))
+    expect_equal(metadata(mae)$genome,genome)
+  }
 })

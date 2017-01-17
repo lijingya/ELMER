@@ -27,11 +27,11 @@
 #' }
 TCGA.pipe <- function(disease,
                       genome = "hg38",
-                      analysis="all",
-                      wd="./",
-                      cores=1,
-                      Data=NULL, 
-                      diff.dir="hypo",
+                      analysis = "all",
+                      wd = "./",
+                      cores = 1,
+                      Data = NULL, 
+                      diff.dir = "hypo",
                       ...){
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
@@ -106,13 +106,13 @@ TCGA.pipe <- function(disease,
       distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
     }
     
-    mae <- createMAE(met = meth.file, 
-                     exp = exp.file, 
+    mae <- createMAE(met           = meth.file, 
+                     exp           = exp.file, 
                      filter.probes = distal.probe,
-                     genome = genome,
-                     met.platform = "450K",
+                     genome        = genome,
+                     met.platform  = "450K",
                      linearize.exp = TRUE,
-                     TCGA = TRUE)
+                     TCGA          = TRUE)
     save(mae,file = sprintf("%s/%s_mae.rda",dir.out,disease))
   }
   
@@ -169,13 +169,12 @@ TCGA.pipe <- function(disease,
     permu.dir <- paste0(dir.out,"/permu")
     params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
     SigPair <- do.call(get.pair,
-                       c(list(data=mae,
-                              probes=Sig.probes,
-                              nearGenes=nearGenes.file,
-                              permu.dir=permu.dir,
-                              dir.out=dir.out,
-                              cores=cores,
-                              label=diff.dir),
+                       c(list(data      = mae,
+                              nearGenes = nearGenes.file,
+                              permu.dir = permu.dir,
+                              dir.out   = dir.out,
+                              cores     = cores,
+                              label     = diff.dir),
                          params))
     
     message("calculate associations of gene expression with DNA methylation at promoter regions")
@@ -190,13 +189,15 @@ TCGA.pipe <- function(disease,
     exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
     meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
     message("Preparing MAE file for analysis...")
-    mae <- createMAE(met = meth.file, 
-                     exp = exp.file,  
+    
+    mae <- createMAE(met           = meth.file, 
+                     exp           = exp.file,  
                      linearize.exp = TRUE,
-                     genome = genome, 
-                     filter.probes=promoter.probe, 
-                     TCGA = TRUE, 
-                     filter.genes=unique(SigPair$GeneID)) # Should add filter genes
+                     genoe         = genome, 
+                     filter.probes = promoter.probe, 
+                     TCGA          = TRUE, 
+                     filter.genes  = unique(SigPair$GeneID)) # Should add filter genes
+    
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(data=mae, sig.pvalue=0.01, save=FALSE),
                                              params))
@@ -224,15 +225,15 @@ TCGA.pipe <- function(disease,
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
     
     newenv <- new.env()
-    if(genome == "hg19") data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
-    if(genome == "hg38") data("Probes.motif.hg38.450K", package = "ELMER.data",envir=newenv)
+    if(genome == "hg19") data("Probes.motif.hg19.450K", package = "ELMER.data", envir = newenv)
+    if(genome == "hg38") data("Probes.motif.hg38.450K", package = "ELMER.data", envir = newenv)
     probes.motif <- get(ls(newenv)[1],envir=newenv)   
     
     enriched.motif <- do.call(get.enriched.motif, 
                               c(list(probes.motif = probes.motif,
-                                     probes = Sig.probes,
-                                     dir.out = dir.out,
-                                     label = diff.dir),
+                                     probes       = Sig.probes,
+                                     dir.out      = dir.out,
+                                     label        = diff.dir),
                                 params))
     
     if(length(analysis) == 1) return(enriched.motif)
@@ -252,16 +253,16 @@ TCGA.pipe <- function(disease,
     print.header(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
                     diff.dir), "subsection")
     enriched.motif <- args[names(args) %in% "enriched.motif"]
-    if(length(enriched.motif)==0){
-      enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out, diff.dir)
+    if(length(enriched.motif) == 0){
+      enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
-                   c(list(data=mae, 
-                          enriched.motif=enriched.motif,
-                          dir.out=dir.out, 
-                          cores=cores, 
-                          label=diff.dir),
+                   c(list(data           = mae, 
+                          enriched.motif = enriched.motif,
+                          dir.out        = dir.out, 
+                          cores          = cores, 
+                          label          = diff.dir),
                      params))
     if(length(analysis) == 1) return(TFs)
   }

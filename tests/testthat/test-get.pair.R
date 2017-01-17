@@ -7,8 +7,9 @@ test_that("Function uses correctly the permu.dir", {
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=5,
-                        Pe = 0.2,
+                        pvalue =  0.2,
                         dir.out="./",
+                        calculate.empirical.p = TRUE,
                         permu.dir = "permu_test",
                         label= "hypo")
   # Folder was crreated correcly
@@ -21,7 +22,8 @@ test_that("Function uses correctly the permu.dir", {
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=6,
-                        Pe = 0.2,
+                        pvalue =  0.2,
+                        calculate.empirical.p = TRUE,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")
@@ -33,7 +35,8 @@ test_that("Function uses correctly the permu.dir", {
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=5,
-                        Pe = 0.01,
+                        pvalue =  0.2,
+                        calculate.empirical.p = TRUE,
                         dir.out="./",
                         label= "hypo")
   # Pe filter is working
@@ -46,6 +49,7 @@ test_that("Function uses correctly the permu.dir", {
                         nearGenes=nearGenes,
                         permu.size=7,
                         Pe = 0.2,
+                        calculate.empirical.p = TRUE,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")

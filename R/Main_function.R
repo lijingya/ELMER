@@ -203,16 +203,17 @@ get.diff.meth <- function(data,
     parallel = TRUE
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
+  groups.info <- pData(data)[getMetSamples(data),group.col]
   out <- alply(.data = rownames(getMet(data)), .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth(probe = x,
                                 percentage = percentage,
                                 meth = assay(getMet(data))[x,],
-                                groups = pData(data)[getMetSamples(data),group.col],
+                                groups = groups.info,
                                 group1 = group1,
                                 test = test,
                                 group2 = group2,
-                                Top.m=Top.m)},
+                                Top.m = Top.m)},
                .progress = "text", .parallel = parallel
   )
   out <- do.call(rbind,out)
@@ -228,7 +229,7 @@ get.diff.meth <- function(data,
               row.names=FALSE)
   }
   
-  result <- out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif &  !is.na(out$adjust.p),]
+  result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif &  !is.na(out$adjust.p),]
   if(nrow(result) == 0 ) {
     message("No relevant probes found")
   } else {
