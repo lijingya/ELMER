@@ -562,9 +562,10 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "getPair")
 This step is to identify enriched motif in a set of probes which is carried out by
 function get.enriched.motif.
 
-The build in data Probes.motif is generated using FIMO with a p-value < 1e–4 
-to scan a +/- 250bp region around each probe using Factorbook motif position weight 
-matrices (PWMs) and Jasper core human motif PWMs generated from the R package MotifDb. 
+The build in data Probes.motif is generated using HOMER with a p-value < 1e–4 
+to scan a +/- 250bp region around each probe using HOmo sapiens 
+COmprehensive MOdel COllection (\href{http://hocomoco.autosome.ru/}{HOCOMOCO}) v10  position
+weight matrices (PWMs). 
 For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given experiment 
 group), a motif enrichment Odds Ratio and a 95% confidence interval were 
 calculated using following formulas:
@@ -610,14 +611,14 @@ Sig.probes.paired <- read.csv("./ELMER.example/Result/LUSC/getPair.hypo.pairs.si
 head(Sig.probes.paired) # significantly hypomethylated probes with putative target genes
 
 enriched.motif <- get.enriched.motif(data = data,
-                                     min.motif.quality = "C",
+                                     min.motif.quality = "B",
                                      probes=Sig.probes.paired, 
                                      dir.out="./ELMER.example/Result/LUSC", 
                                      label="hypo",
                                      min.incidence = 10,
                                      lower.OR = 1.1)
 names(enriched.motif)  # enriched motifs
-head(enriched.motif["TP53"]) ## probes in the given set that have TP53 motif.
+head(enriched.motif["P73_HUMAN.H10MO.A"]) ## probes in the given set that have TP53 motif.
 
 # get.enriched.motif automatically save output files. 
 # getMotif.hypo.enriched.motifs.rda contains enriched motifs and the probes with the motif. 
@@ -717,7 +718,7 @@ with certain motif. Figure \ref{fig:figure3}
 load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(data,
              byTF=list(TF=c("TP53","TP63","TP73"),
-                       probe=enriched.motif[["TP53"]]), 
+                       probe=enriched.motif[["P73_HUMAN.H10MO.A"]]), 
              category="definition",
              save=TRUE,lm_line=TRUE)
 ```
@@ -761,7 +762,7 @@ of TFs expression level with average DNA methylation level at sites with a given
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
 TF.rank.plot(motif.pvalue=TF.meth.cor, 
-             motif="TP53",
+             motif="P73_HUMAN.H10MO.A",
              TF.label=list(TP53=c("TP53","TP63","TP73")),
              save=FALSE) 
 ```
