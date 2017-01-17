@@ -501,7 +501,6 @@ lm_eqn = function(df,Dep,Exp){
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
-#' @importFrom rvest %>%
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if(genome == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
@@ -538,7 +537,6 @@ txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
-#' @importFrom rvest %>%
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if (genome == "hg19"){
@@ -725,7 +723,7 @@ prepare_object <- function(){
 #' @description This function will use TF Class database to create the object
 #' that maps for each TF the members of its family. TF in the same family have 
 #' high correlared PWM.
-#' @importFrom rvest html_table
+#' @importFrom rvest html_table  %>%
 #' @importFrom xml2 read_html 
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){

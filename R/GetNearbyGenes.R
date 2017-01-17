@@ -150,7 +150,6 @@ NearGenes <- function (Target=NULL,
 #' distance with target and side to which the gene locate to the target.
 #' @export
 #' @importFrom GenomicRanges strand follow distance 
-#' @importFrom pbapply pbsapply
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
 #' @importFrom SummarizedExperiment rowRanges

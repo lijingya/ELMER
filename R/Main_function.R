@@ -3,7 +3,6 @@
 #' get.feature.probe is a function to select the probes falling into 
 #' distal feature regions or promoter regions.
 #' @importFrom GenomicRanges promoters 
-#' @importFrom minfi getAnnotation
 #' @description This function selects the probes on HM450K that either overlap 
 #' distal biofeatures or TSS promoter. 
 #' @param promoter A logical.If TRUE, function will ouput the promoter probes.
@@ -883,7 +882,6 @@ get.enriched.motif <- function(data,
 #' The second file is getTF.hypo.TFs.with.motif.pvalue.rda (XX depends on option label). 
 #' This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column). 
 #' If save is false, a data frame which contains the same content with the first file will be reported.
-#' @importFrom pbapply pbsapply
 #' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
 #' @return 
