@@ -4,7 +4,7 @@
 \alias{get.feature.probe}
 \title{get.feature.probe to select probes within promoter regions or distal regions.}
 \usage{
-get.feature.probe(feature, TSS, genome = "hg38", platform = "450K",
+get.feature.probe(feature, TSS, genome = "hg38", met.platform = "450K",
   TSS.range = list(upstream = 2000, downstream = 2000), promoter = FALSE,
   rm.chr = NULL)
 }
@@ -20,7 +20,7 @@ be used as default (see detail). User can specify their own preference TSS annot
 
 \item{genome}{Genome  GENCODE}
 
-\item{platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
+\item{met.platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
 
 \item{TSS.range}{A list specify how to define promoter regions. 
 Default is upstream =2000bp and downstream=2000bp.}

@@ -6,7 +6,7 @@
 \usage{
 createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
   filter.probes = NULL, filter.genes = NULL, met.platform = "450k",
-  genome = NULL, TCGA = FALSE)
+  genome = NULL, save = TRUE, save.filename, TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -30,6 +30,10 @@ See \code{\link{get.feature.probe}} function.}
 \item{filter.genes}{List of genes ensemble ids to filter from object}
 
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
+
+\item{save}{If TRUE, MAE object will be saved into a file named as the argument save.file if this was set, otherwise as mae_genome_met.platform.rda.}
+
+\item{save.filename}{Name of the rda file to save the object (must end in .rda)}
 
 \item{TCGA}{A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 TRUE indicates data is from TCGA and sample section will automatically filled in.}

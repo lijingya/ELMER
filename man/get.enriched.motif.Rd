@@ -9,6 +9,11 @@ get.enriched.motif(probes.motif, probes,
                    dir.out = "./", label = NULL, save=TRUE)
 }
 \arguments{
+\item{data}{A multi Assay Experiment from  \code{\link{createMAE}} function.
+If set and probes.motif/background probes are missing this will be used to get 
+this other two arguments correctly. This argument is not require, you can set probes.motif and 
+the backaground.probes manually.}
+
 \item{probes.motif}{A matrix contains motifs occurrence within probes regions. Probes.motif in 
 \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif}}).}
 
@@ -24,9 +29,15 @@ Special S quality marks the single-box motifs (secondary motif).
 Source: http://hocomoco.autosome.ru/help#description_quality_score
 More information: \url{http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8}}
 
+\item{background.probes}{A vector lists name of probes which are considered as 
+background for motif.enrichment  calculation (see detail).}
+
 \item{lower.OR}{A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
 The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
 are the significantly enriched motifs (detail see reference).}
+
+\item{min.incidence}{A non-negative integer specifies the minimum incidence of motif in the given probes set. 
+10 is default.}
 
 \item{dir.out}{A path. Specifies the directory for outputs. Default is current directory}
 
@@ -34,12 +45,6 @@ are the significantly enriched motifs (detail see reference).}
 
 \item{save}{If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
 getMotif.XX.motif.enrichment.csv (see detail).}
-
-\item{background.probesA}{vector lists name of probes which are considered as 
-background for motif.enrichment  calculation (see detail).}
-
-\item{min.incidenceA}{non-negative integer specifies the minimum incidence of motif in the given probes set. 
-10 is default.}
 }
 \value{
 A list contains enriched motifs with the probes regions harboring the motif.

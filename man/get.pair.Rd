@@ -21,8 +21,9 @@ samples used to link probes to genes. Default is 0.2.}
 
 \item{permu.dir}{A path where the output of permuation will be.}
 
-\item{Pe}{A number specify the empircal pvalue cutoff for defining signficant pairs.
-Default is 0.001
+\item{pvalue}{A number specify the pvalue cutoff for defining signficant pairs.
+Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
+Otherwise  it will select the significant P value (adjusted P value by BH) cutoff.
 @param portion A number specify the cut point for methylated and unmethylated.
 Default is 0.3.
 @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
@@ -48,10 +49,10 @@ and getPair.XX.pairs.significant.csv (see detail).
 data(elmer.data.example)
 nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                          geneAnnot=getExp(data))
-Hypo.pair <-get.pair(data=data,
+Hypo.pair <- get.pair(data=data,
                      nearGenes=nearGenes,
                      permu.size=5,
-                     Pe = 0.2,
+                     pvalue = 0.2,
                      dir.out="./",
                      label= "hypo")
 }

@@ -4,9 +4,12 @@
 \alias{GetNearGenes}
 \title{GetNearGenes to collect nearby genes for one locus.}
 \usage{
-GetNearGenes(geneAnnot = NULL, TRange = NULL, geneNum = 20, cores = 1)
+GetNearGenes(data = NULL, probe = NULL, geneAnnot = NULL, TRange = NULL,
+  geneNum = 20, cores = 1)
 }
 \arguments{
+\item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
+
 \item{geneAnnot}{A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 human genome.}
 
@@ -18,6 +21,9 @@ each side of targets (number shoule be even) Default to 20.}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel process.
 Default is 1: no parallel process.}
+
+\item{probes}{Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+object in the data argument object)}
 }
 \value{
 A data frame of nearby genes and information: genes' IDs, genes' symbols, 
@@ -25,6 +31,8 @@ distance with target and side to which the gene locate to the target.
 }
 \description{
 GetNearGenes is a function to collect equal number of gene on each side of one locus.
+It can receite either multi Assay Experiment with both DNA methylation and gene Expression matrix
+and the names of probes to select nearby genes, or it can receive two granges objects TRange and geneAnnot.
 }
 \examples{
 geneAnnot <- txs(TSS=list(upstream=0, downstream=0))

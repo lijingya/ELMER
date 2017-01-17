@@ -9,7 +9,7 @@
 #' @param promoter A logical.If TRUE, function will ouput the promoter probes.
 #' If FALSE, function will ouput the distal probes overlaping with features. The 
 #' default is FALSE.
-#' @param platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
+#' @param met.platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
 #' @param genome Genome  GENCODE
 #' 
 #' @param feature A GRange object containing biofeature coordinate such as 
@@ -51,11 +51,11 @@
 get.feature.probe <- function(feature,
                               TSS,
                               genome = "hg38",
-                              platform = "450K",
+                              met.platform = "450K",
                               TSS.range=list(upstream=2000,downstream=2000),
                               promoter=FALSE,
                               rm.chr=NULL){
-  probe <- getInfiniumAnnotation(toupper(platform),genome)
+  probe <- getInfiniumAnnotation(toupper(met.platform),genome)
   # We will rmeove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
   probe <- probe[!probe$MASK.mapping,] # remove masked probes
@@ -81,10 +81,10 @@ get.feature.probe <- function(feature,
       if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
       if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
-      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]  
-    }else if(is(feature,"GRange")){             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-    }else{
+    } else if(is(feature,"GRange")) {             
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+    } else {
       stop("feature is not GRange object.")
     }
   } else {
@@ -183,7 +183,7 @@ get.diff.meth <- function(data,
     if(length(unique(pData(data)[,group.col]))<2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
     } else if(length(unique(pData(data)[,group.col])) > 2){
-      stop("Please set group1 and group2 columns. We found more than one and we cannot choose it automatically.")
+      stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
     } else {
       # TO be changed
       groups <- pData(data)[,group.col]
@@ -237,7 +237,6 @@ get.diff.meth <- function(data,
   return(result)  
 }
 
-
 ## TCGA pipe don't specify dir.out
 #' get.pair to predict enhancer-gene linkages.
 #' @description 
@@ -258,8 +257,9 @@ get.diff.meth <- function(data,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 1000.
 #' @param permu.dir A path where the output of permuation will be. 
-#' @param Pe A number specify the empircal pvalue cutoff for defining signficant pairs.
-#'  Default is 0.001
+#' @param pvalue A number specify the pvalue cutoff for defining signficant pairs.
+#'  Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
+#'  Otherwise  it will select the significant P value (adjusted P value by BH) cutoff.
 #'  @param portion A number specify the cut point for methylated and unmethylated.
 #'  Default is 0.3.
 #'  @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
@@ -278,10 +278,10 @@ get.diff.meth <- function(data,
 #' data(elmer.data.example)
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 #'                          geneAnnot=getExp(data))
-#' Hypo.pair <-get.pair(data=data,
+#' Hypo.pair <- get.pair(data=data,
 #'                      nearGenes=nearGenes,
 #'                      permu.size=5,
-#'                      Pe = 0.2,
+#'                      pvalue = 0.2,
 #'                      dir.out="./",
 #'                      label= "hypo")
 get.pair <- function(data,
@@ -290,8 +290,9 @@ get.pair <- function(data,
                      percentage=0.2,
                      permu.size=10000,
                      permu.dir=NULL, 
-                     Pe=0.001,
+                     pvalue = 0.001,
                      dir.out="./",
+                     calculate.empirical.p = FALSE,
                      diffExp=FALSE,
                      cores=1,
                      portion = 0.3, 
@@ -328,27 +329,35 @@ get.pair <- function(data,
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
-  #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
-  GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
-  message(paste("Calculating Pr (random probe - gene). Permutating",permu.size, "probes for each nearby gene"))
-  # get permutation
-  permu <- get.permu(data,
-                     geneID=GeneID, 
-                     percentage=percentage, 
-                     rm.probes=names(nearGenes), 
-                     permu.size=permu.size, 
-                     portion = portion,
-                     permu.dir=permu.dir,
-                     cores=cores)
-  # Get empirical p-value
-  Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
-  
-  Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
-  if(save) write.csv(Probe.gene.Pe, 
-                     file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
-                     row.names=FALSE)
-  selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
-  
+  if(calculate.empirical.p){
+    #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
+    GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
+    message(paste("Calculating Pr (random probe - gene). Permutating",permu.size, "probes for each nearby gene"))
+    # get permutation
+    permu <- get.permu(data,
+                       geneID=GeneID, 
+                       percentage=percentage, 
+                       rm.probes=names(nearGenes), 
+                       permu.size=permu.size, 
+                       portion = portion,
+                       permu.dir=permu.dir,
+                       cores=cores)
+    # Get empirical p-value
+    Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
+    
+    Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
+    if(save) write.csv(Probe.gene.Pe, 
+                       file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+                       row.names=FALSE)
+    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < pvalue & !is.na(Probe.gene.Pe$Pe),]
+  } else {
+    Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
+    Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
+    if(save) write.csv(Probe.gene, 
+                       file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+                       row.names=FALSE)
+    selected <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue & !is.na(Probe.gene$Raw.p.adjust),]
+  }
   if(diffExp){
     ## calculate differential expression between two groups.
     Exp <- getExp(mee, geneID = unique(selected$GeneID))
@@ -370,7 +379,7 @@ get.pair <- function(data,
                      row.names=FALSE)
   invisible(gc())
   return(selected)
-}
+  }
 
 ### permutation
 #permu.size can be all which mean all the usable probes.
@@ -630,16 +639,20 @@ promoterMeth <- function(data,
 #' get.enriched.motif(probes.motif, probes, 
 #'                    background.probes, lower.OR = 1.1, min.incidence = 10, 
 #'                    dir.out = "./", label = NULL, save=TRUE)
+#' @param data A multi Assay Experiment from  \code{\link{createMAE}} function.
+#' If set and probes.motif/background probes are missing this will be used to get 
+#' this other two arguments correctly. This argument is not require, you can set probes.motif and 
+#' the backaground.probes manually.
 #' @param probes.motif A matrix contains motifs occurrence within probes regions. Probes.motif in 
 #' \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif}}).
 #' @param probes A vector lists the name of probes to define the set of probes in which motif enrichment
 #' OR and confidence interval will be calculated.
-#' @param background.probesA vector lists name of probes which are considered as 
+#' @param background.probes A vector lists name of probes which are considered as 
 #' background for motif.enrichment  calculation (see detail).
 #' @param lower.OR A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
 #' The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
 #' are the significantly enriched motifs (detail see reference).
-#' @param min.incidenceA non-negative integer specifies the minimum incidence of motif in the given probes set. 
+#' @param min.incidence A non-negative integer specifies the minimum incidence of motif in the given probes set. 
 #' 10 is default.
 #' @param min.motif.quality Minimum motif quality score to consider. 
 #' Possible valules: A, B (default), C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all) 
@@ -690,7 +703,8 @@ promoterMeth <- function(data,
 #'                                      probes=probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
-get.enriched.motif <- function(probes.motif, 
+get.enriched.motif <- function(data,
+                               probes.motif, 
                                probes,
                                min.motif.quality = "B",
                                background.probes,
@@ -700,16 +714,25 @@ get.enriched.motif <- function(probes.motif,
                                label=NULL,
                                save=TRUE){
   if(missing(probes.motif)){
-    stop("Please set probes.motif argument. See ELMER data")
+    if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
+    file <- paste0("Probes.motif.",metadata(mae)$genome,".",metadata(mae)$met.platform)
+    message("Loading object: ",file)
+    newenv <- new.env()
+    data(file, package = "ELMER.data",envir=newenv)
+    probes.motif <- get(ls(newenv)[1],envir=newenv)   
   }  
   all.probes.TF <- probes.motif
   ## here need to be add motif search part.
   if(missing(probes)) stop("probes option should be specified.")
   if(missing(background.probes)){
-    if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
+    if(!missing(data)) {
+      background.probes <- as.character(names(getMet(data)))
+    } else if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
       background.probes <- get(load(sprintf("%s/probeInfo_feature_distal.rda",dir.out)))
       background.probes <- as.character(names(background.probes))
-    }else{
+    } else {
+      message("backaground.probes argument is missing. We will use all probes as background, ", 
+              "but for enhancer study, it is better to use probes within distal enhancer probes as background.probes.")
       background.probes <- rownames(all.probes.TF)
     }
   }

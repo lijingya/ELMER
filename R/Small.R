@@ -18,6 +18,8 @@
 #'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
 #'  See \code{\link{get.feature.probe}} function.
 #' @param filter.genes List of genes ensemble ids to filter from object  
+#' @param save If TRUE, MAE object will be saved into a file named as the argument save.file if this was set, otherwise as mae_genome_met.platform.rda.
+#' @param save.filename Name of the rda file to save the object (must end in .rda)
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
@@ -139,6 +141,8 @@ createMAE <- function (exp,
                        filter.genes = NULL,
                        met.platform = "450k",
                        genome = NULL,
+                       save = TRUE,
+                       save.filename,
                        TCGA = FALSE) {
   
   if(missing(genome)) stop("Please specify the genome (hg38, hg19)")
@@ -146,7 +150,6 @@ createMAE <- function (exp,
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
-  
   
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
@@ -187,9 +190,6 @@ createMAE <- function (exp,
         values(exp) <- cbind(values(exp),extra)
       } else {
         stop("Please the gene expression matrix should receive ENSEMBLE IDs")
-        #extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$external_gene_name),required.cols])
-        #colnames(extra) <- required.cols
-        #values(exp) <- cbind(values(exp),extra)
       }
     }
   } 
@@ -218,7 +218,7 @@ createMAE <- function (exp,
                                                  "Gene expression" = exp),
                                 pData = pData,   
                                 sampleMap = sampleMap,
-                                metadata = list(TCGA= TRUE, genome = genome))
+                                metadata = list(TCGA= TRUE, genome = genome, met.platform = met.platform ))
   } else {
     
     if(missing(pData)){
@@ -249,7 +249,7 @@ createMAE <- function (exp,
                                                    "Gene expression" = exp),
                                   pData = pData,
                                   sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE, genome = genome))
+                                  metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
     } else {
       # Check that we have the same number of samples
       if(!all(c("primary","colname") %in% colnames(sampleMap))) 
@@ -283,8 +283,12 @@ createMAE <- function (exp,
                                                    "Gene expression" = exp),
                                   pData = pData,
                                   sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE, genome = genome))
+                                  metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
     }
+  }
+  if(save) {
+  if(missing(save.filename)) save.filename <- paste0("mae_",genome,"_",met.platform,".rda")
+    save(mae, file = save.filename,compress = "zx")
   }
   return(mae)
 }

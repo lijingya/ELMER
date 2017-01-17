@@ -133,6 +133,11 @@ NearGenes <- function (Target=NULL,
 #' GetNearGenes to collect nearby genes for one locus.
 #' @description 
 #' GetNearGenes is a function to collect equal number of gene on each side of one locus.
+#' It can receite either multi Assay Experiment with both DNA methylation and gene Expression matrix
+#' and the names of probes to select nearby genes, or it can receive two granges objects TRange and geneAnnot.
+#' @param data A multi Assay Experiment with both DNA methylation and gene Expression objects
+#' @param probes Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+#' object in the data argument object)
 #' @param geneAnnot A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 #' human genome.
 #' @param geneNum A number determines how many gene will be collected totally. 
@@ -158,11 +163,17 @@ NearGenes <- function (Target=NULL,
 #' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
 #' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
-GetNearGenes <- function(geneAnnot=NULL,
-                         TRange=NULL,
-                         geneNum=20,
-                         cores=1){
-  
+GetNearGenes <- function(data = NULL,
+                         probe = NULL,
+                         geneAnnot = NULL,
+                         TRange = NULL,
+                         geneNum = 20,
+                         cores = 1){
+  if(!is.null(data)){
+    if(is.null(probe)) stop("Please set the probe argument (names of probes to select nearby genes)")
+    TRange <- subset(getMet(data), rownames(getMet(mae)) %in% probe)
+    geneAnnot <- getExp(mae)
+  }    
   if(is.null(TRange)){
     stop("TRange must be defined")
   }
