@@ -255,8 +255,9 @@ get.diff.meth <- function(data,
 #'  Default is 1: don't use parallel process.
 #' @param percentage A number ranges from 0 to 0.5 specifying the percentage of 
 #' samples used to link probes to genes. Default is 0.2.
-#' @param permu.size A number specify the times of permuation. Default is 1000.
-#' @param permu.dir A path where the output of permuation will be. 
+#' @param permu.size A number specify the times of permuation. Default is 10000.
+#' @param permu.dir A path where the output of permutation will be. 
+#' @param calculate.empirical.p A logic. It TRUE (default) execute the permutation step, if FALSE uses the adjusted raw p-value to select the significant pairs.
 #' @param pvalue A number specify the pvalue cutoff for defining signficant pairs.
 #'  Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
 #'  Otherwise  it will select the significant P value (adjusted P value by BH) cutoff.
@@ -285,7 +286,6 @@ get.diff.meth <- function(data,
 #'                      dir.out="./",
 #'                      label= "hypo")
 get.pair <- function(data,
-                     probes, # necessary ?
                      nearGenes,
                      percentage=0.2,
                      permu.size=10000,
@@ -332,23 +332,23 @@ get.pair <- function(data,
   if(calculate.empirical.p){
     #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
     GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
-    message(paste("Calculating Pr (random probe - gene). Permutating",permu.size, "probes for each nearby gene"))
+    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for each nearby gene"))
     # get permutation
     permu <- get.permu(data,
-                       geneID=GeneID, 
-                       percentage=percentage, 
-                       rm.probes=names(nearGenes), 
-                       permu.size=permu.size, 
-                       portion = portion,
-                       permu.dir=permu.dir,
-                       cores=cores)
+                       geneID     = GeneID, 
+                       percentage = percentage, 
+                       rm.probes  = names(nearGenes), 
+                       permu.size = permu.size, 
+                       portion    = portion,
+                       permu.dir  = permu.dir,
+                       cores      = cores)
     # Get empirical p-value
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
     
     Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
     if(save) write.csv(Probe.gene.Pe, 
                        file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
-                       row.names=FALSE)
+                       row.names = FALSE)
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < pvalue & !is.na(Probe.gene.Pe$Pe),]
   } else {
     Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")

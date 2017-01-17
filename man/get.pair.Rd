@@ -17,9 +17,9 @@ function or path of rda file containing output of GetNearGenes function.}
 \item{percentage}{A number ranges from 0 to 0.5 specifying the percentage of 
 samples used to link probes to genes. Default is 0.2.}
 
-\item{permu.size}{A number specify the times of permuation. Default is 1000.}
+\item{permu.size}{A number specify the times of permuation. Default is 10000.}
 
-\item{permu.dir}{A path where the output of permuation will be.}
+\item{permu.dir}{A path where the output of permutation will be.}
 
 \item{pvalue}{A number specify the pvalue cutoff for defining signficant pairs.
 Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
@@ -30,6 +30,8 @@ Default is 0.3.
 test whether putative target gene are differentially expressed between two groups.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
+
+\item{calculate.empirical.p}{A logic. It TRUE (default) execute the permutation step, if FALSE uses the adjusted raw p-value to select the significant pairs.}
 
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}

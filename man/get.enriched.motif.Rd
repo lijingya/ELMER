@@ -87,6 +87,7 @@ enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
                                      min.incidence=2, label="hypo")
  # If the MAE is set, the background and the probes.motif will be automatically set                                     
 enriched.motif <- get.enriched.motif(data = data,
+                                     min.motif.quality = "DS",
                                      probes=probes,
                                      min.incidence=2, 
                                      label="hypo")

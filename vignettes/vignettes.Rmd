@@ -366,7 +366,7 @@ results and figures.
 
 ## Selection of probes within biofeatures
 
-This step is to select HM450K probes, which locate far from TSS (at least 2Kb away) 
+This step is to select HM450K/EPIC probes, which locate far from TSS (at least 2Kb away) 
 and within distal enhancer regions. These probes are called distal enhancer probes.
 For distal enhancer regions, we constructed a comprehensive list of putative enhancers 
 combining REMC, ENCODE and FANTOM5 data. Enhancers were identified using ChromHMM 
@@ -375,8 +375,9 @@ genomic elements labeled as EnhG1, EnhG2, EnhA1 or EnhA2 (representing intergeni
 intragenic active enhancers) in any of the 98 cell types, resulting in a total of 
 389,967 non-overlapping enhancer regions. Additionally, FANTOM5 enhancers (43,011) 
 identified by eRNAs for 400 distinct cell types were added to this list. 
-Be default, this comprehensive list of putative enhancer and TSS annotated by GENCODE V15
-and UCSC-gene will be used to select distal enhancer probes. But user can use their 
+Be default, this comprehensive list of putative enhancer and TSS annotated by GENCODE,
+which is programatically accessed using `r Biocpkg("biomaRt")` to get its last version,
+will be used to select distal enhancer probes. But user can use their 
 own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
 
 
@@ -473,7 +474,7 @@ For each enhancer probe with differential methylation, the closest 10 upstream
 genes and the closest 10 downstream genes were tested for correlation between 
 methylation of the probe and expression of the gene. To select these genes, 
 the probe-gene distance was defined as the distance from the probe to a transcription 
-start site specified by the UCSC gene annotation. Thus, exactly 20 statistical 
+start site specified by the GECODE gene annotation. Thus, exactly 20 statistical 
 tests were performed for each probe, as follows. For each probe-gene pair, 
 the samples (all experiment samples and control samples) were divided into two 
 groups: the M group, which consisted of the upper methylation quintile (the 20%
@@ -492,7 +493,7 @@ as follows (implemented in the get.permu function of the `r Biocpkg("ELMER")` pa
 The gene in the pair was held constant, and x random methylation probes were 
 used to perform the same one-tailed U test, generating a set of x permutation
 p-values (Pp). We chose the x random probes only from among those that were 
-“distal” (greater than 2kb from an annotated transcription start site), in order 
+"distal" (greater than 2kb from an annotated transcription start site), in order 
 to make these null-model probes qualitatively similar to the probe being tested. 
 An empirical p-value Pe value was calculated using the following formula 
 (which introduces a pseudo-count of 1):
@@ -505,7 +506,7 @@ It is recommended to use multiple cores for this step. Default permutation time
 is 1000 which may need 12 hrs by 4 cores. However 10,000 permutations is recommended 
 if high confidence results are desired but it may cost 2 days.
 
-If save paramter of get.pair function is true, two cvs files will be output. 
+If save parameter of get.pair function is true, two cvs files will be output. 
 If save parameter is false, a data frame with the same contect as the second file
 mentioned as below will be output.
 
@@ -525,6 +526,21 @@ For example, L3 means the gene is the number 3 closest gene from the left side o
 5. Raw.p:  P value from the Mann-Whitney U test for each pair.
 6. Pe: the empirical P value for each pair.
 
+The main arguments of this function are:
+1. data: A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.
+2. nearGenes:	Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.
+3. percentage:	A number ranges from 0 to 0.5 specifying the percentage of samples used to link probes to genes. Default is 0.2.
+4. permu.size:	A number specify the times of permuation. Default is 10000.
+5. permu.dir	A path where the output of permutation will be saved
+6. calculate.empirical.p: Execute the permutation step or use the adjusted raw p-value to select the significant pairs.
+7. pvalue:	A number specify the pvalue cutoff for defining signficant pairs. Default is 0.001. 
+If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff as explained before. 
+Otherwise it will select the significant P value (adjusted P value by BH) cutoff. 
+8. portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
+9. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.
+10. dir.out	A path specify the directory for outputs. Default is current directory
+11. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
+12. label:	A character labels the outputs.
 
 ```{r,eval=TRUE, message=FALSE}
 ### identify target gene for significantly hypomethylated probes.
@@ -564,8 +580,14 @@ function get.enriched.motif.
 
 The build in data Probes.motif is generated using HOMER with a p-value < 1e–4 
 to scan a +/- 250bp region around each probe using HOmo sapiens 
-COmprehensive MOdel COllection (\href{http://hocomoco.autosome.ru/}{HOCOMOCO}) v10  position
-weight matrices (PWMs). 
+COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10  position
+weight matrices (PWMs). HOCOMOCO offers 540 PMWs each has a quality rating from A to D where 
+A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
+limited applications for quantitative analyses. By default only quality A and B will be used for the 
+Motif enrichment analysis, but the minimun quality score can be seleected by the user.
+(Addtional information [http://hocomoco.autosome.ru/help#description_quality_score](Source)  
+[http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8](More information)). 
+
 For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given experiment 
 group), a motif enrichment Odds Ratio and a 95% confidence interval were 
 calculated using following formulas:
@@ -611,7 +633,7 @@ Sig.probes.paired <- read.csv("./ELMER.example/Result/LUSC/getPair.hypo.pairs.si
 head(Sig.probes.paired) # significantly hypomethylated probes with putative target genes
 
 enriched.motif <- get.enriched.motif(data = data,
-                                     min.motif.quality = "B",
+                                     min.motif.quality = "B", # Default: options A, B, C, D
                                      probes=Sig.probes.paired, 
                                      dir.out="./ELMER.example/Result/LUSC", 
                                      label="hypo",
@@ -674,11 +696,11 @@ TF.rank.plot.
 
 ```{r,eval=TRUE, message=FALSE}
 ## identify regulatory TF for the enriched motifs
-TF <- get.TFs(data=data, 
-              enriched.motif=enriched.motif,
-              dir.out="./ELMER.example/Result/LUSC", 
-              cores=1, 
-              label= "hypo")
+TF <- get.TFs(data = data, 
+              enriched.motif = enriched.motif,
+              dir.out = "./ELMER.example/Result/LUSC", 
+              cores = 1, 
+              label = "hypo")
 
 # get.TFs automatically save output files. 
 # getTF.hypo.TFs.with.motif.pvalue.rda contains statistics for all TF with average 
