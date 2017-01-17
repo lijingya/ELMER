@@ -221,8 +221,10 @@ When TCGA data were used, group labels (control and experiment) will be automati
 ```{r, message=FALSE}
 library(MultiAssayExperiment)
 data <- createMAE(exp = GeneExp, 
-                  met = Meth, 
+                  met = Meth,
+                  met.platform = "450K",
                   genome = "hg19",
+                  save = FALSE,
                   TCGA = TRUE)
 data
 pData(data)[1:3,1:5]
@@ -248,6 +250,7 @@ phenotype.data <- data.frame(row.names = colnames(not.tcga.exp),
 data.hg19 <- createMAE(exp = not.tcga.exp, 
                        met =  not.tcga.met, 
                        TCGA = FALSE, 
+                       met.platform = "450K",
                        genome = "hg19", 
                        pData = phenotype.data)
 data.hg19
@@ -263,6 +266,8 @@ phenotype.data <- data.frame(row.names = colnames(not.tcga.met),
 data.hg38 <- createMAE(exp = not.tcga.exp, 
                        met =  not.tcga.met, 
                        TCGA = FALSE, 
+                       save = FALSE,
+                       met.platform = "450K",
                        genome = "hg38", 
                        pData = phenotype.data)
 data.hg38
@@ -288,7 +293,6 @@ is the ensembl gene annotation fetching from `r Biocpkg("biomaRt")` by `r Biocpk
 function.
 
 ```{r}
-library(SummarizedExperiment)
 rowRanges(getExp(data))
 ```
 
@@ -306,6 +310,8 @@ function will keep them consistent when it generates the  Multi Assay Experiment
 data <- createMAE(exp = GeneExp, 
                   met = Meth,
                   genome = "hg19",
+                  save = FALSE,
+                  met.platform = "450K",
                   TCGA = TRUE)
 
 # For TGCA data 1-12 represents the patient and 1-15 represents the sample ID (i.e. primary solid tumor samples )
@@ -323,26 +329,21 @@ You can also use your own data and annotations to create  Multi Assay Experiment
 
 ```{r, message=FALSE}
 # NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
-                      sample2 = c("TP53"=1.6,"PTEN"=2.3))
+ gene.exp <- DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                        sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3)
+  )
 dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
                      sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
 mae <- createMAE(exp = gene.exp,
                  met = dna.met,
+                 save = FALSE,
+                 met.platform = "450K",
                  pData = sample.info, 
                  genome = "hg38") 
 
 # NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
-                      sample2.exp = c("TP53"=1.6,"PTEN"=2.3))
-
-dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
-                     sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-
-sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-
 rownames(sample.info) <- c("sample1","sample2")
 
 sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
@@ -352,6 +353,8 @@ mae <- createMAE(exp = gene.exp,
                  met = dna.met, 
                  sampleMap = sampleMap, 
                  pData = sample.info, 
+                 save = FALSE,
+                 met.platform = "450K",
                  genome = "hg38") 
 ```
 # Illustration of ELMER analysis steps
@@ -380,7 +383,7 @@ own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
 ```{r}
 #get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
 #enhancers on chromosome 1
-Probe <- get.feature.probe(genome = "hg19",platform =  "450K", rm.chr=paste0("chr",c(2:22,"X","Y")))
+Probe <- get.feature.probe(genome = "hg19", met.platform =  "450K", rm.chr=paste0("chr",c(2:22,"X","Y")))
 save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda")
 ```
 
@@ -433,6 +436,8 @@ library(MultiAssayExperiment)
 ## createMAE can take path as input.
 data <- createMAE(exp = "./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda", 
                   met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
+                  save = FALSE,
+                  met.platform = "450K",
                   genome = "hg19",
                   TCGA = TRUE)
 colnames(pData(data))
@@ -529,17 +534,15 @@ Sig.probes <- read.csv("./ELMER.example/Result/LUSC/getMethdiff.hypo.probes.sign
 head(Sig.probes)  # significantly hypomethylated probes
 
 ## Collect nearby 20 genes for Sig.probes
-nearGenes <-GetNearGenes(TRange=getMet(data)[Sig.probes,],
-                         geneAnnot=getExp(data),
-                         cores=detectCores()/2)
+nearGenes <- GetNearGenes(data = data,probe = Sig.probes, cores=detectCores()/2)
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
-                      probes=Sig.probes,
-                      nearGenes=nearGenes,
-                      permu.dir="./ELMER.example/Result/LUSC/permu",
-                      permu.size=200,
-                      Pe = 0.01,
+                      probes = Sig.probes,
+                      nearGenes = nearGenes,
+                      permu.dir = "./ELMER.example/Result/LUSC/permu",
+                      permu.size = 200,
+                      pvalue = 0.01,
                       dir.out="./ELMER.example/Result/LUSC",
                       cores=detectCores()/2,
                       label= "hypo")
@@ -560,7 +563,7 @@ This step is to identify enriched motif in a set of probes which is carried out 
 function get.enriched.motif.
 
 The build in data Probes.motif is generated using FIMO with a p-value < 1e–4 
-to scan a +/- 100bp region around each probe using Factorbook motif position weight 
+to scan a +/- 250bp region around each probe using Factorbook motif position weight 
 matrices (PWMs) and Jasper core human motif PWMs generated from the R package MotifDb. 
 For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given experiment 
 group), a motif enrichment Odds Ratio and a 95% confidence interval were 
@@ -606,7 +609,9 @@ Sig.probes.paired <- read.csv("./ELMER.example/Result/LUSC/getPair.hypo.pairs.si
                               stringsAsFactors=FALSE)[,1]  
 head(Sig.probes.paired) # significantly hypomethylated probes with putative target genes
 
-enriched.motif <- get.enriched.motif(probes=Sig.probes.paired, 
+enriched.motif <- get.enriched.motif(data = data,
+                                     min.motif.quality = "C",
+                                     probes=Sig.probes.paired, 
                                      dir.out="./ELMER.example/Result/LUSC", 
                                      label="hypo",
                                      min.incidence = 10,
