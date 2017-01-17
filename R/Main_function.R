@@ -206,7 +206,8 @@ get.diff.meth <- function(data,
   groups.info <- pData(data)[getMetSamples(data),group.col]
   save(data,groups.info, group1,group2, Top.m, test,file = "test.rda")
   met <- assay(getMet(data))
-  probes <- rownames(getMet(data))
+  
+  probes <- rownames(met)
   out <- alply(.data = probes, .margins = 1,
                .fun = function(x) {
                  Stat.diff.meth(probe = x,
