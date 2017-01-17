@@ -48,7 +48,7 @@ test_that("Function uses correctly the permu.dir", {
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=7,
-                        Pe = 0.2,
+                        pvalue =  0.2,
                         calculate.empirical.p = TRUE,
                         dir.out="./",
                         permu.dir = "permu_test",
