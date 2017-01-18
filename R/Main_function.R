@@ -235,7 +235,7 @@ get.diff.meth <- function(data,
   if(nrow(result) == 0 ) {
     message("No relevant probes found")
   } else {
-    message(paste0("Number of relevant probes found:", nrow(result)))
+    message(paste0("Number of relevant probes found: ", nrow(result)))
   }  
   return(result)  
 }
