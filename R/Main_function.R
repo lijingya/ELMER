@@ -225,14 +225,13 @@ get.diff.meth <- function(data,
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   if(save){
-    out <- out[!is.na(out[,diffCol]),]
     write.csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
-    write.csv(out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,],
+    write.csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
               row.names=FALSE)
   }
   
-  result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif &  !is.na(out$adjust.p),]
+  result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]
   if(nrow(result) == 0 ) {
     message("No relevant probes found")
   } else {
