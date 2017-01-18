@@ -170,11 +170,12 @@ createMAE <- function (exp,
   }
   # Add this here ?
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
-  met <- met[rowMeans(is.na(assay(met))) < met.na.cut, ]
+
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
   }
+  met <- met[rowMeans(is.na(assay(met))) < met.na.cut, ]
   
   # Select the regions from DNA methylation that overlaps enhancer.
   if(!is.null(filter.probes)){
