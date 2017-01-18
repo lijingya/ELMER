@@ -1,22 +1,29 @@
-
+#' @title Get DNA methylation object from MAE
+#' @description Get DNA methylation object from MAE
 #' @importFrom MultiAssayExperiment experiments
 #' @export
 getMet <- function(data) {
   return(experiments(data)[["DNA methylation"]])
 }
 
+#' @title Get DNA methylation object samples from MAE
+#' @description Get DNA methylation object samples from MAE
 #' @importFrom MultiAssayExperiment sampleMap
 #' @export
 getMetSamples <- function(data){
   return(sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"])
 }
 
+#' @title Get Gene expression object samples from MAE
+#' @description Get Gene expression object samples from MAE
 #' @importFrom MultiAssayExperiment sampleMap
 #' @export
 getExpSamples <- function(data){
   return(sampleMap(data)[sampleMap(data)$assay == "Gene expression","primary"])
 }
 
+#' @title Get Gene expression object from MAE
+#' @description Get Gene expression object from MAE
 #' @importFrom MultiAssayExperiment experiments
 #' @export
 getExp <- function(data) {

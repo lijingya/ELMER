@@ -2,12 +2,15 @@
 #' Stat.diff.meth
 #' @param probe A charactor specify probe name
 #' @param meth A matrix contain DNA methylation data.
-#' @param TN A vector of category of samples.
+#' @param groups A vector of category of samples.
+#' @param group1 Group 1 label in groups vector
+#' @param group2 Group 2 label in groups vector
 #' @param test A function specify which statistic test will be used.
 #' @param percentage A number specify the percentage of normal and tumor 
 #' samples used in the test.
 #' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 #' hypermethylated probe is TRUE.
+#' @importFrom stats sd t.test wilcox.test
 #' @return Statistic test results to identify differentially methylated probes.
 Stat.diff.meth <- function(probe,
                            meth,
@@ -83,6 +86,7 @@ Stat.nonpara.permu <- function(Probe,
 #' @param Top A number determines the percentage of top methylated/unmethylated samples.
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
+#' @importFrom stats wilcox.test
 #' @return U test results
 Stat.nonpara <- function(Probe,
                          NearGenes,
@@ -97,7 +101,7 @@ Stat.nonpara <- function(Probe,
   Meth_B <- mean(Meth > K, na.rm = TRUE)
   if( Meth_B >0.95 | Meth_B < 0.05 ){
     test.p <- NA
-  }else{
+  } else {
     idx <- order(Meth)
     nb <- round(length(Meth)*Top)
     unmethy <- head(idx, n = nb) 
@@ -106,31 +110,34 @@ Stat.nonpara <- function(Probe,
     if(!is.vector(Exp)){
       Exps <- Exps[,c(unmethy,methy)]
       test.p <- unlist(lapply(splitmatrix(Exp),
-                              function(x,Factor) 
-                              {wilcox.test(x[unmethy],x[methy],
+                              function(x) {
+                                wilcox.test(x[unmethy],
+                                            x[methy],
                                            alternative = "greater",
-                                           exact=FALSE)$p.value},
-                              Factor=Fa))
-    }else{
-      test.p <- wilcox.test(Exps[unmethy],Exps[methy],
+                                           exact = FALSE)$p.value}))
+    } else {
+      test.p <- wilcox.test(Exps[unmethy],
+                            Exps[methy],
                             alternative = "greater",
                             exact=FALSE)$p.value
     }
   }
   
   if(length(Gene)==1){
-    out <- data.frame(Probe=rep(Probe,length(Gene)),
-                      GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
-                      Distance=NearGenes[[Probe]]$Distance, 
-                      Sides=NearGenes[[Probe]]$Side,
-                      Raw.p=test.p, 
+    out <- data.frame(Probe    = rep(Probe,length(Gene)),
+                      GeneID   = Gene,
+                      Symbol   = NearGenes[[Probe]]$Symbol, 
+                      Distance = NearGenes[[Probe]]$Distance, 
+                      Sides    = NearGenes[[Probe]]$Side,
+                      Raw.p    = test.p, 
                       stringsAsFactors = FALSE)
   }else{
-    out <- data.frame(Probe=rep(Probe,length(Gene)),
-                      GeneID=Gene,Symbol=NearGenes[[Probe]]$Symbol, 
-                      Distance=NearGenes[[Probe]]$Distance, 
-                      Sides=NearGenes[[Probe]]$Side,
-                      Raw.p=test.p[match(Gene, names(test.p))], 
+    out <- data.frame(Probe    = rep(Probe,length(Gene)),
+                      GeneID   = Gene,
+                      Symbol   = NearGenes[[Probe]]$Symbol, 
+                      Distance = NearGenes[[Probe]]$Distance, 
+                      Sides    = NearGenes[[Probe]]$Side,
+                      Raw.p    = test.p[match(Gene, names(test.p))], 
                       stringsAsFactors = FALSE)
   }
   

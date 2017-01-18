@@ -136,7 +136,7 @@ NearGenes <- function (Target=NULL,
 #' It can receite either multi Assay Experiment with both DNA methylation and gene Expression matrix
 #' and the names of probes to select nearby genes, or it can receive two granges objects TRange and geneAnnot.
 #' @param data A multi Assay Experiment with both DNA methylation and gene Expression objects
-#' @param probes Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+#' @param probe Name of probes to get nearby genes (it should be rownames of the DNA methylation 
 #' object in the data argument object)
 #' @param geneAnnot A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 #' human genome.
@@ -190,7 +190,7 @@ GetNearGenes <- function(data = NULL,
   
   parallel <- FALSE
   if (cores > 1){
-    if (cores > detectCores()) cores <- detectCores()
+    if (cores > parallel::detectCores()) cores <- parallel::detectCores()
     registerDoParallel(cores)
     parallel = TRUE
   }

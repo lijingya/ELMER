@@ -10,7 +10,10 @@
 #' scatter.plot(data, 
 #'              byPair = list(probe = c(), gene = c()),
 #'              byProbe = list(probe = c(), geneNum = 20), 
-#               byTF = list(TF = c(), probe = c()), category = NULL, dir.out = "./", save = TRUE, ...)
+#'              byTF = list(TF = c(), probe = c()),
+#'              category = NULL,
+#'              dir.out = "./",
+#'              save = TRUE, ...)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
 #' See \code{\link{createMultiAssayExperiment function}}.
 #' @param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 

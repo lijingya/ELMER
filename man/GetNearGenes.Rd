@@ -10,6 +10,9 @@ GetNearGenes(data = NULL, probe = NULL, geneAnnot = NULL, TRange = NULL,
 \arguments{
 \item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
 
+\item{probe}{Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+object in the data argument object)}
+
 \item{geneAnnot}{A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 human genome.}
 
@@ -21,9 +24,6 @@ each side of targets (number shoule be even) Default to 20.}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel process.
 Default is 1: no parallel process.}
-
-\item{probes}{Name of probes to get nearby genes (it should be rownames of the DNA methylation 
-object in the data argument object)}
 }
 \value{
 A data frame of nearby genes and information: genes' IDs, genes' symbols, 

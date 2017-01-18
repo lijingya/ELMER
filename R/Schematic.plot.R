@@ -90,6 +90,7 @@ schematic.plot <- function(data,
   }
 }
 
+#' @importFrom grDevices rainbow
 #' @importFrom GenomicRanges seqnames
 schematic <- function(gene.gr,  
                       probe.gr, 

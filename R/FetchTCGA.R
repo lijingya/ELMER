@@ -18,7 +18,7 @@
 #'                basedir = "./Data", RNAtype = "gene", Methfilter = 0.2)
 #' @export
 #' @examples
-#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
+#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
 getTCGA <- function(disease,
                     Meth=TRUE,
                     RNA=TRUE,
@@ -138,7 +138,7 @@ getRNAseq <- function(disease,
 #' @return Download all DNA methylation from HM450K level 3 data for
 #'  the specified disease.
 #' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
-#' @usage get450K(disease, basedir = "./Data")
+#' @usage get450K(disease, basedir = "./Data", genome = "hg19", filter = 0.2)
 get450K <- function(disease, 
                     basedir="./Data",
                     filter=0.2,

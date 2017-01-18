@@ -5,7 +5,14 @@
 \title{get.permu to generate permutation results for calculation of empirical P values for
 each enhancer-gene linkage.}
 \usage{
-get.permu(data, geneID, percentage = 0.2, rm.probes = NULL, portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = 1)
+get.permu(data, 
+          geneID, 
+          percentage = 0.2, 
+          rm.probes = NULL, 
+          portion = 0.3, 
+          permu.size = 10000, 
+          permu.dir = NULL, 
+          cores = 1)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}

@@ -6,6 +6,9 @@
 \usage{
 getTF(genome.build = "hg38")
 }
+\arguments{
+\item{genome.build}{Genome reference version "hg38" or "hg19"}
+}
 \value{
 A data frame with the ensemble gene id and entrezgene and gene symbol.
 }

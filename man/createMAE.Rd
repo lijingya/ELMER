@@ -68,7 +68,11 @@ sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- c("sample1","sample2")
 sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
+mae <- createMAE(exp = gene.exp, 
+                 met = dna.met, 
+                 sampleMap = sampleMap, 
+                 pData = sample.info, 
+                 genome = "hg38") 
 \dontrun{
    # TCGA example using TCGAbiolinks
    # Testing creating MultyAssayExperiment object
@@ -118,10 +122,16 @@ mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = s
    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
    
    # Consisering it is TCGA and SE
-   mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
+   mae.hg19 <- createMAE(exp = exp.hg19, 
+                         met =  met, 
+                         TCGA = TRUE, 
+                         genome = "hg19",  
+                         filter.probes = distal.enhancer)
    values(getExp(mae.hg19))
    
-   mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
+   mae.hg38 <- createMAE(exp = exp.hg38, met = met, 
+                        TCGA = TRUE, genome = "hg38",  
+                        filter.probes = distal.enhancer)
    values(getExp(mae.hg38))
    
    # Consisering it is TCGA and not SE

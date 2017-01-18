@@ -94,6 +94,8 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'expression and DNA methylation at sites of a certain motif.
 #'@export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
+#' @importFrom graphics plot
+#' @importFrom grDevices dev.off pdf 
 #'@examples
 #' data(getTF.hypo.TFs.with.motif.pvalue)
 #' TF.rank.plot(motif.pvalue=TF.meth.cor, 

@@ -6,7 +6,11 @@
 \usage{
 scatter.plot(data, 
              byPair = list(probe = c(), gene = c()),
-             byProbe = list(probe = c(), geneNum = 20),
+             byProbe = list(probe = c(), geneNum = 20), 
+             byTF = list(TF = c(), probe = c()),
+             category = NULL,
+             dir.out = "./",
+             save = TRUE, ...)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 

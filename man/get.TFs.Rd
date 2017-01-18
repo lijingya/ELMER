@@ -4,7 +4,15 @@
 \alias{get.TFs}
 \title{get.TFs to identify regulatory TFs.}
 \usage{
-get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
+get.TFs(data, 
+          enriched.motif, 
+          TFs, 
+          motif.relavent.TFs, 
+          percentage = 0.2,
+          dir.out = "./",
+          label = NULL, 
+          cores = NULL,
+          save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}

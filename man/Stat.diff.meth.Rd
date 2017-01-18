@@ -12,6 +12,12 @@ Stat.diff.meth(probe, meth, groups, group1, group2, test = t.test,
 
 \item{meth}{A matrix contain DNA methylation data.}
 
+\item{groups}{A vector of category of samples.}
+
+\item{group1}{Group 1 label in groups vector}
+
+\item{group2}{Group 2 label in groups vector}
+
 \item{test}{A function specify which statistic test will be used.}
 
 \item{percentage}{A number specify the percentage of normal and tumor 
@@ -19,8 +25,6 @@ samples used in the test.}
 
 \item{Top.m}{A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 hypermethylated probe is TRUE.}
-
-\item{TN}{A vector of category of samples.}
 }
 \value{
 Statistic test results to identify differentially methylated probes.

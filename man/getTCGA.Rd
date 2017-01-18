@@ -35,6 +35,6 @@ getTCGA is a function to download DNA methylation, RNA expression and clinic dat
   to matrixes or data frame for further analysis.
 }
 \examples{
-getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
+getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
 }
 

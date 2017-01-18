@@ -45,9 +45,9 @@ Imports:
     magrittr, 
     readr, 
     rvest,
+    TxDb.Hsapiens.UCSC.hg38.knownGene, 
     xml2
 Suggests:
-    TxDb.Hsapiens.UCSC.hg38.knownGene, 
     parallel,
     BiocStyle,
     knitr,

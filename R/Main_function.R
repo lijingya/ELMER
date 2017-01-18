@@ -143,6 +143,7 @@ get.feature.probe <- function(feature,
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
 #' @importFrom plyr adply
+#' @importFrom stats p.adjust
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -392,7 +393,14 @@ get.pair <- function(data,
 #' pairs. Based on the permutation value, empirical P value can be calculated for the 
 #' real enhancer-gene pair (see reference).
 #' @usage 
-#' get.permu(data, geneID, percentage = 0.2, rm.probes = NULL, portion = 0.3, permu.size = 10000, permu.dir = NULL, cores = 1)
+#' get.permu(data, 
+#'           geneID, 
+#'           percentage = 0.2, 
+#'           rm.probes = NULL, 
+#'           portion = 0.3, 
+#'           permu.size = 10000, 
+#'           permu.dir = NULL, 
+#'           cores = 1)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
@@ -583,6 +591,7 @@ get.permu <- function(data,
 #'  Default is 0.2.
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
+#' @importClassesFrom utils write.csv
 #' @return A data frame contains genes whose expression significantly anti-correlated
 #' with promoter methylation.
 #' @examples 
@@ -701,6 +710,7 @@ promoterMeth <- function(data,
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' @importFrom magrittr divide_by multiply_by %>% add
 #' @importFrom plyr alply
+#' @importFrom utils data
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -714,7 +724,8 @@ promoterMeth <- function(data,
 #'                                      probes=probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence=2, label="hypo")
-#'  # If the MAE is set, the background and the probes.motif will be automatically set                                     
+#' # If the MAE is set, the background and the probes.motif will 
+#' # be automatically set                                     
 #' enriched.motif <- get.enriched.motif(data = data,
 #'                                      min.motif.quality = "DS",
 #'                                      probes=probes,
@@ -859,7 +870,16 @@ get.enriched.motif <- function(data,
 #' get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis 
 #' between the probes containing a particular motif and expression of all known TFs. If save is true, 
 #' two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
-#' @usage get.TFs(mee, enriched.motif, TFs, motif.relavent.TFs, percentage = 0.2, dir.out = "./", label = NULL, cores = NULL,save=TRUE)
+#' @usage 
+#'   get.TFs(data, 
+#'           enriched.motif, 
+#'           TFs, 
+#'           motif.relavent.TFs, 
+#'           percentage = 0.2,
+#'           dir.out = "./",
+#'           label = NULL, 
+#'           cores = NULL,
+#'           save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
 #' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
 #' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
@@ -884,6 +904,7 @@ get.enriched.motif <- function(data,
 #' If save is false, a data frame which contains the same content with the first file will be reported.
 #' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
+#' @importFrom stats na.omit
 #' @return 
 #'  Potential responsible TFs will be reported in a dataframe with 4 columns:
 #'  \itemize{
@@ -918,11 +939,11 @@ get.TFs <- function(data,
                     enriched.motif, 
                     TFs, 
                     motif.relavent.TFs,
-                    percentage=0.2,
-                    dir.out="./",
-                    label=NULL,
-                    cores=1,
-                    save=TRUE){
+                    percentage = 0.2,
+                    dir.out = "./",
+                    label = NULL,
+                    cores = 1,
+                    save = TRUE){
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){

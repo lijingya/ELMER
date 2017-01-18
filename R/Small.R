@@ -47,7 +47,11 @@
 #' rownames(sample.info) <- c("sample1","sample2")
 #' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
 #'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-#' mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg38") 
+#' mae <- createMAE(exp = gene.exp, 
+#'                  met = dna.met, 
+#'                  sampleMap = sampleMap, 
+#'                  pData = sample.info, 
+#'                  genome = "hg38") 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
 #'    # Testing creating MultyAssayExperiment object
@@ -97,10 +101,16 @@
 #'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
 #'    
 #'    # Consisering it is TCGA and SE
-#'    mae.hg19 <- createMAE(exp = exp.hg19, met =  met, TCGA = TRUE, genome = "hg19",  filter.probes = distal.enhancer)
+#'    mae.hg19 <- createMAE(exp = exp.hg19, 
+#'                          met =  met, 
+#'                          TCGA = TRUE, 
+#'                          genome = "hg19",  
+#'                          filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg19))
 #'    
-#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, TCGA = TRUE, genome = "hg38",  filter.probes = distal.enhancer)
+#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, 
+#'                         TCGA = TRUE, genome = "hg38",  
+#'                         filter.probes = distal.enhancer)
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
@@ -587,6 +597,7 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
 #' @title  Get human TF list from the UNiprot database
 #' @description This function gets the last version of human TF list from the UNiprot database
 #' @importFrom readr read_tsv
+#' @param genome.build Genome reference version "hg38" or "hg19"
 #' @return A data frame with the ensemble gene id and entrezgene and gene symbol.
 getTF <- function(genome.build = "hg38"){
   uniprotURL <- "http://www.uniprot.org/uniprot/?"
@@ -632,6 +643,7 @@ get.GRCh <- function(genome="hg38", genes) {
 # Also, As HOMER is using more RAM than the available we will split the files in to 100k probes.
 # Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
 # The false posives will be removed latter with some statistical tests.
+#' @importFrom utils write.table
 getBedForDNAmethylation <- function(){
   TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
