@@ -13,8 +13,8 @@
 TFsurvival.plot <- function(data,
                             TF,
                             percentage = 0.3,
-                            save = FALSE){
-  if(!all("vital_status", "days_to_last_follow_up","days_to_death") %in% colnames(pData(data))){
+                            save = TRUE){
+  if(!all(c("vital_status", "days_to_last_follow_up","days_to_death") %in% colnames(pData(data)))){
     message("pData must have the following columns: vital_status,days_to_last_follow_up, days_to_death")
     return(NULL)
   }
@@ -37,7 +37,6 @@ TFsurvival.plot <- function(data,
   low.idx <-  sampleMap(data)[sampleMap(data)$colname %in% lower,"primary"]
   pData(data)[low.idx,"tf_groups"] <- "low"
   high.idx <-  sampleMap(data)[sampleMap(data)$colname %in% higher,"primary"]
-  print(higher)
   pData(data)[high.idx,"tf_groups"] <- "high"
   
   filename <-  NULL
@@ -46,5 +45,5 @@ TFsurvival.plot <- function(data,
   TCGAanalyze_survival(pData(data),
                        "tf_groups",
                        legend=paste0(TF," Exp level"),
-                       filename = NULL)
+                       filename = filename)
 }

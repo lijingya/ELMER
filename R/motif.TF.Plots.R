@@ -67,8 +67,11 @@ motif.enrichment.plot <- function(motif.enrichment,
     xlab("Motifs") + ylab("Odds Ratio") +
     scale_y_continuous(breaks=c(1,pretty(motif.enrichment$OR, n = 5)))
   if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
-                  useDingbats=FALSE, plot=P,width=4, limitsize = FALSE,
-                  height = 2*round(nrow(motif.enrichment)/10))
+                  useDingbats = FALSE, 
+                  plot = P,
+                  width = 10, 
+                  limitsize = FALSE,
+                  height = 2 * round(nrow(motif.enrichment)/10))
   return(P)
 }
 

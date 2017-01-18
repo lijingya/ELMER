@@ -20,6 +20,7 @@
 #' @param filter.genes List of genes ensemble ids to filter from object  
 #' @param save If TRUE, MAE object will be saved into a file named as the argument save.file if this was set, otherwise as mae_genome_met.platform.rda.
 #' @param save.filename Name of the rda file to save the object (must end in .rda)
+#' @param met.na.cut Define the percentage of NA that the line should have to remove the probes for humanmethylation platforms.
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment
@@ -148,6 +149,7 @@ createMAE <- function (exp,
                        sampleMap,
                        linearize.exp = FALSE,
                        filter.probes = NULL,
+                       met.na.cut = 0.2,
                        filter.genes = NULL,
                        met.platform = "450k",
                        genome = NULL,
@@ -160,7 +162,6 @@ createMAE <- function (exp,
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
-  
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
@@ -169,6 +170,7 @@ createMAE <- function (exp,
   }
   # Add this here ?
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
+  met <- met[rowMeans(is.na(assay(met))) < met.na.cut, ]
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)

@@ -5,8 +5,9 @@
 \title{Construct a Multi Assay Experiment for ELMER analysis}
 \usage{
 createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
-  filter.probes = NULL, filter.genes = NULL, met.platform = "450k",
-  genome = NULL, save = TRUE, save.filename, TCGA = FALSE)
+  filter.probes = NULL, met.na.cut = 0.2, filter.genes = NULL,
+  met.platform = "450k", genome = NULL, save = TRUE, save.filename,
+  TCGA = FALSE)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
@@ -26,6 +27,8 @@ This object must have columns primary (sample ID) and colname (names of the colu
 \item{filter.probes}{A GRanges object contains the coordinate of probes which locate 
 within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
 See \code{\link{get.feature.probe}} function.}
+
+\item{met.na.cut}{Define the percentage of NA that the line should have to remove the probes for humanmethylation platforms.}
 
 \item{filter.genes}{List of genes ensemble ids to filter from object}
 

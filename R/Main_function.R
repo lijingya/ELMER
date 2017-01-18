@@ -221,10 +221,11 @@ get.diff.meth <- function(data,
   out <- do.call(rbind,out)
   out <- as.data.frame(out,stringsAsFactors = FALSE)
   diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
-  out$adjust.p <- p.adjust(as.numeric(out[,2]),method="BH")
+  out$adjust.p <- p.adjust(as.numeric(out[,2]),method = "BH")
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   if(save){
+    out <- out[!is.na(out[,diffCol]),]
     write.csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
     write.csv(out[out$adjust.p < pvalue & abs(out[,diffCol])>sig.dif,],
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
@@ -782,7 +783,13 @@ get.enriched.motif <- function(data,
   p <- Matrix::colMeans(probes.TF)
   P <- bg.Probes.TF.percent
   sub.enrich.TF <- multiply_by(p,(1-P)) %>%  divide_by(P)  %>%  divide_by(1-p)  
-  
+  # Extreme cases: p = 1(likely)/0 (likely) or P = 1 (unlikely) / 0 (likely) 
+  # case 1 p:1,P=1 OR = 1/0/1/0 = Inf
+  # case 2 p:0,P=0 OR = 0/1/0/1 = NaN
+  # case 3 p:1,P=0 OR = 1/0/0/1 = Inf
+  # case 4 p:0,P=1 OR = 0/1/1/0 = NaN
+  # Cases with NaN p = 0, so we will set OR to 0
+  sub.enrich.TF[is.nan(sub.enrich.TF)] <- 0 
   # SD = sqrt(1/a + 1/b + 1/c + 1/d)
   # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
   # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
@@ -795,7 +802,8 @@ get.enriched.motif <- function(data,
   SD <- add(1/a,1/b) %>% add(1/c) %>% add(1/d) %>% sqrt
   sub.enrich.TF.lower <- exp(log(sub.enrich.TF) - 1.96 * SD)
   sub.enrich.TF.upper <- exp(log(sub.enrich.TF) + 1.96 * SD)
-  
+  # If sub.enrich.TF is 0 my SD is Inf we will remove those cases
+  sub.enrich.TF.upper[is.nan(sub.enrich.TF.upper)] <- 0
   ## summary
   Summary <- data.frame(motif = colnames(probes.TF), 
                         NumOfProbes = probes.TF.num,
@@ -833,10 +841,18 @@ get.enriched.motif <- function(data,
   
   ## make plot 
   suppressWarnings({
-    motif.enrichment.plot(motif.enrichment = Summary, 
+    motif.enrichment.plot(motif.enrichment = Summary[Summary$motif %in% names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
+                                                                                       names(en.motifs), value = T)]),], 
                           significant = list(OR = 1.3), 
                           dir.out = dir.out,
-                          label=label, 
+                          label=paste0(label,".all.quality"), 
+                          save=TRUE)
+  })
+  suppressWarnings({
+    motif.enrichment.plot(motif.enrichment = dplyr::filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+                          significant = list(OR = 1.3), 
+                          dir.out = dir.out,
+                          label=paste0(label,".quality.A-",toupper(min.motif.quality)),
                           save=TRUE)
   })
   ## add information to siginificant pairs
