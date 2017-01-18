@@ -711,6 +711,7 @@ promoterMeth <- function(data,
 #' @importFrom magrittr divide_by multiply_by %>% add
 #' @importFrom plyr alply
 #' @importFrom utils data
+#' @importFrom S4Vectors metadata
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
