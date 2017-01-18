@@ -7,7 +7,7 @@
  get450K is a function to download latest version of HM450K DNA methylation 
  for  all samples of certain cancer types from GDC website.}
 \usage{
-get450K(disease, basedir = "./Data")
+get450K(disease, basedir = "./Data", genome = "hg19", filter = 0.2)
 }
 \arguments{
 \item{disease}{A character specifies the disease to download from TCGA such as BLCA}

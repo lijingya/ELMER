@@ -591,7 +591,7 @@ get.permu <- function(data,
 #'  Default is 0.2.
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
-#' @importClassesFrom utils write.csv
+#' @importFrom utils write.csv
 #' @return A data frame contains genes whose expression significantly anti-correlated
 #' with promoter methylation.
 #' @examples 
