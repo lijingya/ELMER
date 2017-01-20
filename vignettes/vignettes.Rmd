@@ -766,7 +766,7 @@ Generate schematic plot for one gene with the probes which the gene is significa
 linked to. Figure \ref{fig:figure5}
 
 ```{r,eval=TRUE, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
-schematic.plot(pair = Hypo.pair, data = data, byGene = "ENSG00000197965", save = FALSE)
+schematic.plot(pair = Hypo.pair, data = data,   group.col = "definition", byGene = "ENSG00000143469", save = FALSE)
 ```
 
 ## Motif enrichment plot

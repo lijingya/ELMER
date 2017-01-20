@@ -70,7 +70,12 @@ schematic.plot <- function(data,
   }
   if(!missing(byGeneID)){
     for(gene in byGeneID){
+      
       significant <- pair[pair$GeneID==gene,]
+      if(nrow(significant) == 0) {
+        warning(paste0("Gene ", gene, " is not in pair list. We cannot plot it."))
+        next
+      }
       gene.gr <- rowRanges(getExp(data))[gene,]
       probe.gr <- rowRanges(getMet(data))[significant$Probe,]
       schematic(data = data,gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save, group.col = group.col)
