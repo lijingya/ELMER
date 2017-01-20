@@ -4,26 +4,28 @@ test_that("Function uses correctly the permu.dir", {
   data(elmer.data.example)
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                             geneAnnot=getExp(data))
-  Hypo.pair <- get.pair(data=data,
-                        nearGenes=nearGenes,
-                        permu.size=5,
-                        pvalue =  0.2,
+  Hypo.pair <- get.pair(data = data,
+                        nearGenes = nearGenes,
+                        permu.size = 5,
+                        pvalue =  0.001,
+                        Pe = 0.2,
                         dir.out="./",
-                        calculate.empirical.p = TRUE,
+                        calculate.Pe = TRUE,
                         permu.dir = "permu_test",
-                        label= "hypo")
+                        label = "hypo")
   # Folder was crreated correcly
   expect_true(file.exists("permu_test/permu.rda"))
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 5)
   # Result correctly use a gene from the nearGene list
   expect_true(all(Hypo.pair[Hypo.pair$Probe %in% "cg00329272" ,]$GeneID %in% nearGenes$cg00329272$GeneID))
-  
+  expect_true(all(Hypo.pair$Raw.p.adjust < 0.001))
+  expect_true(all(Hypo.pair$Pe < 0.2))
   # If we add one more probe the value should be saved
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=6,
                         pvalue =  0.2,
-                        calculate.empirical.p = TRUE,
+                        calculate.Pe  = TRUE,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")
@@ -36,7 +38,7 @@ test_that("Function uses correctly the permu.dir", {
                         nearGenes=nearGenes,
                         permu.size=5,
                         pvalue =  0.02,
-                        calculate.empirical.p = TRUE,
+                        calculate.Pe = TRUE,
                         dir.out="./",
                         label= "hypo")
   # Pvalue filter is working
@@ -49,7 +51,7 @@ test_that("Function uses correctly the permu.dir", {
                         nearGenes=nearGenes,
                         permu.size=7,
                         pvalue =  0.2,
-                        calculate.empirical.p = TRUE,
+                        calculate.Pe = TRUE,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")

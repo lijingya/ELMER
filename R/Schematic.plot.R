@@ -92,6 +92,7 @@ schematic.plot <- function(data,
 
 #' @importFrom grDevices rainbow
 #' @importFrom GenomicRanges seqnames
+#' @importFrom MultiAssayExperiment metadata
 schematic <- function(gene.gr,  
                       probe.gr, 
                       significant, 

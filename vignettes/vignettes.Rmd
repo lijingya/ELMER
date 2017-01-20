@@ -532,15 +532,14 @@ The main arguments of this function are:
 3. percentage:	A number ranges from 0 to 0.5 specifying the percentage of samples used to link probes to genes. Default is 0.2.
 4. permu.size:	A number specify the times of permuation. Default is 10000.
 5. permu.dir	A path where the output of permutation will be saved
-6. calculate.empirical.p: Execute the permutation step or use the adjusted raw p-value to select the significant pairs.
-7. pvalue:	A number specify the pvalue cutoff for defining signficant pairs. Default is 0.001. 
-If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff as explained before. 
-Otherwise it will select the significant P value (adjusted P value by BH) cutoff. 
-8. portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
-9. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.
-10. dir.out	A path specify the directory for outputs. Default is current directory
-11. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
-12. label:	A character labels the outputs.
+6. calculate.Pe: A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.
+7. pvalue: A number specify the raw p-value cutoff for defining signficant pairs.  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
+8. Pe: A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001. Only used if calculate.empirical.p is TRUE.
+9. portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
+10. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.
+11. dir.out	A path specify the directory for outputs. Default is current directory
+12. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
+13. label:	A character labels the outputs.
 
 ```{r,eval=TRUE, message=FALSE}
 ### identify target gene for significantly hypomethylated probes.
@@ -558,6 +557,8 @@ Hypo.pair <- get.pair(data = data,
                       permu.dir = "./ELMER.example/Result/LUSC/permu",
                       permu.size = 200,
                       pvalue = 0.01,
+                      calculate.Pe = TRUE,
+                      Pe = 0.001,
                       dir.out = "./ELMER.example/Result/LUSC",
                       cores = detectCores()/2,
                       label = "hypo")

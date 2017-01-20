@@ -260,10 +260,11 @@ get.diff.meth <- function(data,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param calculate.empirical.p A logic. It TRUE (default) execute the permutation step, if FALSE uses the adjusted raw p-value to select the significant pairs.
-#' @param pvalue A number specify the pvalue cutoff for defining signficant pairs.
-#'  Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
-#'  Otherwise  it will select the significant P value (adjusted P value by BH) cutoff.
+#' @param calculate.Pe A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.
+#' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
+#'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
+#' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
+#'  Default is 0.001. Only used if calculate.empirical.p is TRUE.
 #'  @param portion A number specify the cut point for methylated and unmethylated.
 #'  Default is 0.3.
 #'  @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
@@ -290,17 +291,18 @@ get.diff.meth <- function(data,
 #'                      label= "hypo")
 get.pair <- function(data,
                      nearGenes,
-                     percentage=0.2,
-                     permu.size=10000,
-                     permu.dir=NULL, 
-                     pvalue = 0.001,
-                     dir.out="./",
-                     calculate.empirical.p = TRUE,
-                     diffExp=FALSE,
-                     cores=1,
+                     percentage = 0.2,
+                     permu.size = 10000,
+                     permu.dir = NULL, 
+                     pvalue = 0.05,
+                     Pe = 0.001,
+                     dir.out = "./",
+                     calculate.Pe = TRUE,
+                     diffExp = FALSE,
+                     cores = 1,
                      portion = 0.3, 
-                     label=NULL,
-                     save=TRUE){
+                     label = NULL,
+                     save = TRUE){
   ## check data
   if(!all(names(nearGenes) %in% rownames(getMet(data))))
     stop("Probes option should be subset of rownames of methylation matrix.")
@@ -331,10 +333,19 @@ get.pair <- function(data,
   )
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
+  Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
   
-  if(calculate.empirical.p){
+  if(save) write.csv(Probe.gene, 
+                     file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+                     row.names=FALSE)
+  
+  Probe.gene <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue,]
+  Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
+  selected <- Probe.gene
+  
+  if(calculate.Pe){
     #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
-    GeneID <- unique(Probe.gene[!is.na(Probe.gene$Raw.p),"GeneID"])
+    GeneID <- unique(Probe.gene[,"GeneID"])
     message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for each nearby gene"))
     # get permutation
     permu <- get.permu(data,
@@ -347,20 +358,12 @@ get.pair <- function(data,
                        cores      = cores)
     # Get empirical p-value
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
-    
-    Probe.gene.Pe <- Probe.gene.Pe[order(Probe.gene.Pe$Raw.p),]
+  
     if(save) write.csv(Probe.gene.Pe, 
-                       file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+                       file=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label),
                        row.names = FALSE)
-    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < pvalue & !is.na(Probe.gene.Pe$Pe),]
-  } else {
-    Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
-    Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
-    if(save) write.csv(Probe.gene, 
-                       file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
-                       row.names=FALSE)
-    selected <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue & !is.na(Probe.gene$Raw.p.adjust),]
-  }
+    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  } 
   if(diffExp){
     ## calculate differential expression between two groups.
     Exp <- getExp(mee, geneID = unique(selected$GeneID))

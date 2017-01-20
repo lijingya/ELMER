@@ -152,7 +152,8 @@ test_that("Number of probes in MAE matches the distal probes", {
                      linearize.exp = TRUE, 
                      filter.probes = distal.probe, 
                      TCGA          = TRUE) 
-    expect_equal(length(distal.probe), nrow(getMet(mae)))
+ 
+    expect_gt(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
   }
 })

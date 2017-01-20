@@ -36,6 +36,7 @@
 #'@details byTF The output will be scatter plot for the TFs and the average 
 #'DNA methylation at the probes set specified in byTF list.
 #'@return Scatter plots.
+#'@importFrom MultiAssayExperiment sampleMap
 #'@export
 #'@author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
@@ -58,40 +59,46 @@ scatter.plot <- function(data,
   simpleCap <- function(x) {
     s <- x
     paste(toupper(substring(s, first = 1, last = 1)), tolower(substring(s, 2)),
-          sep="", collapse=" ")
+          sep = "", collapse = " ")
   }
     if(missing(data)) stop("A data object should be included.")
   
   if(!is.null(category) && length(category)==1) { 
-    if(! category %in% colnames(pData(data))) stop("Cateogry not found in the  phenotypic data (pData(data)) ")
+    
+    if(! category %in% colnames(pData(data))) 
+      stop("Cateogry not found in the  phenotypic data (pData(data)) ")
+    
     legend.title <- simpleCap(category)
-    samples <- sampleMap(data)[sampleMap(data)$assay=="DNA methylation","primary"]
+    samples <- sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"]
     category <- pData(data)[samples,category]
     category <- sapply(category, simpleCap)
   }
+  
   if(length(byPair$probe) != 0){
-    if(length(byPair$probe)!=length(byPair$gene))
+    
+    if(length(byPair$probe) != length(byPair$gene))
       stop("In pairs, the length of probes should be the same with the length of genes.")
+    
     for(i in 1:length(byPair$probe)){
       probe <- byPair$probe[i]
       gene <- byPair$gene[i]
       symbol <- getSymbol(data,geneID=gene)
-      P <- scatter(meth=assay(getMet(data)[probe,]),
-                   exp=assay(getExp(data)[gene,] ),
-                   category=category, 
+      P <- scatter(meth     = assay(getMet(data)[probe,]),
+                   exp      = assay(getExp(data)[gene,] ),
+                   category = category, 
                    legend.title = legend.title,
-                   xlab=sprintf("DNA methyation at %s",probe), 
-                   ylab=sprintf("%s gene expression",symbol), 
-                   title=sprintf("%s_%s",probe,symbol),
+                   xlab     = sprintf("DNA methyation at %s",probe), 
+                   ylab     = sprintf("%s gene expression",symbol), 
+                   title    = sprintf("%s_%s",probe,symbol),
                    ...)
       if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
                       plot = P,useDingbats=FALSE, width=7, height = 6)
     }
   }
   
-  if(length(byProbe$probe)!=0){
-    nearGenes <- GetNearGenes(TRange=rowRanges(getMet(data)[byProbe$probe,]),
-                              geneAnnot=rowRanges(getExp(data)),
+  if(length(byProbe$probe) != 0){
+    nearGenes <- GetNearGenes(data    = data,
+                              probe   = byProbe$probe,
                               geneNum = byProbe$geneNum)
     for(i in byProbe$probe){
       probe <- i
@@ -99,35 +106,40 @@ scatter.plot <- function(data,
       symbol <- getSymbol(data,geneID=gene)
       exp <- assay(getExp(data)[gene,])
       rownames(exp) <- symbol
-      P <- scatter(meth=assay(getMet(data)[byProbe$probe,]), 
-                   exp=exp,
-                   category=category,
+      P <- scatter(meth     = assay(getMet(data)[byProbe$probe,]), 
+                   exp      = exp,
+                   category = category,
                    legend.title = legend.title,
-                   xlab=sprintf("DNA methyation at %s",probe), 
-                   ylab=sprintf("Gene expression"), 
-                   title=sprintf("%s nearby %s genes",probe,byProbe$geneNum),
+                   xlab     = sprintf("DNA methyation at %s", probe), 
+                   ylab     = sprintf("Gene expression"), 
+                   title    = sprintf("%s nearby %s genes", probe, byProbe$geneNum),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf",dir.out,probe),
-                      plot = P,useDingbats=FALSE)
+      if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf", dir.out, probe),
+                      plot = P, useDingbats=FALSE)
     }
   }
   
   if(length(byTF$TF)!=0){
+    
     meth <- colMeans(assay(getMet(data)[byTF$probe,]),na.rm = TRUE)
-    gene <- getGeneID(data,symbol=byTF$TF)
+    gene <- getGeneID(data,symbol = byTF$TF)
     exp <- assay(getExp(data)[gene,])
+    
     if(nrow(exp)>1){
       rownames(exp) <- byTF$TF
     }
-    P <- scatter(meth=meth, 
-                 exp=exp,
-                 category=category,
-                 xlab="Avg DNA methyation", ylab=sprintf("TF expression"), 
-                 title="TF vs avg DNA methylation",
+    
+    P <- scatter(meth     = meth, 
+                 exp      = exp,
+                 category = category,
+                 xlab     = "Avg DNA methyation", 
+                 ylab     = sprintf("TF expression"), 
+                 title    = "TF vs avg DNA methylation",
                  ...)
+    
     if(save) ggsave(filename = sprintf("%s/%s.byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
-                    plot = P,useDingbats=FALSE, width=3*(length(byTF$TF)%%5), 
-                    height = 3*ceiling(length(byTF$TF)/5))
+                    plot = P,useDingbats = FALSE, width = 3*(length(byTF$TF)%%5), 
+                    height = 3 * ceiling(length(byTF$TF)/5))
   }
   return(P)
 }
@@ -155,6 +167,7 @@ scatter <- function(meth,
                     title=NULL,
                     color.value=NULL,
                     lm_line=FALSE){
+  
   if(is.null(category)) category <- rep(1,length(meth))
   
   if(!is.vector(exp)){
@@ -163,11 +176,11 @@ scatter <- function(meth,
     exp$meth <- as.vector(meth)
     exp$category <- category
     df <- melt.data.frame(exp, measure.vars = GeneID)
-    P <- ggplot(df, aes(x= meth, y=value, color=factor(category)))+
-      geom_point(size=0.9)+
-      facet_wrap(facets = ~ variable, ncol = 5)+
-      scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
-      theme_bw()+
+    P <- ggplot(df, aes(x = meth, y = value, color = factor(category))) +
+      geom_point(size = 0.9) +
+      facet_wrap(facets = ~ variable, ncol = 5) +
+      scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1)) +
+      theme_bw() +
       theme(panel.grid.major = element_blank(),  
             # legend.position="top",
             legend.key = element_rect(colour = 'white'), 
@@ -176,15 +189,15 @@ scatter <- function(meth,
        guides(colour = guide_legend(override.aes = list(size=4),
                                     title.position="top", 
                                     title.hjust =0.5)) 
-    if(!is.null(color.value)) P <- P+scale_colour_manual(values = color.value)
-    if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", 
-                                   formula = y ~ x,data=df)
-  }else{
+    if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
+    if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+    
+  } else {
     df <- data.frame(meth=meth,exp=exp,category=category)
     if(length(unique(df$category))==1){
-      P <- ggplot(df, aes(x= meth, y=exp))
-    }else{
-      P <- ggplot(df, aes(x= meth, y=exp, color=factor(category)))
+      P <- ggplot(df, aes(x = meth, y = exp))
+    } else {
+      P <- ggplot(df, aes(x = meth, y = exp, color = factor(category)))
     }
     P <- P + geom_point() +
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
@@ -201,7 +214,7 @@ scatter <- function(meth,
     if(lm_line){
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
-      P <- P+ geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+      P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     }
   }
   return(P)

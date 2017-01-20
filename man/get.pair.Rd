@@ -21,9 +21,11 @@ samples used to link probes to genes. Default is 0.2.}
 
 \item{permu.dir}{A path where the output of permutation will be.}
 
-\item{pvalue}{A number specify the pvalue cutoff for defining signficant pairs.
-Default is 0.001. If calculate.empirical.p is TRUE it will be the empirical pvalue cutoff.
-Otherwise  it will select the significant P value (adjusted P value by BH) cutoff.
+\item{pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
+Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.}
+
+\item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
+Default is 0.001. Only used if calculate.empirical.p is TRUE.
 @param portion A number specify the cut point for methylated and unmethylated.
 Default is 0.3.
 @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
@@ -31,7 +33,7 @@ test whether putative target gene are differentially expressed between two group
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
-\item{calculate.empirical.p}{A logic. It TRUE (default) execute the permutation step, if FALSE uses the adjusted raw p-value to select the significant pairs.}
+\item{calculate.Pe}{A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.}
 
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
