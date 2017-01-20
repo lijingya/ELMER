@@ -116,6 +116,8 @@ get.feature.probe <- function(feature,
 #' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
 #'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param group.col A column defining the groups of the sample. You can view the 
+#' available columns using: colnames(MultiAssayExperiment::pData(data)).
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 #' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 #' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites

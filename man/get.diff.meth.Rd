@@ -24,6 +24,9 @@ experimental groups that are used to identify the differential methylation. Defa
 \item{pvalue}{A number specifies the significant P value (adjusted P value by BH) cutoff 
 for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::pData(data)).}
+
 \item{test}{Statistical test to be used. Options: t.test (DEFAULT), wilcox.test}
 
 \item{sig.dif}{A number specifies the smallest DNA methylation difference as a cutoff for 

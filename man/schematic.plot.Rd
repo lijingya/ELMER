@@ -11,6 +11,9 @@ schematic.plot(pair,
                dir.out = "./", save = TRUE, ...)
 }
 \arguments{
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::pData(data)).}
+
 \item{pair}{A Pair object. All slots of Pair class should be included}
 
 \item{byProbe}{A vector of probe names.}

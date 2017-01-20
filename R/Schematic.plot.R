@@ -10,6 +10,8 @@
 #'@importFrom GenomicRanges GRanges findOverlaps
 #'@importFrom IRanges IRanges
 #'@param pair A Pair object. All slots of Pair class should be included
+#' @param group.col A column defining the groups of the sample. You can view the 
+#' available columns using: colnames(MultiAssayExperiment::pData(data)).
 #'@param byProbe A vector of probe names.
 #'@param byGene A vector of gene ID
 #'@param byCoordinate A list contains chr, start and end. 
@@ -45,6 +47,7 @@
 #' new.schematic.plot(data, pair, byGeneID = "ENSG00000009790")
 #' new.schematic.plot(data, pair, byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
 schematic.plot <- function(data,
+                           group.col = NULL,
                            pair, 
                            byProbe, 
                            byGeneID, 
@@ -62,7 +65,7 @@ schematic.plot <- function(data,
       significant <- pair[pair$Probe==probe,]
       gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
       probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
-      schematic(gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save)
+      schematic(data = data, gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save, group.col = group.col)
     }
   }
   if(!missing(byGeneID)){
@@ -70,7 +73,7 @@ schematic.plot <- function(data,
       significant <- pair[pair$GeneID==gene,]
       gene.gr <- rowRanges(getExp(data))[gene,]
       probe.gr <- rowRanges(getMet(data))[significant$Probe,]
-      schematic(gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save)
+      schematic(data = data,gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save, group.col = group.col)
     }
     
   }
@@ -82,10 +85,10 @@ schematic.plot <- function(data,
       probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
       gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
       significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
-      schematic(gene.gr, probe.gr, significant,
+      schematic(data = data,gene.gr, probe.gr, significant,
                     label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
                                   dir.out,byCoordinate$chr[i],byCoordinate$start[i],
-                                  byCoordinate$end[i]), save=save)
+                                  byCoordinate$end[i]), save=save, group.col = group.col)
     }
   }
 }
@@ -93,11 +96,13 @@ schematic.plot <- function(data,
 #' @importFrom grDevices rainbow
 #' @importFrom GenomicRanges seqnames
 #' @importFrom MultiAssayExperiment metadata
-schematic <- function(gene.gr,  
+schematic <- function(data,
+                      gene.gr,  
                       probe.gr, 
                       significant, 
-                      label, 
-                      save=TRUE){
+                      label,
+                      save=TRUE,
+                      group.col = NULL){
   
   if(save) pdf(paste0(label,".pdf"))
   chr <- as.character(seqnames(probe.gr))
@@ -118,14 +123,14 @@ schematic <- function(gene.gr,
                                shape = "arrow")
   
   details <- function(identifier, ...) {
-    d <- data.frame(signal = assay(getMet(data))[identifier, ], group = pData(data)$definition)
+    d <- data.frame(signal = assay(getMet(data))[identifier, ], group = pData(data)[,group.col])
     print(densityplot(~signal, group = group, data = d, auto.key = TRUE,
                       main = list(label = identifier, cex = 0.7),
                       scales = list(draw = FALSE, x = list(draw = TRUE)),
-                      ylab = "", xlab = "", ), newpage = FALSE,
+                      ylab = "", xlab = ""), newpage = FALSE,
           prefix = "plot")
   }
-  
+  if(!is.null(group.col)){
   deTrack <- AnnotationTrack(range = probe.gr, 
                              genome = metadata(data)$genome, 
                              showId = FALSE, 
@@ -136,14 +141,29 @@ schematic <- function(gene.gr,
                              detailsBorder.col="red",
                              col.line="red",
                              detailsBorder.lwd=0,
-                             id = names(probe.gr), name = "probe details",
-                             stacking = "squish", fun = details)
+                             id = names(probe.gr), 
+                             name = "probe details",
+                             stacking = "squish", 
+                             fun = details)
   plotTracks(list(idxTrack,  axTrack, genetrack,deTrack),  
              background.title = "darkblue",
              detailsBorder.col = "white",
              sizes=c(1,1,1,8), 
              details.ratio = 1,
-             details.size = 0.8,col = NULL,
+             details.size = 0.8,
+             col = NULL,
              geneSymbols=TRUE)
+  
+  } else {
+    plotTracks(list(idxTrack,  axTrack, genetrack),  
+               background.title = "darkblue",
+               detailsBorder.col = "white",
+               sizes=c(1,1,1), 
+               details.ratio = 1,
+               details.size = 0.8,
+               col = NULL,
+               geneSymbols=TRUE)
+    
+  }
   if(save) dev.off()
 }

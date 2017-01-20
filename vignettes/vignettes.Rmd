@@ -756,6 +756,7 @@ the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
 ```{r, eval=TRUE, fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
 schematic.plot(pair    = Hypo.pair, 
                data    = data,
+               group.col = "definition",
                byProbe = "cg25312122",
                save    = FALSE)
 ```
