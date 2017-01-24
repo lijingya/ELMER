@@ -7,7 +7,7 @@
 getGeneID(data, symbol)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
 
 \item{symbol}{A vector of characters which are gene symbols}
 }

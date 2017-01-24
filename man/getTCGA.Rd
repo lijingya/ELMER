@@ -5,7 +5,7 @@
 \title{getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.}
 \usage{
 getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE, 
-               basedir = "./Data", RNAtype = "gene", Methfilter = 0.2)
+               basedir = "./Data", RNAtype = "gene", Methfilter = 0.2, genome = "hg19")
 }
 \arguments{
 \item{disease}{A character specifies the disease to download in TCGA such as BLCA}

@@ -1,5 +1,6 @@
 #' @title Get DNA methylation object from MAE
 #' @description Get DNA methylation object from MAE
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @importFrom MultiAssayExperiment experiments
 #' @export
 getMet <- function(data) {
@@ -8,6 +9,7 @@ getMet <- function(data) {
 
 #' @title Get DNA methylation object samples from MAE
 #' @description Get DNA methylation object samples from MAE
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @importFrom MultiAssayExperiment sampleMap
 #' @export
 getMetSamples <- function(data){
@@ -16,6 +18,7 @@ getMetSamples <- function(data){
 
 #' @title Get Gene expression object samples from MAE
 #' @description Get Gene expression object samples from MAE
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @importFrom MultiAssayExperiment sampleMap
 #' @export
 getExpSamples <- function(data){
@@ -24,6 +27,7 @@ getExpSamples <- function(data){
 
 #' @title Get Gene expression object from MAE
 #' @description Get Gene expression object from MAE
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMultiAssayExperiment function}}.
 #' @importFrom MultiAssayExperiment experiments
 #' @export
 getExp <- function(data) {

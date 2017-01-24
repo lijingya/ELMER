@@ -10,7 +10,7 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
   dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
 
 \item{diff.dir}{A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 get.diff.meth function will identify all significantly hypomethylated CpG sites; 
@@ -26,6 +26,12 @@ for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::pData(data)).}
+
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
 
 \item{test}{Statistical test to be used. Options: t.test (DEFAULT), wilcox.test}
 

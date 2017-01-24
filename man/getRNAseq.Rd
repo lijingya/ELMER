@@ -4,7 +4,7 @@
 \alias{getRNAseq}
 \title{getRNAseq to download all RNAseq data for a certain cancer type from TCGA.}
 \usage{
-getRNAseq(disease, basedir = "./Data")
+getRNAseq(disease, basedir = "./Data", genome = "hg38")
 }
 \arguments{
 \item{disease}{A character specifies disease in TCGA such as BLCA}

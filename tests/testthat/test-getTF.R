@@ -187,5 +187,6 @@ test_that("Test if the results is right", {
 
 test_that("It creates a PDF with the TF ranking plot", {
   expect_true(file.exists("TFrankPlot/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+  unlink("TFrankPlot",recursive = TRUE, force = TRUE)
 })
   

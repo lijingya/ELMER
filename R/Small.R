@@ -12,6 +12,7 @@
 #'  have different columns names. 
 #'  This object must have columns primary (sample ID) and colname (names of the columns of the matrix).
 #' @param linearize.exp Take log2(exp + 1) in order to linearize relation between methylation and expression  
+#' @param met.platform DNA methylation platform "450K" or "EPIC"
 #' @param TCGA A logical. FALSE indicate data is not from TCGA (FALSE is default). 
 #' TRUE indicates data is from TCGA and sample section will automatically filled in.
 #' @param filter.probes A GRanges object contains the coordinate of probes which locate 
@@ -382,7 +383,7 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
 #' take in R object or read files by specifying file paths. 
 #' @param pair A data.frame (R object) or a path of XX.csv file containing pair information such as
 #' output of function \code{\link{get.pair}}.
-#' @param probeInfoA GRnage object or a path of XX.rda file which only contains a GRange of probe information.
+#' @param probeInfo A GRnage object or a path of XX.rda file which only contains a GRange of probe information.
 #' @param geneInfo A GRnage object or path of XX.rda file which only contains a GRange of gene 
 #' information such as Coordinates, GENEID and SYMBOL. 
 #' @export 
@@ -442,7 +443,7 @@ splitmatrix <- function(x,by="row") {
 }
 
 #'getSymbol to report gene symbol from id
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param geneID A character which is the ensembl_gene_id
 #' @return The gene symbol for input genes.
 #' @export
@@ -457,7 +458,7 @@ getSymbol <- function(data,geneID){
 
 #'getGeneID to report gene id from symbol
 #'@importFrom S4Vectors values
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #'@param symbol A vector of characters which are gene symbols 
 #'@return The gene ID for these gene symbols
 #'@export
@@ -497,7 +498,7 @@ lm_eqn = function(df,Dep,Exp){
 #' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
 #' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
 #'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
-#' @param genome.build Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
+#' @param genome Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
 #' Options: hg19 (default) and hg38.
 #' @return UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.
 #' @examples
@@ -751,7 +752,7 @@ createMotifRelevantTfs <- function(){
     family <- split(tf.family,f = tf.family$`TF family`)
     motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
       f <- x$`TF family`
-      if(f == "") return(x$`Transcription factor`) # Casse without family, we will get only the same object
+      if(f == "") return(x$`Transcription factor`) # Case without family, we will get only the same object
       return(unique(family[as.character(f)][[1]]$`Transcription factor`))
     },.progress = "text")
     #names(motif.relavent.TFs) <- tf.family$`Transcription factor`

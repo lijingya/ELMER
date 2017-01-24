@@ -76,7 +76,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   # Testing creating MultyAssayExperiment object
   # Load library
   # Consisering it is TCGA and SE
-  data("elmer.data.example")
+  data(elmer.data.example)
   mae <- createMAE(exp = getExp(data), met =  getMet(data), TCGA = TRUE, genome = "hg19")
   expect_equal(metadata(mae)$genome,"hg19")
   expect_true(metadata(mae)$TCGA)
@@ -156,4 +156,5 @@ test_that("Number of probes in MAE matches the distal probes", {
     expect_gt(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
   }
+  unlink("GDCdata",recursive = TRUE, force = TRUE)
 })

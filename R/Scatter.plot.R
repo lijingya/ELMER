@@ -15,7 +15,7 @@
 #'              dir.out = "./",
 #'              save = TRUE, ...)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
-#' See \code{\link{createMultiAssayExperiment function}}.
+#' See \code{\link{createMAE}} function.
 #' @param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
 #'of probes' name and gene contains a vector of gene ID. The length of probe 
 #'should be the same with length of gene. Output see detail.

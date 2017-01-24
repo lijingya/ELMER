@@ -14,7 +14,7 @@ scatter.plot(data,
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
-See \code{\link{createMultiAssayExperiment function}}.}
+See \code{\link{createMAE}} function.}
 
 \item{byPair}{A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
 of probes' name and gene contains a vector of gene ID. The length of probe 

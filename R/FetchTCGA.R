@@ -15,7 +15,7 @@
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
 #' @usage getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE, 
-#'                basedir = "./Data", RNAtype = "gene", Methfilter = 0.2)
+#'                basedir = "./Data", RNAtype = "gene", Methfilter = 0.2, genome = "hg19")
 #' @export
 #' @examples
 #' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
@@ -77,7 +77,7 @@ getTCGA <- function(disease,
 #' @param disease A character specifies disease in TCGA such as BLCA
 #' @param basedir Download all RNA seq level 3 data for the specified disease.
 #' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
-#' @usage getRNAseq(disease, basedir = "./Data")
+#' @usage getRNAseq(disease, basedir = "./Data", genome = "hg38")
 #' @return Download all RNA seq level 3 data for the specified disease.
 #' @importFrom TCGAbiolinks GDCdownload GDCquery GDCprepare
 getRNAseq <- function(disease, 

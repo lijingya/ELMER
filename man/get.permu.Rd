@@ -15,7 +15,7 @@ get.permu(data,
           cores = 1)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
 
 \item{geneID}{A vector lists the genes' ID.}
 

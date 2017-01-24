@@ -14,6 +14,8 @@ containing the following columns: vital_status, days_to_last_follow_up and days_
 
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples in the 
 higher and lower expression groups. Default is 0.3}
+
+\item{save}{Save plot as PDF}
 }
 \description{
 This function will create a survival plot for the samples with higher, midium, low expression

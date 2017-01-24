@@ -32,6 +32,8 @@ See \code{\link{get.feature.probe}} function.}
 
 \item{filter.genes}{List of genes ensemble ids to filter from object}
 
+\item{met.platform}{DNA methylation platform "450K" or "EPIC"}
+
 \item{genome}{Which is the default genome to make gene information. Options hg19 and hg38}
 
 \item{save}{If TRUE, MAE object will be saved into a file named as the argument save.file if this was set, otherwise as mae_genome_met.platform.rda.}

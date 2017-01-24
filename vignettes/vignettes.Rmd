@@ -58,9 +58,8 @@ references:
   issued:
   year: 2016 
 
-
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -694,7 +693,7 @@ results for associations between TFs (row) and average DNA methylation
 at motifs (column). This matrix can be use to generate TF ranking plots by function
 TF.rank.plot.
 
-```{r,eval=TRUE, message=FALSE}
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 ## identify regulatory TF for the enriched motifs
 TF <- get.TFs(data = data, 
               enriched.motif = enriched.motif,
@@ -716,7 +715,7 @@ dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf")
 ## Scatter plots
 Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
-```{r, echo=TRUE, message=FALSE,warning=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+```{r results='hide', echo=TRUE, message=FALSE,warning=FALSE, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
 scatter.plot(data,
              byProbe = list(probe = c("cg19403323"), geneNum = 20), 
              category = "definition", 

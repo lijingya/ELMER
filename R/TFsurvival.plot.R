@@ -8,6 +8,7 @@
 #' @param TF A gene symbol
 #' @param percentage   A number ranges from 0 to 1 specifying the percentage of samples in the 
 #' higher and lower expression groups. Default is 0.3
+#' @param save Save plot as PDF
 #' @importFrom TCGAbiolinks TCGAanalyze_survival
 #' @export
 TFsurvival.plot <- function(data,

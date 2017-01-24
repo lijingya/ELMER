@@ -10,10 +10,10 @@ fetch.pair(pair, probeInfo, geneInfo)
 \item{pair}{A data.frame (R object) or a path of XX.csv file containing pair information such as
 output of function \code{\link{get.pair}}.}
 
+\item{probeInfo}{A GRnage object or a path of XX.rda file which only contains a GRange of probe information.}
+
 \item{geneInfo}{A GRnage object or path of XX.rda file which only contains a GRange of gene 
 information such as Coordinates, GENEID and SYMBOL.}
-
-\item{probeInfoA}{GRnage object or a path of XX.rda file which only contains a GRange of probe information.}
 }
 \description{
 fetch.pair is a funtion to take in enhancer-gene linkage prediction information,

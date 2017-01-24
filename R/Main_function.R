@@ -115,9 +115,13 @@ get.feature.probe <- function(feature,
 #' and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
 #' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
 #'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::pData(data)).
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
 #' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
 #' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
@@ -146,6 +150,7 @@ get.feature.probe <- function(feature,
 #' @export 
 #' @importFrom plyr adply
 #' @importFrom stats p.adjust
+#' @importFrom MultiAssayExperiment pData
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -250,10 +255,10 @@ get.diff.meth <- function(data,
 #' (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
-#' get.pair(data, probes, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
+#' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
 #'          Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = 1, portion=0.3,   
 #'          label = NULL, save=TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -267,9 +272,9 @@ get.diff.meth <- function(data,
 #'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
 #'  Default is 0.001. Only used if calculate.empirical.p is TRUE.
-#'  @param portion A number specify the cut point for methylated and unmethylated.
+#' @param portion A number specify the cut point for methylated and unmethylated.
 #'  Default is 0.3.
-#'  @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
+#' @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
@@ -368,7 +373,7 @@ get.pair <- function(data,
   } 
   if(diffExp){
     ## calculate differential expression between two groups.
-    Exp <- getExp(mee, geneID = unique(selected$GeneID))
+    Exp <- getExp(data)[unique(selected$GeneID),]
     TN <- getSample(mee,cols = "TN")
     out <- lapply(split(Exp,rownames(Exp)),
                   function(x, TN){
@@ -406,7 +411,7 @@ get.pair <- function(data,
 #'           permu.size = 10000, 
 #'           permu.dir = NULL, 
 #'           cores = 1)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -661,9 +666,10 @@ promoterMeth <- function(data,
 #' a given set of probes. If save is TURE, two output files will be saved: 
 #' getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 #' @usage 
-#' get.enriched.motif(probes.motif, probes, 
+#' get.enriched.motif(data, probes.motif, probes, 
 #'                    background.probes, lower.OR = 1.1, min.incidence = 10, 
-#'                    dir.out = "./", label = NULL, save=TRUE)
+#'                    dir.out = "./", label = NULL, save=TRUE,
+#'                    min.motif.quality = "B")
 #' @param data A multi Assay Experiment from  \code{\link{createMAE}} function.
 #' If set and probes.motif/background probes are missing this will be used to get 
 #' this other two arguments correctly. This argument is not require, you can set probes.motif and 
@@ -717,6 +723,8 @@ promoterMeth <- function(data,
 #' @importFrom plyr alply
 #' @importFrom utils data
 #' @importFrom S4Vectors metadata
+#' @importFrom dplyr filter
+#' @importFrom Matrix colMeans colSums
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -854,7 +862,7 @@ get.enriched.motif <- function(data,
                           save=TRUE)
   })
   suppressWarnings({
-    motif.enrichment.plot(motif.enrichment = dplyr::filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+    motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                           significant = list(OR = 1.3), 
                           dir.out = dir.out,
                           label=paste0(label,".quality.A-",toupper(min.motif.quality)),
@@ -899,9 +907,9 @@ get.enriched.motif <- function(data,
 #'           percentage = 0.2,
 #'           dir.out = "./",
 #'           label = NULL, 
-#'           cores = NULL,
+#'           cores = 1,
 #'           save = TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE function}}.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
 #' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
 #' If missing, human.TF list will be used (human.TF data in ELMER.data). 
@@ -926,6 +934,7 @@ get.enriched.motif <- function(data,
 #' @importFrom plyr ldply  adply
 #' @importFrom doParallel registerDoParallel
 #' @importFrom stats na.omit
+#' @importFrom parallel detectCores
 #' @return 
 #'  Potential responsible TFs will be reported in a dataframe with 4 columns:
 #'  \itemize{

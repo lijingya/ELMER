@@ -193,7 +193,7 @@ TCGA.pipe <- function(disease,
     mae <- createMAE(met           = meth.file, 
                      exp           = exp.file,  
                      linearize.exp = TRUE,
-                     genoe         = genome, 
+                     genome        = genome, 
                      filter.probes = promoter.probe, 
                      TCGA          = TRUE, 
                      filter.genes  = unique(SigPair$GeneID)) # Should add filter genes
