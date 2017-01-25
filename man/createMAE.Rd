@@ -52,23 +52,19 @@ and create a Multi Assay Experiment.
 }
 \examples{
 # NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
-                       sample2 = c("TP53"=1.6,"PTEN"=2.3)
-)
+gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                  sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9)
-)
+                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
 mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
 
 # NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
-                       sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
-)
+gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                  sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
-                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
-)
+                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- c("sample1","sample2")
 sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
@@ -124,7 +120,7 @@ mae <- createMAE(exp = gene.exp,
    GDCdownload(query.met)
    met <- GDCprepare(query = query.met)
    
-   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
    
    # Consisering it is TCGA and SE
    mae.hg19 <- createMAE(exp = exp.hg19, 
@@ -159,7 +155,7 @@ mae <- createMAE(exp = gene.exp,
    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
                                 samples = colnames(not.tcga.exp), 
                                 group = c(rep("group1",4),rep("group2",4)))
-   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
    mae.hg19 <- createMAE(exp = not.tcga.exp, 
                          met =  not.tcga.met, 
                          TCGA = FALSE, 

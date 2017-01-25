@@ -4,11 +4,14 @@
 \alias{schematic.plot}
 \title{schematic.plot to plot schematic plots showing the locations of genes and probes.}
 \usage{
-schematic.plot(pair, 
+schematic.plot(data,
+               group.col = NULL,
+               pair, 
                byProbe, 
-               byGene, 
-               byCoordinate = list(chr = c(), start = c(), end = c()), 
-               dir.out = "./", save = TRUE, ...)
+               byGeneID, 
+               byCoordinate=list(chr=c(), start=c(), end=c()),
+               dir.out="./",
+               save=TRUE,...)
 }
 \arguments{
 \item{group.col}{A column defining the groups of the sample. You can view the 

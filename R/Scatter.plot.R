@@ -148,16 +148,16 @@ scatter.plot <- function(data,
 #'scatter
 #'@importFrom reshape melt.data.frame
 #'@import ggplot2
-#@param meth A vector of number.
-#@param exp A vector of number or matrix with sample in column and gene in rows.
-#@param category A vector of sample labels.
-#@param xlab A character specify the title of x axis.
-#@param ylab A character specify the title of y axis.
-#@param title A character specify the figure title.
-#@param color.value A vector specify the color of each category, such as 
+#'@param meth A vector of number.
+#'@param exp A vector of number or matrix with sample in column and gene in rows.
+#'@param category A vector of sample labels.
+#'@param xlab A character specify the title of x axis.
+#'@param ylab A character specify the title of y axis.
+#'@param title A character specify the figure title.
+#'@param color.value A vector specify the color of each category, such as 
 #color.value=c("Experiment"="red","Control"="darkgreen")
-#@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
-#@return A ggplot figure object
+#'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
+#'@return A ggplot figure object
 scatter <- function(meth, 
                     exp, 
                     legend.title = "Legend",

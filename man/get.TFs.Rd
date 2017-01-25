@@ -68,9 +68,12 @@ enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg089
                                  "cg10097755", "cg09247779", "cg09181054"))
 TF <- get.TFs(data, 
               enriched.motif, 
-              TFs=data.frame(external_gene_name=c("TP53","TP63","TP73"),
-                             ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
-                             stringsAsFactors = FALSE),
+              TFs = data.frame(
+                     external_gene_name=c("TP53","TP63","TP73"),
+                     ensembl_gene_id= c("ENSG00000141510",
+                                        "ENSG00000073282",
+                                        "ENSG00000078900"),
+                     stringsAsFactors = FALSE),
              label="hypo")
 # This case will use Uniprot dabase to get list of Trasncription factors              
 TF <- get.TFs(data, 

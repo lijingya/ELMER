@@ -7,6 +7,26 @@
 scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
   ylab = NULL, title = NULL, color.value = NULL, lm_line = FALSE)
 }
+\arguments{
+\item{meth}{A vector of number.}
+
+\item{exp}{A vector of number or matrix with sample in column and gene in rows.}
+
+\item{category}{A vector of sample labels.}
+
+\item{xlab}{A character specify the title of x axis.}
+
+\item{ylab}{A character specify the title of y axis.}
+
+\item{title}{A character specify the figure title.}
+
+\item{color.value}{A vector specify the color of each category, such as}
+
+\item{lm_line}{A logic. If it is TRUE, regression line will be added to the graph.}
+}
+\value{
+A ggplot figure object
+}
 \description{
 scatter
 }

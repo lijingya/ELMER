@@ -23,6 +23,7 @@
 #' @param rm.chr A vector of chromosome need to be remove from probes such as chrX chrY or chrM
 #' @return A GRange object containing probes that satisfy selecting critiria.
 #' @export 
+#' @importFrom S4Vectors queryHits subjectHits
 #' @details 
 #'  In order to get real distal probes, we use more comprehensive annotated TSS by both 
 #'  GENCODE and UCSC. However, to get probes within promoter regions need more
@@ -255,9 +256,9 @@ get.diff.meth <- function(data,
 #' (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
-#' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
-#'          Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = 1, portion=0.3,   
-#'          label = NULL, save=TRUE)
+#' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
+#'          pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = TRUE, diffExp = FALSE,
+#'          cores = 1, portion = 0.3,  label = NULL, save = TRUE))
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
@@ -278,6 +279,8 @@ get.diff.meth <- function(data,
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
+#' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
+#' and getPair.XX.pairs.significant.csv (see detail).
 #' @return Statistics for all pairs and significant pairs
 #' @export 
 #' @author 
@@ -666,10 +669,9 @@ promoterMeth <- function(data,
 #' a given set of probes. If save is TURE, two output files will be saved: 
 #' getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 #' @usage 
-#' get.enriched.motif(data, probes.motif, probes, 
+#' get.enriched.motif(data, probes.motif, probes, min.motif.quality = "C",
 #'                    background.probes, lower.OR = 1.1, min.incidence = 10, 
-#'                    dir.out = "./", label = NULL, save=TRUE,
-#'                    min.motif.quality = "B")
+#'                    dir.out = "./", label = NULL, save = TRUE)
 #' @param data A multi Assay Experiment from  \code{\link{createMAE}} function.
 #' If set and probes.motif/background probes are missing this will be used to get 
 #' this other two arguments correctly. This argument is not require, you can set probes.motif and 
@@ -957,9 +959,12 @@ get.enriched.motif <- function(data,
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
 #' TF <- get.TFs(data, 
 #'               enriched.motif, 
-#'               TFs=data.frame(external_gene_name=c("TP53","TP63","TP73"),
-#'                              ensembl_gene_id= c("ENSG00000141510","ENSG00000073282","ENSG00000078900"),
-#'                              stringsAsFactors = FALSE),
+#'               TFs = data.frame(
+#'                      external_gene_name=c("TP53","TP63","TP73"),
+#'                      ensembl_gene_id= c("ENSG00000141510",
+#'                                         "ENSG00000073282",
+#'                                         "ENSG00000078900"),
+#'                      stringsAsFactors = FALSE),
 #'              label="hypo")
 #' # This case will use Uniprot dabase to get list of Trasncription factors              
 #' TF <- get.TFs(data, 

@@ -4,8 +4,8 @@
 \alias{getTCGA}
 \title{getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.}
 \usage{
-getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE, 
-               basedir = "./Data", RNAtype = "gene", Methfilter = 0.2, genome = "hg19")
+getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
+               genome = "hg38", Methfilter=0.2)
 }
 \arguments{
 \item{disease}{A character specifies the disease to download in TCGA such as BLCA}
@@ -18,9 +18,6 @@ getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE,
 
 \item{basedir}{A path shows where the data will be stored.}
 
-\item{RNAtype}{A charactor to specify whether use isoform level or gene level. 
-When RNAtype=gene, gene level gene expression will be used.}
-
 \item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
 
 \item{Methfilter}{A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.}
@@ -31,8 +28,8 @@ the specified disease from TCGA.
 }
 \description{
 getTCGA is a function to download DNA methylation, RNA expression and clinic data for all
- samples of certain cancer type from TCGA website. And downloaded data will be transform
-  to matrixes or data frame for further analysis.
+samples of certain cancer type from TCGA website. And downloaded data will be transform
+to matrixes or data frame for further analysis.
 }
 \examples{
 getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")

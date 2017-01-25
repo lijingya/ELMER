@@ -2,24 +2,27 @@
 #' @description 
 #' schematic.plot is a function to plot schematic plots showing the locations of genes and probes.
 #' @usage 
-#' schematic.plot(pair, 
+#' schematic.plot(data,
+#'                group.col = NULL,
+#'                pair, 
 #'                byProbe, 
-#'                byGene, 
-#'                byCoordinate = list(chr = c(), start = c(), end = c()), 
-#'                dir.out = "./", save = TRUE, ...)
-#'@importFrom GenomicRanges GRanges findOverlaps
-#'@importFrom IRanges IRanges
-#'@param pair A Pair object. All slots of Pair class should be included
+#'                byGeneID, 
+#'                byCoordinate=list(chr=c(), start=c(), end=c()),
+#'                dir.out="./",
+#'                save=TRUE,...)
+#' @importFrom GenomicRanges GRanges findOverlaps
+#' @importFrom IRanges IRanges
+#' @param pair A Pair object. All slots of Pair class should be included
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::pData(data)).
-#'@param byProbe A vector of probe names.
-#'@param byGene A vector of gene ID
-#'@param byCoordinate A list contains chr, start and end. 
+#' @param byProbe A vector of probe names.
+#' @param byGene A vector of gene ID
+#' @param byCoordinate A list contains chr, start and end. 
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
-#'@param ... Parameters for GetNearGenes
-#'@param dir.out A path specify the directory for outputs. Default is current directory
-#'@param save A logic. If true, figures will be saved to dir.out.
-#'@details
+#' @param ... Parameters for GetNearGenes
+#' @param dir.out A path specify the directory for outputs. Default is current directory
+#' @param save A logic. If true, figures will be saved to dir.out.
+#' @details
 #'byProbes:
 #'When a vector of probes' name are provided,
 #'function will produce schematic plots for each individual probes.
@@ -35,7 +38,7 @@
 #'When a genomic coordinate is provided, function will 
 #'produce a schematic plot for this coordinate. The schematic plot contains 
 #'all genes and significantly linked probes in the range and the significant links.
-#'@export
+#' @export
 #' @import Gviz lattice
 #' @examples 
 #' data(elmer.data.example)

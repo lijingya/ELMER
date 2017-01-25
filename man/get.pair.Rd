@@ -4,9 +4,9 @@
 \alias{get.pair}
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
-get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL,  
-         Pe = 0.001, dir.out = "./", diffExp = FALSE, cores = 1, portion=0.3,   
-         label = NULL, save=TRUE)
+get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
+         pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = TRUE, diffExp = FALSE,
+         cores = 1, portion = 0.3,  label = NULL, save = TRUE))
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
@@ -41,6 +41,9 @@ Default is 1: don't use parallel process.}
 Default is 0.3.}
 
 \item{label}{A character labels the outputs.}
+
+\item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
+and getPair.XX.pairs.significant.csv (see detail).}
 }
 \value{
 Statistics for all pairs and significant pairs

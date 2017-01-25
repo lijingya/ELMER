@@ -1,21 +1,19 @@
 #' getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.
 #' @description 
 #' getTCGA is a function to download DNA methylation, RNA expression and clinic data for all
-#'  samples of certain cancer type from TCGA website. And downloaded data will be transform
-#'   to matrixes or data frame for further analysis.
+#' samples of certain cancer type from TCGA website. And downloaded data will be transform
+#' to matrixes or data frame for further analysis.
 #' @param disease A character specifies the disease to download in TCGA such as BLCA
 #' @param Meth A logic if TRUE HM450K DNA methylation data will download.
 #' @param RNA A logic if TRUE RNA-seq Hiseq-V2 from TCGA level 3 will be download.
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
 #' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param basedir A path shows where the data will be stored.
-#' @param RNAtype A charactor to specify whether use isoform level or gene level. 
-#' When RNAtype=gene, gene level gene expression will be used.
 #' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
-#' @usage getTCGA(disease, Meth = TRUE, RNA = TRUE, Clinic = TRUE, 
-#'                basedir = "./Data", RNAtype = "gene", Methfilter = 0.2, genome = "hg19")
+#' @usage getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
+#'                genome = "hg38", Methfilter=0.2)
 #' @export
 #' @examples
 #' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
@@ -24,7 +22,6 @@ getTCGA <- function(disease,
                     RNA=TRUE,
                     Clinic=TRUE,
                     basedir="./Data",
-                    RNAtype="gene",
                     genome = "hg38",
                     Methfilter=0.2){
   if(missing(disease)) stop("disease need to be specified.")
@@ -138,7 +135,7 @@ getRNAseq <- function(disease,
 #' @return Download all DNA methylation from HM450K level 3 data for
 #'  the specified disease.
 #' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
-#' @usage get450K(disease, basedir = "./Data", genome = "hg19", filter = 0.2)
+#' @usage get450K(disease, basedir="./Data",filter=0.2, genome = "hg38")
 get450K <- function(disease, 
                     basedir="./Data",
                     filter=0.2,

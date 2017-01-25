@@ -28,23 +28,19 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame assay assay<-
 #' @examples
 #' # NON TCGA example: matrices has diffetrent column names
-#' gene.exp <- DataFrame(sample1 = c("TP53"=2.3,"PTEN"=5.4),
-#'                        sample2 = c("TP53"=1.6,"PTEN"=2.3)
-#' )
+#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 #' dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-#'                        sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9)
-#' )
+#'                        sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- colnames(gene.exp)
 #' mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
 #' 
 #' # NON TCGA example: matrices has diffetrent column names
-#' gene.exp <- DataFrame(sample1.exp = c("TP53"=2.3,"PTEN"=5.4),
-#'                        sample2.exp = c("TP53"=1.6,"PTEN"=2.3)
-#' )
+#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 #' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
-#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
-#' )
+#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
 #' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 #' rownames(sample.info) <- c("sample1","sample2")
 #' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
@@ -100,7 +96,7 @@
 #'    GDCdownload(query.met)
 #'    met <- GDCprepare(query = query.met)
 #'    
-#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
 #'    
 #'    # Consisering it is TCGA and SE
 #'    mae.hg19 <- createMAE(exp = exp.hg19, 
@@ -135,7 +131,7 @@
 #'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
 #'                                 samples = colnames(not.tcga.exp), 
 #'                                 group = c(rep("group1",4),rep("group2",4)))
-#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")                             
+#'    distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
 #'    mae.hg19 <- createMAE(exp = not.tcga.exp, 
 #'                          met =  not.tcga.met, 
 #'                          TCGA = FALSE, 
@@ -369,7 +365,11 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
   
   if(!file.exists(basename(annotation))) {
     if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-    download(annotation, basename(annotation), mode = mode)
+    tryCatch({
+      download(annotation, basename(annotation), mode = mode)
+    },error = function(e) {
+      download(annotation, basename(annotation), mode = mode)
+    })
   }
   annotation <- get(load(basename(annotation)))
   return(annotation)  
@@ -386,6 +386,7 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
 #' @param probeInfo A GRnage object or a path of XX.rda file which only contains a GRange of probe information.
 #' @param geneInfo A GRnage object or path of XX.rda file which only contains a GRange of gene 
 #' information such as Coordinates, GENEID and SYMBOL. 
+#' @importFrom utils read.csv
 #' @export 
 #' @examples
 #' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
@@ -471,14 +472,15 @@ getGeneID <- function(data,symbol){
   return(gene)
 }
 
-# lable linear regression formula 
-# @param df A data.frame object contains two variables: dependent 
-# variable (Dep) and explanation variable (Exp).
-# @param Dep A character specify dependent variable. The first column 
-# will be dependent variable as default.
-# @param Exp A character specify explanation variable. The second column 
-# will be explanation variable as default.
-# @return A linear regression formula
+#' lable linear regression formula 
+#' @param df A data.frame object contains two variables: dependent 
+#' variable (Dep) and explanation variable (Exp).
+#' @param Dep A character specify dependent variable. The first column 
+#' will be dependent variable as default.
+#' @param Exp A character specify explanation variable. The second column 
+#' will be explanation variable as default.
+#' @return A linear regression formula
+#' @importFrom stats coef lm
 lm_eqn = function(df,Dep,Exp){
   if(missing(Dep)) Dep <- colnames(df)[1]
   if(missing(Exp)) Exp <- colnames(df)[2]
@@ -551,6 +553,7 @@ txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
+#' @importFrom GenomicRanges makeGRangesFromDataFrame
 #' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if (genome == "hg19"){
@@ -648,6 +651,7 @@ get.GRCh <- function(genome="hg38", genes) {
 # Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
 # The false posives will be removed latter with some statistical tests.
 #' @importFrom utils write.table
+#' @importFrom readr write_tsv
 getBedForDNAmethylation <- function(){
   TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))

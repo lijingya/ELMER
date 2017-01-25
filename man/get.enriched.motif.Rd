@@ -4,10 +4,9 @@
 \alias{get.enriched.motif}
 \title{get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.}
 \usage{
-get.enriched.motif(data, probes.motif, probes, 
+get.enriched.motif(data, probes.motif, probes, min.motif.quality = "C",
                    background.probes, lower.OR = 1.1, min.incidence = 10, 
-                   dir.out = "./", label = NULL, save=TRUE,
-                   min.motif.quality = "B")
+                   dir.out = "./", label = NULL, save = TRUE)
 }
 \arguments{
 \item{data}{A multi Assay Experiment from  \code{\link{createMAE}} function.
