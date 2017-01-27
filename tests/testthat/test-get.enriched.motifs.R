@@ -17,13 +17,14 @@ test_that("get enriched motif function returns the expected result", {
   rownames(Probes.motif) <- bg
   Probes.motif[probes,4] <- 1
   Probes.motif[1,] <- c(0,0,1,0) # The case before will give an execption
-
-  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
-                                       probes=probes,lower.OR = 0.1,
-                                       min.motif.quality = "D",
-                                       background.probes = bg,
-                                       label="hypo")
-
+  sink("/dev/null");
+  suppressMessages({
+    enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                         probes=probes,lower.OR = 0.1,
+                                         min.motif.quality = "D",
+                                         background.probes = bg,
+                                         label="hypo")
+  })
   # In this case MAFG_HUMAN.H10MO.C is the enriched motif
   # 1) SP2_HUMAN.H10MO.C, has the motif for all probes, but as it has for all bg probes
   # it will be conisered false positve
@@ -35,11 +36,14 @@ test_that("get enriched motif function returns the expected result", {
   rownames(Probes.motif) <- bg
   Probes.motif[1,] <- c(0,0,1) # The case before will give an execption
   
-  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
-                                       probes=probes,
-                                       min.motif.quality = "D",
-                                       background.probes = bg,
-                                       label="hypo")
+  sink("/dev/null");
+  suppressMessages({
+    enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                         probes=probes,
+                                         min.motif.quality = "D",
+                                         background.probes = bg,
+                                         label="hypo")
+  })
   expect_equal(names(enriched.motif), "MAFG_HUMAN.H10MO.C")
   expect_true(all(enriched.motif[[1]] %in% probes))
 })
@@ -61,31 +65,40 @@ test_that("min.incidence works", {
   rownames(Probes.motif) <- bg
   Probes.motif[probes,4] <- 1
   Probes.motif[1,] <- c(0,0,1,0) # The case before will give an execption
-
-  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
-                                       probes=probes,
-                                       min.incidence = 20,
-                                       lower.OR = 0.1,
-                                       min.motif.quality = "D",
-                                       background.probes = bg,
-                                       label="hypo")
+  sink("/dev/null");
+  suppressMessages({
+    
+    enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                         probes=probes,
+                                         min.incidence = 20,
+                                         lower.OR = 0.1,
+                                         min.motif.quality = "D",
+                                         background.probes = bg,
+                                         label="hypo")
+  })
   expect_true(length(enriched.motif) == 0)
-
-  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
-                                       probes=probes,
-                                       min.incidence = 0,
-                                       lower.OR = 0.0,
-                                       min.motif.quality = "D",
-                                       background.probes = bg,
-                                       label="hypo")
+  sink("/dev/null");
+  suppressMessages({
+    
+    enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                         probes=probes,
+                                         min.incidence = 0,
+                                         lower.OR = 0.0,
+                                         min.motif.quality = "D",
+                                         background.probes = bg,
+                                         label="hypo")
+  })
   expect_true(length(enriched.motif) == ncol(Probes.motif))
-  enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
-                                       probes=probes,
-                                       min.incidence = 0,
-                                       lower.OR = 0.0,
-                                       min.motif.quality = "B",
-                                       background.probes = bg,
-                                       label="hypo")
+  sink("/dev/null");
+  suppressMessages({
+    enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
+                                         probes=probes,
+                                         min.incidence = 0,
+                                         lower.OR = 0.0,
+                                         min.motif.quality = "B",
+                                         background.probes = bg,
+                                         label="hypo")
+  })
   expect_true(length(enriched.motif) == 0)
   
 })

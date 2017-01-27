@@ -1,7 +1,7 @@
 context("Checking get pair function")
 
 test_that("Function uses correctly the permu.dir", {
-  data(elmer.data.example)
+  data(elmer.data.example, envir = environment())
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                             geneAnnot=getExp(data))
   Hypo.pair <- get.pair(data = data,
@@ -86,7 +86,7 @@ test_that("Ramdom probe sleection is the same for every run", {
   set.seed(200); probes.permu.rep <- sample(probes, size = 10000, replace = FALSE)
   expect_true(all(probes.permu == probes.permu.rep))
   
-  data(elmer.data.example)
+  data(elmer.data.example, envir = environment())
   permu <- get.permu(data = data,
                      permu.dir = "test_permu_1",
                      geneID=rownames(getExp(data))[1],

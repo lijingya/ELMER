@@ -10,7 +10,10 @@ test_that("The creation of a using matrices and no TCGA data with equal colnames
   )
   sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
   rownames(sample.info) <- colnames(gene.exp)
-  mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+  })
   expect_equal(metadata(mae)$genome,"hg38")
   expect_false(metadata(mae)$TCGA)
   expect_equal(dim(getExp(mae)),c(2,2))
@@ -33,7 +36,11 @@ test_that("The creation of a using matrices and no TCGA data with different coln
   rownames(sample.info) <- c("sample1","sample2")
   sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
                          colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-  mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = gene.exp, met = dna.met, 
+                     sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  })
   expect_equal(metadata(mae)$genome,"hg19")
   expect_false(metadata(mae)$TCGA)
   expect_equal(dim(getExp(mae)),c(2,2))
@@ -57,7 +64,11 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   rownames(sample.info) <- c("sample1","sample2")
   sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
                          colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-  mae <- createMAE(exp = gene.exp, met = dna.met, sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = gene.exp, met = dna.met, 
+                     sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+  })
   expect_equal(metadata(mae)$genome,"hg19")
   expect_false(metadata(mae)$TCGA)
   expect_equal(dim(getExp(mae)),c(2,2))
@@ -76,8 +87,13 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   # Testing creating MultyAssayExperiment object
   # Load library
   # Consisering it is TCGA and SE
-  data(elmer.data.example)
-  mae <- createMAE(exp = getExp(data), met =  getMet(data), TCGA = TRUE, genome = "hg19")
+  data(elmer.data.example, envir = environment())
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = getExp(data), 
+                     met =  getMet(data), 
+                     TCGA = TRUE, genome = "hg19")
+  })
   expect_equal(metadata(mae)$genome,"hg19")
   expect_true(metadata(mae)$TCGA)
   expect_true(all(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression")))
@@ -85,7 +101,11 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   expect_equal(dim(getMet(mae)),c(101,234))
   expect_equal(dim(getExp(mae)),c(1026,234))
   
-  mae <- createMAE(exp = getExp(data), met =  getMet(data), TCGA = TRUE, genome = "hg38")
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = getExp(data), met =  getMet(data), 
+                     TCGA = TRUE, genome = "hg38")
+  })
   expect_equal(metadata(mae)$genome,"hg38")
   expect_true(metadata(mae)$TCGA)
   expect_true(all(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression")))
@@ -94,10 +114,17 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   expect_equal(dim(getExp(mae)),c(1026,234))
   
   # Consisering it is TCGA and not SE
-  mae <- createMAE(exp = assay(getExp(data)), met =  assay(getMet(data)), TCGA = TRUE, genome = "hg19")
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = assay(getExp(data)), met =  assay(getMet(data)), 
+                     TCGA = TRUE, genome = "hg19")
+  })
   expect_equal(metadata(mae)$genome,"hg19")
-  
-  mae <- createMAE(exp = assay(getExp(data)), met =  assay(getMet(data)), TCGA = TRUE, genome = "hg38")
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = assay(getExp(data)), met =  assay(getMet(data)), 
+                     TCGA = TRUE, genome = "hg38")
+  })
   expect_equal(metadata(mae)$genome,"hg38")
   
   # Consisering it is not TCGA and SE
@@ -111,8 +138,11 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
                                samples = colnames(not.tcga.exp), 
                                group = c(rep("group1", length(colnames(not.tcga.exp)) / 2 ), 
                                          rep("group2", length(colnames(not.tcga.exp)) /2 )))
-  
-  mae <- createMAE(exp = not.tcga.exp, met =  not.tcga.met, TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+  sink("/dev/null");
+  suppressMessages({
+    mae <- createMAE(exp = not.tcga.exp, met =  not.tcga.met,
+                     TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+  })
   
 })
 
@@ -152,7 +182,7 @@ test_that("Number of probes in MAE matches the distal probes", {
                      linearize.exp = TRUE, 
                      filter.probes = distal.probe, 
                      TCGA          = TRUE) 
- 
+    
     expect_gt(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
   }
