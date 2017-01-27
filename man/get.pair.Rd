@@ -6,7 +6,7 @@
 \usage{
 get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
          pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = TRUE, diffExp = FALSE,
-         cores = 1, portion = 0.3,  label = NULL, save = TRUE))
+         cores = 1, portion = 0.3,  label = NULL, save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}

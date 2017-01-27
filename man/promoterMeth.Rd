@@ -5,9 +5,12 @@
 \title{promoterMeth to calculate associations of gene expression with DNA methylation
 at promoter regions}
 \usage{
-promoterMeth(mee, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
+promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
 }
 \arguments{
+\item{data}{A Multi Assay Experiment object with DNA methylation and 
+gene expression Summarized Experiment objects}
+
 \item{sig.pvalue}{A number specifies significant cutoff for gene silenced by promoter
 methylation. Default is 0.01. P value is raw P value without adjustment.}
 
@@ -16,9 +19,6 @@ samples of control and experimental groups used to link promoter DNA methylation
 Default is 0.2.}
 
 \item{save}{A logic. If it is true, the result will be saved.}
-
-\item{mee}{A Multi Assay Experiment object with DNA methylation and 
-gene expression Summarized Experiment objects}
 }
 \value{
 A data frame contains genes whose expression significantly anti-correlated

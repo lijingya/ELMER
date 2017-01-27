@@ -48,15 +48,32 @@ checkData <- function(data){
   if(!"ensembl_gene_id" %in% colnames(values(data))) stop("Please the input should be a Gene Expression data must have external_gene_name column")
 }
 
-
-#' getSymbol
+#'getSymbol to report gene symbol from id
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
-#' @param geneID A character which is the geneID
-#' @return The gene symbol 
+#' @param geneID A character which is the ensembl_gene_id
+#' @return The gene symbol for input genes.
 #' @export
-getSymbol <- function(data, geneID){
-  gene.info <- values(getExp(data))
-  gene <- gene.info[gene.info$ensembl_gene_id %in% geneID,"external_gene_name"]
+#' @examples
+#' data(elmer.data.example)
+#' getSymbol(data, geneID="ENSG00000143067")
+getSymbol <- function(data,geneID){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(geneID,gene$ensembl_gene_id),"external_gene_name"]
+  return(gene)
+}
+
+#'getGeneID to report gene id from symbol
+#'@importFrom S4Vectors values
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
+#'@param symbol A vector of characters which are gene symbols 
+#'@return The gene ID for these gene symbols
+#'@export
+#'@examples
+#' data(elmer.data.example)
+#' getGeneID(data, symbol="ZNF697")
+getGeneID <- function(data,symbol){
+  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
+  gene <- gene[match(symbol,gene$external_gene_name),"ensembl_gene_id"]
   return(gene)
 }
 

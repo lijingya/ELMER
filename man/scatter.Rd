@@ -12,6 +12,8 @@ scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
 
 \item{exp}{A vector of number or matrix with sample in column and gene in rows.}
 
+\item{legend.title}{Plot legend title}
+
 \item{category}{A vector of sample labels.}
 
 \item{xlab}{A character specify the title of x axis.}

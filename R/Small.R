@@ -24,7 +24,7 @@
 #' @param met.na.cut Define the percentage of NA that the line should have to remove the probes for humanmethylation platforms.
 #' @return A MultiAssayExperiment object
 #' @export 
-#' @importFrom MultiAssayExperiment MultiAssayExperiment
+#' @importFrom MultiAssayExperiment MultiAssayExperiment 
 #' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame assay assay<-
 #' @examples
 #' # NON TCGA example: matrices has diffetrent column names
@@ -334,6 +334,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
 }
 
 #' @importFrom downloader download
+#' @importFrom S4Vectors DataFrame
 makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform) {
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from DNA methylation input")
@@ -375,61 +376,6 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
   return(annotation)  
 }
 
-#' fetch.pair to generate Pair class object.
-#' @description 
-#' fetch.pair is a funtion to take in enhancer-gene linkage prediction information,
-#' probe information and gene annotation generating a Pair class object, which is the 
-#' input for plotting functions. Options (pair, probeInfo, geneInfo) can
-#' take in R object or read files by specifying file paths. 
-#' @param pair A data.frame (R object) or a path of XX.csv file containing pair information such as
-#' output of function \code{\link{get.pair}}.
-#' @param probeInfo A GRnage object or a path of XX.rda file which only contains a GRange of probe information.
-#' @param geneInfo A GRnage object or path of XX.rda file which only contains a GRange of gene 
-#' information such as Coordinates, GENEID and SYMBOL. 
-#' @importFrom utils read.csv
-#' @export 
-#' @examples
-#' df <- data.frame(Probe=c("cg19403323","cg12213388","cg26607897"),
-#' GeneID =c("ID255928","ID84451","ID55811"),
-#' Symbol =c("SYT14","KIAA1804","ADCY10"),
-#' Pe=c(0.003322259,0.003322259,0.003322259))
-#' geneInfo <- txs()
-#' ## input can be a path
-#' pair <- fetch.pair(pair = df, geneInfo=geneInfo)
-fetch.pair <- function(pair,probeInfo,geneInfo){
-  if(!missing(pair)){
-    if(is.character(pair)){
-      pair <- read.csv(pair, stringsAsFactors=FALSE)
-    }
-  }else{
-    pair <- NULL
-  }
-  if(!missing(probeInfo)){
-    if(is.character(probeInfo)){
-      newenv <- new.env()
-      load(probeInfo, envir=newenv)
-      probeInfo <- get(ls(newenv)[1],envir=newenv)
-      # The data is in the one and only variable
-    }
-  }else{
-    probeInfo <- NULL
-  }
-  
-  if(!missing(geneInfo)){
-    if(is.character(geneInfo)){
-      newenv <- new.env()
-      load(geneInfo, envir=newenv)
-      geneInfo <- get(ls(newenv)[1],envir=newenv) 
-      # The data is in the one and only variable
-    }
-  }else{
-    geneInfo <- NULL
-  }
-  
-  pair <- pair.data(pairInfo=pair,probeInfo=probeInfo,geneInfo=geneInfo)
-  return(pair)
-}
-
 # splitmatix 
 # @param x A matrix 
 # @param by A character specify if split the matix by row or column.
@@ -443,34 +389,6 @@ splitmatrix <- function(x,by="row") {
   return(out)
 }
 
-#'getSymbol to report gene symbol from id
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
-#' @param geneID A character which is the ensembl_gene_id
-#' @return The gene symbol for input genes.
-#' @export
-#' @examples
-#' data(elmer.data.example)
-#' getSymbol(data, geneID="ENSG00000143067")
-getSymbol <- function(data,geneID){
-  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
-  gene <- gene[match(geneID,gene$ensembl_gene_id),"external_gene_name"]
-  return(gene)
-}
-
-#'getGeneID to report gene id from symbol
-#'@importFrom S4Vectors values
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
-#'@param symbol A vector of characters which are gene symbols 
-#'@return The gene ID for these gene symbols
-#'@export
-#'@examples
-#' data(elmer.data.example)
-#' getGeneID(data, symbol="ZNF697")
-getGeneID <- function(data,symbol){
-  gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
-  gene <- gene[match(symbol,gene$external_gene_name),"ensembl_gene_id"]
-  return(gene)
-}
 
 #' lable linear regression formula 
 #' @param df A data.frame object contains two variables: dependent 
@@ -493,42 +411,6 @@ lm_eqn = function(df,Dep,Exp){
 }
 
 
-#' txs to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians. 
-#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
-#' @description 
-#' txs is a function to fetch USCS gene annotation (transcripts level) from Bioconductor package Homo.sapians.
-#' If upstream and downstream are specified in TSS list, promoter regions of USCS gene will be generated.
-#' @param TSS A list. Contains upstream and downstream like TSS=list(upstream, downstream).
-#'  When upstream and downstream is specified, coordinates of promoter regions with gene annotation will be generated.
-#' @param genome Use TxDb.Hsapiens.UCSC.hg38.knownGene instead of TxDb.Hsapiens.UCSC.hg19.knownGene.
-#' Options: hg19 (default) and hg38.
-#' @return UCSC gene annotation if TSS is not specified. Coordinates of UCSC gene promoter regions if TSS is specified.
-#' @examples
-#' # get UCSC gene annotation (transcripts level)
-#' \dontrun{
-#'     txs <- txs()
-#'     txs <- txs(genome.build = "hg38")
-#' }
-#' # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
-#' \dontrun{
-#' txs <- txs(TSS=list(upstream=1000, downstream=1000))
-#' }
-#' @export
-#' @author Lijing Yao (maintainer: lijingya@usc.edu)
-#' @import GenomeInfoDb
-#' @importFrom GenomicFeatures transcripts
-#' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
-txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
-  if(genome == "hg38") TxDb(Homo.sapiens) <- TxDb.Hsapiens.UCSC.hg38.knownGene
-  gene <- suppressMessages(transcripts(Homo.sapiens, columns=c('GENEID','SYMBOL','ENSEMBL',"ENTREZID")))
-  gene$GENEID <- unlist(gene$GENEID)
-  gene$TXNAME <- unlist(gene$TXNAME)
-  gene$SYMBOL <- unlist(gene$SYMBOL)
-  gene <- gene[!is.na(gene$GENEID)]
-  if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
-    gene <- promoters(gene, upstream = TSS$upstream, downstream = TSS$downstream)
-  return(gene)
-}
 
 #' getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor package biomaRt
 #' If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
@@ -540,14 +422,10 @@ txs <- function(genome = "hg38",TSS=list(upstream=NULL, downstream=NULL)){
 #' @param genome Which genome build will be used: hg38 (default) or hg19.
 #' @return GENCODE gene annotation if TSS is not specified. Coordinates of GENCODE gene promoter regions if TSS is specified.
 #' @examples
-#' # get UCSC gene annotation (transcripts level)
+#' # get GENCODE gene annotation (transcripts level)
 #' \dontrun{
-#'     txs <- txs()
-#'     txs <- txs(genome.build = "hg38")
-#' }
-#' # get coordinate of all UCSC promoter regions +/-1000bp of TSSs
-#' \dontrun{
-#' txs <- txs(TSS=list(upstream=1000, downstream=1000))
+#'     getTSS <- getTSS()
+#'     getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 #' }
 #' @export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
@@ -720,10 +598,8 @@ prepare_object <- function(){
       motifs <- readr::read_tsv(file)
       # From 1 to 21 we have annotations then we have 640 motifs
       matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = 640,sparse = TRUE)
-      print(object.size(matrix))
       colnames(matrix) <- gsub(" Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
       rownames(matrix) <- motifs$PeakID
-      print(object.size(matrix))
       matrix[!is.na(motifs[,-c(1:21)])] <- 1
       matrix <- as(matrix, "nsparseMatrix")
       assign(paste0("Probes.motif.",gen,".",plat),matrix) # For each probe that there is a bind to the motif, we will add as 1 in the matrix. (Are hg38, hg19,450k,epic matrices equal?)

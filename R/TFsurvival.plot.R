@@ -33,17 +33,18 @@ TFsurvival.plot <- function(data,
   # Get the names of the 30% patients with higher expression
   higher <- names(tail(exp, n = ceiling(length(exp) * percentage)))
   
+  df <- pData(data)
   # Create the labels for each sample
-  pData(data)$tf_groups <- "medium"
+  df$tf_groups <- "medium"
   low.idx <-  sampleMap(data)[sampleMap(data)$colname %in% lower,"primary"]
-  pData(data)[low.idx,"tf_groups"] <- "low"
+  df[low.idx,"tf_groups"] <- "low"
   high.idx <-  sampleMap(data)[sampleMap(data)$colname %in% higher,"primary"]
-  pData(data)[high.idx,"tf_groups"] <- "high"
+  df[high.idx,"tf_groups"] <- "high"
   
   filename <-  NULL
   if(save) filename <- paste0(TF,"_survival.pdf")
   # Use TCGAbiolinks to create the survival curve
-  TCGAanalyze_survival(pData(data),
+  TCGAanalyze_survival(df,
                        "tf_groups",
                        legend=paste0(TF," Exp level"),
                        filename = filename)

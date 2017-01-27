@@ -21,14 +21,10 @@ getTSS to fetch GENCODE gene annotation (transcripts level) from Bioconductor pa
 If upstream and downstream are specified in TSS list, promoter regions of GENCODE gene will be generated.
 }
 \examples{
-# get UCSC gene annotation (transcripts level)
+# get GENCODE gene annotation (transcripts level)
 \dontrun{
-    txs <- txs()
-    txs <- txs(genome.build = "hg38")
-}
-# get coordinate of all UCSC promoter regions +/-1000bp of TSSs
-\dontrun{
-txs <- txs(TSS=list(upstream=1000, downstream=1000))
+    getTSS <- getTSS()
+    getTSS <- getTSS(genome.build = "hg38", TSS=list(upstream=1000, downstream=1000))
 }
 }
 \author{

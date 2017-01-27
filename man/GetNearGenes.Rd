@@ -35,7 +35,7 @@ It can receite either multi Assay Experiment with both DNA methylation and gene 
 and the names of probes to select nearby genes, or it can receive two granges objects TRange and geneAnnot.
 }
 \examples{
-geneAnnot <- txs(TSS=list(upstream=0, downstream=0))
+geneAnnot <- getTSS(TSS=list(upstream=0, downstream=0))
 probe <- GRanges(seqnames = c("chr1","chr2"), 
 range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 name= c("cg18108049","cg17125141"))

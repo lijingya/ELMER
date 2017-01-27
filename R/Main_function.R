@@ -63,11 +63,7 @@ get.feature.probe <- function(feature,
   if(!promoter){
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
-      TSS.gencode <- getTSS(genome = genome)
-      # The function txs gets the transcription coordinantes from USCS
-      TSS <- TSS.gencode
-      # TSS.uscs <- txs(genome)
-      # TSS <- c(TSS.gencode, reduce(TSS.uscs))
+      TSS <- getTSS(genome = genome)
     }
     suppressWarnings({
       TSS <- promoters(TSS,upstream = TSS.range[["upstream"]], 
@@ -90,11 +86,7 @@ get.feature.probe <- function(feature,
   } else {
     if(missing(TSS)){
       # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
-      TSS.gencode <- getTSS(genome = genome)
-      TSS <- TSS.gencode
-      # The function txs gets the transcription coordinantes from USCS
-      #TSS.uscs <- txs(genome)
-      #TSS <- c(TSS.gencode, reduce(TSS.uscs))
+      TSS <- getTSS(genome = genome)
     }
     suppressWarnings({
       promoters <- promoters(TSS,upstream = TSS.range[["upstream"]], 
@@ -258,7 +250,7 @@ get.diff.meth <- function(data,
 #' @usage 
 #' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
 #'          pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = TRUE, diffExp = FALSE,
-#'          cores = 1, portion = 0.3,  label = NULL, save = TRUE))
+#'          cores = 1, portion = 0.3,  label = NULL, save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
@@ -594,8 +586,8 @@ get.permu <- function(data,
 #' promoterMeth is a function to calculate associations of gene expression with DNA methylation
 #' at promoter regions.
 #' @usage 
-#' promoterMeth(mee, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
-#'@param mee A Multi Assay Experiment object with DNA methylation and 
+#' promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
+#'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
 #'@param sig.pvalue A number specifies significant cutoff for gene silenced by promoter
 #' methylation. Default is 0.01. P value is raw P value without adjustment.
@@ -723,10 +715,11 @@ promoterMeth <- function(data,
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' @importFrom magrittr divide_by multiply_by %>% add
 #' @importFrom plyr alply
-#' @importFrom utils data
+#' @importFrom utils data read.csv
 #' @importFrom S4Vectors metadata
 #' @importFrom dplyr filter
 #' @importFrom Matrix colMeans colSums
+#' @import ELMER.data
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.

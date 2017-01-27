@@ -151,6 +151,7 @@ scatter.plot <- function(data,
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
 #'@param category A vector of sample labels.
+#'@param legend.title Plot legend title 
 #'@param xlab A character specify the title of x axis.
 #'@param ylab A character specify the title of y axis.
 #'@param title A character specify the figure title.

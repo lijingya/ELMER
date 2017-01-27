@@ -14,12 +14,18 @@ schematic.plot(data,
                save=TRUE,...)
 }
 \arguments{
+\item{data}{A Multi Assay Experiment object with DNA methylation and 
+gene expression Summarized Experiment objects}
+
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::pData(data)).}
 
-\item{pair}{A Pair object. All slots of Pair class should be included}
+\item{pair}{A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
+This is the ouput of get.pairfunction.}
 
 \item{byProbe}{A vector of probe names.}
+
+\item{byGeneID}{A vector of gene ID}
 
 \item{byCoordinate}{A list contains chr, start and end. 
 byCoordinate=list(chr=c(),start=c(),end=c()).}
@@ -29,8 +35,6 @@ byCoordinate=list(chr=c(),start=c(),end=c()).}
 \item{save}{A logic. If true, figures will be saved to dir.out.}
 
 \item{...}{Parameters for GetNearGenes}
-
-\item{byGene}{A vector of gene ID}
 }
 \description{
 schematic.plot is a function to plot schematic plots showing the locations of genes and probes.

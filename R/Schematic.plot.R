@@ -12,11 +12,14 @@
 #'                save=TRUE,...)
 #' @importFrom GenomicRanges GRanges findOverlaps
 #' @importFrom IRanges IRanges
-#' @param pair A Pair object. All slots of Pair class should be included
+#'@param data A Multi Assay Experiment object with DNA methylation and 
+#' gene expression Summarized Experiment objects
+#' @param pair A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
+#' This is the ouput of get.pairfunction.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::pData(data)).
 #' @param byProbe A vector of probe names.
-#' @param byGene A vector of gene ID
+#' @param byGeneID A vector of gene ID
 #' @param byCoordinate A list contains chr, start and end. 
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
 #' @param ... Parameters for GetNearGenes
