@@ -108,18 +108,18 @@ motif.enrichment.plot <- function(motif.enrichment,
 TF.rank.plot <- function(motif.pvalue, 
                          motif, 
                          TF.label, 
-                         dir.out="./", 
-                         save=TRUE){
+                         dir.out = "./", 
+                         save = TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
-  if(is.character(motif.pvalue)){
+  if(is.character(motif.pvalue)) {
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
   if(missing(TF.label)){
       motif.relavent.TFs <- createMotifRelevantTfs()
       TF.label <- motif.relavent.TFs[motif]
       specify <- "No"
-  }else{
+  } else {
     specify <- "Yes"
   }
   significant <- floor(0.05 * nrow(motif.pvalue))
@@ -127,7 +127,7 @@ TF.rank.plot <- function(motif.pvalue,
   
   Plots <- list()
   for(i in motif){
-    df <- data.frame(pvalue=motif.pvalue[,i], Gene=rownames(motif.pvalue), stringAsFactors=FALSE)
+    df <- data.frame(pvalue = motif.pvalue[,i], Gene = rownames(motif.pvalue), stringAsFactors = FALSE)
     df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
     TF.sub <- TF.label[[i]]
@@ -137,20 +137,20 @@ TF.rank.plot <- function(motif.pvalue,
     df$label <- "No"
     df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
-                           text=as.character(df$Gene[df$label %in% "Yes"]), 
-                           x=which(df$label %in% "Yes"), stringsAsFactors = FALSE)
+                           text = as.character(df$Gene[df$label %in% "Yes"]), 
+                           x = which(df$label %in% "Yes"), stringsAsFactors = FALSE)
     P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Yes","No"))))+
       scale_color_manual(values = c("red","black"))+
       geom_vline(xintercept=significant, linetype = "3313")+
-      geom_point()+
+      geom_point() +
       # geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",
       #          position=position_jitter(height=0.5,width = 0.3), size=2)+
       #     geom_segment(aes(x = x, y = pvalue, xend = , yend = ),df.label,color="black")+
-      theme_bw()+
+      theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
       theme(legend.position="none")+
-      labs(x="Rank", y="-log10 P value", title=i)
+      labs(x = "Rank", y ="-log10 P value", title=i)
     
     df$Gene <- as.character(df$Gene)
     df$Gene[df$label %in% "No"] <- "" 

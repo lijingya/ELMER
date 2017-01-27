@@ -49,9 +49,9 @@
 #'                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
 #'                    Symbol = c("TRAF3IP3","LAMB3","LAMB3"), 
 #'                    Pe = c(0.001,0.00001,0.001))
-#' schematic.plot(data, pair, byProbe = "cg19403323")
-#' schematic.plot(data, pair, byGeneID = "ENSG00000009790")
-#' schematic.plot(data, pair, byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
+#' schematic.plot(data, group.col = "definition", pair = pair, byProbe = "cg19403323")
+#' schematic.plot(data, group.col = "definition", pair = pair, byGeneID = "ENSG00000009790")
+#' schematic.plot(data, group.col = "definition",pair = pair, byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
 schematic.plot <- function(data,
                            group.col = NULL,
                            pair, 
