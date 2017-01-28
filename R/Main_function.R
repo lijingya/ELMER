@@ -260,17 +260,23 @@ get.diff.meth <- function(data,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param calculate.Pe A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.
+#' @param calculate.Pe A logic. If TRUE (default) also execute the permutation step, 
+#' if FALSE only uses the adjusted raw p-value to select the significant pairs.
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
 #'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
 #'  Default is 0.001. Only used if calculate.empirical.p is TRUE.
+#' @param filter.probes Should filter probes by selecting only probes that have at least
+#' a certain number of samples below and above a certain cut-off. 
+#' See \code{\link{preAssociationProbeFiltering}} function.
 #' @param filter.portion A number specify the cut point to define binary methlation level for probe loci. 
 #' Default is 0.3. When beta value is above 0.3, the probe is methylated and 
 #' vice versa. For one probe, the percentage of methylated and unmethylated samples 
-#' should be above filter.percentage value
+#' should be above filter.percentage value.   
+#' Only used if filter.probes is TRUE. See \code{\link{preAssociationProbeFiltering}} function.
 #' @param filter.percentage Minimun percentage of samples to be considered in methylated and unmethylated
-#' for the filter.portion option. Default 5\% See \code{\link{preAssociationProbeFiltering}} function.
+#' for the filter.portion option. Default 5\%. Only used if filter.probes is TRUE.
+#'  See \code{\link{preAssociationProbeFiltering}} function.
 #' @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
@@ -306,7 +312,9 @@ get.pair <- function(data,
                      calculate.Pe = TRUE,
                      diffExp = FALSE,
                      cores = 1,
-                     portion = 0.3, 
+                     filter.probes = TRUE,
+                     filter.portion = 0.3, 
+                     filter.percentage = 0.05,
                      label = NULL,
                      save = TRUE){
   ## check data

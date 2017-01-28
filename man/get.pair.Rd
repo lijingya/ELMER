@@ -29,7 +29,8 @@ Default is 0.001. Only used if calculate.empirical.p is TRUE.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
-\item{calculate.Pe}{A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.}
+\item{calculate.Pe}{A logic. If TRUE (default) also execute the permutation step, 
+if FALSE only uses the adjusted raw p-value to select the significant pairs.}
 
 \item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to 
 test whether putative target gene are differentially expressed between two groups.}
@@ -37,18 +38,24 @@ test whether putative target gene are differentially expressed between two group
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
 
-\item{label}{A character labels the outputs.}
-
-\item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
-and getPair.XX.pairs.significant.csv (see detail).}
+\item{filter.probes}{Should filter probes by selecting only probes that have at least
+a certain number of samples below and above a certain cut-off. 
+See \code{\link{preAssociationProbeFiltering}} function.}
 
 \item{filter.portion}{A number specify the cut point to define binary methlation level for probe loci. 
 Default is 0.3. When beta value is above 0.3, the probe is methylated and 
 vice versa. For one probe, the percentage of methylated and unmethylated samples 
-should be above filter.percentage value}
+should be above filter.percentage value.   
+Only used if filter.probes is TRUE. See \code{\link{preAssociationProbeFiltering}} function.}
 
 \item{filter.percentage}{Minimun percentage of samples to be considered in methylated and unmethylated
-for the filter.portion option. Default 5\% See \code{\link{preAssociationProbeFiltering}} function.}
+for the filter.portion option. Default 5\%. Only used if filter.probes is TRUE.
+ See \code{\link{preAssociationProbeFiltering}} function.}
+
+\item{label}{A character labels the outputs.}
+
+\item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
+and getPair.XX.pairs.significant.csv (see detail).}
 }
 \value{
 Statistics for all pairs and significant pairs

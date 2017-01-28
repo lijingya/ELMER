@@ -466,13 +466,30 @@ dir(path = "./ELMER.example/Result/LUSC", pattern = "getMethdiff")
 
 This step is to link enhancer probes with mehtylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out
-by function get.pair.
+by function get.pair. 
 
-For each enhancer probe with differential methylation, the closest 10 upstream 
+First, the fucntion get.pair for additional stringency and to avoid correlations due to non-cancer contamination, 
+selects only those enhancer probes that had differential methylation as defined above, 
+and where at least 5 % of all samples (combining tumor and normal) had beta values > 0.3.
+ We usually call locus unmethylated when the methylation value < 0.3 and methylated 
+ when the methylation value > 0.3. 
+Basically, this step will make sure we have at least a percentage of beta values 
+lesser than K and n percentage of beta values greater K. 
+For example, if percentage is 5\%, the number of samples 100 and K = 0.3, 
+this filter will select probes that we have at least 5 (5\% of 100\%) samples have beta 
+values > 0.3 and at least 5 samples have beta values < 0.3.
+This filter is importante as true promoters and enhancers usually have a pretty low 
+value (of course purity can screw that up).  
+we often see lots of PMD probes across the genome with intermediate values like 0.4.  
+Choosing a value of 0.3 will certainly give some false negatives, but not compared
+to the number of false positives we thought we might get without this filter.
+Please see the documentation for the function `preAssociationProbeFiltering`.
+
+After, for each enhancer probe with differential methylation and passing this filter, the closest 10 upstream 
 genes and the closest 10 downstream genes were tested for correlation between 
 methylation of the probe and expression of the gene. To select these genes, 
 the probe-gene distance was defined as the distance from the probe to a transcription 
-start site specified by the GECODE gene annotation. Thus, exactly 20 statistical 
+start site specified by the GENCODE gene annotation. Thus, exactly 20 statistical 
 tests were performed for each probe, as follows. For each probe-gene pair, 
 the samples (all experiment samples and control samples) were divided into two 
 groups: the M group, which consisted of the upper methylation quintile (the 20%
@@ -533,11 +550,16 @@ The main arguments of this function are:
 6. calculate.Pe: A logic. If TRUE (default) also execute the permutation step, if FALSE only uses the adjusted raw p-value to select the significant pairs.
 7. pvalue: A number specify the raw p-value cutoff for defining signficant pairs.  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 8. Pe: A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001. Only used if calculate.empirical.p is TRUE.
-9. portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
-10. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.
-11. dir.out	A path specify the directory for outputs. Default is current directory
-12. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
-13. label:	A character labels the outputs.
+9. filter.probes Should filter probes by selecting only probes that have at least
+   a certain number of samples below and above a certain cut-off. 
+   See `preAssociationProbeFiltering` function.
+10.  filter.portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
+11. filter.percentage:  Minimun percentage of samples to be considered in methylated and unmethylated 
+for the filter.portion option. Default 5\%. See `preAssociationProbeFiltering` function.
+12. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.
+13. dir.out	A path specify the directory for outputs. Default is current directory
+14. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
+15. label:	A character labels the outputs.
 
 ```{r,eval=TRUE, message=FALSE}
 ### identify target gene for significantly hypomethylated probes.
@@ -557,6 +579,9 @@ Hypo.pair <- get.pair(data = data,
                       pvalue = 0.01,
                       calculate.Pe = TRUE,
                       Pe = 0.01,
+                      probe.filtering = TRUE, # See preAssociationProbeFiltering function
+                      filter.percentage  0.05,
+                      filter.portion = 0.3,
                       dir.out = "./ELMER.example/Result/LUSC",
                       cores = detectCores()/2,
                       label = "hypo")
