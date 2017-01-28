@@ -29,8 +29,8 @@ Default is 0.001. Only used if calculate.empirical.p is TRUE.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
-\item{calculate.Pe}{A logic. If TRUE (default) also execute the permutation step, 
-if FALSE only uses the adjusted raw p-value to select the significant pairs.}
+\item{calculate.Pe}{A logic. If TRUE  also execute the permutation step, 
+if FALSE (default) only uses the adjusted raw p-value to select the significant pairs.}
 
 \item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to 
 test whether putative target gene are differentially expressed between two groups.}

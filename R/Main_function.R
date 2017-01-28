@@ -260,8 +260,8 @@ get.diff.meth <- function(data,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param calculate.Pe A logic. If TRUE (default) also execute the permutation step, 
-#' if FALSE only uses the adjusted raw p-value to select the significant pairs.
+#' @param calculate.Pe A logic. If TRUE  also execute the permutation step, 
+#' if FALSE (default) only uses the adjusted raw p-value to select the significant pairs.
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
 #'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
@@ -309,7 +309,7 @@ get.pair <- function(data,
                      pvalue = 0.05,
                      Pe = 0.001,
                      dir.out = "./",
-                     calculate.Pe = TRUE,
+                     calculate.Pe = FALSE,
                      diffExp = FALSE,
                      cores = 1,
                      filter.probes = TRUE,
