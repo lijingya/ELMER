@@ -37,13 +37,18 @@ test whether putative target gene are differentially expressed between two group
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
 
-\item{portion}{A number specify the cut point for methylated and unmethylated.
-Default is 0.3.}
-
 \item{label}{A character labels the outputs.}
 
 \item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 and getPair.XX.pairs.significant.csv (see detail).}
+
+\item{filter.portion}{A number specify the cut point to define binary methlation level for probe loci. 
+Default is 0.3. When beta value is above 0.3, the probe is methylated and 
+vice versa. For one probe, the percentage of methylated and unmethylated samples 
+should be above filter.percentage value}
+
+\item{filter.percentage}{Minimun percentage of samples to be considered in methylated and unmethylated
+for the filter.portion option. Default 5\% See \code{\link{preAssociationProbeFiltering}} function.}
 }
 \value{
 Statistics for all pairs and significant pairs

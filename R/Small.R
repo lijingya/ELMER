@@ -167,7 +167,7 @@ createMAE <- function (exp,
   }
   # Add this here ?
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
-
+  
   
   if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
@@ -297,7 +297,7 @@ createMAE <- function (exp,
     }
   }
   if(save) {
-  if(missing(save.filename)) save.filename <- paste0("mae_",genome,"_",met.platform,".rda")
+    if(missing(save.filename)) save.filename <- paste0("mae_",genome,"_",met.platform,".rda")
     save(mae, file = save.filename,compress = "xz")
     message("MAE saved as: ", save.filename)
   }
@@ -648,3 +648,70 @@ createMotifRelevantTfs <- function(){
 }
 
 
+#' @title Filtering probes
+#' @description 
+#' This function has some filters to the DNA methylation data
+#' in each it selects probes to avoid correlations due to non-cancer 
+#' contamination and for additional stringency.
+#'  \itemize{
+#' \item Filter 1: We usually call locus unmethylated when the methylation value < 0.3 and methylated when the methylation value > 0.3. 
+#'       Therefore Meth_B is the percentage of methylation value > K. 
+#'       Basically, this step will make sure we have at least a percentage of beta values lesser than K and n percentage of beta values greater K. 
+#'       For example, if percentage is 5\%, the number of samples 100 and K = 0.3, 
+#'       this filter will select probes that we have at least 5 (5\% of 100\%) samples have beta values > 0.3 and at least 5 samples have beta values < 0.3.
+#'       This filter is importante as true promoters and enhancers usually have a pretty low value (of course purity can screw that up).  
+#'       we often see lots of PMD probes across the genome with intermediate values like 0.4.  
+#'       Choosing a value of 0.3 will certainly give some false negatives, but not compared to the number of false positives we thought we might get without this filter.
+#' }
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
+#' Method section (Linking enhancer probes with methylation changes to target genes with expression changes).
+#' @param data A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix
+#' @param K Cut off to consider probes as methylated or unmethylated. Default: 0.3
+#' @param percentage The percentage of samples we should have at least considered as methylated and unmethylated
+#' @return An object with the same class, but with the probes removed.
+#' @export
+#' @examples
+#'  random.probe <- runif(100, 0, 1)
+#'  bias_l.probe <- runif(100, 0, 0.3)
+#'  bias_g.probe <- runif(100, 0.3, 1)
+#'  met <- rbind(random.probe,bias_l.probe,bias_g.probe)
+#'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
+#'  met <- rbind(random.probe,random.probe,random.probe)
+#'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
+#'  
+#'  data(elmer.data.example)
+#'  data <- preAssociationProbeFiltering(data,  K = 0.3, percentage = 0.05)
+#'  
+#'  met <- rbind(random.probe,bias_l.probe,bias_g.probe)
+#'  colnames(met) <- paste("sample",1:100)
+#'  exp <- met
+#'  rownames(exp) <- c("ENSG00000141510","ENSG00000171862","ENSG00000171863")
+#'  sample.info <- DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
+#'  rownames(sample.info) <- colnames(exp)
+#'  mae <- createMAE(exp = exp, met = met, pData = sample.info, genome = "hg38") 
+#'  mae <- preAssociationProbeFiltering(mae,  K = 0.3, percentage = 0.05)
+preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
+  print.header("Filtering probes", type = "section")
+  message("For more information see function preAssociationProbeFiltering")
+  
+  if(class(data) == class(MultiAssayExperiment())) met <- assay(getMet(data))
+    # In percentage how many probes are bigger than K ?
+    Meth_B <- rowMeans(met > K, na.rm = TRUE)
+    # We should  have at least 5% methylation value < K or at least 5% methylation value > K
+    keep <- Meth_B < (1 - percentage) & Meth_B > percentage
+    message("Making sure we have at least ", percentage * 100, "% of beta values lesser than ", K," and ", 
+          percentage * 100, "% of beta values greater ",K,".") 
+    if( length(keep) - sum(keep) != 0){
+      message("Removing ", length(keep) - sum(keep), " probes out of ", length(keep))
+    } else {
+      message("There were no probes to be removed")
+    }
+    if(class(data) == class(MultiAssayExperiment())) {
+      experiments(data)["DNA methylation"][[1]] <- experiments(data)["DNA methylation"][[1]][keep,]
+    } else {
+      data <- data[keep,,drop = FALSE]
+    }
+  return(data)
+}

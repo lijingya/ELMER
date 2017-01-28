@@ -82,7 +82,6 @@ Stat.nonpara.permu <- function(Probe,
 #' which is good for computing each probes for nearby genes.
 #' @param Probe A character of name of Probe in array.
 #' @param NearGenes A list of nearby gene for each probe which is output of GetNearGenes function.
-#' @param K A number determines the methylated groups and unmethylated groups.
 #' @param Top A number determines the percentage of top methylated/unmethylated samples.
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
@@ -90,7 +89,6 @@ Stat.nonpara.permu <- function(Probe,
 #' @return U test results
 Stat.nonpara <- function(Probe,
                          NearGenes,
-                         K,
                          Top=NULL,
                          Meths=Meths,
                          Exps=Exps){
@@ -98,29 +96,24 @@ Stat.nonpara <- function(Probe,
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,]
   Meth <- Meths[Probe,]
-  Meth_B <- mean(Meth > K, na.rm = TRUE)
-  if( Meth_B >0.95 | Meth_B < 0.05 ){
-    test.p <- NA
+  idx <- order(Meth)
+  nb <- round(length(Meth)*Top)
+  unmethy <- head(idx, n = nb) 
+  methy <- tail(idx, n = nb) 
+  # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
+  if(!is.vector(Exp)){
+    Exps <- Exps[,c(unmethy,methy)]
+    test.p <- unlist(lapply(splitmatrix(Exp),
+                            function(x) {
+                              wilcox.test(x[unmethy],
+                                          x[methy],
+                                          alternative = "greater",
+                                          exact = FALSE)$p.value}))
   } else {
-    idx <- order(Meth)
-    nb <- round(length(Meth)*Top)
-    unmethy <- head(idx, n = nb) 
-    methy <- tail(idx, n = nb) 
-    # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
-    if(!is.vector(Exp)){
-      Exps <- Exps[,c(unmethy,methy)]
-      test.p <- unlist(lapply(splitmatrix(Exp),
-                              function(x) {
-                                wilcox.test(x[unmethy],
-                                            x[methy],
-                                           alternative = "greater",
-                                           exact = FALSE)$p.value}))
-    } else {
-      test.p <- wilcox.test(Exps[unmethy],
-                            Exps[methy],
-                            alternative = "greater",
-                            exact=FALSE)$p.value
-    }
+    test.p <- wilcox.test(Exps[unmethy],
+                          Exps[methy],
+                          alternative = "greater",
+                          exact=FALSE)$p.value
   }
   
   if(length(Gene)==1){
@@ -131,7 +124,7 @@ Stat.nonpara <- function(Probe,
                       Sides    = NearGenes[[Probe]]$Side,
                       Raw.p    = test.p, 
                       stringsAsFactors = FALSE)
-  }else{
+  } else {
     out <- data.frame(Probe    = rep(Probe,length(Gene)),
                       GeneID   = Gene,
                       Symbol   = NearGenes[[Probe]]$Symbol, 

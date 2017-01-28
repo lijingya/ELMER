@@ -5,14 +5,12 @@
 \title{U test (non parameter test) for permutation. This is one probe vs nearby gene 
 which is good for computing each probes for nearby genes.}
 \usage{
-Stat.nonpara(Probe, NearGenes, K, Top = NULL, Meths = Meths, Exps = Exps)
+Stat.nonpara(Probe, NearGenes, Top = NULL, Meths = Meths, Exps = Exps)
 }
 \arguments{
 \item{Probe}{A character of name of Probe in array.}
 
 \item{NearGenes}{A list of nearby gene for each probe which is output of GetNearGenes function.}
-
-\item{K}{A number determines the methylated groups and unmethylated groups.}
 
 \item{Top}{A number determines the percentage of top methylated/unmethylated samples.}
 

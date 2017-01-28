@@ -265,8 +265,12 @@ get.diff.meth <- function(data,
 #'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
 #'  Default is 0.001. Only used if calculate.empirical.p is TRUE.
-#' @param portion A number specify the cut point for methylated and unmethylated.
-#'  Default is 0.3.
+#' @param filter.portion A number specify the cut point to define binary methlation level for probe loci. 
+#' Default is 0.3. When beta value is above 0.3, the probe is methylated and 
+#' vice versa. For one probe, the percentage of methylated and unmethylated samples 
+#' should be above filter.percentage value
+#' @param filter.percentage Minimun percentage of samples to be considered in methylated and unmethylated
+#' for the filter.portion option. Default 5\% See \code{\link{preAssociationProbeFiltering}} function.
 #' @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
@@ -322,15 +326,16 @@ get.pair <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
+  
+  data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
   message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
-                                     Meths= assay(getMet(data)[x,]), 
-                                     NearGenes=nearGenes,
-                                     K=portion,
-                                     Top=percentage,
-                                     Exps=assay(getExp(data)))},
+                                     Meths = assay(getMet(data))[x,], 
+                                     NearGenes = nearGenes,
+                                     Top = percentage,
+                                     Exps = assay(getExp(data)))},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
@@ -355,7 +360,6 @@ get.pair <- function(data,
                        percentage = percentage, 
                        rm.probes  = names(nearGenes), 
                        permu.size = permu.size, 
-                       portion    = portion,
                        permu.dir  = permu.dir,
                        cores      = cores)
     # Get empirical p-value
@@ -415,11 +419,6 @@ get.pair <- function(data,
 #' groups used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permuation will be. 
-#' @param portion A number specify the cut point to define binary methlation level for probe loci. 
-#' Default is 0.3. When beta value is above 0.3, the probe is methylated and 
-#' vice versa. For one probe, the percentage of methylated or unmethylated samples 
-#' should be above 0.05.
-#' Default is 0.3.
 #' @return Permutations
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
@@ -442,16 +441,14 @@ get.pair <- function(data,
 #'                   permu.size=5)
 get.permu <- function(data, 
                       geneID, 
-                      percentage=0.2, 
-                      rm.probes=NULL,
-                      portion=0.3,
-                      permu.size=10000, 
-                      permu.dir=NULL,
-                      cores=1){
+                      percentage = 0.2, 
+                      rm.probes = NULL,
+                      permu.size = 10000, 
+                      permu.dir = NULL,
+                      cores = 1){
   
   ## get usable probes
-  binary.m <- rowMeans(assay(getMet(data)) > portion, na.rm = TRUE)
-  usable.probes <- names(binary.m[binary.m < 0.95 & binary.m > 0.05 & !is.na(binary.m)])
+  usable.probes <- names(assay(getMet(data)))
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 

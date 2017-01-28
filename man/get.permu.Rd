@@ -24,12 +24,6 @@ groups used to link probes to genes. Default is 0.2.}
 
 \item{rm.probes}{A vector lists the probes name.}
 
-\item{portion}{A number specify the cut point to define binary methlation level for probe loci. 
-Default is 0.3. When beta value is above 0.3, the probe is methylated and 
-vice versa. For one probe, the percentage of methylated or unmethylated samples 
-should be above 0.05.
-Default is 0.3.}
-
 \item{permu.size}{A number specify the times of permuation. Default is 10000.}
 
 \item{permu.dir}{A path where the output of permuation will be.}

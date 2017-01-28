@@ -448,7 +448,7 @@ sig.diff <- get.diff.meth(data,
                           percentage = 0.2,
                           sig.dif = 0.3,
                           diff.dir = "hypo", # Search for hypomethylated probes in group 1
-                          cores=detectCores()/2, 
+                          cores = detectCores()/2, 
                           dir.out ="./ELMER.example/Result/LUSC", 
                           pvalue = 0.01)
 
