@@ -35,6 +35,9 @@ if FALSE (default) only uses the adjusted raw p-value to select the significant 
 \item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to 
 test whether putative target gene are differentially expressed between two groups.}
 
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::pData(data)).}
+
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
 
@@ -76,6 +79,15 @@ Hypo.pair <- get.pair(data=data,
                      pvalue = 0.2,
                      dir.out="./",
                      label= "hypo")
+                     
+Hypo.pair <- get.pair(data = data,
+                      nearGenes = nearGenes,
+                      permu.size = 5,
+                      pvalue = 0.2,
+                      dir.out = "./",
+                      diffExp = TRUE, 
+                      group.col = "definition",
+                      label = "hypo")                    
 }
 \author{
 Lijing Yao (creator: lijingya@usc.edu) 

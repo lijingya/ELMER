@@ -303,6 +303,15 @@ get.diff.meth <- function(data,
 #'                      pvalue = 0.2,
 #'                      dir.out="./",
 #'                      label= "hypo")
+#'                      
+#' Hypo.pair <- get.pair(data = data,
+#'                       nearGenes = nearGenes,
+#'                       permu.size = 5,
+#'                       pvalue = 0.2,
+#'                       dir.out = "./",
+#'                       diffExp = TRUE, 
+#'                       group.col = "definition",
+#'                       label = "hypo")                    
 get.pair <- function(data,
                      nearGenes,
                      percentage = 0.2,
@@ -389,18 +398,20 @@ get.pair <- function(data,
   } 
   if(diffExp){
     message("Calculating differential expression between two groups")
-    Exp <- getExp(data)[unique(selected$GeneID),]
-    groups <- pData(data)[,group.col]
-    prefix <- paste(unique(groups),sep = ".vs.")
+    Exp <- assay(getExp(data)[unique(selected$GeneID),])
+    groups <- unique(pData(data)[,group.col])
+    prefix <- paste(gsub("[[:punct:]]| ", ".", groups),collapse =  ".vs.")
     log.col <- paste0("log2FC_",prefix)
     diff.col <- paste0(prefix,".diff.pvalue")
+    idx1 <- pData(data)[,group.col] == groups[1] 
+    idx2 <- pData(data)[,group.col] == groups[2] 
     out <- lapply(split(Exp,rownames(Exp)),
-                  function(x, groups){
-                    test <- t.test(x~groups)
-                    U.test <- wilcox.test(x~groups)
+                  function(x){
+                    test <- t.test(x = x[idx1],y = x[idx2],conf.int = TRUE)
+                    # U.test <- wilcox.test(x~groups) # Why this?
                     out <- data.frame("log2FC" = test$estimate[2] - test$estimate[1],
                                       "diff.pvalue" = test$p.value)
-                    return(out)}, groups = groups)
+                    return(out)})
     out <- do.call(rbind, out)
     out$GeneID <- rownames(out)
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
