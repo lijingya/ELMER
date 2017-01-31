@@ -340,7 +340,10 @@ get.pair <- function(data,
   }
   
   data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
+  
   met <- assay(getMet(data))
+  # Probes that were removed from the last steps cannot be verified
+  nearGenes <- nearGenes[names(nearGenes) %in% rownames(met)] 
   exp <- assay(getExp(data))
   message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
@@ -466,7 +469,7 @@ get.permu <- function(data,
                       cores = 1){
   
   ## get usable probes
-  usable.probes <- names(assay(getMet(data)))
+  usable.probes <- names(getMet(data))
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
     stop(sprintf("There is no enough usable probes to perform %s time permutation, 
@@ -621,9 +624,11 @@ get.permu <- function(data,
 promoterMeth <- function(data,
                          sig.pvalue = 0.01,
                          percentage = 0.2,
+                         upstream = 100,
+                         downstream = 700,
                          save = TRUE){
   message("Calculating associations of gene expression with DNA methylation at promoter regions")
-  TSS_2K <- promoters(rowRanges(getExp(data)), upstream = 100, downstream = 700)
+  TSS_2K <- promoters(rowRanges(getExp(data)), upstream = upstream, downstream = downstream)
   probes <- rowRanges(getMet(data))
   overlap <- findOverlaps(probes, TSS_2K)
   df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]), 
@@ -655,11 +660,10 @@ promoterMeth <- function(data,
     exps <- assay(getExp(data))
     out <- lapply(rownames(Gene.promoter),
                   Stat.nonpara, 
-                  NearGenes=Fake,
-                  K=0.3,
-                  Top=0.2,
-                  Meths=Gene.promoter,
-                  Exps=exps)
+                  NearGenes = Fake,
+                  Top = 0.2,
+                  Meths = Gene.promoter,
+                  Exps = exps)
     out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }

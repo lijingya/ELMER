@@ -89,32 +89,25 @@ Stat.nonpara.permu <- function(Probe,
 #' @return U test results
 Stat.nonpara <- function(Probe,
                          NearGenes,
-                         Top=NULL,
-                         Meths=Meths,
-                         Exps=Exps){
-  if(! length(Probe)==1) {stop("Number of  Probe should be 1")}
+                         Top = NULL,
+                         Meths = Meths,
+                         Exps = Exps){
+  if(!length(Probe)==1) stop("Number of  Probe should be 1")
+  
   Gene <- NearGenes[[Probe]][,2]
-  Exp <- Exps[Gene,]
-  Meth <- Meths[Probe,]
+  Exp <- Exps[Gene,,drop = FALSE]
+  Meth <- Meths
   idx <- order(Meth)
-  nb <- round(length(Meth)*Top)
+  nb <- round(length(Meth) * Top)
   unmethy <- head(idx, n = nb) 
   methy <- tail(idx, n = nb) 
   # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
-  if(!is.vector(Exp)){
-    Exps <- Exps[,c(unmethy,methy)]
-    test.p <- unlist(lapply(splitmatrix(Exp),
+  test.p <- unlist(lapply(splitmatrix(Exp),
                             function(x) {
                               wilcox.test(x[unmethy],
                                           x[methy],
                                           alternative = "greater",
                                           exact = FALSE)$p.value}))
-  } else {
-    test.p <- wilcox.test(Exps[unmethy],
-                          Exps[methy],
-                          alternative = "greater",
-                          exact=FALSE)$p.value
-  }
   
   if(length(Gene)==1){
     out <- data.frame(Probe    = rep(Probe,length(Gene)),

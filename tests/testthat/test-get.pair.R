@@ -2,6 +2,8 @@ context("Checking get pair function")
 
 test_that("Function uses correctly the permu.dir", {
   data(elmer.data.example, envir = environment())
+  sink("/dev/null");
+  
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                             geneAnnot=getExp(data))
   Hypo.pair <- get.pair(data = data,
@@ -21,6 +23,7 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(all(Hypo.pair$Raw.p.adjust < 0.001))
   expect_true(all(Hypo.pair$Pe < 0.2))
   # If we add one more probe the value should be saved
+  
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=6,
