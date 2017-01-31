@@ -279,6 +279,8 @@ get.diff.meth <- function(data,
 #'  See \code{\link{preAssociationProbeFiltering}} function.
 #' @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
+#' @param group.col A column defining the groups of the sample. You can view the 
+#' available columns using: colnames(MultiAssayExperiment::pData(data)).
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
@@ -311,6 +313,7 @@ get.pair <- function(data,
                      dir.out = "./",
                      calculate.Pe = FALSE,
                      diffExp = FALSE,
+                     group.col,
                      cores = 1,
                      filter.probes = TRUE,
                      filter.portion = 0.3, 
@@ -326,8 +329,9 @@ get.pair <- function(data,
     stop("nearGene option must be a list containing output of GetNearGenes function 
          or path of rda file containing output of GetNearGenes function.")
   }
-  #get raw pvalue
-  ##I need to modify that if there is all NA. stop the process.
+  if(diffExp & missing(group.col)) 
+    stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
+  
   parallel <- FALSE
   if (cores > 1){
     if (cores > detectCores()) cores <- detectCores()
@@ -336,14 +340,16 @@ get.pair <- function(data,
   }
   
   data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
+  met <- assay(getMet(data))
+  exp <- assay(getExp(data))
   message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
-                                     Meths = assay(getMet(data))[x,], 
+                                     Meths = met[x,], 
                                      NearGenes = nearGenes,
                                      Top = percentage,
-                                     Exps = assay(getExp(data)))},
+                                     Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
@@ -379,19 +385,23 @@ get.pair <- function(data,
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   } 
   if(diffExp){
-    ## calculate differential expression between two groups.
+    message("Calculating differential expression between two groups")
     Exp <- getExp(data)[unique(selected$GeneID),]
-    TN <- getSample(mee,cols = "TN")
+    groups <- pData(data)[,group.col]
+    prefix <- paste(unique(groups),sep = ".vs.")
+    log.col <- paste0("log2FC_",prefix)
+    diff.col <- paste0(prefix,".diff.pvalue")
     out <- lapply(split(Exp,rownames(Exp)),
-                  function(x, TN){
-                    test <- t.test(x~TN)
-                    U.test <- wilcox.test(x~TN)
-                    out <- data.frame("log2FC_TvsN" = test$estimate[2]-test$estimate[1],
-                                      "TN.diff.pvalue"=test$p.value)
-                    return(out)}, TN=TN)
+                  function(x, groups){
+                    test <- t.test(x~groups)
+                    U.test <- wilcox.test(x~groups)
+                    out <- data.frame("log2FC" = test$estimate[2] - test$estimate[1],
+                                      "diff.pvalue" = test$p.value)
+                    return(out)}, groups = groups)
     out <- do.call(rbind, out)
     out$GeneID <- rownames(out)
-    add <- out[match(selected$GeneID, out$GeneID),c("log2FC_TvsN","TN.diff.pvalue")]
+    add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
+    colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)                                                         
   }
   if(save) write.csv(selected, 
