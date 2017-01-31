@@ -216,9 +216,18 @@ createMAE <- function (exp,
     # Get clinical information
     if(missing(pData)) {
       pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      
+      # This will keep the same strategy the old ELMER version used:
+      # Every type of tumor samples (starts with T) will be set to tumor and
+      # every type of normal samples   (starts with N) will be set to normal 
+      # See : https://github.com/lijingya/ELMER/blob/3e050462aa41c8f542530ccddc8fa607207faf88/R/Small.R#L8-L48
+      pData$TN <- NA
+      pData[grep("^N",pData$shortLetterCode),"TN"] <- "Normal" 
+      pData[grep("^T",pData$shortLetterCode),"TN"] <- "Tumor" 
+      
+      sampleMap <- DataFrame(assay = c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
                              primary = substr(c(colnames(met),colnames(exp)),1,16),
-                             colname=c(colnames(met),colnames(exp)))
+                             colname = c(colnames(met),colnames(exp)))
       pData$barcode <- NULL
       pData <- pData[!duplicated(pData),]      
       rownames(pData) <- pData$sample
@@ -432,7 +441,6 @@ lm_eqn = function(df,Dep,Exp){
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
-#' @import TxDb.Hsapiens.UCSC.hg38.knownGene Homo.sapiens
 getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if (genome == "hg19"){
     # for hg19
@@ -671,6 +679,7 @@ createMotifRelevantTfs <- function(){
 #' @param K Cut off to consider probes as methylated or unmethylated. Default: 0.3
 #' @param percentage The percentage of samples we should have at least considered as methylated and unmethylated
 #' @return An object with the same class, but with the probes removed.
+#' @importFrom MultiAssayExperiment experiments<-
 #' @export
 #' @examples
 #'  random.probe <- runif(100, 0, 1)

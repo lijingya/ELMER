@@ -17,7 +17,6 @@ Description: ELMER is designed to use DNA methylation and gene expression from a
     factor network in primary tissue.
 Depends:
     R (>= 3.2.0),
-    Homo.sapiens,
     ELMER.data
 License: GPL-3
 LazyData: true
@@ -47,7 +46,6 @@ Imports:
     magrittr, 
     readr, 
     rvest,
-    TxDb.Hsapiens.UCSC.hg38.knownGene, 
     xml2
 Suggests:
     parallel,

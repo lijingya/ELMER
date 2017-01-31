@@ -18,13 +18,15 @@
 #' @examples
 #' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
 getTCGA <- function(disease,
-                    Meth=TRUE,
-                    RNA=TRUE,
-                    Clinic=TRUE,
-                    basedir="./Data",
+                    Meth = TRUE,
+                    RNA = TRUE,
+                    Clinic = TRUE,
+                    basedir = "./Data",
                     genome = "hg38",
-                    Methfilter=0.2){
+                    Methfilter = 0.2){
+  
   if(missing(disease)) stop("disease need to be specified.")
+
   if(Meth){
     print.header("Downloading DNA methylation", "subsection")
     test.meth <- tryCatch({
@@ -38,7 +40,7 @@ getTCGA <- function(disease,
     print.header("Downloading RNA", "subsection")
     test.rna <- tryCatch({
       getRNAseq(disease, basedir, genome = genome)
-    }, error=function(err){
+    }, error = function(err){
       return("error")
     })
   }
@@ -47,7 +49,7 @@ getTCGA <- function(disease,
     print.header("Downloading Clinic", "subsection")
     test.clinic <- tryCatch({
       getClinic(disease, basedir)
-    }, error=function(err){
+    }, error = function(err){
       return("error")
     })
   }

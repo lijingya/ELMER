@@ -185,6 +185,7 @@ test_that("Number of probes in MAE matches the distal probes", {
     
     expect_gt(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
+    expect_true("TN" %in% colnames(pData(mae)))
   }
   unlink("GDCdata",recursive = TRUE, force = TRUE)
 })
