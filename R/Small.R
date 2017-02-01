@@ -493,20 +493,26 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
 #' @param genome.build Genome reference version "hg38" or "hg19"
 #' @return A data frame with the ensemble gene id and entrezgene and gene symbol.
 getTF <- function(genome.build = "hg38"){
-  uniprotURL <- "http://www.uniprot.org/uniprot/?"
-  query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
-  fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
-  format <- "format=tab"
-  human.TF <- readr::read_tsv(paste0(uniprotURL,
-                                     paste(query, fields,format, sep = "&")),
-                              col_types = "ccccccc") 
-  gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
-  gene  <- gene[!duplicated(gene),]
+  print.header("Accessing Uniprot to get last version of Human TFs","subsection")
+  if(!file.exists("HumanTF.rda")){
+    uniprotURL <- "http://www.uniprot.org/uniprot/?"
+    query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
+    fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
+    format <- "format=tab"
+    human.TF <- readr::read_tsv(paste0(uniprotURL,
+                                       paste(query, fields,format, sep = "&")),
+                                col_types = "ccccccc") 
+    gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
+    gene  <- gene[!duplicated(gene),]
+    save(gene, file = "HumanTF.rda")
+  } else {
+    gene <- get(load("HumanTF.rda"))
+  }
   return(gene)
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets
-get.GRCh <- function(genome="hg38", genes) {
+get.GRCh <- function(genome = "hg38", genes) {
   if (genome == "hg19"){
     # for hg19
     ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
@@ -527,102 +533,6 @@ get.GRCh <- function(genome="hg38", genes) {
   return(gene.location)
 }
 
-
-# To find for each probe the know motif we will use HOMER software (http://homer.salk.edu/homer/)
-# Step:
-# 1 - get DNA methylation probes annotation with the regions
-# 2 - Make a bed file from it
-# 3 - Execute section: Finding Instance of Specific Motifs from http://homer.salk.edu/homer/ngs/peakMotifs.html to the HOCOMOCO TF motifs
-# Also, As HOMER is using more RAM than the available we will split the files in to 100k probes.
-# Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
-# The false posives will be removed latter with some statistical tests.
-#' @importFrom utils write.table
-#' @importFrom readr write_tsv
-getBedForDNAmethylation <- function(){
-  TFBS.motif <- "http://hocomoco.autosome.ru/final_bundle/HUMAN/mono/HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif"
-  if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
-  for(plat in c("450K","EPIC")){
-    for(gen in c("hg19","hg38")){
-      
-      file <- paste0(plat,gen,".txt")
-      print(file)
-      if(!file.exists(file)){
-        # STEP 1
-        gr <- getInfiniumAnnotation(plat = plat,genome =  gen)
-        
-        # This will remove masked probes. They have poor quality and might be arbitrarily positioned (Wanding Zhou)
-        print(table(gr$MASK.mapping))
-        gr <- gr[!gr$MASK.mapping]
-        print(table(gr$MASK.mapping))
-        
-        df <- data.frame(seqnames=seqnames(gr),
-                         starts=as.integer(start(gr)),
-                         ends=end(gr),
-                         names=names(gr),
-                         scores=c(rep(".", length(gr))),
-                         strands=strand(gr))
-        step <- 100000 # nb of lines in each file 100K was selected to not explode RAM
-        n <- nrow(df)
-        for(j in 0:floor(n/step)){
-          # STEP 2
-          file.aux <- paste0(plat,gen,"_",j,".bed")
-          if(!file.exists(gsub(".bed",".txt",file.aux))){
-            end <- ifelse(((j + 1) * step) > n, n,((j + 1) * step))
-            write.table(df[((j * step) + 1):end,], file = file.aux, col.names = F, quote = F,row.names = F,sep = "\t")
-            
-            # STEP 3
-            cmd <- paste0("source ~/.bash_rc; annotatePeaks.pl " ,file.aux, " ", gen, " -m ", basename(TFBS.motif), " -size 500 -cpu 12 > ", gsub(".bed",".txt",file.aux))
-            system(cmd)
-          }
-        }
-        # We will merge the results from each file into one
-        peaks <- NULL
-        for(j in 0:floor(n/step)){
-          aux <-  read_tsv(paste0(plat,gen,"_",j,".txt"))
-          colnames(aux)[1] <- "PeakID"
-          if(is.null(peaks)) {
-            peaks <- aux
-          } else {
-            peaks <- rbind(peaks, aux)
-          }
-        }
-        write_tsv(peaks,path=file,col_names = TRUE)
-        print("DONE!")
-        gc()
-      }
-    }
-  }
-}
-
-# This code will read the table with the motifs, save it as a sparce matrix
-# and save all as a .rda that will be placed in ELMER.data
-# Should this code be moved to ELMER.data?
-prepare_object <- function(){
-  # command 
-  # annotatePeaks.pl /Users/chedraouisil/ELMER/450Khg19.bed hg19 -m HOCOMOCOv10_HUMAN_mono_homer_format_0.0001.motif > 450hg19.txt
-  for(plat in c("450K","EPIC")){
-    for(gen in c("hg19","hg38")){
-      file <- paste0(plat,gen,".txt")
-      motifs <- readr::read_tsv(file)
-      # From 1 to 21 we have annotations then we have 640 motifs
-      matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = 640,sparse = TRUE)
-      colnames(matrix) <- gsub(" Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
-      rownames(matrix) <- motifs$PeakID
-      matrix[!is.na(motifs[,-c(1:21)])] <- 1
-      matrix <- as(matrix, "nsparseMatrix")
-      assign(paste0("Probes.motif.",gen,".",plat),matrix) # For each probe that there is a bind to the motif, we will add as 1 in the matrix. (Are hg38, hg19,450k,epic matrices equal?)
-      rm(matrix)
-      rm(motifs)
-      gc()
-    }
-  }
-  save(Probes.motif.hg19.450K, file = "Probes.motif.hg19.450K.rda", compress = "xz")
-  save(Probes.motif.hg38.450K, file = "Probes.motif.hg38.450K.rda", compress = "xz")
-  save(Probes.motif.hg19.EPIC, file = "Probes.motif.hg19.EPIC.rda", compress = "xz")
-  save(Probes.motif.hg38.EPIC, file = "Probes.motif.hg38.EPIC.rda", compress = "xz")
-  
-}
-
 #' @title Get family of transcription factors
 #' @description This function will use TF Class database to create the object
 #' that maps for each TF the members of its family. TF in the same family have 
@@ -631,6 +541,7 @@ prepare_object <- function(){
 #' @importFrom xml2 read_html 
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
+  print.header("Accessing hocomoco to get last version of TFs families","subsection")
   if(!file.exists("motif.relavent.TFs.rda")){
     # Download from http://hocomoco.autosome.ru/human/mono
     tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
