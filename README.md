@@ -14,8 +14,8 @@ devtools::install_github("tiagochst/ELMER");
 Then you can load the package and see an introduction with
 ```r
 library(ELMER)
-openVignette("ELMER.data")
-openVignette("ELMER")
+Biobase::openVignette("ELMER.data")
+Biobase::openVignette("ELMER")
 ```
 ```
 # Please select a vignette:
