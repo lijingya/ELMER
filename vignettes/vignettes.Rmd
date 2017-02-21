@@ -606,7 +606,7 @@ Hypo.pair <- get.pair(data = data,
                       calculate.Pe = TRUE,
                       Pe = 0.01,
                       probe.filtering = TRUE, # See preAssociationProbeFiltering function
-                      filter.percentage  0.05,
+                      filter.percentage = 0.05,
                       filter.portion = 0.3,
                       dir.out = "./ELMER.example/Result/LUSC",
                       cores = detectCores()/2,
