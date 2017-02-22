@@ -8,14 +8,14 @@ To obtain a copy of ELMER, you will need to install devtools and ELMER.data whic
 ```r
 install.packages(devtools)
 library(devtools);
-devtools::install_github("lijingya/ELMER.data");
-devtools::install_github("lijingya/ELMER");
+devtools::install_github("tiagochst/ELMER.data");
+devtools::install_github("tiagochst/ELMER");
 ```
 Then you can load the package and see an introduction with
 ```r
 library(ELMER)
-openVignette("ELMER.data")
-openVignette("ELMER")
+Biobase::openVignette("ELMER.data")
+Biobase::openVignette("ELMER")
 ```
 ```
 # Please select a vignette:

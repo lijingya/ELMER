@@ -76,29 +76,18 @@ TCGA.pipe <- function(disease,
       invisible(gc())
     }
   }
+  
   if(tolower("createMAE") %in% tolower(analysis)){
     print.header("Creating Multi Assay Experiment")
 
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    if(!file.exists(meth.file)){
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      load(sprintf("%s/%s_meth.rda",Data,disease))
-      met <- met[,met$definition %in% c("Primary solid Tumor","Solid Tissue Normal")]
-      save(met,file = sprintf("%s/%s_meth_refined.rda",dir.out,disease))
-      if(!all(c("Primary solid Tumor","Solid Tissue Normal") %in% met$definition)){
-        message("There are no samples for Solid Tissue Normal")
-        return(NULL)
-      }
-      rm(met)
-    }
-    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
-    if(!file.exists(exp.file)){
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      load(sprintf("%s/%s_RNA.rda",Data,disease))
-      rna <- rna[,rna$definition %in% c("Primary solid Tumor","Solid Tissue Normal")]
-      save(rna,file= sprintf("%s/%s_RNA_refined.rda",dir.out,disease))
-      rm(rna)
-    }
+    group.col <- "TN"
+    sample.type <- c("Tumor","Normal")
+    
+    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    meth.file <- sprintf("%s/%s_meth.rda",Data,disease)
+    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    exp.file <- sprintf("%s/%s_RNA.rda",Data,disease)
+
     ## get distal probe info
     distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
     if(!file.exists(distal.probe)){
@@ -113,6 +102,11 @@ TCGA.pipe <- function(disease,
                      met.platform  = "450K",
                      linearize.exp = TRUE,
                      TCGA          = TRUE)
+    if(!all(sample.type %in% pData(mae)[,group.col])){
+      message("There are no samples for both groups")
+      return(NULL)
+    }
+    mae <- mae[,pData(mae)[,group.col] %in% sample.type]
     save(mae,file = sprintf("%s/%s_mae.rda",dir.out,disease))
   }
   

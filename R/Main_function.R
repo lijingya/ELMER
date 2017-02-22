@@ -405,15 +405,14 @@ get.pair <- function(data,
     diff.col <- paste0(prefix,".diff.pvalue")
     idx1 <- pData(data)[,group.col] == groups[1] 
     idx2 <- pData(data)[,group.col] == groups[2] 
-    out <- lapply(split(Exp,rownames(Exp)),
-                  function(x){
-                    test <- t.test(x = x[idx1],y = x[idx2],conf.int = TRUE)
-                    # U.test <- wilcox.test(x~groups) # Why this?
-                    out <- data.frame("log2FC" = test$estimate[2] - test$estimate[1],
-                                      "diff.pvalue" = test$p.value)
-                    return(out)})
-    out <- do.call(rbind, out)
-    out$GeneID <- rownames(out)
+    out <- adply(.data = split(Exp,rownames(Exp)), .margins = 1,
+                 .fun = function(x) {
+                   test <- t.test(x = x[idx1],y = x[idx2])
+                   out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
+                                     "diff.pvalue" = test$p.value)
+                   },
+                 .progress = "text", .parallel = parallel,.id = "GeneID"
+    )
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
     colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)                                                         
