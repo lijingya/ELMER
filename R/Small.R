@@ -216,13 +216,17 @@ createMAE <- function (exp,
     # Get clinical information
     if(missing(pData)) {
       pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
-                             primary = substr(c(colnames(met),colnames(exp)),1,16),
-                             colname=c(colnames(met),colnames(exp)))
+      
       pData$barcode <- NULL
       pData <- pData[!duplicated(pData),]      
       rownames(pData) <- pData$sample
+    } 
+    if(missing(sampleMap)) {
+     sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = substr(c(colnames(met),colnames(exp)),1,16),
+                             colname=c(colnames(met),colnames(exp)))
     }
+    
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
