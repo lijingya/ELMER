@@ -544,28 +544,28 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
   print.header("Accessing hocomoco to get last version of TFs families","subsection")
-  if(!file.exists("motif.relavent.TFs.rda")){
+  if(!file.exists("motif.relevant.TFs.rda")){
     # Download from http://hocomoco.autosome.ru/human/mono
     tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
     tf.family <- tf.family[[1]]
     # Split TF for each family, this will help us map for each motif which are the some ones in the family
     # basicaly: for a TF get its family then get all TF in that family
     family <- split(tf.family,f = tf.family$`TF family`)
-    motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
+    motif.relevant.TFs <- plyr::alply(tf.family,1, function(x){  
       f <- x$`TF family`
       if(f == "") return(x$`Transcription factor`) # Case without family, we will get only the same object
       return(unique(family[as.character(f)][[1]]$`Transcription factor`))
     },.progress = "text")
-    #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
-    names(motif.relavent.TFs) <- tf.family$Model
+    #names(motif.relevant.TFs) <- tf.family$`Transcription factor`
+    names(motif.relevant.TFs) <- tf.family$Model
     # Cleaning object
-    attr(motif.relavent.TFs,which="split_type") <- NULL
-    attr(motif.relavent.TFs,which="split_labels") <- NULL
-    save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+    attr(motif.relevant.TFs,which="split_type") <- NULL
+    attr(motif.relevant.TFs,which="split_labels") <- NULL
+    save(motif.relevant.TFs, file = "motif.relevant.TFs.rda")
   } else {
-    motif.relavent.TFs <- get(load("motif.relavent.TFs.rda"))
+    motif.relevant.TFs <- get(load("motif.relevant.TFs.rda"))
   }
-  return(motif.relavent.TFs)
+  return(motif.relevant.TFs)
 }
 
 
