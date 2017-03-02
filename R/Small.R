@@ -209,9 +209,10 @@ createMAE <- function (exp,
     ID <- intersect(substr(colnames(met),1,15), substr(colnames(exp),1,15))
     
     # Get only samples with both DNA methylation and Gene expression
-    met <- met[,match(ID,substr(colnames(met),1,15))]
-    exp <- exp[,match(ID,substr(colnames(exp),1,15))]
-    stopifnot(all(substr(colnames(exp),1,15) == substr(colnames(met),1,15)))
+    met <- met[,match(ID,substr(colnames(met),1,16))]
+    exp <- exp[,match(ID,substr(colnames(exp),1,16))]
+    stopifnot(all(substr(colnames(exp),1,16) == substr(colnames(met),1,16)))
+    stopifnot(ncol(exp) == ncol(met))
     
     # Get clinical information
     if(missing(pData)) {
