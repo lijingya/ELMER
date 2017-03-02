@@ -206,7 +206,7 @@ createMAE <- function (exp,
   if(TCGA){
     message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
     # If it is not TCGA we will assure the sample has both DNA methylation and gene expression
-    ID <- intersect(substr(colnames(met),1,15), substr(colnames(exp),1,15))
+    ID <- intersect(substr(colnames(met),1,16), substr(colnames(exp),1,16))
     
     # Get only samples with both DNA methylation and Gene expression
     met <- met[,match(ID,substr(colnames(met),1,16))]
