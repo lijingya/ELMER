@@ -70,6 +70,7 @@ knitr::opts_chunk$set(dpi = 300, cache = FALSE)
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
+library(BiocStyle)
 ```
 
 # Introduction
@@ -604,8 +605,8 @@ Hypo.pair <- get.pair(data = data,
                       pvalue = 0.01,
                       calculate.Pe = TRUE,
                       Pe = 0.01,
-                      probe.filtering = TRUE, # See preAssociationProbeFiltering function
-                      filter.percentage  0.05,
+                      filter.probes = TRUE, # See preAssociationProbeFiltering function
+                      filter.percentage = 0.05,
                       filter.portion = 0.3,
                       dir.out = "./ELMER.example/Result/LUSC",
                       cores = detectCores()/2,

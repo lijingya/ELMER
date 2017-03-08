@@ -123,10 +123,23 @@ scatter.plot <- function(data,
     
     meth <- colMeans(assay(getMet(data)[byTF$probe,]),na.rm = TRUE)
     gene <- getGeneID(data,symbol = byTF$TF)
+
+    # Our input might not be mapped, we need to verify it    
+    found <- NULL
+    if(any(is.na(gene))){
+      found <- !is.na(gene)
+      message("Gene not found: ", byTF$TF[!found])
+      gene <- na.omit(gene) # rm the one not found
+    }
+    
     exp <- assay(getExp(data)[gene,])
     
-    if(nrow(exp)>1){
-      rownames(exp) <- byTF$TF
+    if(nrow(exp) > 1){
+      if(!is.null(found)) {
+        rownames(exp) <- byTF$TF[found]
+      } else {
+        rownames(exp) <- byTF$TF
+      }
     }
     
     P <- scatter(meth     = meth, 

@@ -206,17 +206,17 @@ createMAE <- function (exp,
   if(TCGA){
     message("Checking samples have both DNA methylation and Gene expression and they are in the same order...")
     # If it is not TCGA we will assure the sample has both DNA methylation and gene expression
-    ID <- intersect(substr(colnames(met),1,15), substr(colnames(exp),1,15))
+    ID <- intersect(substr(colnames(met),1,16), substr(colnames(exp),1,16))
     
     # Get only samples with both DNA methylation and Gene expression
-    met <- met[,match(ID,substr(colnames(met),1,15))]
-    exp <- exp[,match(ID,substr(colnames(exp),1,15))]
-    stopifnot(all(substr(colnames(exp),1,15) == substr(colnames(met),1,15)))
+    met <- met[,match(ID,substr(colnames(met),1,16))]
+    exp <- exp[,match(ID,substr(colnames(exp),1,16))]
+    stopifnot(all(substr(colnames(exp),1,16) == substr(colnames(met),1,16)))
+    stopifnot(ncol(exp) == ncol(met))
     
     # Get clinical information
     if(missing(pData)) {
       pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
-      
       # This will keep the same strategy the old ELMER version used:
       # Every type of tumor samples (starts with T) will be set to tumor and
       # every type of normal samples   (starts with N) will be set to normal 
@@ -225,13 +225,16 @@ createMAE <- function (exp,
       pData[grep("^N",pData$shortLetterCode),"TN"] <- "Normal" 
       pData[grep("^T",pData$shortLetterCode),"TN"] <- "Tumor" 
       
-      sampleMap <- DataFrame(assay = c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
-                             primary = substr(c(colnames(met),colnames(exp)),1,16),
-                             colname = c(colnames(met),colnames(exp)))
       pData$barcode <- NULL
       pData <- pData[!duplicated(pData),]      
       rownames(pData) <- pData$sample
+    } 
+    if(missing(sampleMap)) {
+     sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+                             primary = substr(c(colnames(met),colnames(exp)),1,16),
+                             colname=c(colnames(met),colnames(exp)))
     }
+    
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
@@ -542,28 +545,28 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(){
   print.header("Accessing hocomoco to get last version of TFs families","subsection")
-  if(!file.exists("motif.relavent.TFs.rda")){
+  if(!file.exists("motif.relevant.TFs.rda")){
     # Download from http://hocomoco.autosome.ru/human/mono
     tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
     tf.family <- tf.family[[1]]
     # Split TF for each family, this will help us map for each motif which are the some ones in the family
     # basicaly: for a TF get its family then get all TF in that family
     family <- split(tf.family,f = tf.family$`TF family`)
-    motif.relavent.TFs <- plyr::alply(tf.family,1, function(x){  
+    motif.relevant.TFs <- plyr::alply(tf.family,1, function(x){  
       f <- x$`TF family`
       if(f == "") return(x$`Transcription factor`) # Case without family, we will get only the same object
       return(unique(family[as.character(f)][[1]]$`Transcription factor`))
     },.progress = "text")
-    #names(motif.relavent.TFs) <- tf.family$`Transcription factor`
-    names(motif.relavent.TFs) <- tf.family$Model
+    #names(motif.relevant.TFs) <- tf.family$`Transcription factor`
+    names(motif.relevant.TFs) <- tf.family$Model
     # Cleaning object
-    attr(motif.relavent.TFs,which="split_type") <- NULL
-    attr(motif.relavent.TFs,which="split_labels") <- NULL
-    save(motif.relavent.TFs, file = "motif.relavent.TFs.rda")
+    attr(motif.relevant.TFs,which="split_type") <- NULL
+    attr(motif.relevant.TFs,which="split_labels") <- NULL
+    save(motif.relevant.TFs, file = "motif.relevant.TFs.rda")
   } else {
-    motif.relavent.TFs <- get(load("motif.relavent.TFs.rda"))
+    motif.relevant.TFs <- get(load("motif.relevant.TFs.rda"))
   }
-  return(motif.relavent.TFs)
+  return(motif.relevant.TFs)
 }
 
 

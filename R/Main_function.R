@@ -141,6 +141,7 @@ get.feature.probe <- function(feature,
 #'  information with the second file.
 #' @return Statistics for all probes and significant hypo or hyper-methylated probes.
 #' @export 
+#' @importFrom readr write_csv
 #' @importFrom plyr adply
 #' @importFrom stats p.adjust
 #' @importFrom MultiAssayExperiment pData
@@ -225,8 +226,10 @@ get.diff.meth <- function(data,
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   if(save){
-    write.csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
-    write.csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
+    message("Saving results")
+    dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
+    write_csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
+    write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
               file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
               row.names=FALSE)
   }
