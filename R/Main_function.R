@@ -172,6 +172,7 @@ get.diff.meth <- function(data,
                           sig.dif = 0.3,
                           dir.out = "./",
                           save = TRUE){
+  
   if(is.null(getMet(data)))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(pData(data))==0){
@@ -225,6 +226,7 @@ get.diff.meth <- function(data,
   out$adjust.p <- p.adjust(as.numeric(out[,2]),method = "BH")
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
+  
   if(save){
     message("Saving results")
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
@@ -370,9 +372,7 @@ get.pair <- function(data,
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
   
-  if(save) write.csv(Probe.gene, 
-                     file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
-                     row.names=FALSE)
+  if(save) write_csv(Probe.gene,path=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label))
   
   Probe.gene <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue,]
   Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
@@ -393,9 +393,7 @@ get.pair <- function(data,
     # Get empirical p-value
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   
-    if(save) write.csv(Probe.gene.Pe, 
-                       file=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label),
-                       row.names = FALSE)
+    if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   } 
   if(diffExp){
@@ -419,9 +417,7 @@ get.pair <- function(data,
     colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)                                                         
   }
-  if(save) write.csv(selected, 
-                     file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
-                     row.names=FALSE)
+  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))
   invisible(gc())
   return(selected)
 }
