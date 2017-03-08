@@ -29,4 +29,3 @@ get450K to download HM40K DNA methylation data for certain cancer types from TCG
  get450K is a function to download latest version of HM450K DNA methylation 
  for  all samples of certain cancer types from GDC website.
 }
-

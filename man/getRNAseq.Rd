@@ -19,4 +19,3 @@ Download all RNA seq level 3 data for the specified disease.
 \description{
 getRNAseq is a function to download RNAseq data for all samples of a certain cancer type from TCGA
 }
-

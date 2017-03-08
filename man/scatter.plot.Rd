@@ -70,4 +70,3 @@ scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143322")),
 \author{
 Lijing Yao (maintainer: lijingya@usc.edu)
 }
-

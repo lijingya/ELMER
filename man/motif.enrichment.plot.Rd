@@ -49,11 +49,10 @@ motif.enrichment.plot(motif.enrichment=motif.enrichment,
                      significant=list(OR=3),
                      label="hypo", save=FALSE)
 }
-\author{
-Lijing Yao (creator: lijingya@usc.edu)
-}
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
-
+\author{
+Lijing Yao (creator: lijingya@usc.edu)
+}

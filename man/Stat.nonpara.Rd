@@ -25,4 +25,3 @@ U test results
 U test (non parameter test) for permutation. This is one probe vs nearby gene 
 which is good for computing each probes for nearby genes.
 }
-

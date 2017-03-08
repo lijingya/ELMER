@@ -17,4 +17,3 @@ for 234 samples from TCGA-LUSC.
 This data is used in the examples of ELMER package
 }
 \keyword{internal}
-

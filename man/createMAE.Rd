@@ -165,4 +165,3 @@ mae <- createMAE(exp = gene.exp,
 }
 createMAE
 }
-

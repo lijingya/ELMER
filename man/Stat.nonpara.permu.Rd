@@ -23,4 +23,3 @@ U test results
 \description{
 Stat.nonpara.permu
 }
-

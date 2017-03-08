@@ -34,4 +34,3 @@ to matrixes or data frame for further analysis.
 \examples{
 getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
 }
-

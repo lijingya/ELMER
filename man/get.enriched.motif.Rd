@@ -21,7 +21,7 @@ the backaground.probes manually.}
 OR and confidence interval will be calculated.}
 
 \item{min.motif.quality}{Minimum motif quality score to consider. 
-Possible valules: A, B (default), C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all) 
+Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default) 
 Description: Each PWM has a quality rating from A to D where 
 A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
 limited applications for quantitative analyses. 
@@ -93,11 +93,10 @@ enriched.motif <- get.enriched.motif(data = data,
                                      min.incidence=2, 
                                      label="hypo")
 }
-\author{
-Lijing Yao (creator: lijingya@usc.edu)
-}
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
-
+\author{
+Lijing Yao (creator: lijingya@usc.edu)
+}

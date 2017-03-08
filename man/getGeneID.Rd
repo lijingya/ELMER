@@ -21,4 +21,3 @@ getGeneID to report gene id from symbol
 data(elmer.data.example)
 getGeneID(data, symbol="ZNF697")
 }
-

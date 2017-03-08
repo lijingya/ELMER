@@ -228,10 +228,9 @@ get.diff.meth <- function(data,
   if(save){
     message("Saving results")
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
-    write_csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
+    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
-              file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
-              row.names=FALSE)
+              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir))
   }
   
   result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]

@@ -81,4 +81,3 @@ Hyper.probe <- get.diff.meth(data,
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
-

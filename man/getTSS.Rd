@@ -30,4 +30,3 @@ If upstream and downstream are specified in TSS list, promoter regions of GENCOD
 \author{
 Lijing Yao (maintainer: lijingya@usc.edu)
 }
-

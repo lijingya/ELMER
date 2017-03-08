@@ -22,4 +22,3 @@ This function will create a survival plot for the samples with higher, midium, l
 of a given transcription factor. 
 By defau;t samples with higher expression are the top 30% and the lower expression the bottom 30%.
 }
-
