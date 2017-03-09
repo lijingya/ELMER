@@ -17,4 +17,3 @@ Download all clinic information for the specified disease.
 \description{
 getClinic is a function to download latest version of clinic data for all samples of certain cancer types from TCGA website.
 }
-

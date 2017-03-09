@@ -172,6 +172,7 @@ get.diff.meth <- function(data,
                           sig.dif = 0.3,
                           dir.out = "./",
                           save = TRUE){
+  
   if(is.null(getMet(data)))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
   if(nrow(pData(data))==0){
@@ -225,13 +226,13 @@ get.diff.meth <- function(data,
   out$adjust.p <- p.adjust(as.numeric(out[,2]),method = "BH")
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
+  
   if(save){
     message("Saving results")
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
-    write_csv(out,file=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir), row.names=FALSE)
+    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
-              file=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir), 
-              row.names=FALSE)
+              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir))
   }
   
   result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]
@@ -374,11 +375,11 @@ get.pair <- function(data,
   if(save) {
     dir.create(dir.out, showWarnings = FALSE)
     file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label)
-    write.csv(Probe.gene, 
-                     file=file,
-                     row.names=FALSE)
+    write_csv(Probe.gene,path=file)
     message(paste("File created:", file))
   }
+  if(save) 
+  
   Probe.gene <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue,]
   Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
   selected <- Probe.gene
@@ -401,9 +402,7 @@ get.pair <- function(data,
     # Get empirical p-value
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   
-    if(save) write.csv(Probe.gene.Pe, 
-                       file=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label),
-                       row.names = FALSE)
+    if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   } 
   if(diffExp){
@@ -427,9 +426,7 @@ get.pair <- function(data,
     colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)                                                         
   }
-  if(save) write.csv(selected, 
-                     file=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label),
-                     row.names=FALSE)
+  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))
   invisible(gc())
   return(selected)
 }
@@ -719,7 +716,7 @@ promoterMeth <- function(data,
 #' @param min.incidence A non-negative integer specifies the minimum incidence of motif in the given probes set. 
 #' 10 is default.
 #' @param min.motif.quality Minimum motif quality score to consider. 
-#' Possible valules: A, B (default), C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all) 
+#' Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default) 
 #' Description: Each PWM has a quality rating from A to D where 
 #' A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
 #' limited applications for quantitative analyses. 
@@ -782,7 +779,7 @@ promoterMeth <- function(data,
 get.enriched.motif <- function(data,
                                probes.motif, 
                                probes,
-                               min.motif.quality = "C",
+                               min.motif.quality = "DS",
                                background.probes,
                                lower.OR = 1.1,
                                min.incidence = 10, 

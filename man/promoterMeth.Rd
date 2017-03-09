@@ -35,4 +35,3 @@ promoterMeth
 data(elmer.data.example)
 Gene.promoter <- promoterMeth(data) 
 }
-

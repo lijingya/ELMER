@@ -45,4 +45,3 @@ NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
-

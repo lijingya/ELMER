@@ -17,4 +17,3 @@ A data frame with empirical Pvalue.
 \description{
 Calculate empirical Pvalue
 }
-

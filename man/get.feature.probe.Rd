@@ -67,4 +67,3 @@ Probe <- get.feature.probe(promoter=FALSE)
 # get distal enhancer probe remove chrX chrY
 Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
 }
-

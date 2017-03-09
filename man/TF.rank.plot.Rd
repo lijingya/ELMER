@@ -40,4 +40,3 @@ TF.rank.plot(motif.pvalue=TF.meth.cor,
 \author{
 Lijing Yao (maintainer: lijingya@usc.edu)
 }
-

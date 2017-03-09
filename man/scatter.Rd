@@ -32,4 +32,3 @@ A ggplot figure object
 \description{
 scatter
 }
-

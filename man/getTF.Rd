@@ -15,4 +15,3 @@ A data frame with the ensemble gene id and entrezgene and gene symbol.
 \description{
 This function gets the last version of human TF list from the UNiprot database
 }
-

@@ -68,4 +68,3 @@ schematic.plot(data, group.col = "definition",
                pair = pair, 
                byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
 }
-

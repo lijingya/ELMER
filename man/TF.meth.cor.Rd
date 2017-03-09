@@ -13,4 +13,3 @@ for a given motif and the gene expression of TF.
 This data is used in the examples of ELMER package
 }
 \keyword{internal}
-

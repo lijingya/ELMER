@@ -23,7 +23,7 @@
 #' @examples
 #' \dontrun{
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
-#'   TCGA.pipe(disease = "PRAD",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
+#'   TCGA.pipe(disease = "LUSC",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
 #' }
 TCGA.pipe <- function(disease,
                       genome = "hg38",
@@ -108,6 +108,7 @@ TCGA.pipe <- function(disease,
     }
     mae <- mae[,pData(mae)[,group.col] %in% sample.type]
     save(mae,file = sprintf("%s/%s_mae.rda",dir.out,disease))
+    readr::write_tsv(as.data.frame(pData(mae)), path = sprintf("%s/%s_samples_info.tsv",dir.out,disease))
   }
   
   #get differential DNA methylation
@@ -161,7 +162,7 @@ TCGA.pipe <- function(disease,
     
     ## get pair
     permu.dir <- paste0(dir.out,"/permu")
-    params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
+    params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp","calculate.Pe","group.col")]
     SigPair <- do.call(get.pair,
                        c(list(data      = mae,
                               nearGenes = nearGenes.file,
@@ -180,20 +181,30 @@ TCGA.pipe <- function(disease,
       promoter.probe <- get.feature.probe(promoter=TRUE, 
                                           TSS.range=list(upstream=100, downstream=700))
     })
-    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    message("Preparing MAE file for analysis...")
+    group.col <- "TN"
+    sample.type <- c("Tumor","Normal")
     
-    mae <- createMAE(met           = meth.file, 
-                     exp           = exp.file,  
-                     linearize.exp = TRUE,
-                     genome        = genome, 
-                     filter.probes = promoter.probe, 
-                     TCGA          = TRUE, 
-                     filter.genes  = unique(SigPair$GeneID)) # Should add filter genes
+    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    meth.file <- sprintf("%s/%s_meth.rda",Data,disease)
+    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    exp.file <- sprintf("%s/%s_RNA.rda",Data,disease)
+    
+    mae.promoter <- createMAE(met           = meth.file, 
+                              exp           = exp.file, 
+                              filter.probes = promoter.probe,
+                              genome        = genome,
+                              met.platform  = "450K",
+                              linearize.exp = TRUE,
+                              TCGA          = TRUE)
+    if(!all(sample.type %in% pData(mae)[,group.col])){
+      message("There are no samples for both groups")
+      return(NULL)
+    }
+    mae.promoter <- mae.promoter[,pData(mae.promoter)[,group.col] %in% sample.type]
+    save(mae.promoter,file = sprintf("%s/%s_mae_promoter.rda",dir.out,disease))
     
     params <- args[names(args) %in% "percentage"]
-    Promoter.meth <- do.call(promoterMeth, c(list(data=mae, sig.pvalue=0.01, save=FALSE),
+    Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
                                              params))
     add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
     SigPair <- cbind(SigPair, GSbPM.pvalue = add)

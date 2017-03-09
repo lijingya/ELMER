@@ -12,4 +12,3 @@ getExpSamples(data)
 \description{
 Get Gene expression object samples from MAE
 }
-

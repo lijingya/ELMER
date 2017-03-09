@@ -32,4 +32,3 @@ Statistic test results to identify differentially methylated probes.
 \description{
 Stat.diff.meth
 }
-

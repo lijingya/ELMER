@@ -22,4 +22,3 @@ A linear regression formula
 \description{
 lable linear regression formula
 }
-

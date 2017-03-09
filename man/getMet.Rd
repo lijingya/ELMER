@@ -12,4 +12,3 @@ getMet(data)
 \description{
 Get DNA methylation object from MAE
 }
-

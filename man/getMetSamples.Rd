@@ -12,4 +12,3 @@ getMetSamples(data)
 \description{
 Get DNA methylation object samples from MAE
 }
-

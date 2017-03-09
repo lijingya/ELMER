@@ -12,4 +12,3 @@ getExp(data)
 \description{
 Get Gene expression object from MAE
 }
-

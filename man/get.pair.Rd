@@ -89,12 +89,11 @@ Hypo.pair <- get.pair(data = data,
                       group.col = "definition",
                       label = "hypo")                    
 }
-\author{
-Lijing Yao (creator: lijingya@usc.edu) 
-Tiago C Silva (maintainer: tiagochst@usp.br)
-}
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
-
+\author{
+Lijing Yao (creator: lijingya@usc.edu) 
+Tiago C Silva (maintainer: tiagochst@usp.br)
+}
