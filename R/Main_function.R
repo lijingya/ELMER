@@ -371,14 +371,21 @@ get.pair <- function(data,
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
   
-  if(save) write.csv(Probe.gene, 
-                     file=sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label),
+  if(save) {
+    dir.create(dir.out, showWarnings = FALSE)
+    file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label)
+    write.csv(Probe.gene, 
+                     file=file,
                      row.names=FALSE)
-  
+    message(paste("File created:", file))
+  }
   Probe.gene <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue,]
   Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
   selected <- Probe.gene
-  
+  if(nrow(selected) == 0) {
+    message(paste("No significant pairs were found for pvalue =", pvalue))
+    return(selected)
+  }
   if(calculate.Pe){
     #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
     GeneID <- unique(Probe.gene[,"GeneID"])
