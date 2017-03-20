@@ -368,24 +368,13 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(plat == "EPIC") {
-    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/EPIC/EPIC.manifest.rda"
-  } else {
-    annotation <- "http://zwdzwd.io/InfiniumAnnotation/current/hm450/hm450.manifest.rda"
-  }
-  if(genome == "hg38") annotation <- gsub(".rda",".hg38.rda", annotation)
-  message(paste0("Adding annotation for DNA methylation from: ",annotation))
-  
-  if(!file.exists(basename(annotation))) {
-    if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-    tryCatch({
-      download(annotation, basename(annotation), mode = mode)
-    },error = function(e) {
-      download(annotation, basename(annotation), mode = mode)
-    })
-  }
-  annotation <- get(load(basename(annotation)))
-  return(annotation)  
+  newenv <- new.env()
+  if(genome == "hg19" & plat == "450K" ) data("hm450.manifest",package = "ELMER.data", envir = newenv)
+  if(genome == "hg19" & plat == "EPIC" ) data("EPIC.manifest",package = "ELMER.data", envir = newenv)
+  if(genome == "hg38" & plat == "450K" ) data("hm450.manifest.hg38",package = "ELMER.data", envir = newenv)
+  if(genome == "hg38" & plat == "EPIC" ) data("EPIC.manifest.hg38",package = "ELMER.data", envir = newenv)
+  annotation <- get(ls(newenv)[1],envir=newenv)   
+  return(annotation)
 }
 
 # splitmatix 
