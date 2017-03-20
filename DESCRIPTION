@@ -51,7 +51,8 @@ Suggests:
     parallel,
     BiocStyle,
     knitr,
-    testthat
+    testthat,
+    DT
 biocViews: 
     DNAMethylation, 
     GeneExpression, 
