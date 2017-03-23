@@ -32,9 +32,17 @@ relevant TF and top3 TFs will be labeled in a different color.
 }
 \examples{
 data(getTF.hypo.TFs.with.motif.pvalue)
-TF.rank.plot(motif.pvalue=TF.meth.cor, 
-            motif="TP53", 
-            TF.label=list(TP53=c("TP53","TP63","TP73")),
+TF.rank.plot(motif.pvalue=TF.meth.cor,  
+            motif="P53_HUMAN.H10MO.B", 
+            TF.label=createMotifRelevantTfs("subfamily")["P53_HUMAN.H10MO.B"],
+            save=TRUE)
+TF.rank.plot(motif.pvalue=TF.meth.cor,  
+            motif="P53_HUMAN.H10MO.B", 
+            save=TRUE)
+# Same as above
+TF.rank.plot(motif.pvalue=TF.meth.cor,  
+            motif="P53_HUMAN.H10MO.B", 
+            TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H10MO.B"],
             save=TRUE)
 }
 \author{

@@ -4,7 +4,10 @@
 \alias{createMotifRelevantTfs}
 \title{Get family of transcription factors}
 \usage{
-createMotifRelevantTfs()
+createMotifRelevantTfs(classification = "family")
+}
+\arguments{
+\item{classification}{Select if we will use Family classification or sub-family}
 }
 \value{
 A list of TFs and its family members

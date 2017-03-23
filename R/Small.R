@@ -531,18 +531,22 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' high correlared PWM.
 #' @importFrom rvest html_table  %>%
 #' @importFrom xml2 read_html 
+#' @param classification Select if we will use Family classification or sub-family
 #' @return A list of TFs and its family members
-createMotifRelevantTfs <- function(){
-  print.header("Accessing hocomoco to get last version of TFs families","subsection")
-  if(!file.exists("motif.relevant.TFs.rda")){
+createMotifRelevantTfs <- function(classification = "family"){
+  message("Accessing hocomoco to get last version of TFs ", classification)
+  file <- paste0(classification,".motif.relevant.TFs.rda")
+  if(!file.exists(file)){
     # Download from http://hocomoco.autosome.ru/human/mono
     tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
     tf.family <- tf.family[[1]]
     # Split TF for each family, this will help us map for each motif which are the some ones in the family
     # basicaly: for a TF get its family then get all TF in that family
-    family <- split(tf.family,f = tf.family$`TF family`)
+    col <- ifelse(classification == "family", "TF family","TF subfamily")
+    family <- split(tf.family,f = tf.family[[col]])
+
     motif.relevant.TFs <- plyr::alply(tf.family,1, function(x){  
-      f <- x$`TF family`
+      f <- x[[col]]
       if(f == "") return(x$`Transcription factor`) # Case without family, we will get only the same object
       return(unique(family[as.character(f)][[1]]$`Transcription factor`))
     },.progress = "text")
@@ -551,9 +555,9 @@ createMotifRelevantTfs <- function(){
     # Cleaning object
     attr(motif.relevant.TFs,which="split_type") <- NULL
     attr(motif.relevant.TFs,which="split_labels") <- NULL
-    save(motif.relevant.TFs, file = "motif.relevant.TFs.rda")
+    save(motif.relevant.TFs, file = file)
   } else {
-    motif.relevant.TFs <- get(load("motif.relevant.TFs.rda"))
+    motif.relevant.TFs <- get(load(file))
   }
   return(motif.relevant.TFs)
 }
@@ -626,4 +630,62 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
       data <- data[keep,,drop = FALSE]
     }
   return(data)
+}
+
+#' @title Merge nearby probes into regions
+#' @description 
+#' This function come after the get.pair function.
+#' We will consider nearby probes as a regions controlling the nearby gene
+#'            
+#' 0------------  genes
+#'          0-------|
+#' | region |    
+#' Maximum distance between probes will be 1KB  
+#' @examples 
+#' data(elmer.data.example)
+#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],
+#'                          geneAnnot=getExp(data))
+#' Hypo.pair <- get.pair(data=data,
+#'                      nearGenes=nearGenes,
+#'                      permu.size=5,
+#'                      pvalue = 0.1,
+#'                      dir.out="./",
+#'                      label= "hypo")
+#'  Hypo.pair <- Hypo.pair[Hypo.pair$GeneID %in% Hypo.pair$GeneID[duplicated(Hypo.pair$GeneID)],]
+#'  # No change 
+#'  regions <- getRegionFromProbes(data,Hypo.pair, 1000)  
+#'  # Should be merged as one region
+#'  regions <- getRegionFromProbes(data,Hypo.pair, 3000) 
+#'                    
+getRegionFromProbes <- function(data,
+                                pair,
+                                distance=250){
+  regions <- NULL
+  for(gene in unique(pair$GeneID)){
+    aux <- subset(pair, GeneID == gene)
+    suppressWarnings({
+      probes <- promoters(rowRanges(getMet(data)[aux$Probe,]),distance,distance + 2)
+    })
+    m <- mergeOverlapping(probes,probes)
+    m$gene <- gene
+    regions <- c(regions,m)
+  }
+  return(do.call("c", regions))
+}
+
+mergeOverlapping <- function(x, y, minfrac=NULL) {
+  x <- granges(x)
+  y <- granges(y)
+  hits <- findOverlaps(x, y)
+  xhits <- x[queryHits(hits)]
+  yhits <- y[subjectHits(hits)]
+  if(!is.null(minfrac)){
+  frac <- width(pintersect(xhits, yhits)) / pmin(width(xhits), width(yhits))
+  merge <- frac >= minfrac
+  c(reduce(c(xhits[merge], yhits[merge])),
+    xhits[!merge], yÒhits[!merge],
+    x[-queryHits(hits)], y[-subjectHits(hits)])
+  } else {
+    reduce(c(xhits, yhits))
+  }
 }

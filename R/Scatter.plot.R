@@ -151,8 +151,8 @@ scatter.plot <- function(data,
                  ...)
     
     if(save) ggsave(filename = sprintf("%s/%s.byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
-                    plot = P,useDingbats = FALSE, width = 3*(length(byTF$TF)%%5), 
-                    height = 3 * ceiling(length(byTF$TF)/5))
+                    plot = P,useDingbats = FALSE, width = max(6,3*(length(byTF$TF)%%5)), 
+                    height = max(4,3 * ceiling(length(byTF$TF)/5)))
   }
   return(P)
 }

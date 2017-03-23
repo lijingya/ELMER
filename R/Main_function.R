@@ -66,7 +66,8 @@ get.feature.probe <- function(feature,
       TSS <- getTSS(genome = genome)
     }
     suppressWarnings({
-      TSS <- promoters(TSS,upstream = TSS.range[["upstream"]], 
+      TSS <- promoters(TSS,
+                       upstream = TSS.range[["upstream"]], 
                        downstream = TSS.range[["downstream"]])
       
       probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
@@ -1004,7 +1005,7 @@ get.TFs <- function(data,
                     TFs, 
                     motif.relavent.TFs,
                     percentage = 0.2,
-                    dir.out = "./",
+                    dir.out = ".",
                     label = NULL,
                     cores = 1,
                     save = TRUE){
@@ -1123,6 +1124,7 @@ get.TFs <- function(data,
                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
   rownames(cor.summary) <- cor.summary$motif
+  
   if(save){
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
@@ -1130,12 +1132,22 @@ get.TFs <- function(data,
               file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
                            dir.out=dir.out, label=label), row.names=TRUE)
   } 
-  if(!file.exists(sprintf("%s/TFrankPlot",dir.out)))
-    dir.create(sprintf("%s/TFrankPlot",dir.out))
+  
   print.header("Creating plots", "subsection")
+  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot_family",dir.out),")")
+  dir.create(sprintf("%s/TFrankPlot_family",dir.out),showWarnings = FALSE)
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
-               dir.out=sprintf("%s/TFrankPlot",dir.out), 
+               TF.label =  createMotifRelevantTfs()[colnames(TF.meth.cor)],
+               dir.out=sprintf("%s/TFrankPlot_family",dir.out), 
                save=TRUE)
+  message("TF rank plot highlighting TF in the same subfamily (folder: ", sprintf("%s/TFrankPlot_subfamily",dir.out),")")
+  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out),showWarnings = FALSE)
+  TF.rank.plot(motif.pvalue=TF.meth.cor, 
+               motif=colnames(TF.meth.cor), 
+               TF.label =  createMotifRelevantTfs("subfamily")[colnames(TF.meth.cor)],
+               dir.out=sprintf("%s/TFrankPlot_subfamily",dir.out), 
+               save=TRUE)
+  
   return(cor.summary)
 }

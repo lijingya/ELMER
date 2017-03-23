@@ -101,9 +101,17 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' @importFrom grDevices dev.off pdf 
 #'@examples
 #' data(getTF.hypo.TFs.with.motif.pvalue)
-#' TF.rank.plot(motif.pvalue=TF.meth.cor, 
-#'             motif="TP53", 
-#'             TF.label=list(TP53=c("TP53","TP63","TP73")),
+#' TF.rank.plot(motif.pvalue=TF.meth.cor,  
+#'             motif="P53_HUMAN.H10MO.B", 
+#'             TF.label=createMotifRelevantTfs("subfamily")["P53_HUMAN.H10MO.B"],
+#'             save=TRUE)
+#' TF.rank.plot(motif.pvalue=TF.meth.cor,  
+#'             motif="P53_HUMAN.H10MO.B", 
+#'             save=TRUE)
+#' # Same as above
+#' TF.rank.plot(motif.pvalue=TF.meth.cor,  
+#'             motif="P53_HUMAN.H10MO.B", 
+#'             TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H10MO.B"],
 #'             save=TRUE)
 TF.rank.plot <- function(motif.pvalue, 
                          motif, 
@@ -112,6 +120,10 @@ TF.rank.plot <- function(motif.pvalue,
                          save = TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
+  if(!motif %in% colnames(motif.pvalue)) {
+    print(knitr::kable(sort(colnames(motif.pvalue)), col.names = "motifs"))
+    stop("Motif does not match. Select from the list above")
+  }
   if(is.character(motif.pvalue)) {
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
@@ -131,9 +143,9 @@ TF.rank.plot <- function(motif.pvalue,
     df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
     TF.sub <- TF.label[[i]]
-    if(specify %in% "No"){
-      TF.sub <- TF.sub[TF.sub %in% df$Gene[1:floor(0.05 * nrow(df))]]
-    }
+    #if(specify %in% "No"){
+    #  TF.sub <- TF.sub[TF.sub %in% df$Gene[1:floor(0.05 * nrow(df))]]
+    #}
     df$label <- "No"
     df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
