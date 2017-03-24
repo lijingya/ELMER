@@ -60,40 +60,32 @@ get.feature.probe <- function(feature,
   probe <- probe[!grepl("rs",names(probe)),]
   probe <- probe[!probe$MASK.mapping,] # remove masked probes
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
+  
+  if(missing(TSS)){
+    # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
+    TSS <- getTSS(genome = genome)
+  }
+  suppressWarnings({
+    promoters <- promoters(TSS,
+                           upstream = TSS.range[["upstream"]], 
+                           downstream = TSS.range[["downstream"]])
+  })
+
   if(!promoter){
-    if(missing(TSS)){
-      # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
-      TSS <- getTSS(genome = genome)
-    }
-    suppressWarnings({
-      TSS <- promoters(TSS,
-                       upstream = TSS.range[["upstream"]], 
-                       downstream = TSS.range[["downstream"]])
-      
-      probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,TSS))))]
-    })
-    
+    probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
     if(missing(feature)){
       newenv <- new.env()
       if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
       if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
-      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-    } else if(is(feature,"GRange")) {             
+    }  
+    if(is(feature,"GRange")) {             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
     } else {
       stop("feature is not GRange object.")
     }
   } else {
-    if(missing(TSS)){
-      # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
-      TSS <- getTSS(genome = genome)
-    }
-    suppressWarnings({
-      promoters <- promoters(TSS,upstream = TSS.range[["upstream"]], 
-                             downstream = TSS.range[["downstream"]])
       probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
-    })
   }
   return(probe)
 }
