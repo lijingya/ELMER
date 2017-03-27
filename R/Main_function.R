@@ -79,10 +79,10 @@ get.feature.probe <- function(feature,
       if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
       feature <- get(ls(newenv)[1],envir=newenv)   
     }  
-    if(is(feature,"GRange")) {             
+    if(is(feature,"GRanges")) {             
       probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
     } else {
-      stop("feature is not GRange object.")
+      stop("feature is not GRanges object.")
     }
   } else {
       probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
