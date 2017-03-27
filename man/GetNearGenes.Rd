@@ -4,13 +4,13 @@
 \alias{GetNearGenes}
 \title{GetNearGenes to collect nearby genes for one locus.}
 \usage{
-GetNearGenes(data = NULL, probe = NULL, geneAnnot = NULL, TRange = NULL,
-  geneNum = 20, cores = 1)
+GetNearGenes(data = NULL, probes = NULL, geneAnnot = NULL,
+  TRange = NULL, geneNum = 20, cores = 1)
 }
 \arguments{
 \item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
 
-\item{probe}{Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+\item{probes}{Name of probes to get nearby genes (it should be rownames of the DNA methylation 
 object in the data argument object)}
 
 \item{geneAnnot}{A GRange object  or Summarized Experiment object that contains coordinates of promoters for 

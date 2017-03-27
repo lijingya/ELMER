@@ -4,7 +4,7 @@
 \alias{get.enriched.motif}
 \title{get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.}
 \usage{
-get.enriched.motif(data, probes.motif, probes, min.motif.quality = "C",
+get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
                    background.probes, lower.OR = 1.1, min.incidence = 10, 
                    dir.out = "./", label = NULL, save = TRUE)
 }

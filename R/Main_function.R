@@ -690,7 +690,7 @@ promoterMeth <- function(data,
 #' a given set of probes. If save is TURE, two output files will be saved: 
 #' getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 #' @usage 
-#' get.enriched.motif(data, probes.motif, probes, min.motif.quality = "C",
+#' get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
 #'                    background.probes, lower.OR = 1.1, min.incidence = 10, 
 #'                    dir.out = "./", label = NULL, save = TRUE)
 #' @param data A multi Assay Experiment from  \code{\link{createMAE}} function.
