@@ -383,7 +383,7 @@ get.pair <- function(data,
   if(calculate.Pe){
     #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
     GeneID <- unique(Probe.gene[,"GeneID"])
-    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for each nearby gene"))
+    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
     # get permutation
     permu <- get.permu(data,
                        geneID     = GeneID, 

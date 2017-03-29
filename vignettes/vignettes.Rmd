@@ -70,6 +70,7 @@ knitr::opts_chunk$set(dpi = 300, cache = FALSE)
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
+dir.create("result")
 library(BiocStyle)
 ```
 
@@ -105,24 +106,9 @@ biocLite("ELMER")
 # Download example data
 The following steps can be used to download the example data set for `r Biocpkg("ELMER")`.
 
-```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
-if(!file_test("-d", "./ELMER.example")) {
-  if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-  URL <- "https://www.dropbox.com/s/mxf2u1wcauenx8m/ELMER.example.zip?raw=1"
-  downloader::download(URL,destfile = "ELMER.example.zip",mode= mode)
-  utils::unzip("ELMER.example.zip")
-}
+```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(ELMER, quietly = TRUE)
 library(DT)
-```
-
-```{r, fig.height=6,eval=FALSE}
-#Example file download from URL: "https://www.dropbox.com/s/mxf2u1wcauenx8m/ELMER.example.zip
-URL <- "https://www.dropbox.com/s/mxf2u1wcauenx8m/ELMER.example.zip?raw=1"
-if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-downloader::download(URL,destfile = "ELMER.example.zip", mode= mode)
-utils::unzip("ELMER.example.zip")
-library(ELMER)
 ```
 
 
@@ -183,7 +169,6 @@ can read in files by specifying files' path which will help to reduce memory usa
 
 ```{r}
 # Example of DNA methylation data input
-load("./ELMER.example/Result/LUSC/LUSC_meth_refined.rda")
 datatable(Meth[1:10, 1:10], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
@@ -210,7 +195,6 @@ can read in files by specifying the path of files which will help to reduce memo
 
 ```{r}
 # Example of Gene expression data input
-load("./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda")
 datatable(GeneExp[1:10, 1:2], 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
@@ -418,7 +402,7 @@ own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
 #get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
 #enhancers on chromosome 1
 Probe <- get.feature.probe(genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
-save(Probe,file="./ELMER.example/Result/LUSC/probeInfo_feature_distal.rda")
+save(Probe,file="result/probeInfo_feature_distal.rda")
 ```
 
 ## Identifying differentially methylated probes
@@ -467,9 +451,8 @@ Both files contain four columns: probe, pvalue, ExperimentMinControl, adjust.p.
 
 ```{r,eval=TRUE, message=FALSE}
 library(MultiAssayExperiment)
-## createMAE can take path as input.
-data <- createMAE(exp = "./ELMER.example/Result/LUSC/LUSC_RNA_refined.rda", 
-                  met = "./ELMER.example/Result/LUSC/LUSC_meth_refined.rda",
+data <- createMAE(exp = GeneExp, 
+                  met = Meth,
                   save = FALSE,
                   met.platform = "450K",
                   genome = "hg19",
@@ -486,7 +469,7 @@ sig.diff <- get.diff.meth(data,
                           sig.dif = 0.3,
                           diff.dir = "hypo", # Search for hypomethylated probes in group 1
                           cores = detectCores()/2, 
-                          dir.out ="./ELMER.example/Result/LUSC", 
+                          dir.out ="result", 
                           pvalue = 0.01)
 
 datatable(sig.diff, 
@@ -496,7 +479,7 @@ datatable(sig.diff,
 # getMethdiff.hypo.probes.csv contains statistics for all the probes.
 # getMethdiff.hypo.probes.significant.csv contains only the significant probes which
 # is the same with sig.diff
-dir(path = "./ELMER.example/Result/LUSC", pattern = "getMethdiff")  
+dir(path = "result", pattern = "getMethdiff")  
 ```
 
 
@@ -609,17 +592,17 @@ You can view the  available columns using: colnames(MultiAssayExperiment::pData(
 ```{r,eval=TRUE, message=FALSE}
 ### identify target gene for significantly hypomethylated probes.
 
-Sig.probes <- read.csv("./ELMER.example/Result/LUSC/getMethdiff.hypo.probes.significant.csv",
+Sig.probes <- read.csv("result/getMethdiff.hypo.probes.significant.csv",
                        stringsAsFactors=FALSE)[,1]  
 head(Sig.probes)  # significantly hypomethylated probes
 
 ## Collect nearby 20 genes for Sig.probes
-nearGenes <- GetNearGenes(data = data, probe = Sig.probes, cores = detectCores()/2)
+nearGenes <- GetNearGenes(data = data, probes = Sig.probes, cores = detectCores()/2)
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
                       nearGenes = nearGenes,
-                      permu.dir = "./ELMER.example/Result/LUSC/permu",
+                      permu.dir = "result/permu",
                       permu.size = 200,
                       pvalue = 0.01,
                       calculate.Pe = TRUE,
@@ -627,7 +610,7 @@ Hypo.pair <- get.pair(data = data,
                       filter.probes = TRUE, # See preAssociationProbeFiltering function
                       filter.percentage = 0.05,
                       filter.portion = 0.3,
-                      dir.out = "./ELMER.example/Result/LUSC",
+                      dir.out = "result",
                       cores = detectCores()/2,
                       label = "hypo")
 
@@ -638,7 +621,7 @@ datatable(Hypo.pair, ## significant probe-gene pairs
 #getPair.hypo.all.pairs.statistic.csv contains statistics for all the probe-gene pairs.
 #getPair.hypo.pairs.significant.csv contains only the significant probes which is 
 # same with Hypo.pair.
-dir(path = "./ELMER.example/Result/LUSC", pattern = "getPair") 
+dir(path = "result", pattern = "getPair") 
 ```
 
 
@@ -697,14 +680,14 @@ the motif.
 ## identify enriched motif for significantly hypomethylated probes which 
 ##have putative target genes.
 
-Sig.probes.paired <- read.csv("./ELMER.example/Result/LUSC/getPair.hypo.pairs.significant.csv",
+Sig.probes.paired <- read.csv("result/getPair.hypo.pairs.significant.csv",
                               stringsAsFactors=FALSE)[,1]  
 head(Sig.probes.paired) # significantly hypomethylated probes with putative target genes
 
 enriched.motif <- get.enriched.motif(data = data,
                                      min.motif.quality = "B", # Default: options A, B, C, D
                                      probes = Sig.probes.paired, 
-                                     dir.out = "./ELMER.example/Result/LUSC", 
+                                     dir.out = "result", 
                                      label = "hypo",
                                      min.incidence = 10,
                                      lower.OR = 1.1)
@@ -714,10 +697,10 @@ head(enriched.motif["P73_HUMAN.H10MO.A"]) ## probes in the given set that have T
 # get.enriched.motif automatically save output files. 
 # getMotif.hypo.enriched.motifs.rda contains enriched motifs and the probes with the motif. 
 # getMotif.hypo.motif.enrichment.csv contains summary of enriched motifs.
-dir(path = "./ELMER.example/Result/LUSC", pattern = "getMotif") 
+dir(path = "result", pattern = "getMotif") 
 
 # motif enrichment figure will be automatically generated.
-dir(path = "./ELMER.example/Result/LUSC", pattern = "motif.enrichment.pdf") 
+dir(path = "result", pattern = "motif.enrichment.pdf") 
 ```
 
 
@@ -767,7 +750,7 @@ TF.rank.plot.
 ## identify regulatory TF for the enriched motifs
 TF <- get.TFs(data = data, 
               enriched.motif = enriched.motif,
-              dir.out = "./ELMER.example/Result/LUSC", 
+              dir.out = "result", 
               cores = 1, 
               label = "hypo")
 
@@ -775,10 +758,10 @@ TF <- get.TFs(data = data,
 # getTF.hypo.TFs.with.motif.pvalue.rda contains statistics for all TF with average 
 # DNA methylation at sites with the enriched motif.
 # getTF.hypo.significant.TFs.with.motif.summary.csv contains only the significant probes.
-dir(path = "./ELMER.example/Result/LUSC", pattern = "getTF")  
+dir(path = "result", pattern = "getTF")  
 
 # TF ranking plot based on statistics will be automatically generated.
-dir(path = "./ELMER.example/Result/LUSC/TFrankPlot", pattern = "pdf") 
+dir(path = "result/TFrankPlot", pattern = "pdf") 
 ```
 
 # Generating figures
@@ -806,7 +789,7 @@ Generate scatter plot for TF expression vs average DNA methylation of the sites
 with certain motif. Figure \ref{fig:figure3}
 
 ```{r,eval=TRUE, fig.cap="Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively."}
-load("./ELMER.example/Result/LUSC/getMotif.hypo.enriched.motifs.rda")
+load("result/getMotif.hypo.enriched.motifs.rda")
 scatter.plot(data,
              byTF = list(TF = c("TP53","TP63","TP73"),
                          probe = enriched.motif[["P73_HUMAN.H10MO.A"]]), 
@@ -842,7 +825,7 @@ schematic.plot(pair = Hypo.pair, data = data,   group.col = "definition", byGene
 Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:figure6}
 
 ```{r,eval=TRUE,fig.cap="The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio."}
-motif.enrichment.plot(motif.enrichment="./ELMER.example/Result/LUSC/getMotif.hypo.motif.enrichment.csv", 
+motif.enrichment.plot(motif.enrichment="result/getMotif.hypo.motif.enrichment.csv", 
                       significant=list(OR=1.3,lowerOR=1.3), 
                       label="hypo", save=TRUE)  ## different signficant cut off.
 ```
@@ -852,7 +835,7 @@ TF ranking plot shows statistic -log10(P value) assessing the anti-correlation l
 of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
 
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type . The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
-load("./ELMER.example/Result/LUSC/getTF.hypo.TFs.with.motif.pvalue.rda")
+load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
 TF.rank.plot(motif.pvalue = TF.meth.cor, 
              motif = "P73_HUMAN.H10MO.A",
              TF.label = list(TP53 = c("TP53","TP63","TP73")),

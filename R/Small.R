@@ -30,26 +30,28 @@
 #' # NON TCGA example: matrices has diffetrent column names
 #' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
 #'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-#' dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-#'                        sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
-#' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-#' rownames(sample.info) <- colnames(gene.exp)
-#' mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
-#' 
-#' # NON TCGA example: matrices has diffetrent column names
-#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-#'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 #' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
 #'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-#' sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-#' rownames(sample.info) <- c("sample1","sample2")
+#' sample.info <- DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
 #' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
 #'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 #' mae <- createMAE(exp = gene.exp, 
 #'                  met = dna.met, 
 #'                  sampleMap = sampleMap, 
+#'                  met.platform ="450K",
 #'                  pData = sample.info, 
 #'                  genome = "hg38") 
+#' # You can also use sample Mapping and Sample information tables from a tsv file
+#' # You can use the createTSVTemplates function to create the tsv files
+#' write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
+#' write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
+#' mae <- createMAE(exp = gene.exp, 
+#'                  met = dna.met, 
+#'                  sampleMap = "sampleMap.tsv", 
+#'                  met.platform ="450K",
+#'                  pData = "sample.info.tsv", 
+#'                  genome = "hg38") 
+#' 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
 #'    # Testing creating MultyAssayExperiment object
@@ -159,6 +161,14 @@ createMAE <- function (exp,
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
+  
+  suppressMessages({
+    if(is.character(pData)) { 
+      pData <- as.data.frame(read_tsv(pData))
+      rownames(pData) <- pData$primary
+    }
+    if(is.character(sampleMap)) sampleMap <- read_tsv(sampleMap)
+  })  
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
@@ -230,7 +240,7 @@ createMAE <- function (exp,
       rownames(pData) <- pData$sample
     } 
     if(missing(sampleMap)) {
-     sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
+      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
                              primary = substr(c(colnames(met),colnames(exp)),1,16),
                              colname=c(colnames(met),colnames(exp)))
     }
@@ -276,8 +286,8 @@ createMAE <- function (exp,
       # Check that we have the same number of samples
       if(!all(c("primary","colname") %in% colnames(sampleMap))) 
         stop("sampleMap should have the following columns: primary (sample ID) and colname(DNA methylation and gene expression sample [same as the colnames of the matrix])")
-      if(!any(rownames(pData) %in% sampleMap$primary))
-        stop("pData row names should be mapped to sampleMap primary column ")
+      #if(!any(rownames(pData) %in% sampleMap$primary))
+      #  stop("pData row names should be mapped to sampleMap primary column ")
       # Find which samples are DNA methylation and gene expression
       sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
       sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
@@ -375,6 +385,36 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
   if(genome == "hg38" & plat == "EPIC" ) data("EPIC.manifest.hg38",package = "ELMER.data", envir = newenv)
   annotation <- get(ls(newenv)[1],envir=newenv)   
   return(annotation)
+}
+
+#' Create examples files for Sample mapping and information used in createMAE function
+#' @description 
+#' This function will receive the DNA methylation and gene expression matrix and will create
+#' some examples of table for the argument pData and sampleMap used in ceeateMae function.
+#' @examples 
+#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
+#' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
+#' createTSVTemplates(met = dna.met, exp = gene.exp)                       
+#' @importFrom readr write_tsv
+#' @export
+createTSVTemplates <- function(met, exp) {
+  assay <- c(rep("DNA methylation", ncol(met)),
+             rep("Gene expression", ncol(exp)))
+  primary <- rep("SampleX", ncol(met) + ncol(exp))
+  colname <- c(colnames(met),colnames(exp))
+  sampleMap <- data.frame(assay,primary,colname)
+  message("===== Sample mapping example file ======")
+  message("Saving example file as elmer_example_sample_mapping.tsv.")
+  message("Please, fill primary column correctly")
+  write_tsv(sampleMap,path = "elmer_example_sample_mapping.tsv")
+  
+  pData <- data.frame(primary = paste0("sample",1:ncol(met)), group = rep("To be filled",ncol(met)))
+  message("===== Sample information example file ======")
+  message("Saving example file as elmer_example_sample_metadata.tsv.")
+  message("Please, fill primary column correctly, also you can add new columns as the example group column.")
+  write_tsv(pData,path = "elmer_example_sample_metadata.tsv")
 }
 
 # splitmatix 
@@ -544,7 +584,7 @@ createMotifRelevantTfs <- function(classification = "family"){
     # basicaly: for a TF get its family then get all TF in that family
     col <- ifelse(classification == "family", "TF family","TF subfamily")
     family <- split(tf.family,f = tf.family[[col]])
-
+    
     motif.relevant.TFs <- plyr::alply(tf.family,1, function(x){  
       f <- x[[col]]
       if(f == "") return(x$`Transcription factor`) # Case without family, we will get only the same object
@@ -613,22 +653,22 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   message("For more information see function preAssociationProbeFiltering")
   
   if(class(data) == class(MultiAssayExperiment())) met <- assay(getMet(data))
-    # In percentage how many probes are bigger than K ?
-    Meth_B <- rowMeans(met > K, na.rm = TRUE)
-    # We should  have at least 5% methylation value < K or at least 5% methylation value > K
-    keep <- Meth_B < (1 - percentage) & Meth_B > percentage
-    message("Making sure we have at least ", percentage * 100, "% of beta values lesser than ", K," and ", 
+  # In percentage how many probes are bigger than K ?
+  Meth_B <- rowMeans(met > K, na.rm = TRUE)
+  # We should  have at least 5% methylation value < K or at least 5% methylation value > K
+  keep <- Meth_B < (1 - percentage) & Meth_B > percentage
+  message("Making sure we have at least ", percentage * 100, "% of beta values lesser than ", K," and ", 
           percentage * 100, "% of beta values greater ",K,".") 
-    if( length(keep) - sum(keep) != 0){
-      message("Removing ", length(keep) - sum(keep), " probes out of ", length(keep))
-    } else {
-      message("There were no probes to be removed")
-    }
-    if(class(data) == class(MultiAssayExperiment())) {
-      experiments(data)["DNA methylation"][[1]] <- experiments(data)["DNA methylation"][[1]][keep,]
-    } else {
-      data <- data[keep,,drop = FALSE]
-    }
+  if( length(keep) - sum(keep) != 0){
+    message("Removing ", length(keep) - sum(keep), " probes out of ", length(keep))
+  } else {
+    message("There were no probes to be removed")
+  }
+  if(class(data) == class(MultiAssayExperiment())) {
+    experiments(data)["DNA methylation"][[1]] <- experiments(data)["DNA methylation"][[1]][keep,]
+  } else {
+    data <- data[keep,,drop = FALSE]
+  }
   return(data)
 }
 
@@ -641,6 +681,7 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #'          0-------|
 #' | region |    
 #' Maximum distance between probes will be 1KB  
+#' @importFrom GenomicRanges reduce
 #' @examples 
 #' data(elmer.data.example)
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],
@@ -660,32 +701,29 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 getRegionFromProbes <- function(data,
                                 pair,
                                 distance=250){
+  # This code needs improvements
   regions <- NULL
   for(gene in unique(pair$GeneID)){
+    # For each gene consider the pair probes with a window of 250 bp
     aux <- subset(pair, GeneID == gene)
     suppressWarnings({
       probes <- promoters(rowRanges(getMet(data)[aux$Probe,]),distance,distance + 2)
     })
-    m <- mergeOverlapping(probes,probes)
-    m$gene <- gene
-    regions <- c(regions,m)
+    # If they overlap merge them (reduce)
+    reduced <- reduce(probes)
+    reduced$gene <- gene
+    regions <- c(regions,reduced)
   }
+  
   return(do.call("c", regions))
 }
 
-mergeOverlapping <- function(x, y, minfrac=NULL) {
-  x <- granges(x)
-  y <- granges(y)
-  hits <- findOverlaps(x, y)
-  xhits <- x[queryHits(hits)]
-  yhits <- y[subjectHits(hits)]
-  if(!is.null(minfrac)){
-  frac <- width(pintersect(xhits, yhits)) / pmin(width(xhits), width(yhits))
-  merge <- frac >= minfrac
-  c(reduce(c(xhits[merge], yhits[merge])),
-    xhits[!merge], yÒhits[!merge],
-    x[-queryHits(hits)], y[-subjectHits(hits)])
-  } else {
-    reduce(c(xhits, yhits))
-  }
+
+hgetMarks4regions <- function(){
+  newenv <- new.env()
+  data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
+  probes.motif <- get(ls(newenv)[1],envir=newenv)   
+  probes <- promoters(rowRanges(getMet(data)), distance, distance + 2)
+  regions <- reduce(probes)
 }
+# get size regions: sum(ranges(gr0)@width)

@@ -54,26 +54,28 @@ and create a Multi Assay Experiment.
 # NON TCGA example: matrices has diffetrent column names
 gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-                       sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
-sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-rownames(sample.info) <- colnames(gene.exp)
-mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
-
-# NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-                  sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-rownames(sample.info) <- c("sample1","sample2")
+sample.info <- DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
 sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 mae <- createMAE(exp = gene.exp, 
                  met = dna.met, 
                  sampleMap = sampleMap, 
+                 met.platform ="450K",
                  pData = sample.info, 
                  genome = "hg38") 
+# You can also use sample Mapping and Sample information tables from a tsv file
+# You can use the createTSVTemplates function to create the tsv files
+write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
+write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
+mae <- createMAE(exp = gene.exp, 
+                 met = dna.met, 
+                 sampleMap = "sampleMap.tsv", 
+                 met.platform ="450K",
+                 pData = "sample.info.tsv", 
+                 genome = "hg38") 
+
 \dontrun{
    # TCGA example using TCGAbiolinks
    # Testing creating MultyAssayExperiment object
