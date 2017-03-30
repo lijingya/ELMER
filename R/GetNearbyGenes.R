@@ -170,8 +170,8 @@ GetNearGenes <- function(data = NULL,
                          cores = 1){
   message("Searching for the ", geneNum, " near genes")
   if(!is.null(data)){
-    if(is.null(probe)) stop("Please set the probe argument (names of probes to select nearby genes)")
-    TRange <- subset(getMet(data), rownames(getMet(data)) %in% probe)
+    if(is.null(probes)) stop("Please set the probes argument (names of probes to select nearby genes)")
+    TRange <- subset(getMet(data), rownames(getMet(data)) %in% probes)
     geneAnnot <- getExp(data)
   }    
   if(is.null(TRange)){

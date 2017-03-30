@@ -5,8 +5,9 @@
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
 get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-         pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = TRUE, diffExp = FALSE,
-         cores = 1, portion = 0.3,  label = NULL, save = TRUE)
+         pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = FALSE, diffExp = FALSE,
+         group.col, cores = 1, filter.probes = TRUE, filter.portion = 0.3,  filter.percentage = 0.05,
+         label = NULL, save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
