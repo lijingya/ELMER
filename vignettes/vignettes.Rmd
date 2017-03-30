@@ -603,7 +603,7 @@ nearGenes <- GetNearGenes(data = data, probes = Sig.probes, cores = detectCores(
 Hypo.pair <- get.pair(data = data,
                       nearGenes = nearGenes,
                       permu.dir = "result/permu",
-                      permu.size = 200,
+                      permu.size = 10, # Please set to 100000 to get significant results
                       pvalue = 0.01,
                       calculate.Pe = TRUE,
                       Pe = 0.01,
