@@ -162,15 +162,19 @@ createMAE <- function (exp,
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
   
-  if(!missing(pData)) { 
-    suppressMessages({
+  suppressMessages({
+    
+    if(!missing(pData)) { 
       if(is.character(pData)) { 
         pData <- as.data.frame(read_tsv(pData))
         rownames(pData) <- pData$primary
       }
+    }
+    if(!missing(sampleMap)) { 
       if(is.character(sampleMap)) sampleMap <- read_tsv(sampleMap)
-    })  
-  }
+    }
+  })  
+  
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
