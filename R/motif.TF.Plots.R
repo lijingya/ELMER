@@ -120,9 +120,9 @@ TF.rank.plot <- function(motif.pvalue,
                          save = TRUE){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
-  if(!motif %in% colnames(motif.pvalue)) {
+  if(!all(motif %in% colnames(motif.pvalue))) {
     print(knitr::kable(sort(colnames(motif.pvalue)), col.names = "motifs"))
-    stop("Motif does not match. Select from the list above")
+    stop("One of the motifs does not match. Select from the list above")
   }
   if(is.character(motif.pvalue)) {
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
