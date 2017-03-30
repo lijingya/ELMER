@@ -161,6 +161,7 @@ NearGenes <- function (Target=NULL,
 #' probe <- GRanges(seqnames = c("chr1","chr2"), 
 #' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
+#' names(probe) <- c("cg18108049","cg17125141")
 #' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
 GetNearGenes <- function(data = NULL,
                          probes = NULL,
@@ -194,7 +195,12 @@ GetNearGenes <- function(data = NULL,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  
+
+  if(is.null(names(TRange))) {
+    if(is.null(TRange$name)) stop("No probe names found in TRange")
+        names(TRange) <- TRange$name
+  }
+    
   NearGenes <- alply(.data = as.data.frame(TRange), .margins = 1,
                      .fun = function(x) {
                        NearGenes( Target = rownames(x),

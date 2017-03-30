@@ -39,6 +39,7 @@ geneAnnot <- getTSS(TSS=list(upstream=0, downstream=0))
 probe <- GRanges(seqnames = c("chr1","chr2"), 
 range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 name= c("cg18108049","cg17125141"))
+names(probe) <- c("cg18108049","cg17125141")
 NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
 }
 \references{
