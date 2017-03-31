@@ -697,6 +697,8 @@ the motif.
 
 ### Arguments
 
+The main arguments of this function are:
+
 | Argument | Description |
 |-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | data | A multi Assay Experiment from  createMAE function. If set and probes.motif/background probes are missing this will be used to get this other two arguments correctly. This argument is not require, you can set probes.motif and the backaground.probes manually. |
@@ -709,12 +711,6 @@ the motif.
 | dir.out | A path. Specifies the directory for outputs. Default is current directory |
 | label | A character. Labels the outputs such as "hypo", "hyper" |
 | save | If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail). |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
-|  |  |
 
 ### Code example
 ```{r,eval=TRUE, message=FALSE}
@@ -750,6 +746,7 @@ dir(path = "result", pattern = "motif.enrichment.pdf")
 This step is to identify regulatory TF whose expression associates with TF binding motif 
 DNA methylation which is carried out by function get.TFs.
 
+### Description
 For each motif considered to be enriched within a particular probe set, function will
 compare the average DNA methylation at all distal enhancer probes within +/- 100bp 
 of a motif occurrence, to the expression of human TFs. A statistical test 
@@ -787,6 +784,24 @@ results for associations between TFs (row) and average DNA methylation
 at motifs (column). This matrix can be use to generate TF ranking plots by function
 TF.rank.plot.
 
+### Arguments
+
+
+The main arguments of this function are:
+
+| Argument | Description |
+|--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function. |
+| enriched.motif | A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function. |
+| TFs | A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol. If missing, human.TF list will be used (human.TF data in ELMER.data). For detail information, refer the reference paper. |
+| motif.relavent.TFs | A list containing motif as names and relavent TFs as contents for each list element or a path of XX.rda file containing a list as above. If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). For detail information, refer the reference paper. |
+| percentage | A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2. |
+| dir.out | A path specifies the directory for outputs of get.pair function. Default is current directory |
+| label | A character labels the outputs. |
+| cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
+| save | A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file. |
+
+### Code example
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 ## identify regulatory TF for the enriched motifs
 TF <- get.TFs(data = data, 
@@ -886,8 +901,10 @@ TF.rank.plot(motif.pvalue = TF.meth.cor,
 ```
 
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
+load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
+motif <- "P73_HUMAN.H10MO.A"
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
-            motif=colnames(TF.meth.cor)[1], 
+            motif=motif, 
             TF.label=createMotifRelevantTfs("subfamily")[motif],
             save=FALSE)
 ```
