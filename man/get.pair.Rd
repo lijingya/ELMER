@@ -5,7 +5,7 @@
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
 get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-         pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = FALSE, diffExp = FALSE,
+         pvalue = 0.05, Pe = 0.001, dir.out = "./",diffExp = FALSE,
          group.col, cores = 1, filter.probes = TRUE, 
          filter.portion = 0.3,  filter.percentage = 0.05,
          label = NULL, save = TRUE)
@@ -30,9 +30,6 @@ Default is 0.05. It will select the significant P value (adjusted P value by BH)
 Default is 0.001. Only used if calculate.empirical.p is TRUE.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
-
-\item{calculate.Pe}{A logic. If TRUE  also execute the permutation step, 
-if FALSE (default) only uses the adjusted raw p-value to select the significant pairs.}
 
 \item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to 
 test whether putative target gene are differentially expressed between two groups.}

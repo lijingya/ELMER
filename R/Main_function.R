@@ -70,7 +70,7 @@ get.feature.probe <- function(feature,
                            upstream = TSS.range[["upstream"]], 
                            downstream = TSS.range[["downstream"]])
   })
-
+  
   if(!promoter){
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
     if(missing(feature)){
@@ -85,7 +85,7 @@ get.feature.probe <- function(feature,
       stop("feature is not GRanges object.")
     }
   } else {
-      probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
+    probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
   }
   return(probe)
 }
@@ -246,7 +246,7 @@ get.diff.meth <- function(data,
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
 #' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-#'          pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = FALSE, diffExp = FALSE,
+#'          pvalue = 0.05, Pe = 0.001, dir.out = "./",diffExp = FALSE,
 #'          group.col, cores = 1, filter.probes = TRUE, 
 #'          filter.portion = 0.3,  filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
@@ -259,8 +259,6 @@ get.diff.meth <- function(data,
 #' samples used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param calculate.Pe A logic. If TRUE  also execute the permutation step, 
-#' if FALSE (default) only uses the adjusted raw p-value to select the significant pairs.
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
 #'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
@@ -319,7 +317,6 @@ get.pair <- function(data,
                      pvalue = 0.05,
                      Pe = 0.001,
                      dir.out = "./",
-                     calculate.Pe = FALSE,
                      diffExp = FALSE,
                      group.col,
                      cores = 1,
@@ -365,7 +362,7 @@ get.pair <- function(data,
   )
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
-
+  
   if(save) {
     dir.create(dir.out, showWarnings = FALSE)
     file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label)
@@ -380,24 +377,24 @@ get.pair <- function(data,
     message(paste("No significant pairs were found for pvalue =", pvalue))
     return(selected)
   }
-  if(calculate.Pe){
-    #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
-    GeneID <- unique(Probe.gene[,"GeneID"])
-    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
-    # get permutation
-    permu <- get.permu(data,
-                       geneID     = GeneID, 
-                       percentage = percentage, 
-                       rm.probes  = names(nearGenes), 
-                       permu.size = permu.size, 
-                       permu.dir  = permu.dir,
-                       cores      = cores)
-    # Get empirical p-value
-    Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   
-    if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
-    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
-  } 
+  #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
+  GeneID <- unique(Probe.gene[,"GeneID"])
+  message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
+  # get permutation
+  permu <- get.permu(data,
+                     geneID     = GeneID, 
+                     percentage = percentage, 
+                     rm.probes  = names(nearGenes), 
+                     permu.size = permu.size, 
+                     permu.dir  = permu.dir,
+                     cores      = cores)
+  # Get empirical p-value
+  Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
+  
+  if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
+  selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  
   if(diffExp){
     message("Calculating differential expression between two groups")
     Exp <- assay(getExp(data)[unique(selected$GeneID),])
@@ -412,7 +409,7 @@ get.pair <- function(data,
                    test <- t.test(x = x[idx1],y = x[idx2])
                    out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
                                      "diff.pvalue" = test$p.value)
-                   },
+                 },
                  .progress = "text", .parallel = parallel,.id = "GeneID"
     )
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
@@ -511,7 +508,7 @@ get.permu <- function(data,
   tmp.probes <- probes.permu
   tmp.genes <- geneID
   missing.genes <- NULL
-  # Case 2) Permutation already done
+  # Check if it isCase 2: Permutation already done
   file <- file.path(permu.dir,"permu.rda")
   if (!is.null(permu.dir)) {
     if (file.exists(file)) {
@@ -879,7 +876,7 @@ get.enriched.motif <- function(data,
   ## make plot 
   suppressWarnings({
     motif.enrichment.plot(motif.enrichment = Summary[Summary$motif %in% names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                                                                       names(en.motifs), value = T)]),], 
+                                                                                             names(en.motifs), value = T)]),], 
                           significant = list(OR = 1.3), 
                           dir.out = dir.out,
                           label=paste0(label,".all.quality"), 
@@ -1001,6 +998,9 @@ get.TFs <- function(data,
                     label = NULL,
                     cores = 1,
                     save = TRUE){
+  if(missing(data)){
+    stop("data argument is empty")
+  }
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
