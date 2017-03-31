@@ -15,7 +15,7 @@ this other two arguments correctly. This argument is not require, you can set pr
 the backaground.probes manually.}
 
 \item{probes.motif}{A matrix contains motifs occurrence within probes regions. Probes.motif in 
-\pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif}}).}
+\pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif.hg19.450K}}).}
 
 \item{probes}{A vector lists the name of probes to define the set of probes in which motif enrichment
 OR and confidence interval will be calculated.}

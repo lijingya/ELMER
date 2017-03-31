@@ -151,19 +151,18 @@ TF.rank.plot <- function(motif.pvalue,
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
                            text = as.character(df$Gene[df$label %in% "Yes"]), 
                            x = which(df$label %in% "Yes"), stringsAsFactors = FALSE)
+    highlight <- df[df$label=="Yes",]
     P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Yes","No"))))+
-      scale_color_manual(values = c("red","black"))+
+      scale_color_manual(values = c("red","black","purple"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point() +
-      # geom_text(aes(x=x+100, y=pvalue,label=text),df.label,color="black",
-      #          position=position_jitter(height=0.5,width = 0.3), size=2)+
-      #     geom_segment(aes(x = x, y = pvalue, xend = , yend = ),df.label,color="black")+
       theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
       theme(legend.position="none")+
-      labs(x = "Rank", y ="-log10 P value", title=i)
-    
+      labs(x = "Rank", y ="-log10 P value", title=i) + 
+      geom_point(data=highlight, aes(x=rank, y=pvalue))
+      
     df$Gene <- as.character(df$Gene)
     df$Gene[df$label %in% "No"] <- "" 
     P <- P + geom_text_repel(
@@ -171,6 +170,7 @@ TF.rank.plot <- function(motif.pvalue,
       aes(label = Gene),
       min.segment.length = unit(0.0, "lines"),
       size = 3,
+      segment.color = "gray",
       nudge_x = 10,
       show.legend = FALSE,
       fontface = 'bold', color = 'black',

@@ -397,6 +397,8 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
 #' @description 
 #' This function will receive the DNA methylation and gene expression matrix and will create
 #' some examples of table for the argument pData and sampleMap used in ceeateMae function.
+#' @param met DNA methylation matrix or Summarized Experiment
+#' @param exp Gene expression matrix or Summarized Experiment
 #' @examples 
 #' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
 #'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
@@ -688,6 +690,10 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #' | region |    
 #' Maximum distance between probes will be 1KB  
 #' @importFrom GenomicRanges reduce
+#' @param data Multi Assay Experiment
+#' @param pair Table with gene-probe pair list
+#' @param distance Minimum distance to consider from a probe (if it is 100 we will
+#' consider +-100 probe site)
 #' @examples 
 #' data(elmer.data.example)
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],

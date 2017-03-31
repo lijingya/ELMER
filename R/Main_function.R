@@ -247,7 +247,8 @@ get.diff.meth <- function(data,
 #' @usage 
 #' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
 #'          pvalue = 0.05, Pe = 0.001, dir.out = "./", calculate.Pe = FALSE, diffExp = FALSE,
-#'          group.col, cores = 1, filter.probes = TRUE, filter.portion = 0.3,  filter.percentage = 0.05,
+#'          group.col, cores = 1, filter.probes = TRUE, 
+#'          filter.portion = 0.3,  filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
@@ -364,18 +365,16 @@ get.pair <- function(data,
   )
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
-  Probe.gene$Raw.p.adjust <- p.adjust(as.numeric(Probe.gene$Raw.p),method="BH")
-  
+
   if(save) {
     dir.create(dir.out, showWarnings = FALSE)
     file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label)
     write_csv(Probe.gene,path=file)
     message(paste("File created:", file))
   }
-  if(save) 
   
-  Probe.gene <- Probe.gene[Probe.gene$Raw.p.adjust < pvalue,]
-  Probe.gene <- Probe.gene[order(Probe.gene$Raw.p.adjust),]
+  Probe.gene <- Probe.gene[Probe.gene$Raw.p < pvalue,]
+  Probe.gene <- Probe.gene[order(Probe.gene$Raw.p),]
   selected <- Probe.gene
   if(nrow(selected) == 0) {
     message(paste("No significant pairs were found for pvalue =", pvalue))
@@ -438,7 +437,6 @@ get.pair <- function(data,
 #'           geneID, 
 #'           percentage = 0.2, 
 #'           rm.probes = NULL, 
-#'           portion = 0.3, 
 #'           permu.size = 10000, 
 #'           permu.dir = NULL, 
 #'           cores = 1)
@@ -615,7 +613,8 @@ get.permu <- function(data,
 #' promoterMeth is a function to calculate associations of gene expression with DNA methylation
 #' at promoter regions.
 #' @usage 
-#' promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2, save = TRUE)
+#' promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2,
+#'              upstream = 100,  downstream = 700, save = TRUE)
 #'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
 #'@param sig.pvalue A number specifies significant cutoff for gene silenced by promoter
@@ -699,7 +698,7 @@ promoterMeth <- function(data,
 #' this other two arguments correctly. This argument is not require, you can set probes.motif and 
 #' the backaground.probes manually.
 #' @param probes.motif A matrix contains motifs occurrence within probes regions. Probes.motif in 
-#' \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif}}).
+#' \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif.hg19.450K}}).
 #' @param probes A vector lists the name of probes to define the set of probes in which motif enrichment
 #' OR and confidence interval will be calculated.
 #' @param background.probes A vector lists name of probes which are considered as 
@@ -998,7 +997,7 @@ get.TFs <- function(data,
                     TFs, 
                     motif.relavent.TFs,
                     percentage = 0.2,
-                    dir.out = ".",
+                    dir.out = "./",
                     label = NULL,
                     cores = 1,
                     save = TRUE){
