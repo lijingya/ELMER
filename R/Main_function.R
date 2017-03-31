@@ -97,21 +97,27 @@ get.feature.probe <- function(feature,
 #' groups such as normal verus tumor samples.
 #' @description 
 #' get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
-#' hypo/hyper-methyalated using proportional samples (defined by percentage option) from control 
-#' and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
-#' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
-#'  If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
+#' hypo/hyper-methyalated using proportional samples (defined by percentage option) from group 1 
+#' and group 2. The P values will be adjusted by Benjamini-Hochberg method. 
+#' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant 
+#' differentially methylated CpG sites.
+#' If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
+#' See \code{\link{createMAE}} function.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::pData(data)).
-#' @param group1 A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
-#' @param group2 A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
-#' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
-#' get.diff.meth function will identify all significantly hypomethylated CpG sites; 
-#' If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites
-#' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
+#' @param diff.dir A number ranges from 0 to 1 specifying the percentage of samples 
+#' from group1 and group2 that are used to identify the differential methylation. 
+#' Default is 0.2 because we did not expect all cases to be from a single molecular 
+#' subtype.But, If you are working with molecular subtypes please set it to 1.
+#' @param cores A interger which defines the number of cores to be used in parallel 
+#' process. Default is 1: no parallel process.
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of samples from control and
 #'  experimental groups that are used to identify the differential methylation. Default is 0.2.
 #' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff 
@@ -260,9 +266,9 @@ get.diff.meth <- function(data,
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
-#'  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
+#'  Default is 0.05. It will select the significant P value  cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
-#'  Default is 0.001. Only used if calculate.empirical.p is TRUE.
+#'  Default is 0.001
 #' @param filter.probes Should filter probes by selecting only probes that have at least
 #' a certain number of samples below and above a certain cut-off. 
 #' See \code{\link{preAssociationProbeFiltering}} function.
@@ -619,6 +625,8 @@ get.permu <- function(data,
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of
 #'  samples of control and experimental groups used to link promoter DNA methylation to genes.
 #'  Default is 0.2.
+#'  @param upstream Number of bp upstream of TSS to consider as promoter region
+#'  @param downstream  Number of bp downstream of TSS to consider as promoter region
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
 #' @importFrom utils write.csv

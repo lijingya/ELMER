@@ -21,7 +21,7 @@ NULL
 #' This data is used in the examples of ELMER package
 #' @docType data
 #' @keywords internal
-#' @name Met
+#' @name Meth
 #' @format A MultiAssayExperiment for 268 Samples  and 1728 probes
 NULL
 

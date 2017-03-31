@@ -17,7 +17,9 @@ methylation. Default is 0.01. P value is raw P value without adjustment.}
 
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of
 samples of control and experimental groups used to link promoter DNA methylation to genes.
-Default is 0.2.}
+Default is 0.2.
+@param upstream Number of bp upstream of TSS to consider as promoter region
+@param downstream  Number of bp downstream of TSS to consider as promoter region}
 
 \item{save}{A logic. If it is true, the result will be saved.}
 }

@@ -24,10 +24,10 @@ samples used to link probes to genes. Default is 0.2.}
 \item{permu.dir}{A path where the output of permutation will be.}
 
 \item{pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
-Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.}
+Default is 0.05. It will select the significant P value  cutoff before calculating the empirical p-values.}
 
 \item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
-Default is 0.001. Only used if calculate.empirical.p is TRUE.}
+Default is 0.001}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 

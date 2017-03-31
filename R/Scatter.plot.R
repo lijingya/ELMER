@@ -98,7 +98,7 @@ scatter.plot <- function(data,
   
   if(length(byProbe$probe) != 0){
     nearGenes <- GetNearGenes(data    = data,
-                              probe   = byProbe$probe,
+                              probes  = byProbe$probe,
                               geneNum = byProbe$geneNum)
     for(i in byProbe$probe){
       probe <- i

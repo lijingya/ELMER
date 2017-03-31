@@ -453,22 +453,25 @@ Both files contain four columns: probe, pvalue, ExperimentMinControl, adjust.p.
 ### Arguments
 The main arguments of this function are:
 
-* **data**	A multiAssayExperiment with DNA methylation and Gene Expression data. See `createMAE` function.
-* **diff.dir**	A character can be "hypo" or "hyper", showing dirction DNA methylation changes. 
+| Argument              |Description |  
+|------------------------|
+| **data**       | A multiAssayExperiment with DNA methylation and Gene Expression data.  See `createMAE` function. |
+| **diff.dir**   | 	A character can be "hypo" or "hyper", showing dirction DNA methylation changes. 
 If it is "hypo", `get.diff.meth` function will identify all significantly hypomethylated CpG sites in group 1 compared to group 2; 
-If "hyper", `get.diff.meth` function will identify all significantly hypermethylated CpG sites in group 1 compared to group 2;
-* **group.col**  A column defining the groups of each sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`.
-* **group1** A group from `group.col`. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.
-* **group2** A group from `group.col`. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.
-* **percentage** 	A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. 
-Default is 0.2 because we did not expect all cases to be from a single molecular subtype. ***But, If you are working with molecular subtypes please set it to 1.***
-* **test** Statistical test to be used. Options: t.test (DEFAULT), wilcox.test
-* **pvalue** A number that specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01
-* **sig.dif** A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.
-* **dir.out** A path specify the directory for outputs. Default is is current directory.
-* **save** A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
-* **cores** A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
+If "hyper", `get.diff.meth` function will identify all significantly hypermethylated CpG sites in group 1 compared to group 2; |
+| **percentage** | A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. 
+Default is 0.2 because we did not expect all cases to be from a single molecular subtype. **But, If you are working with molecular subtypes please set it to 1.** |
+| **pvalue**     | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
+| **group.col**  | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`.|
+| **group1**     | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
+| **group2**     | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.|
+| **test**       | Statistical test to be used. Options: t.test (DEFAULT), wilcox.test|
+| **sig.dif**    | A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.|
+| **dir.out**    | A path specify the directory for outputs. Default is is current directory.|
+| **save**       | A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail) |
+| **cores**      | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.|
 
+### Code example
 ```{r,eval=TRUE, message=FALSE}
 library(MultiAssayExperiment)
 data <- createMAE(exp = GeneExp, 
@@ -503,13 +506,13 @@ datatable(sig.diff,
 dir(path = "result", pattern = "getMethdiff")  
 ```
 
-
 ## Identifying putative probe-gene pairs
 
 This step is to link enhancer probes with mehtylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out
 by function get.pair. 
 
+### Description
 First, the fucntion get.pair for additional stringency and to avoid correlations due to non-cancer contamination, 
 selects only those enhancer probes that had differential methylation as defined above, 
 and where at least 5 % of all samples (combining tumor and normal) had beta values > 0.3.
@@ -584,30 +587,29 @@ For example, L3 means the gene is the number 3 closest gene from the left side o
 5. Raw.p:  P value from the Mann-Whitney U test for each pair.
 6. Pe: the empirical P value for each pair.
 
-The main arguments of this function are:
-1. data: A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.
-2. nearGenes:	Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.
-3. percentage:	A number ranges from 0 to 0.5 specifying the percentage of samples used to link probes to genes. Default is 0.2.
-4. permu.size:	A number specify the times of permutation. Default is 10000.
-5. permu.dir	A path where the output of permutation will be saved
-6. pvalue: A number specify the raw p-value cutoff for defining signficant pairs.  Default is 0.05. It will select the significant P value (adjusted P value by BH) cutoff before calculating the empirical p-values.
-7. Pe: A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001. Only used if calculate.empirical.p is TRUE.
-8. filter.probes Should filter probes by selecting only probes that have at least
-   a certain number of samples below and above a certain cut-off. 
-   See `preAssociationProbeFiltering` function.
-9.  filter.portion: A number specifing the cut point for methylated and unmethylated. Default is 0.3.
-10. filter.percentage:  Minimun percentage of samples to be considered in methylated and unmethylated 
-for the filter.portion option. Default 5\%. See `preAssociationProbeFiltering` function.
-11. diffExp: A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative 
-target gene are differentially expressed between two groups. If true two columns will be added
-to the output log2FC.groupA.vs.groupB (positive values means gene has higher 
-expression in group A compared to group B) and groupA.vs.groupB.diff.pvalue with the significance of the test (not adjusted).
-12. group.col. A column defining the groups of the samples to be used if diffExp is TRUE. 
-You can view the  available columns using: colnames(MultiAssayExperiment::pData(data)).
-13. dir.out	A path specify the directory for outputs. Default is current directory
-14. cores:	A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.
-15. label:	A character labels the outputs.
+### Arguments
 
+The main arguments of this function are:
+
+| Argument          | Description                                                                                                                                                                                                                                                                                                                                                         |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data              | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.                                                                                                                                                                                                                                                                       |
+| nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.                                                                                                                                                                                                                                     |
+| percentage        | A number ranges from 0 to 0.5 specifying the percentage of samples used to link probes to genes. Default is 0.2.                                                                                                                                                                                                                                                    |
+| permu.size        | A number specify the times of permuation. Default is 10000.                                                                                                                                                                                                                                                                                                         |
+| permu.dir         | A path where the output of permutation will be.                                                                                                                                                                                                                                                                                                                     |
+| pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
+| Pe                | A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001.                                                                                                                                                                                                                        |
+| dir.out           | A path specify the directory for outputs. Default is current directory                                                                                                                                                                                                                                                                                              |
+| diffExp           | A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.                                                                                                                                                                                                                    |
+| group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`.                                                                                                                                                                                                                                  |
+| cores             | A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.                                                                                                                                                                                                                                                   |
+| filter.probes     | Should filter probes by selecting only probes that have at least a certain number of samples below and above a certain cut-off. See `preAssociationProbeFiltering` function.                                                                                                                                                                                          |
+| filter.portion    | A number specify the cut point to define binary methlation level for probe loci. Default is 0.3. When beta value is above 0.3, the probe is methylated and vice versa. For one probe, the percentage of methylated and unmethylated samples should be above filter.percentage value. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function. |
+| filter.percentage | Minimun percentage of samples to be considered in methylated and unmethylated for the filter.portion option. Default 5%. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function.                                                                                                                                                             |
+| label             | A character labels the outputs.                                                                                                                                                                                                                                                                                                                                     |
+| save              | Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv and getPair.XX.pairs.significant.csv (see detail).                                                                                                                                                                                                                                      |
+### Code example
 ```{r,eval=TRUE, message=FALSE}
 ### identify target gene for significantly hypomethylated probes.
 
@@ -647,6 +649,8 @@ dir(path = "result", pattern = "getPair")
 
 This step is to identify enriched motif in a set of probes which is carried out by
 function `get.enriched.motif`.
+
+### Description
 
 The build in data Probes.motif is generated using HOMER with a p-value < 1e–4 
 to scan a +/- 250bp region around each probe using HOmo sapiens 
@@ -694,6 +698,28 @@ corresponding to min.incidence option.
 The second file is a rda file listing each enriched motif and the probes containing
 the motif.
 
+### Arguments
+
+| Argument | Description |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data | A multi Assay Experiment from  createMAE function. If set and probes.motif/background probes are missing this will be used to get this other two arguments correctly. This argument is not require, you can set probes.motif and the backaground.probes manually. |
+| probes.motif | A matrix contains motifs occurrence within probes regions. Probes.motif in ELMER.data will be used if probes.motif is missing (detail see Probes.motif.hg19.450K). |
+| probes | A vector lists the name of probes to define the set of probes in which motif enrichment OR and confidence interval will be calculated. |
+| min.motif.quality | Minimum motif quality score to consider. Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default) Description: Each PWM has a quality rating from A to D where A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a limited applications for quantitative analyses. Special S quality marks the single-box motifs (secondary motif). Source: http://hocomoco.autosome.ru/help#description_quality_score More information: http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8 |
+| background.probes | A vector lists name of probes which are considered as background for motif.enrichment calculation (see detail). |
+| lower.OR | A number specifies the smallest lower boundary of 95% confidence interval for Odds Ratio. The motif with higher lower boudnary of 95% confidence interval for Odds Ratio than the number are the significantly enriched motifs (detail see reference). |
+| min.incidence | A non-negative integer specifies the minimum incidence of motif in the given probes set. 10 is default. |
+| dir.out | A path. Specifies the directory for outputs. Default is current directory |
+| label | A character. Labels the outputs such as "hypo", "hyper" |
+| save | If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail). |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+|  |  |
+
+### Code example
 ```{r,eval=TRUE, message=FALSE}
 ## identify enriched motif for significantly hypomethylated probes which 
 ##have putative target genes.

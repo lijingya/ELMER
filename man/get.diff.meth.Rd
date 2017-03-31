@@ -10,13 +10,16 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
   dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
+See \code{\link{createMAE}} function.}
 
-\item{diff.dir}{A character can be "hypo" or "hyper", showing dirction DNA methylation changes. If it is "hypo", 
-get.diff.meth function will identify all significantly hypomethylated CpG sites; 
-If "hyper", get.diff.meth function will identify all significantly hypoermethylated CpG sites}
+\item{diff.dir}{A number ranges from 0 to 1 specifying the percentage of samples 
+from group1 and group2 that are used to identify the differential methylation. 
+Default is 0.2 because we did not expect all cases to be from a single molecular 
+subtype.But, If you are working with molecular subtypes please set it to 1.}
 
-\item{cores}{A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.}
+\item{cores}{A interger which defines the number of cores to be used in parallel 
+process. Default is 1: no parallel process.}
 
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples from control and
 experimental groups that are used to identify the differential methylation. Default is 0.2.}
@@ -27,10 +30,12 @@ for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::pData(data)).}
 
-\item{group1}{A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{group2}{A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{test}{Statistical test to be used. Options: t.test (DEFAULT), wilcox.test}
@@ -47,10 +52,11 @@ Statistics for all probes and significant hypo or hyper-methylated probes.
 }
 \description{
 get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
-hypo/hyper-methyalated using proportional samples (defined by percentage option) from control 
-and experimental groups. The P values will be adjusted by Benjamini-Hochberg method. 
-Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant differentially methylated CpG sites.
- If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
+hypo/hyper-methyalated using proportional samples (defined by percentage option) from group 1 
+and group 2. The P values will be adjusted by Benjamini-Hochberg method. 
+Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant 
+differentially methylated CpG sites.
+If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
 }
 \details{
 save: 
