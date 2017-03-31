@@ -453,23 +453,20 @@ Both files contain four columns: probe, pvalue, ExperimentMinControl, adjust.p.
 ### Arguments
 The main arguments of this function are:
 
-| Argument              |Description |  
-|------------------------|
-| **data**       | A multiAssayExperiment with DNA methylation and Gene Expression data.  See `createMAE` function. |
-| **diff.dir**   | 	A character can be "hypo" or "hyper", showing dirction DNA methylation changes. 
-If it is "hypo", `get.diff.meth` function will identify all significantly hypomethylated CpG sites in group 1 compared to group 2; 
-If "hyper", `get.diff.meth` function will identify all significantly hypermethylated CpG sites in group 1 compared to group 2; |
-| **percentage** | A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. 
-Default is 0.2 because we did not expect all cases to be from a single molecular subtype. **But, If you are working with molecular subtypes please set it to 1.** |
-| **pvalue**     | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
-| **group.col**  | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`.|
-| **group1**     | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
-| **group2**     | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.|
-| **test**       | Statistical test to be used. Options: t.test (DEFAULT), wilcox.test|
-| **sig.dif**    | A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3.|
-| **dir.out**    | A path specify the directory for outputs. Default is is current directory.|
-| **save**       | A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail) |
-| **cores**      | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.|
+| Argument | Description |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data | A `multiAssayExperiment` with DNA methylation and Gene Expression data. See `createMAE` function. |
+| diff.dir | A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. Default is 0.2 because we did not expect all cases to be from a single molecular subtype. **But, If you are working with molecular subtypes please set it to 1.** |
+| cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
+| percentage | A number ranges from 0 to 1 specifying the percentage of samples from control and experimental groups that are used to identify the differential methylation. Default is 0.2. |
+| pvalue | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
+| group.col | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`. |
+| group1 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
+| group2 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
+| test | Statistical test to be used. Options: t.test (DEFAULT), wilcox.test |
+| sig.dif | A number specifies the smallest DNA methylation difference as a cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.3. |
+| dir.out | A path specify the directory for outputs. Default is is current directory. |
+| save | A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail) |
 
 ### Code example
 ```{r,eval=TRUE, message=FALSE}
