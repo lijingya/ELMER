@@ -106,10 +106,14 @@ biocLite("ELMER")
 ```
 
 # Download example data
+
 The following steps can be used to download the example data set for `r Biocpkg("ELMER")`.
 
 ```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(ELMER, quietly = TRUE)
+data(elmer.data.example)
+data(LUSC_meth_refined)
+data(LUSC_RNA_refined)
 library(DT)
 ```
 
