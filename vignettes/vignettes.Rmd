@@ -75,6 +75,7 @@ library(BiocStyle)
 ```
 
 # Introduction
+
 This document provides an introduction of the R/Biocondcutor  `r Biocpkg("ELMER")` package, which is designed 
 to combine DNA methylation and gene expression data from human tissues to infer 
 multi-level cis-regulatory networks. `r Biocpkg("ELMER")` uses DNA methylation to 
@@ -96,6 +97,7 @@ differentially methylated and linked to putative target gene.
 
 
 ## Installing and loading ELMER
+
 To install this package, start R and enter
 
 ```{r, eval = FALSE}
@@ -125,7 +127,7 @@ target genes, motif analysis and idnetify regulatory transcription factors.
 ```{r, fig.height=6,eval=FALSE}
 TCGA.pipe("LUSC",
           wd = "./ELMER.example",
-          cores = detectCores()/2,
+          cores = parallel::detectCores()/2,
           permu.size = 300,
           Pe = 0.01,
           analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
@@ -411,6 +413,7 @@ This step is to identify DNA methylation changes at distal enhancer probes which
 carried out by function `get.diff.meth`.    
 
 ### Description 
+
 For each enhancer probe, function first ranked experiment samples and control samples 
 by their DNA methylation beta values. To identify hypomethylated probes, function 
 compared the lower control quintile (20% of control samples with the lowest methylation) 
@@ -456,9 +459,12 @@ The main arguments of this function are:
 | Argument | Description |
 |------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | data | A `multiAssayExperiment` with DNA methylation and Gene Expression data. See `createMAE` function. |
-| diff.dir | A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. Default is 0.2 because we did not expect all cases to be from a single molecular subtype. **But, If you are working with molecular subtypes please set it to 1.** |
+| diff.dir |  A character can be "hypo" or "hyper", showing differential methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes;  "hyper" which is only selecting hypermethylated probes |
 | cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
-| percentage | A number ranges from 0 to 1 specifying the percentage of samples from control and experimental groups that are used to identify the differential methylation. Default is 0.2. |
+| percentage |  A number ranges from 0 to 1 specifying the percentage of samples 
+ from group1 and group2 that are used to identify the differential methylation. 
+ Default is 0.2 because we did not expect all cases to be from a single molecular 
+ subtype.But, If you are working with molecular subtypes please set it to 1. |
 | pvalue | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
 | group.col | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`. |
 | group1 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
@@ -489,7 +495,7 @@ sig.diff <- get.diff.meth(data,
                           percentage = 0.2,
                           sig.dif = 0.3,
                           diff.dir = "hypo", # Search for hypomethylated probes in group 1
-                          cores = detectCores()/2, 
+                          cores = parallel::detectCores()/2, 
                           dir.out ="result", 
                           pvalue = 0.01)
 
@@ -501,6 +507,56 @@ datatable(sig.diff,
 # getMethdiff.hypo.probes.significant.csv contains only the significant probes which
 # is the same with sig.diff
 dir(path = "result", pattern = "getMethdiff")  
+```
+
+### Percentage: Dealing with molecular subytpes 
+
+As stated before the argument `percentage` (a number ranging from 0 to 1) controls 
+the number of samples to be used from both groups when you are comparing the DNA methylation level at each probe.
+When comparing Primary Solid tumor samples versus Normal tissue samples only the lower quintiles were used because we 
+did not expect all cases to be from a single molecular subtype, and we sought to 
+identify methylation changes within cases from the same molecular subtype.
+But if you are dealing already with subtypes it is better to set `percentage` to 1.
+
+The code example below highlight some different probes founds when using 100\% or 20\%.
+
+```{r  results="hide",eval=TRUE, message=FALSE}
+# We will evaluate the different probes found using different percentage values.
+groupCol <- "subtype_Expression.Subtype"
+group1 <- "classical"
+group2 <- "secretory"
+
+# For each probe use lower 20% samples
+sig.diff.20 <- get.diff.meth(data, 
+                             group.col = groupCol,
+                             group1 = group1,
+                             group2 = group2,
+                             percentage = 0.2,
+                             sig.dif = 0.3,
+                             diff.dir = "hypo",
+                             pvalue = 0.01)
+
+# For each probe use all samples
+sig.diff.100 <- get.diff.meth(data, 
+                              group.col = groupCol,
+                              group1 = group1,
+                              group2 = group2,
+                              percentage = 1.0,
+                              sig.dif = 0.3,
+                              diff.dir = "hypo", 
+                              pvalue = 0.01)
+```
+```{r  eval=TRUE, message=FALSE,fig.height=5}
+# Which probes were found with 20% of samples and not with 100%
+probe <- sig.diff.20[which(!sig.diff.20$probe %in% sig.diff.100$probe),"probe"]
+metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2,
+           diff.dir = "hypo", title = "probes were found with 20% of samples and not with 100%")
+```
+```{r  eval=TRUE, message=FALSE,fig.height=5, fig.width=5}
+# Which probes were found with 100% of samples and not with 20%
+probe <- sig.diff.100[which(!sig.diff.100$probe %in% sig.diff.20$probe),"probe"]
+metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2, 
+           diff.dir = "hypo", title = "probes were found with 100% of samples and not with 20%")
 ```
 
 ## Identifying putative probe-gene pairs

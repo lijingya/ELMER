@@ -46,7 +46,8 @@ Imports:
     magrittr, 
     readr, 
     rvest,
-    xml2
+    xml2,
+    plotly
 Suggests:
     parallel,
     BiocStyle,

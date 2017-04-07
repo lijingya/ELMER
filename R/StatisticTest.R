@@ -30,7 +30,7 @@ Stat.diff.meth <- function(probe,
   
   group1.tmp <- group1.tmp[1:group1.nb]
   group2.tmp <- group2.tmp[1:group2.nb]
-  
+
   if(sd(meth,na.rm=TRUE)>0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
       alternative <- ifelse(Top.m,"greater","less")

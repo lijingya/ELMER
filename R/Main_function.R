@@ -112,14 +112,16 @@ get.feature.probe <- function(feature,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
-#' @param diff.dir A number ranges from 0 to 1 specifying the percentage of samples 
+#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
+#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
+#' "hyper" which is only selecting hypermethylated probes; 
+#' @param cores A interger which defines the number of cores to be used in parallel 
+#' process. Default is 1: no parallel process.
+#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples 
 #' from group1 and group2 that are used to identify the differential methylation. 
 #' Default is 0.2 because we did not expect all cases to be from a single molecular 
 #' subtype.But, If you are working with molecular subtypes please set it to 1.
 #' @param cores A interger which defines the number of cores to be used in parallel 
-#' process. Default is 1: no parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples from control and
-#'  experimental groups that are used to identify the differential methylation. Default is 0.2.
 #' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff 
 #' for selecting significant hypo/hyper-methylated probes. Default is 0.01
 #' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for 
