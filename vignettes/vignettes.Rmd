@@ -546,13 +546,13 @@ sig.diff.100 <- get.diff.meth(data,
                               diff.dir = "hypo", 
                               pvalue = 0.01)
 ```
-```{r  eval=TRUE, message=FALSE,fig.height=5}
+```{r  eval=TRUE, message=FALSE,fig.height=4, fig.width=4, warning=FALSE}
 # Which probes were found with 20% of samples and not with 100%
 probe <- sig.diff.20[which(!sig.diff.20$probe %in% sig.diff.100$probe),"probe"]
 metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2,
            diff.dir = "hypo", title = "probes were found with 20% of samples and not with 100%")
 ```
-```{r  eval=TRUE, message=FALSE,fig.height=5, fig.width=5}
+```{r  eval=TRUE, message=FALSE,fig.height=4, fig.width=4, warning=FALSE}
 # Which probes were found with 100% of samples and not with 20%
 probe <- sig.diff.100[which(!sig.diff.100$probe %in% sig.diff.20$probe),"probe"]
 metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2, 
