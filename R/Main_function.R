@@ -13,7 +13,8 @@
 #' 
 #' @param feature A GRange object containing biofeature coordinate such as 
 #' enhancer coordinates. Default is comprehensive genomic enhancer regions from 
-#' REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}.
+#' REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}. 
+#' If NULL only distal probes (2Kbp away from TSS will be selected)
 #' feature option is only usable when promoter option is FALSE.
 #' @param TSS A GRange object contains the transcription start sites. When promoter is FALSE, Union.TSS
 #' in \pkg{ELMER.data} will be used for default. When promoter is TRUE, UCSC gene TSS will
@@ -73,16 +74,19 @@ get.feature.probe <- function(feature,
   
   if(!promoter){
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
-    if(missing(feature)){
-      newenv <- new.env()
-      if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
-      if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
-      feature <- get(ls(newenv)[1],envir=newenv)   
-    }  
-    if(is(feature,"GRanges")) {             
-      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-    } else {
-      stop("feature is not GRanges object.")
+    
+    if(is.null(feature)) {
+      if(missing(feature)){
+        newenv <- new.env()
+        if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
+        if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
+        feature <- get(ls(newenv)[1],envir=newenv)   
+      }  
+      if(is(feature,"GRanges")) {             
+        probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+      } else {
+        stop("feature is not GRanges object.")
+      }
     }
   } else {
     probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
