@@ -77,10 +77,9 @@ The following steps can be used to download the example data set for \Rpackage{E
 <<example.data.run, echo=FALSE, hide=TRUE, message=FALSE, include=FALSE>>=
 if(!file_test("-d", "./ELMER.example")) {
   if(Sys.info()["sysname"] == "Windows") mode <- "wb" else  mode <- "w"
-  URL <- "https://dl.dropboxusercontent.com/u/61961845/ELMER.example.tar.bz2"
-  downloader::download(URL,destfile = "ELMER.example.tar.bz2",mode= mode)
-  R.utils::bunzip2("./ELMER.example.tar.bz2")
-  untar("./ELMER.example.tar")
+  URL <- "https://www.dropbox.com/s/mxf2u1wcauenx8m/ELMER.example.zip?raw=1"
+  downloader::download(URL,destfile = "ELMER.example.zip",mode= mode)
+  utils::unzip("ELMER.example.zip")
 }
 library(ELMER, quietly = TRUE)
 @
