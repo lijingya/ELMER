@@ -27,12 +27,13 @@ Maximum distance between probes will be 1KB
 data(elmer.data.example)
 nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],
                          geneAnnot=getExp(data))
-Hypo.pair <- get.pair(data=data,
-                     nearGenes=nearGenes,
-                     permu.size=5,
+Hypo.pair <- get.pair(data = data,
+                      nearGenes = nearGenes,
+                     permu.size = 5,
                      pvalue = 0.1,
-                     dir.out="./",
-                     label= "hypo")
+                     Pe = 0.2,
+                     dir.out = "./",
+                     label = "hypo")
  Hypo.pair <- Hypo.pair[Hypo.pair$GeneID \%in\% Hypo.pair$GeneID[duplicated(Hypo.pair$GeneID)],]
  # No change 
  regions <- getRegionFromProbes(data,Hypo.pair, 1000)  
