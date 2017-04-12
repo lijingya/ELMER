@@ -26,7 +26,7 @@ getTCGA <- function(disease,
                     Methfilter = 0.2){
   
   if(missing(disease)) stop("disease need to be specified.")
-
+  
   if(Meth){
     print.header("Downloading DNA methylation", "subsection")
     test.meth <- tryCatch({
@@ -86,31 +86,32 @@ getRNAseq <- function(disease,
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.rna <- file.path(dir.raw,"RNA")
-  if (!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE)
+  if (!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE, showWarnings = FALSE)
   
-  if (genome == "hg38"){
-    query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                      data.category = "Transcriptome Profiling", 
-                      data.type = "Gene Expression Quantification", 
-                      workflow.type = "HTSeq - FPKM-UQ")
-  } else {
-    query <- GDCquery(project = paste0("TCGA-",toupper(disease)),
-                      data.category = "Gene expression",
-                      data.type = "Gene expression quantification",
-                      platform = "Illumina HiSeq", 
-                      file.type  = "normalized_results",
-                      experimental.strategy = "RNA-Seq",
-                      legacy = TRUE)
-  }
-  tryCatch({
-    GDCdownload(query, directory = dir.rna, chunks.per.download = 200)
-  }, error = function(e) {
-    GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
-  })
-  
-  # Preparing to save output if it does not exists
-  fout <- sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease))
+  fout <- sprintf("%s/%s_RNA_%s.rda",diseasedir,toupper(disease), genome)
   if(!file.exists(fout)){
+    
+    if (genome == "hg38"){
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "Transcriptome Profiling", 
+                        data.type = "Gene Expression Quantification", 
+                        workflow.type = "HTSeq - FPKM-UQ")
+    } else {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)),
+                        data.category = "Gene expression",
+                        data.type = "Gene expression quantification",
+                        platform = "Illumina HiSeq", 
+                        file.type  = "normalized_results",
+                        experimental.strategy = "RNA-Seq",
+                        legacy = TRUE)
+    }
+    tryCatch({
+      GDCdownload(query, directory = dir.rna, chunks.per.download = 200)
+    }, error = function(e) {
+      GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
+    })
+    
+    # Preparing to save output if it does not exists
     rna <- GDCprepare(query, 
                       directory = dir.rna,
                       summarizedExperiment = TRUE)
@@ -139,35 +140,34 @@ getRNAseq <- function(disease,
 #' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
 #' @usage get450K(disease, basedir="./Data",filter=0.2, genome = "hg38")
 get450K <- function(disease, 
-                    basedir="./Data",
-                    filter=0.2,
-                    genome = "hg38"){
+                    basedir = "./Data",
+                    filter  = 0.2,
+                    genome  = "hg38"){
   
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.meth <- file.path(dir.raw,"Meth")
-  if (!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE)
+  if (!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE, showWarnings = FALSE)
   
-  if (genome == "hg38") {
-    query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                      data.category = "DNA Methylation",
-                      platform = "Illumina Human Methylation 450")
-  } else {
-    query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
-                      data.category = "DNA methylation",
-                      legacy = TRUE,
-                      platform = "Illumina Human Methylation 450")
-  }  
-  tryCatch({
-    GDCdownload(query,directory = dir.meth,chunks.per.download = 5)
-  }, error = function(e) {
-    GDCdownload(query,directory = dir.meth,  method = "client")
-  })
-  
-  # Preparing to save output if it does not exists
-  fout <- sprintf("%s/%s_meth.rda",diseasedir,toupper(disease))
+  fout <- sprintf("%s/%s_meth_%s.rda",diseasedir,toupper(disease),genome)
   if(!file.exists(fout)){
+    
+    if (genome == "hg38") {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "DNA Methylation",
+                        platform = "Illumina Human Methylation 450")
+    } else {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "DNA methylation",
+                        legacy = TRUE,
+                        platform = "Illumina Human Methylation 450")
+    }  
+    tryCatch({
+      GDCdownload(query,directory = dir.meth,chunks.per.download = 5)
+    }, error = function(e) {
+      GDCdownload(query,directory = dir.meth,  method = "client")
+    })
     met <- GDCprepare(query = query,
                       directory = dir.meth,
                       summarizedExperiment = TRUE)
@@ -195,7 +195,7 @@ getClinic <- function(disease, basedir="./Data")
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.clinic <- file.path(dir.raw,"Clinic")
-  if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE)
+  if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE, showWarnings = FALSE)
   
   Clinic <- GDCquery_clinic(project = paste0("TCGA-",toupper(disease)))
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
