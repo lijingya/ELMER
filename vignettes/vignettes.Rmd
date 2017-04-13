@@ -663,7 +663,7 @@ The main arguments of this function are:
 | cores             | A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.                                                                                                                                                                                                                                                   |
 | filter.probes     | Should filter probes by selecting only probes that have at least a certain number of samples below and above a certain cut-off. See `preAssociationProbeFiltering` function.                                                                                                                                                                                          |
 | filter.portion    | A number specify the cut point to define binary methlation level for probe loci. Default is 0.3. When beta value is above 0.3, the probe is methylated and vice versa. For one probe, the percentage of methylated and unmethylated samples should be above filter.percentage value. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function. |
-| filter.percentage | Minimun percentage of samples to be considered in methylated and unmethylated for the filter.portion option. Default 5%. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function.                                                                                                                                                             |
+| filter.percentage | Minimum percentage of samples to be considered in methylated and unmethylated for the filter.portion option. Default 5%. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function.                                                                                                                                                             |
 | label             | A character labels the outputs.                                                                                                                                                                                                                                                                                                                                     |
 | save              | Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv and getPair.XX.pairs.significant.csv (see detail).                                                                                                                                                                                                                                      |
 ### Code example
@@ -715,7 +715,7 @@ COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10  pos
 weight matrices (PWMs). HOCOMOCO offers 640 PMWs each has a quality rating from A to D where 
 A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
 limited applications for quantitative analyses. By default only quality A and B will be used for the 
-Motif enrichment analysis, but the minimun quality score can be seleected by the user.
+Motif enrichment analysis, but the Minimum quality score can be selected by the user.
 (Addtional information [http://hocomoco.autosome.ru/help#description_quality_score](Source)  
 [http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8](More information)). 
 

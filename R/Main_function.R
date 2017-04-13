@@ -53,13 +53,13 @@ get.feature.probe <- function(feature,
                               TSS,
                               genome = "hg38",
                               met.platform = "450K",
-                              TSS.range=list(upstream=2000,downstream=2000),
-                              promoter=FALSE,
-                              rm.chr=NULL){
+                              TSS.range = list(upstream = 2000, downstream = 2000),
+                              promoter = FALSE,
+                              rm.chr = NULL){
   probe <- getInfiniumAnnotation(toupper(met.platform),genome)
   # We will rmeove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
-  probe <- probe[!probe$MASK.mapping,] # remove masked probes
+  probe <- probe[!probe$MASK.general,] # remove masked probes
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   
   if(missing(TSS)){
@@ -75,7 +75,7 @@ get.feature.probe <- function(feature,
   if(!promoter){
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
     
-    if(is.null(feature)) {
+    if(is.null(feature)) return(probe)
       if(missing(feature)){
         newenv <- new.env()
         if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
