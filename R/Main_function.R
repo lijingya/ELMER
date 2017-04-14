@@ -87,7 +87,6 @@ get.feature.probe <- function(feature,
       } else {
         stop("feature is not GRanges object.")
       }
-    }
   } else {
     probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
   }
