@@ -97,9 +97,10 @@ TCGA.pipe <- function(disease,
     
     mae <- createMAE(met           = meth.file, 
                      exp           = exp.file, 
-                     filter.probes = distal.probe,
+                     # filter.probes = distal.probe,
                      genome        = genome,
                      met.platform  = "450K",
+                     save = FALSE,
                      linearize.exp = TRUE,
                      TCGA          = TRUE)
     if(!all(sample.type %in% pData(mae)[,group.col])){
@@ -111,7 +112,7 @@ TCGA.pipe <- function(disease,
     readr::write_tsv(as.data.frame(pData(mae)), path = sprintf("%s/%s_samples_info.tsv",dir.out,disease))
   }
   
-  #get differential DNA methylation
+  # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
     print.header("Get differential DNA methylation loci")
     mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
@@ -122,7 +123,7 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
     params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
-    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,group.col = "definition")))
+    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,group.col = "TN")))
     if(length(analysis)==1) return(diff.meth)
   }
   
@@ -148,8 +149,8 @@ TCGA.pipe <- function(disease,
       if(!file.exists(nearGenes.file)){
         params <- args[names(args) %in% c("geneNum")]
         nearGenes <- do.call(GetNearGenes,
-                             c(list(TRange=subset(getMet(mae), rownames(getMet(mae)) %in% Sig.probes),
-                                    geneAnnot=getExp(mae),
+                             c(list(data = mae, 
+                                    probes = Sig.probes,
                                     cores=cores),
                                params))
         save(nearGenes,file=nearGenes.file)
@@ -167,6 +168,7 @@ TCGA.pipe <- function(disease,
                        c(list(data      = mae,
                               nearGenes = nearGenes.file,
                               permu.dir = permu.dir,
+                              group.col = "TN",
                               dir.out   = dir.out,
                               cores     = cores,
                               label     = diff.dir),
@@ -271,5 +273,6 @@ TCGA.pipe <- function(disease,
                      params))
     if(length(analysis) == 1) return(TFs)
   }
+           
 }
 
