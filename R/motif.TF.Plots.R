@@ -71,7 +71,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                   plot = P,
                   width = 10, 
                   limitsize = FALSE,
-                  height = 2 * round(nrow(motif.enrichment)/10))
+                  height = 2 * round(nrow(motif.enrichment)/8))
   return(P)
 }
 

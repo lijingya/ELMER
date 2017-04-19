@@ -11,7 +11,8 @@ get.feature.probe(feature, TSS, genome = "hg38", met.platform = "450K",
 \arguments{
 \item{feature}{A GRange object containing biofeature coordinate such as 
 enhancer coordinates. Default is comprehensive genomic enhancer regions from 
-REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}.
+REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}. 
+If NULL only distal probes (2Kbp away from TSS will be selected)
 feature option is only usable when promoter option is FALSE.}
 
 \item{TSS}{A GRange object contains the transcription start sites. When promoter is FALSE, Union.TSS

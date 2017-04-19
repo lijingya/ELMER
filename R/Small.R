@@ -698,12 +698,13 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #' data(elmer.data.example)
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],
 #'                          geneAnnot=getExp(data))
-#' Hypo.pair <- get.pair(data=data,
-#'                      nearGenes=nearGenes,
-#'                      permu.size=5,
+#' Hypo.pair <- get.pair(data = data,
+#'                       nearGenes = nearGenes,
+#'                      permu.size = 5,
 #'                      pvalue = 0.1,
-#'                      dir.out="./",
-#'                      label= "hypo")
+#'                      Pe = 0.2,
+#'                      dir.out = "./",
+#'                      label = "hypo")
 #'  Hypo.pair <- Hypo.pair[Hypo.pair$GeneID %in% Hypo.pair$GeneID[duplicated(Hypo.pair$GeneID)],]
 #'  # No change 
 #'  regions <- getRegionFromProbes(data,Hypo.pair, 1000)  
@@ -712,9 +713,13 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #'                    
 getRegionFromProbes <- function(data,
                                 pair,
-                                distance=250){
+                                distance = 250){
   # This code needs improvements
   regions <- NULL
+  
+  # No input
+  if(nrow(pair) == 0) stop("pair argument is empty")
+  
   for(gene in unique(pair$GeneID)){
     # For each gene consider the pair probes with a window of 250 bp
     aux <- subset(pair, GeneID == gene)
@@ -728,6 +733,48 @@ getRegionFromProbes <- function(data,
   }
   
   return(do.call("c", regions))
+}
+
+#' @title Transform Probes.motif to regions motif
+#' @description Transform Probes.motif to regions motif
+#' @import data.table GenomicRanges 
+#' @importFrom dplyr group_by count
+#' @examples 
+#' data("hm450.manifest")
+#' data("Probes.motif.hg19.450K")
+#' regions.motif <- getRegionsFromPlatforms(hm450.manifest,Probes.motif.hg19.450K)
+getRegionsFromPlatforms <- function(probe.gr,
+                                    probes.motif, 
+                                    distance = 250){
+  # Remove masked probes
+  probe.gr <- probe.gr[probe.gr$MASK.general == FALSE,] 
+  
+  # Create a window over each probes
+  probes <- GenomicRanges::promoters(probe.gr,distance,distance + 2)
+  
+  # If they overlap merge them (reduce)
+  message("Reducing probes to regions")
+  regions <- reduce(probes)
+  
+  # Check probes that belong to the same region
+  probes.region <- tibble::tibble(names = names(probes), regions = GenomicRanges::nearest(probes,regions))
+  nb.probes <- dplyr::group_by(probes.region,regions)  %>% count 
+  values(regions)$nb.probes <- nb.probes$n
+
+  # Check histogram o probes per region
+  # df <- count(as.data.frame(values(reduced)),nb.probes)
+  # plotly::plot_ly(x = df$nb.probes, y = df$n)
+  
+  # only consider probes in probe.gr
+  aux.motif <- tibble::as_tibble(as.matrix(probes.motif[names(probe.gr),]))
+  message("Reducing motifs from probes to regions")
+  aux.motif$regions <- probes.region$regions
+  dt <- as.data.table(aux.motif) 
+  message("This might take a while")
+  regions.motif <- dt[, lapply(.SD, max), by = list(regions)]
+  return(list("regions.motif" = regions.motif,
+              "regions" = regions,
+              "probes.region" = probes.region))
 }
 
 
