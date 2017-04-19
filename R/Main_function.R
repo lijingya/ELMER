@@ -207,11 +207,10 @@ get.diff.meth <- function(data,
   groups.info <- pData(data)[getMetSamples(data),group.col]
   met <- assay(getMet(data))
   probes <- rownames(met)
-  out <- alply(.data = probes, .margins = 1,
+  out <- alply(.data = met, .margins = 1,
                .fun = function(x) {
-                 Stat.diff.meth(probe = x,
-                                percentage = percentage,
-                                meth = met[x,],
+                 Stat.diff.meth(percentage = percentage,
+                                meth = x,
                                 groups = groups.info,
                                 group1 = group1,
                                 test = test,
@@ -221,8 +220,10 @@ get.diff.meth <- function(data,
   )
   out <- do.call(rbind,out)
   out <- as.data.frame(out,stringsAsFactors = FALSE)
+  out$probe <- probes
   diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
   out$adjust.p <- p.adjust(as.numeric(out[,2]),method = "BH")
+  out <- out[,c(3,1,2,4)]
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   
@@ -252,7 +253,7 @@ get.diff.meth <- function(data,
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
 #' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-#'          pvalue = 0.05, Pe = 0.001, dir.out = "./",diffExp = FALSE,
+#'          pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
 #'          group.col, cores = 1, filter.probes = TRUE, 
 #'          filter.portion = 0.3,  filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
@@ -266,7 +267,7 @@ get.diff.meth <- function(data,
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
-#'  Default is 0.05. It will select the significant P value  cutoff before calculating the empirical p-values.
+#'  Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
 #'  Default is 0.001
 #' @param filter.probes Should filter probes by selecting only probes that have at least
@@ -320,7 +321,7 @@ get.pair <- function(data,
                      percentage = 0.2,
                      permu.size = 10000,
                      permu.dir = NULL, 
-                     pvalue = 0.05,
+                     pvalue = 0.001,
                      Pe = 0.001,
                      dir.out = "./",
                      diffExp = FALSE,

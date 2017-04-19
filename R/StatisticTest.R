@@ -12,8 +12,7 @@
 #' hypermethylated probe is TRUE.
 #' @importFrom stats sd t.test wilcox.test
 #' @return Statistic test results to identify differentially methylated probes.
-Stat.diff.meth <- function(probe,
-                           meth,
+Stat.diff.meth <- function(meth,
                            groups,
                            group1,
                            group2,
@@ -43,9 +42,9 @@ Stat.diff.meth <- function(probe,
     
     MeanDiff <- ifelse(length(TT$estimate) == 2, TT$estimate[1]-TT$estimate[2],TT$estimate)
     PP <- TT$p.value
-    out <- data.frame(probe=probe,PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
+    out <- data.frame(PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
   }else{
-    out <- data.frame(probe=probe,PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
+    out <- data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
   }
   return(out)
 }
