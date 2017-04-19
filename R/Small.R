@@ -505,7 +505,8 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
                     "external_gene_name")
   }
   chrom <- c(1:22, "X", "Y","M","*")
-  description <- listDatasets(ensembl)[listDatasets(ensembl)$dataset=="hsapiens_gene_ensembl",]$description
+  db.datasets <- listDatasets(ensembl)
+  description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
   message(paste0("Downloading genome information. Using: ", description))
   
   filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
