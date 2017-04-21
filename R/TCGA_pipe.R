@@ -66,7 +66,7 @@ TCGA.pipe <- function(disease,
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
     print.header("Select distal enhancer probes")
-    params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
+    params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr", "genome")]
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
     if(length(analysis) == 1){
