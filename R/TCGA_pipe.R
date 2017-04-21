@@ -108,14 +108,14 @@ TCGA.pipe <- function(disease,
       return(NULL)
     }
     mae <- mae[,pData(mae)[,group.col] %in% sample.type]
-    save(mae,file = sprintf("%s/%s_mae.rda",dir.out,disease))
-    readr::write_tsv(as.data.frame(pData(mae)), path = sprintf("%s/%s_samples_info.tsv",dir.out,disease))
+    save(mae,file = sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome))
+    readr::write_tsv(as.data.frame(pData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
   }
   
   # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
     print.header("Get differential DNA methylation loci")
-    mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
@@ -130,7 +130,7 @@ TCGA.pipe <- function(disease,
   #predict pair
   if("pair" %in% tolower(analysis)){
     print.header("Predict pairs")
-    mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease, genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
@@ -187,9 +187,9 @@ TCGA.pipe <- function(disease,
     sample.type <- c("Tumor","Normal")
     
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    meth.file <- sprintf("%s/%s_meth.rda",Data,disease)
+    meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    exp.file <- sprintf("%s/%s_RNA.rda",Data,disease)
+    exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
     
     mae.promoter <- createMAE(met           = meth.file, 
                               exp           = exp.file, 
@@ -203,7 +203,7 @@ TCGA.pipe <- function(disease,
       return(NULL)
     }
     mae.promoter <- mae.promoter[,pData(mae.promoter)[,group.col] %in% sample.type]
-    save(mae.promoter,file = sprintf("%s/%s_mae_promoter.rda",dir.out,disease))
+    save(mae.promoter,file = sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, gneome))
     
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
