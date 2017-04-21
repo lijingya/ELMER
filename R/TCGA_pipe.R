@@ -84,9 +84,9 @@ TCGA.pipe <- function(disease,
     sample.type <- c("Tumor","Normal")
     
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    meth.file <- sprintf("%s/%s_meth.rda",Data,disease)
+    meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease,genome)
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    exp.file <- sprintf("%s/%s_RNA.rda",Data,disease)
+    exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
 
     ## get distal probe info
     distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
@@ -97,7 +97,7 @@ TCGA.pipe <- function(disease,
     
     mae <- createMAE(met           = meth.file, 
                      exp           = exp.file, 
-                     # filter.probes = distal.probe,
+                     filter.probes = distal.probe,
                      genome        = genome,
                      met.platform  = "450K",
                      save = FALSE,
