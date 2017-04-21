@@ -75,13 +75,17 @@ get.feature.probe <- function(feature,
   if(!promoter){
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
     
-    if(is.null(feature)) return(probe)
+    
       if(missing(feature)){
+        message("Get enhancer positions from ELMER.data")
         newenv <- new.env()
         if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
         if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
         feature <- get(ls(newenv)[1],envir=newenv)   
-      }  
+      } else if(is.null(feature)) {
+        message("Returning distal probes")
+        return(probe)
+      }
       if(is(feature,"GRanges")) {             
         probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
       } else {

@@ -517,14 +517,15 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   } else {
     tss <- get(load(filename))  
   } 
+  if(genome == "hg19") tss$external_gene_name <- tss$external_gene_id
   tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
   tss$strand[tss$strand == 1] <- "+" 
   tss$strand[tss$strand == -1] <- "-" 
   tss <- makeGRangesFromDataFrame(tss,start.field = "start_position", end.field = "end_position", keep.extra.columns = TRUE)
-  if(genome == "hg19") tss$external_gene_name <- tss$external_gene_id
+  
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
-  
+
   return(tss)
 }
 
