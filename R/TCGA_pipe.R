@@ -153,7 +153,7 @@ TCGA.pipe <- function(disease,
         nearGenes <- do.call(GetNearGenes,
                              c(list(data = mae, 
                                     probes = Sig.probes,
-                                    cores=cores),
+                                    cores = cores),
                                params))
         save(nearGenes,file=nearGenes.file)
       }

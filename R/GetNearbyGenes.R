@@ -25,9 +25,9 @@ NearGenes <- function (Target=NULL,
   #      If we only have r genes (r < 10) due to end of genomic region, get the r ones and get more 10-r to the left 
   # Where 10 is genum/2
   Gene$GENEID <- Gene$ensembl_gene_id
-  if("external_gene_name" %in% colnames(mcols(genes))){
+  if("external_gene_name" %in% colnames(mcols(Gene))){
   Gene$SYMBOL <- Gene$external_gene_name
-  } else  if("external_gene_id" %in% colnames(mcols(genes))){
+  } else  if("external_gene_id" %in% colnames(mcols(Gene))){
     Gene$SYMBOL <- Gene$external_gene_id
   } else {
     stop("No gene symbol column found (expected external_gene_id or external_gene_name")
