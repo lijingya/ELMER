@@ -4,12 +4,10 @@
 \alias{Stat.diff.meth}
 \title{Stat.diff.meth}
 \usage{
-Stat.diff.meth(probe, meth, groups, group1, group2, test = t.test,
+Stat.diff.meth(meth, groups, group1, group2, test = t.test,
   percentage = 0.2, Top.m = NULL)
 }
 \arguments{
-\item{probe}{A charactor specify probe name}
-
 \item{meth}{A matrix contain DNA methylation data.}
 
 \item{groups}{A vector of category of samples.}
@@ -25,6 +23,8 @@ samples used in the test.}
 
 \item{Top.m}{A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 hypermethylated probe is TRUE.}
+
+\item{probe}{A charactor specify probe name}
 }
 \value{
 Statistic test results to identify differentially methylated probes.

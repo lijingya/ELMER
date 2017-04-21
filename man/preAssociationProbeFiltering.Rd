@@ -49,7 +49,7 @@ contamination and for additional stringency.
  rownames(exp) <- c("ENSG00000141510","ENSG00000171862","ENSG00000171863")
  sample.info <- DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
  rownames(sample.info) <- colnames(exp)
- mae <- createMAE(exp = exp, met = met, pData = sample.info, genome = "hg38") 
+ mae <- createMAE(exp = exp, met = met, colData = sample.info, genome = "hg38") 
  mae <- preAssociationProbeFiltering(mae,  K = 0.3, percentage = 0.05)
 }
 \references{

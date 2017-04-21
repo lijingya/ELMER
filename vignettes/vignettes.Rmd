@@ -243,7 +243,7 @@ data <- createMAE(exp = GeneExp,
                   save = FALSE,
                   TCGA = TRUE)
 data
-datatable(as.matrix(pData(data)[,c("patient","definition","TN")]),
+datatable(as.matrix(colData(data)[,c("patient","definition","TN")]),
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 
@@ -270,7 +270,7 @@ data.hg19 <- createMAE(exp = not.tcga.exp,
                        TCGA = FALSE, 
                        met.platform = "450K",
                        genome = "hg19", 
-                       pData = phenotype.data)
+                       colData = phenotype.data)
 data.hg19
 
 # The samples that does not have data for both DNA methylation and Gene exprssion will be removed even for the phenotype data
@@ -287,9 +287,9 @@ data.hg38 <- createMAE(exp = not.tcga.exp,
                        save = FALSE,
                        met.platform = "450K",
                        genome = "hg38", 
-                       pData = phenotype.data)
+                       colData = phenotype.data)
 data.hg38
-datatable(as.matrix(pData(data.hg38)[1:20,]),
+datatable(as.matrix(colData(data.hg38)[1:20,]),
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 ```
@@ -338,7 +338,7 @@ data <- createMAE(exp = GeneExp,
 all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
 
 # See sample information for data
-datatable(as.matrix(pData(data)[pData(data)$sample == "TCGA-43-3394-11A",]),
+datatable(as.matrix(colData(data)[colData(data)$sample == "TCGA-43-3394-11A",]),
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 
@@ -362,7 +362,7 @@ mae <- createMAE(exp = gene.exp,
                  met = dna.met,
                  save = FALSE,
                  met.platform = "450K",
-                 pData = sample.info, 
+                 colData = sample.info, 
                  genome = "hg38") 
 
 # NON TCGA example: matrices has diffetrent column names
@@ -374,7 +374,7 @@ sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"),
 mae <- createMAE(exp = gene.exp, 
                  met = dna.met, 
                  sampleMap = sampleMap, 
-                 pData = sample.info, 
+                 colData = sample.info, 
                  save = FALSE,
                  met.platform = "450K",
                  genome = "hg38") 
@@ -470,7 +470,7 @@ The main arguments of this function are:
  Default is 0.2 because we did not expect all cases to be from a single molecular 
  subtype.But, If you are working with molecular subtypes please set it to 1. |
 | pvalue | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
-| group.col | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`. |
+| group.col | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`. |
 | group1 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
 | group2 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
 | test | Statistical test to be used. Options: t.test (DEFAULT), wilcox.test |
@@ -488,7 +488,7 @@ data <- createMAE(exp = GeneExp,
                   genome = "hg19",
                   TCGA = TRUE)
 save(data,file = "result/mae.rda")
-datatable(as.matrix(pData(data)[1:5,]), 
+datatable(as.matrix(colData(data)[1:5,]), 
           options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
           rownames = TRUE)
 
@@ -659,7 +659,7 @@ The main arguments of this function are:
 | Pe                | A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001.                                                                                                                                                                                                                        |
 | dir.out           | A path specify the directory for outputs. Default is current directory                                                                                                                                                                                                                                                                                              |
 | diffExp           | A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.                                                                                                                                                                                                                    |
-| group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::pData(data))`.                                                                                                                                                                                                                                  |
+| group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                                                                                                                                                                                                                                  |
 | cores             | A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.                                                                                                                                                                                                                                                   |
 | filter.probes     | Should filter probes by selecting only probes that have at least a certain number of samples below and above a certain cut-off. See `preAssociationProbeFiltering` function.                                                                                                                                                                                          |
 | filter.portion    | A number specify the cut point to define binary methlation level for probe loci. Default is 0.3. When beta value is above 0.3, the probe is methylated and vice versa. For one probe, the percentage of methylated and unmethylated samples should be above filter.percentage value. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function. |

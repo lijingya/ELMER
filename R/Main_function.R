@@ -112,7 +112,7 @@ get.feature.probe <- function(feature,
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
 #' See \code{\link{createMAE}} function.
 #' @param group.col A column defining the groups of the sample. You can view the 
-#' available columns using: colnames(MultiAssayExperiment::pData(data)).
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
 #' @param group1 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
@@ -152,7 +152,7 @@ get.feature.probe <- function(feature,
 #' @importFrom readr write_csv
 #' @importFrom plyr adply
 #' @importFrom stats p.adjust
-#' @importFrom MultiAssayExperiment pData
+#' @importFrom MultiAssayExperiment colData
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -183,20 +183,20 @@ get.diff.meth <- function(data,
   
   if(is.null(getMet(data)))
     stop("Cannot identify differential DNA methylation region without DNA methylation data.")
-  if(nrow(pData(data))==0){
+  if(nrow(colData(data))==0){
     stop("Sample information data to do differential analysis.")
   } else if (missing(group.col)){
-    stop("Please pData.col should be specified, labeling two group of sample for comparison. See colnames(pData(data)) for possibilities")
-  } else if (!group.col %in% colnames(pData(data))){
-    stop("Group column not found in phenotypic data and meta-data of the object. See values with pData(data)")
+    stop("Please colData.col should be specified, labeling two group of sample for comparison. See colnames(colData(data)) for possibilities")
+  } else if (!group.col %in% colnames(colData(data))){
+    stop("Group column not found in phenotypic data and meta-data of the object. See values with colData(data)")
   } else if (missing(group1) | missing(group2)) {
-    if(length(unique(pData(data)[,group.col]))<2){
+    if(length(unique(colData(data)[,group.col]))<2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
-    } else if (length(unique(pData(data)[,group.col])) > 2){
+    } else if (length(unique(colData(data)[,group.col])) > 2){
       stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
     } else {
       # TO be changed
-      groups <- pData(data)[,group.col]
+      groups <- colData(data)[,group.col]
       group1 <- unique(groups)[1] 
       group2 <- unique(groups)[2]
       message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
@@ -213,7 +213,7 @@ get.diff.meth <- function(data,
     parallel = TRUE
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
-  groups.info <- pData(data)[getMetSamples(data),group.col]
+  groups.info <- colData(data)[getMetSamples(data),group.col]
   met <- assay(getMet(data))
   probes <- rownames(met)
   out <- alply(.data = met, .margins = 1,
@@ -293,7 +293,7 @@ get.diff.meth <- function(data,
 #' @param diffExp A logic. Default is FALSE. If TRUE, t test will be applied to 
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param group.col A column defining the groups of the sample. You can view the 
-#' available columns using: colnames(MultiAssayExperiment::pData(data)).
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
@@ -414,12 +414,12 @@ get.pair <- function(data,
   if(diffExp){
     message("Calculating differential expression between two groups")
     Exp <- assay(getExp(data)[unique(selected$GeneID),])
-    groups <- unique(pData(data)[,group.col])
+    groups <- unique(colData(data)[,group.col])
     prefix <- paste(gsub("[[:punct:]]| ", ".", groups),collapse =  ".vs.")
     log.col <- paste0("log2FC_",prefix)
     diff.col <- paste0(prefix,".diff.pvalue")
-    idx1 <- pData(data)[,group.col] == groups[1] 
-    idx2 <- pData(data)[,group.col] == groups[2] 
+    idx1 <- colData(data)[,group.col] == groups[1] 
+    idx2 <- colData(data)[,group.col] == groups[2] 
     out <- adply(.data = split(Exp,rownames(Exp)), .margins = 1,
                  .fun = function(x) {
                    test <- t.test(x = x[idx1],y = x[idx2])

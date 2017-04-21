@@ -5,7 +5,7 @@
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
 get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
-         pvalue = 0.05, Pe = 0.001, dir.out = "./",diffExp = FALSE,
+         pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
          group.col, cores = 1, filter.probes = TRUE, 
          filter.portion = 0.3,  filter.percentage = 0.05,
          label = NULL, save = TRUE)
@@ -24,7 +24,7 @@ samples used to link probes to genes. Default is 0.2.}
 \item{permu.dir}{A path where the output of permutation will be.}
 
 \item{pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
-Default is 0.05. It will select the significant P value  cutoff before calculating the empirical p-values.}
+Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.}
 
 \item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
 Default is 0.001}
@@ -35,7 +35,7 @@ Default is 0.001}
 test whether putative target gene are differentially expressed between two groups.}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
-available columns using: colnames(MultiAssayExperiment::pData(data)).}
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}

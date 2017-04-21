@@ -4,7 +4,7 @@
 \alias{createMAE}
 \title{Construct a Multi Assay Experiment for ELMER analysis}
 \usage{
-createMAE(exp, met, pData, sampleMap, linearize.exp = FALSE,
+createMAE(exp, met, colData, sampleMap, linearize.exp = FALSE,
   filter.probes = NULL, met.na.cut = 0.2, filter.genes = NULL,
   met.platform = "450k", genome = NULL, save = TRUE, save.filename,
   TCGA = FALSE)
@@ -15,7 +15,7 @@ either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 
 \item{met}{A Summaerized Experiment, a matrix or path of rda file only containing the data.}
 
-\item{pData}{A DataFrame or data.frame of the phenotype data for all participants}
+\item{colData}{A DataFrame or data.frame of the phenotype data for all participants}
 
 \item{sampleMap}{A DataFrame or data.frame of the matching samples and colnames
 of the gene expression and DNA methylation matrix. This should be used if your matrix
@@ -63,7 +63,7 @@ mae <- createMAE(exp = gene.exp,
                  met = dna.met, 
                  sampleMap = sampleMap, 
                  met.platform ="450K",
-                 pData = sample.info, 
+                 colData = sample.info, 
                  genome = "hg38") 
 # You can also use sample Mapping and Sample information tables from a tsv file
 # You can use the createTSVTemplates function to create the tsv files
@@ -73,7 +73,7 @@ mae <- createMAE(exp = gene.exp,
                  met = dna.met, 
                  sampleMap = "sampleMap.tsv", 
                  met.platform ="450K",
-                 pData = "sample.info.tsv", 
+                 colData = "sample.info.tsv", 
                  genome = "hg38") 
 
 \dontrun{
@@ -163,7 +163,7 @@ mae <- createMAE(exp = gene.exp,
                          TCGA = FALSE, 
                          filter.probes = distal.enhancer,
                          genome = "hg19", 
-                         pData = phenotype.data)
+                         colData = phenotype.data)
 }
 createMAE
 }

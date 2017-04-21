@@ -31,7 +31,7 @@ subtype.But, If you are working with molecular subtypes please set it to 1.}
 \item{title}{plot title}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
-available columns using: colnames(MultiAssayExperiment::pData(data)).}
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
 }
 \value{
 Box plot

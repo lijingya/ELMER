@@ -13,7 +13,7 @@ createTSVTemplates(met, exp)
 }
 \description{
 This function will receive the DNA methylation and gene expression matrix and will create
-some examples of table for the argument pData and sampleMap used in ceeateMae function.
+some examples of table for the argument colData and sampleMap used in ceeateMae function.
 }
 \examples{
 gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),

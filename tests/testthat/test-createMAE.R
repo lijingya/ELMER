@@ -12,7 +12,7 @@ test_that("The creation of a using matrices and no TCGA data with equal colnames
   rownames(sample.info) <- colnames(gene.exp)
   sink("/dev/null");
   suppressMessages({
-    mae <- createMAE(exp = gene.exp, met = dna.met, pData = sample.info, genome = "hg38") 
+    mae <- createMAE(exp = gene.exp, met = dna.met, colData  = sample.info, genome = "hg38") 
   })
   expect_equal(metadata(mae)$genome,"hg38")
   expect_false(metadata(mae)$TCGA)
@@ -20,7 +20,7 @@ test_that("The creation of a using matrices and no TCGA data with equal colnames
   expect_equal(dim(getMet(mae)),c(2,2))
   expect_equal(assay(getMet(mae)),as.matrix(dna.met))
   expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
-  expect_equal(pData(mae),sample.info)
+  expect_equal(colData(mae),sample.info)
   expect_true(all(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression")))
 })  
 
@@ -39,7 +39,7 @@ test_that("The creation of a using matrices and no TCGA data with different coln
   sink("/dev/null");
   suppressMessages({
     mae <- createMAE(exp = gene.exp, met = dna.met, 
-                     sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+                     sampleMap = sampleMap, colData = sample.info, genome = "hg19") 
   })
   expect_equal(metadata(mae)$genome,"hg19")
   expect_false(metadata(mae)$TCGA)
@@ -47,7 +47,7 @@ test_that("The creation of a using matrices and no TCGA data with different coln
   expect_equal(dim(getMet(mae)),c(2,2))
   expect_equal(assay(getMet(mae)),as.matrix(dna.met))
   expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
-  expect_equal(pData(mae),sample.info)
+  expect_equal(colData(mae),sample.info)
   expect_true(all(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression")))
   expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae)))))
 })
@@ -67,7 +67,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   sink("/dev/null");
   suppressMessages({
     mae <- createMAE(exp = gene.exp, met = dna.met, 
-                     sampleMap = sampleMap, pData = sample.info, genome = "hg19") 
+                     sampleMap = sampleMap, colData = sample.info, genome = "hg19") 
   })
   expect_equal(metadata(mae)$genome,"hg19")
   expect_false(metadata(mae)$TCGA)
@@ -75,7 +75,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   expect_equal(dim(getMet(mae)),c(2,2))
   expect_equal(assay(getMet(mae)),as.matrix(dna.met))
   expect_equal(assay(getExp(mae)),as.matrix(gene.exp))
-  expect_equal(pData(mae),sample.info)
+  expect_equal(colData(mae),sample.info)
   expect_true(all(sampleMap(mae)$assay %in% c("DNA methylation","Gene expression")))
   expect_true(all(c("external_gene_name","ensembl_gene_id") %in% colnames(values(getExp(mae)))))
   
@@ -141,7 +141,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   sink("/dev/null");
   suppressMessages({
     mae <- createMAE(exp = not.tcga.exp, met =  not.tcga.met,
-                     TCGA = FALSE, genome = "hg19", pData = phenotype.data)
+                     TCGA = FALSE, genome = "hg19", colData = phenotype.data)
   })
   
 })
@@ -185,7 +185,7 @@ test_that("Number of probes in MAE matches the distal probes", {
     
     expect_gt(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
-    expect_true("TN" %in% colnames(pData(mae)))
+    expect_true("TN" %in% colnames(colData(mae)))
   }
   unlink("GDCdata",recursive = TRUE, force = TRUE)
 })

@@ -18,7 +18,7 @@ schematic.plot(data,
 gene expression Summarized Experiment objects}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
-available columns using: colnames(MultiAssayExperiment::pData(data)).}
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{pair}{A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
 This is the ouput of get.pairfunction.}

@@ -17,7 +17,7 @@
 #' @param pair A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
 #' This is the ouput of get.pairfunction.
 #' @param group.col A column defining the groups of the sample. You can view the 
-#' available columns using: colnames(MultiAssayExperiment::pData(data)).
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
 #' @param byProbe A vector of probe names.
 #' @param byGeneID A vector of gene ID
 #' @param byCoordinate A list contains chr, start and end. 
@@ -136,7 +136,7 @@ schematic <- function(data,
                                shape = "arrow")
   
   details <- function(identifier, ...) {
-    d <- data.frame(signal = assay(getMet(data))[identifier, ], group = pData(data)[,group.col])
+    d <- data.frame(signal = assay(getMet(data))[identifier, ], group = colData(data)[,group.col])
     print(densityplot(~signal, group = group, data = d, auto.key = TRUE,
                       main = list(label = identifier, cex = 0.7),
                       scales = list(draw = FALSE, x = list(draw = TRUE)),

@@ -8,7 +8,7 @@
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
 #' See \code{\link{createMAE}} function.
 #' @param group.col A column defining the groups of the sample. You can view the 
-#' available columns using: colnames(MultiAssayExperiment::pData(data)).
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
 #' @param group1 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
@@ -54,7 +54,7 @@ metBoxPlot <- function(data,
   if(missing(group2)) stop("Please set data argument")
   if(missing(probe)) stop("Please set data argument")
   
-  aux <- data.frame("group" = pData(data)[,groupCol],
+  aux <- data.frame("group" = colData(data)[,groupCol],
                     "DNA methylation beta value" = assay(getMet(data))[probe,]) %>% 
     filter(group %in% c(group1,group2)) %>% droplevels
   

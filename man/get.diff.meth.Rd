@@ -29,7 +29,7 @@ subtype.But, If you are working with molecular subtypes please set it to 1.}
 for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
-available columns using: colnames(MultiAssayExperiment::pData(data)).}
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{group1}{A group from group.col. ELMER will run group1 vs group2. 
 That means, if direction is hyper, get probes

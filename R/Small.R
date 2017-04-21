@@ -6,7 +6,7 @@
 #' @param exp A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
 #' either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)
 #' @param genome Which is the default genome to make gene information. Options hg19 and hg38
-#' @param pData A DataFrame or data.frame of the phenotype data for all participants
+#' @param colData A DataFrame or data.frame of the phenotype data for all participants
 #' @param sampleMap  A DataFrame or data.frame of the matching samples and colnames
 #'  of the gene expression and DNA methylation matrix. This should be used if your matrix
 #'  have different columns names. 
@@ -39,7 +39,7 @@
 #'                  met = dna.met, 
 #'                  sampleMap = sampleMap, 
 #'                  met.platform ="450K",
-#'                  pData = sample.info, 
+#'                  colData = sample.info, 
 #'                  genome = "hg38") 
 #' # You can also use sample Mapping and Sample information tables from a tsv file
 #' # You can use the createTSVTemplates function to create the tsv files
@@ -49,7 +49,7 @@
 #'                  met = dna.met, 
 #'                  sampleMap = "sampleMap.tsv", 
 #'                  met.platform ="450K",
-#'                  pData = "sample.info.tsv", 
+#'                  colData = "sample.info.tsv", 
 #'                  genome = "hg38") 
 #' 
 #' \dontrun{
@@ -139,12 +139,12 @@
 #'                          TCGA = FALSE, 
 #'                          filter.probes = distal.enhancer,
 #'                          genome = "hg19", 
-#'                          pData = phenotype.data)
+#'                          colData = phenotype.data)
 #' }
 #' createMAE
 createMAE <- function (exp, 
                        met, 
-                       pData, 
+                       colData, 
                        sampleMap,
                        linearize.exp = FALSE,
                        filter.probes = NULL,
@@ -164,10 +164,10 @@ createMAE <- function (exp,
   
   suppressMessages({
     
-    if(!missing(pData)) { 
-      if(is.character(pData)) { 
-        pData <- as.data.frame(read_tsv(pData))
-        rownames(pData) <- pData$primary
+    if(!missing(colData)) { 
+      if(is.character(colData)) { 
+        colData <- as.data.frame(read_tsv(colData))
+        rownames(colData) <- colData$primary
       }
     }
     if(!missing(sampleMap)) { 
@@ -231,19 +231,19 @@ createMAE <- function (exp,
     stopifnot(ncol(exp) == ncol(met))
     
     # Get clinical information
-    if(missing(pData)) {
-      pData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
+    if(missing(colData)) {
+      colData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
       # This will keep the same strategy the old ELMER version used:
       # Every type of tumor samples (starts with T) will be set to tumor and
       # every type of normal samples   (starts with N) will be set to normal 
       # See : https://github.com/lijingya/ELMER/blob/3e050462aa41c8f542530ccddc8fa607207faf88/R/Small.R#L8-L48
-      pData$TN <- NA
-      pData[grep("^N",pData$shortLetterCode),"TN"] <- "Normal" 
-      pData[grep("^T",pData$shortLetterCode),"TN"] <- "Tumor" 
+      colData$TN <- NA
+      colData[grep("^N",colData$shortLetterCode),"TN"] <- "Normal" 
+      colData[grep("^T",colData$shortLetterCode),"TN"] <- "Tumor" 
       
-      pData$barcode <- NULL
-      pData <- pData[!duplicated(pData),]      
-      rownames(pData) <- pData$sample
+      colData$barcode <- NULL
+      colData <- colData[!duplicated(colData),]      
+      rownames(colData) <- colData$sample
     } 
     if(missing(sampleMap)) {
       sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), rep("Gene expression", length(colnames(exp)))),
@@ -254,13 +254,13 @@ createMAE <- function (exp,
     message("Creating MultiAssayExperiment")
     mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                  "Gene expression" = exp),
-                                pData = pData,   
+                                colData = colData,   
                                 sampleMap = sampleMap,
                                 metadata = list(TCGA= TRUE, genome = genome, met.platform = met.platform ))
   } else {
     
-    if(missing(pData)){
-      message <- paste("Please set pData argument. A data frame with samples", 
+    if(missing(colData)){
+      message <- paste("Please set colData argument. A data frame with samples", 
                        "information. All rownames should be colnames of DNA",
                        "methylation and gene expression. An example is showed",
                        "in MultiAssayExperiment documentation",
@@ -278,22 +278,22 @@ createMAE <- function (exp,
       if(!all(colnames(exp) == colnames(met))) 
         stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
-      pData <- pData[match(ID,rownames(pData)),,drop = FALSE]
+      colData <- colData[match(ID,rownames(colData)),,drop = FALSE]
       sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
                                       rep("Gene expression", length(colnames(exp)))),
                              primary = c(colnames(met),colnames(exp)),
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                    "Gene expression" = exp),
-                                  pData = pData,
+                                  colData = colData,
                                   sampleMap = sampleMap,
                                   metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
     } else {
       # Check that we have the same number of samples
       if(!all(c("primary","colname") %in% colnames(sampleMap))) 
         stop("sampleMap should have the following columns: primary (sample ID) and colname(DNA methylation and gene expression sample [same as the colnames of the matrix])")
-      #if(!any(rownames(pData) %in% sampleMap$primary))
-      #  stop("pData row names should be mapped to sampleMap primary column ")
+      #if(!any(rownames(colData) %in% sampleMap$primary))
+      #  stop("colData row names should be mapped to sampleMap primary column ")
       # Find which samples are DNA methylation and gene expression
       sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
       sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
@@ -312,14 +312,14 @@ createMAE <- function (exp,
       if(!all(sampleMap.met$primary == sampleMap.exp$primary)) 
         stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
-      pData <- pData[match(commun.samples,rownames(pData)),,drop = FALSE]
+      colData <- colData[match(commun.samples,rownames(colData)),,drop = FALSE]
       sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
                                       rep("Gene expression", length(colnames(exp)))),
                              primary = commun.samples,
                              colname=c(colnames(met),colnames(exp)))
       mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
                                                    "Gene expression" = exp),
-                                  pData = pData,
+                                  colData = colData,
                                   sampleMap = sampleMap,
                                   metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
     }
@@ -385,10 +385,10 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
   newenv <- new.env()
-  if(genome == "hg19" & plat == "450K" ) data("hm450.manifest",package = "ELMER.data", envir = newenv)
-  if(genome == "hg19" & plat == "EPIC" ) data("EPIC.manifest",package = "ELMER.data", envir = newenv)
-  if(genome == "hg38" & plat == "450K" ) data("hm450.manifest.hg38",package = "ELMER.data", envir = newenv)
-  if(genome == "hg38" & plat == "EPIC" ) data("EPIC.manifest.hg38",package = "ELMER.data", envir = newenv)
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) data("hm450.manifest",package = "ELMER.data", envir = newenv)
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) data("EPIC.manifest",package = "ELMER.data", envir = newenv)
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) data("hm450.manifest.hg38",package = "ELMER.data", envir = newenv)
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) data("EPIC.manifest.hg38",package = "ELMER.data", envir = newenv)
   annotation <- get(ls(newenv)[1],envir=newenv)   
   return(annotation)
 }
@@ -396,7 +396,7 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
 #' Create examples files for Sample mapping and information used in createMAE function
 #' @description 
 #' This function will receive the DNA methylation and gene expression matrix and will create
-#' some examples of table for the argument pData and sampleMap used in ceeateMae function.
+#' some examples of table for the argument colData and sampleMap used in ceeateMae function.
 #' @param met DNA methylation matrix or Summarized Experiment
 #' @param exp Gene expression matrix or Summarized Experiment
 #' @examples 
@@ -418,11 +418,11 @@ createTSVTemplates <- function(met, exp) {
   message("Please, fill primary column correctly")
   write_tsv(sampleMap,path = "elmer_example_sample_mapping.tsv")
   
-  pData <- data.frame(primary = paste0("sample",1:ncol(met)), group = rep("To be filled",ncol(met)))
+  colData <- data.frame(primary = paste0("sample",1:ncol(met)), group = rep("To be filled",ncol(met)))
   message("===== Sample information example file ======")
   message("Saving example file as elmer_example_sample_metadata.tsv.")
   message("Please, fill primary column correctly, also you can add new columns as the example group column.")
-  write_tsv(pData,path = "elmer_example_sample_metadata.tsv")
+  write_tsv(colData,path = "elmer_example_sample_metadata.tsv")
 }
 
 # splitmatix 
@@ -656,7 +656,7 @@ createMotifRelevantTfs <- function(classification = "family"){
 #'  rownames(exp) <- c("ENSG00000141510","ENSG00000171862","ENSG00000171863")
 #'  sample.info <- DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
 #'  rownames(sample.info) <- colnames(exp)
-#'  mae <- createMAE(exp = exp, met = met, pData = sample.info, genome = "hg38") 
+#'  mae <- createMAE(exp = exp, met = met, colData = sample.info, genome = "hg38") 
 #'  mae <- preAssociationProbeFiltering(mae,  K = 0.3, percentage = 0.05)
 preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   print.header("Filtering probes", type = "section")

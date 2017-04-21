@@ -37,7 +37,7 @@ TCGA.pipe <- function(disease,
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://gdc-portal.nci.nih.gov")
   
-  available.analysis <- c("download","distal.enhancer",
+  available.analysis <- c("download","distal.probes",
                           "createMAE","diffMeth","pair",
                           "motif","TF.search","all")
   if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = T, invert = T)
@@ -65,10 +65,12 @@ TCGA.pipe <- function(disease,
   
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
-    print.header("Select distal enhancer probes")
-    params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr", "genome")]
+    print.header("Select distal probes")
+    params <- args[names(args) %in% c("TSS", "TSS.range","rm.chr")]
+    params <- c(params,list("genome" = genome, "feature"= NULL))
+    print(params)
     probeInfo <- do.call(get.feature.probe,params)
-    save(probeInfo,file = sprintf("%s/probeInfo_feature_distal.rda",dir.out))
+    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome))
     if(length(analysis) == 1){
       return(probeInfo)
     } else {
@@ -89,9 +91,10 @@ TCGA.pipe <- function(disease,
     exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
 
     ## get distal probe info
-    distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
+    distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
     if(!file.exists(distal.probe)){
-      params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
+      params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
+      params <- c(params,list("genome" = genome, "feature"= NULL))
       distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
     }
     
@@ -103,13 +106,13 @@ TCGA.pipe <- function(disease,
                      save = FALSE,
                      linearize.exp = TRUE,
                      TCGA          = TRUE)
-    if(!all(sample.type %in% pData(mae)[,group.col])){
+    if(!all(sample.type %in% colData(mae)[,group.col])){
       message("There are no samples for both groups")
       return(NULL)
     }
-    mae <- mae[,pData(mae)[,group.col] %in% sample.type]
+    mae <- mae[,colData(mae)[,group.col] %in% sample.type]
     save(mae,file = sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome))
-    readr::write_tsv(as.data.frame(pData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
+    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
   }
   
   # get differential DNA methylation
@@ -198,11 +201,11 @@ TCGA.pipe <- function(disease,
                               met.platform  = "450K",
                               linearize.exp = TRUE,
                               TCGA          = TRUE)
-    if(!all(sample.type %in% pData(mae)[,group.col])){
+    if(!all(sample.type %in% colData(mae)[,group.col])){
       message("There are no samples for both groups")
       return(NULL)
     }
-    mae.promoter <- mae.promoter[,pData(mae.promoter)[,group.col] %in% sample.type]
+    mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
     save(mae.promoter,file = sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, gneome))
     
     params <- args[names(args) %in% "percentage"]
