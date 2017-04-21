@@ -68,7 +68,6 @@ TCGA.pipe <- function(disease,
     print.header("Select distal probes")
     params <- args[names(args) %in% c("TSS", "TSS.range","rm.chr")]
     params <- c(params,list("genome" = genome, "feature"= NULL))
-    print(params)
     probeInfo <- do.call(get.feature.probe,params)
     save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome))
     if(length(analysis) == 1){
