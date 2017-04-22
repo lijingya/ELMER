@@ -205,7 +205,7 @@ TCGA.pipe <- function(disease,
       return(NULL)
     }
     mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
-    save(mae.promoter,file = sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, gneome))
+    save(mae.promoter,file = sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, genome))
     
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
