@@ -182,8 +182,8 @@ TCGA.pipe <- function(disease,
     ## promoter methylation correlation.
     # get promoter 
     suppressWarnings({
-      promoter.probe <- get.feature.probe(promoter=TRUE, 
-                                          TSS.range=list(upstream=100, downstream=700))
+      promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
+                                          TSS.range=list(upstream = 200, downstream = 2000))
     })
     group.col <- "TN"
     sample.type <- c("Tumor","Normal")
