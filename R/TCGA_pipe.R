@@ -80,38 +80,40 @@ TCGA.pipe <- function(disease,
   
   if(tolower("createMAE") %in% tolower(analysis)){
     print.header("Creating Multi Assay Experiment")
-
-    group.col <- "TN"
-    sample.type <- c("Tumor","Normal")
-    
-    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease,genome)
-    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
-
-    ## get distal probe info
-    distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
-    if(!file.exists(distal.probe)){
-      params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
-      params <- c(params,list("genome" = genome, "feature"= NULL))
-      distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
+    file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
+    if(!file.exists(file)) {
+      group.col <- "TN"
+      sample.type <- c("Tumor","Normal")
+      
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease,genome)
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
+      
+      ## get distal probe info
+      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
+      if(!file.exists(distal.probe)){
+        params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
+        params <- c(params,list("genome" = genome, "feature"= NULL))
+        distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
+      }
+      
+      mae <- createMAE(met           = meth.file, 
+                       exp           = exp.file, 
+                       filter.probes = distal.probe,
+                       genome        = genome,
+                       met.platform  = "450K",
+                       save          = FALSE,
+                       linearize.exp = TRUE,
+                       TCGA          = TRUE)
+      if(!all(sample.type %in% colData(mae)[,group.col])){
+        message("There are no samples for both groups")
+        return(NULL)
+      }
+      mae <- mae[,colData(mae)[,group.col] %in% sample.type]
+      save(mae,file = file)
+      readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
     }
-    
-    mae <- createMAE(met           = meth.file, 
-                     exp           = exp.file, 
-                     filter.probes = distal.probe,
-                     genome        = genome,
-                     met.platform  = "450K",
-                     save = FALSE,
-                     linearize.exp = TRUE,
-                     TCGA          = TRUE)
-    if(!all(sample.type %in% colData(mae)[,group.col])){
-      message("There are no samples for both groups")
-      return(NULL)
-    }
-    mae <- mae[,colData(mae)[,group.col] %in% sample.type]
-    save(mae,file = sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome))
-    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
   }
   
   # get differential DNA methylation
@@ -178,38 +180,46 @@ TCGA.pipe <- function(disease,
     
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
+    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, genome)
     
-    ## promoter methylation correlation.
-    # get promoter 
-    suppressWarnings({
-      promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
-                                          TSS.range=list(upstream = 200, downstream = 2000))
-    })
-    group.col <- "TN"
-    sample.type <- c("Tumor","Normal")
-    
-    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
-    if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
-    
-    mae.promoter <- createMAE(met           = meth.file, 
-                              exp           = exp.file, 
-                              filter.probes = promoter.probe,
-                              genome        = genome,
-                              met.platform  = "450K",
-                              linearize.exp = TRUE,
-                              TCGA          = TRUE)
-    if(!all(sample.type %in% colData(mae)[,group.col])){
-      message("There are no samples for both groups")
-      return(NULL)
+    if(!file.exists(file)){    
+      ## promoter methylation correlation.
+      # get promoter 
+      suppressWarnings({
+        promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
+                                            TSS.range=list(upstream = 200, downstream = 2000))
+      })
+      group.col <- "TN"
+      sample.type <- c("Tumor","Normal")
+      
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
+      
+      mae.promoter <- createMAE(met           = meth.file, 
+                                exp           = exp.file, 
+                                filter.probes = promoter.probe,
+                                genome        = genome,
+                                met.platform  = "450K",
+                                linearize.exp = TRUE,
+                                save          = FALSE,
+                                TCGA          = TRUE)
+      if(!all(sample.type %in% colData(mae)[,group.col])){
+        message("There are no samples for both groups")
+        return(NULL)
+      }
+      mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
+      save(mae.promoter,file = file)
+    } else {
+      mae.promoter <- get(load(file))
     }
-    mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
-    save(mae.promoter,file = sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, genome))
-    
     params <- args[names(args) %in% "percentage"]
     Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
                                              params))
+    write.csv(Promoter.meth, 
+              file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
+              row.names=FALSE)
     add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
     SigPair <- cbind(SigPair, GSbPM.pvalue = add)
     write.csv(SigPair, 
@@ -222,7 +232,7 @@ TCGA.pipe <- function(disease,
   # search enriched motif
   if("motif" %in% tolower(analysis)){
     print.header("Motif search")
-
+    
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
@@ -260,7 +270,7 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     #construct RNA seq data
     print.header(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
-                    diff.dir), "subsection")
+                         diff.dir), "subsection")
     enriched.motif <- args[names(args) %in% "enriched.motif"]
     if(length(enriched.motif) == 0){
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
@@ -275,6 +285,6 @@ TCGA.pipe <- function(disease,
                      params))
     if(length(analysis) == 1) return(TFs)
   }
-           
+  
 }
 
