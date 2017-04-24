@@ -55,7 +55,7 @@ TCGA.pipe <- function(disease,
   if("download" %in% tolower(analysis)){
     print.header("Download data")
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    params <- args[names(args) %in% c("RNAtype","Methfilter")]
+    params <- c()
     params$disease <- disease
     params$basedir <- sprintf("%s/Data",wd)
     params$genome <- genome
