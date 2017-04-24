@@ -266,7 +266,7 @@ TCGA.pipe <- function(disease,
   if(tolower("TF.search") %in% tolower(analysis)){
     print.header("Search responsible TFs")
     ## load mae
-    mae.file <- sprintf("%s/%s_mae.rda",dir.out,disease)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
