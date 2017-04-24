@@ -6,7 +6,7 @@
 at promoter regions}
 \usage{
 promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2,
-             upstream = 100,  downstream = 700, save = TRUE)
+             upstream = 200,  downstream = 2000, save = TRUE)
 }
 \arguments{
 \item{data}{A Multi Assay Experiment object with DNA methylation and 
@@ -19,7 +19,8 @@ methylation. Default is 0.01. P value is raw P value without adjustment.}
 samples of control and experimental groups used to link promoter DNA methylation to genes.
 Default is 0.2.
 @param upstream Number of bp upstream of TSS to consider as promoter region
-@param downstream  Number of bp downstream of TSS to consider as promoter region}
+@param downstream  Number of bp downstream of TSS to consider as promoter region
+@param cores Number of cores to be used in paralellization. Default 1 (no paralellization)}
 
 \item{save}{A logic. If it is true, the result will be saved.}
 }

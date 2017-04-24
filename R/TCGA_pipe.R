@@ -146,38 +146,40 @@ TCGA.pipe <- function(disease,
                            stringsAsFactors=FALSE)[,1]
     ## Get nearby genes-----------------------
     message("Get nearby genes")
+    file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
-    nearGenes.file <- args[names(args) %in% "nearGenes"]
-    if(length(nearGenes.file)==0){
-      nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
-      if(!file.exists(nearGenes.file)){
-        params <- args[names(args) %in% c("geneNum")]
-        nearGenes <- do.call(GetNearGenes,
-                             c(list(data = mae, 
-                                    probes = Sig.probes,
-                                    cores = cores),
-                               params))
-        save(nearGenes,file=nearGenes.file)
+    if(!file.exists(file)){    
+      nearGenes.file <- args[names(args) %in% "nearGenes"]
+      if(length(nearGenes.file)==0){
+        nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
+        if(!file.exists(nearGenes.file)){
+          params <- args[names(args) %in% c("geneNum")]
+          nearGenes <- do.call(GetNearGenes,
+                               c(list(data = mae, 
+                                      probes = Sig.probes,
+                                      cores = cores),
+                                 params))
+          save(nearGenes,file=nearGenes.file)
+        }
+      } else {
+        nearGenes.file <- nearGenes.file[["nearGenes"]]
       }
-    } else {
-      nearGenes.file <- nearGenes.file[["nearGenes"]]
+      ## calculation
+      message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
+      
+      ## get pair
+      permu.dir <- paste0(dir.out,"/permu")
+      params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp","calculate.Pe","group.col")]
+      SigPair <- do.call(get.pair,
+                         c(list(data      = mae,
+                                nearGenes = nearGenes.file,
+                                permu.dir = permu.dir,
+                                group.col = "TN",
+                                dir.out   = dir.out,
+                                cores     = cores,
+                                label     = diff.dir),
+                           params))
     }
-    ## calculation
-    message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
-    
-    ## get pair
-    permu.dir <- paste0(dir.out,"/permu")
-    params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp","calculate.Pe","group.col")]
-    SigPair <- do.call(get.pair,
-                       c(list(data      = mae,
-                              nearGenes = nearGenes.file,
-                              permu.dir = permu.dir,
-                              group.col = "TN",
-                              dir.out   = dir.out,
-                              cores     = cores,
-                              label     = diff.dir),
-                         params))
-    
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
     file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, genome)
