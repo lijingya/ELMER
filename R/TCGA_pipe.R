@@ -179,6 +179,8 @@ TCGA.pipe <- function(disease,
                                 cores     = cores,
                                 label     = diff.dir),
                            params))
+    } else {
+      SigPair <- readr::read_csv(file)
     }
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
