@@ -1,6 +1,6 @@
 context("Testing get.diff.meth")
 
-test_that("The directions shold change if we change the groups", {
+test_that("The directions should change if we change the groups", {
   data(elmer.data.example, envir = environment())
   Hypo.probe.1 <- get.diff.meth(data, 
                                 percentage = 1,

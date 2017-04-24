@@ -36,6 +36,6 @@ at promoter regions.
 promoterMeth
 }
 \examples{
-data(elmer.data.example)
+data(elmer.data.example.promoter)
 Gene.promoter <- promoterMeth(data) 
 }
