@@ -627,7 +627,7 @@ get.permu <- function(data,
 #' at promoter regions.
 #' @usage 
 #' promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2,
-#'              upstream = 100,  downstream = 700, save = TRUE)
+#'              upstream = 200,  downstream = 2000, save = TRUE)
 #'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
 #'@param sig.pvalue A number specifies significant cutoff for gene silenced by promoter
@@ -637,6 +637,7 @@ get.permu <- function(data,
 #'  Default is 0.2.
 #'  @param upstream Number of bp upstream of TSS to consider as promoter region
 #'  @param downstream  Number of bp downstream of TSS to consider as promoter region
+#'  @param cores Number of cores to be used in paralellization. Default 1 (no paralellization)
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
 #' @importFrom utils write.csv
@@ -649,9 +650,18 @@ get.permu <- function(data,
 promoterMeth <- function(data,
                          sig.pvalue = 0.01,
                          percentage = 0.2,
-                         upstream = 100,
-                         downstream = 700,
-                         save = TRUE){
+                         upstream = 200,
+                         downstream = 2000,
+                         save = TRUE,
+                         cores = 1){
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
   message("Calculating associations of gene expression with DNA methylation at promoter regions")
   TSS_2K <- promoters(rowRanges(getExp(data)), upstream = upstream, downstream = downstream)
   probes <- rowRanges(getMet(data))
@@ -663,7 +673,7 @@ promoterMeth <- function(data,
   } else {
     df <- unique(df)
     ProbeInTSS <- split(df$Probe,df$GeneID)
-    
+    message("Calculating average DNA methylation for probes near the same TSS")
     ## calculate average methylation of promoter
     met <- assay(getMet(data))
     Gene.promoter <- lapply(ProbeInTSS, 
@@ -675,21 +685,32 @@ promoterMeth <- function(data,
                               return(meth)
                             },   
                             METH=met)
+    
+    
     Gene.promoter <- do.call(rbind, Gene.promoter)
     ## make fake NearGene 
     Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
-                       GeneID = rownames(Gene.promoter),
+                       GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
                        Distance = 1,
                        Side = 1, stringsAsFactors=FALSE)
     Fake <- split(Fake, Fake$GeneID)
     exps <- assay(getExp(data))
-    out <- lapply(rownames(Gene.promoter),
-                  Stat.nonpara, 
-                  NearGenes = Fake,
-                  Top = 0.2,
-                  Meths = Gene.promoter,
-                  Exps = exps)
-    out <- do.call(rbind, out)[,c("GeneID","Symbol","Raw.p")]
+    
+    message("Calculating Pp (probe - gene) for all nearby genes")
+    out <- adply(.data = rownames(Gene.promoter)[1:3], .margins = 1,
+                        .fun = function(x) {
+                          Stat.nonpara(Probe = x,
+                                       Meths = Gene.promoter[x,], 
+                                       NearGenes = Fake,
+                                       Top = percentage,
+                                       Exps = exps)},
+                        .progress = "text", .parallel = parallel, .id = NULL
+    )
+    
+    out <- out[,c("GeneID","Symbol","Raw.p")]
+    if(save) write.csv(out, 
+                       file = "Genes_all_anticorrelated_promoter_methylation.csv",
+                       row.names = FALSE)
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }
   if(nrow(out) == 0) message("No assossiation was found")
