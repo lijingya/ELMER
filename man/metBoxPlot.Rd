@@ -4,12 +4,16 @@
 \alias{metBoxPlot}
 \title{scatter.plot to plot scatter plots between gene expression and DNA methylation.}
 \usage{
-metBoxPlot(data, groupCol, group1, group2, probe, percentage = 0.2,
-  diff.dir = "hypo", title = "Title")
+metBoxPlot(data, group.col, group1, group2, probe, percentage = 0.2,
+  diff.dir = "hypo", legend.col = NULL, title = NULL, filename = NULL,
+  save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
 See \code{\link{createMAE}} function.}
+
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{group1}{A group from group.col. ELMER will run group1 vs group2. 
 That means, if direction is hyper, get probes
@@ -29,9 +33,6 @@ subtype.But, If you are working with molecular subtypes please set it to 1.}
 "hyper" which is only selecting hypermethylated probes;}
 
 \item{title}{plot title}
-
-\item{group.col}{A column defining the groups of the sample. You can view the 
-available columns using: colnames(MultiAssayExperiment::colData(data)).}
 }
 \value{
 Box plot
@@ -45,11 +46,11 @@ and average DNA methylation at certain motif sites will be generated.
 }
 \examples{
 data(elmer.data.example)
-groupCol <- "subtype_Expression.Subtype"
+group.col <- "subtype_Expression.Subtype"
 group1 <- "classical"
 group2 <- "secretory"
 metBoxPlot(data,
-           groupCol = groupCol,
+           group.col = group.col,
            group1 = group1,
            group2 = group2, 
            probe ="cg17898069",

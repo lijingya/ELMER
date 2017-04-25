@@ -37,6 +37,14 @@ test whether putative target gene are differentially expressed between two group
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
 

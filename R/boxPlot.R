@@ -30,54 +30,105 @@
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
 #' data(elmer.data.example)
-#' groupCol <- "subtype_Expression.Subtype"
+#' group.col <- "subtype_Expression.Subtype"
 #' group1 <- "classical"
 #' group2 <- "secretory"
 #' metBoxPlot(data,
-#'            groupCol = groupCol,
+#'            group.col = group.col,
 #'            group1 = group1,
 #'            group2 = group2, 
 #'            probe ="cg17898069",
 #'            percentage = 0.2, 
 #'            diff.dir = "hypo")
 metBoxPlot <- function(data, 
-                       groupCol, 
+                       group.col, 
                        group1, 
                        group2, 
                        probe, 
                        percentage = 0.2, 
                        diff.dir = "hypo",
-                       title = "Title") {
+                       legend.col= NULL,
+                       title = NULL,
+                       filename = NULL,
+                       save = TRUE) {
   if(missing(data)) stop("Please set data argument")
-  if(missing(groupCol)) stop("Please set data argument")
-  if(missing(group1)) stop("Please set data argument")
-  if(missing(group2)) stop("Please set data argument")
-  if(missing(probe)) stop("Please set data argument")
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  if(missing(probe)) stop("Please set probe argument")
   
-  aux <- data.frame("group" = colData(data)[,groupCol],
-                    "DNA methylation beta value" = assay(getMet(data))[probe,]) %>% 
-    filter(group %in% c(group1,group2)) %>% droplevels
-  
-  if(diff.dir == "hyper") {
-    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(ceiling(sum(aux$group == group2) * .2)) %>% select(2),
-                      aux %>% filter(group %in% group1) %>% top_n(ceiling(sum(aux$group == group1) * .2)) %>% select(2))
-  } else {
-    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(-ceiling(sum(aux$group == group2) * .2)) %>% select(2),
-                      aux %>% filter(group %in% group1) %>% top_n(-ceiling(sum(aux$group == group1) * .2)) %>% select(2))
+  if(is.null(filename)){
+    if(is.null(legend.col)) filename <- paste0(group.col,"_",probe)
+    if(!is.null(legend.col)) filename <- paste0(group.col,"_",probe,"_",legend.col)
+    filename <- paste0(gsub("\\.","_",filename),".png")
   }
-  aux$used <- ".all"
-  aux.used <- aux[aux$DNA.methylation.beta.value %in% val.used$DNA.methylation.beta.value,]
-  aux.used$used <- percentage
   
+  if(is.null(legend.col)) { 
+    aux <- data.frame("group" = colData(data)[,group.col],
+                      "DNA methylation beta value" = assay(getMet(data))[probe,]) %>% 
+      filter(group %in% c(group1,group2)) %>% droplevels
+    pos <- 2
+    showlegend <- FALSE
+  } else {
+    aux <- data.frame("group" = colData(data)[,group.col], 
+                      "legend" = colData(data)[,legend.col], 
+                      "DNA methylation beta value" = assay(getMet(data))[probe,]) %>% 
+      filter(group %in% c(group1,group2)) %>% droplevels
+    if(any(is.na(aux$legend))) aux$legend[is.na(aux$legend)] <- "NA"
+    pos <- 3
+    showlegend <- TRUE
+  }  
+  if(diff.dir == "hyper") {
+    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(ceiling(sum(aux$group == group2) * .2)) %>% select(pos),
+                      aux %>% filter(group %in% group1) %>% top_n(ceiling(sum(aux$group == group1) * .2)) %>% select(pos))
+  } else {
+    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(-ceiling(sum(aux$group == group2) * .2)) %>% select(pos),
+                      aux %>% filter(group %in% group1) %>% top_n(-ceiling(sum(aux$group == group1) * .2)) %>% select(pos))
+  }
+  aux$used <- " (100%)"
+  aux.used <- aux[aux$DNA.methylation.beta.value %in% val.used$DNA.methylation.beta.value,]
+  aux.used$used <- paste0(" (", percentage * 100, "%",")")
   aux <- rbind(aux,aux.used)
   aux$group <- paste0(aux$group, aux$used)
+  if(is.null(title)) title <- paste0("Boxplot DNA methylation (probe ", probe,")")
+  if(is.null(legend.col)) { 
+    legend.col <- "used"
+    legend.title <- ""
+  } else {
+    legend.title <- legend.col
+    legend.col <- "legend"
+  }
+  
   suppressWarnings({
     p <- plot_ly(data = aux, 
                  x = ~group, 
                  y = ~DNA.methylation.beta.value,
-                 color = ~used, 
+                 color = ~eval(as.name(paste(legend.col))), 
                  type = "box", boxpoints = "all", jitter = 0.3,
-                 pointpos = -1.8) %>% layout(title = title)
+                 pointpos = -1.8) %>% 
+      plotly::add_annotations( text=legend.title, xref="paper", yref="paper",
+                       x=1.02, xanchor="left",
+                       y=0.8, yanchor="bottom",    # Same y as legend below
+                       legendtitle=TRUE, showarrow=FALSE ) %>% 
+      layout(title = title, boxmode = "group", xaxis = list(title = ""), 
+             legend=list(y=0.8, yanchor="top" ), 
+                                             font = list(size = 24), showlegend = showlegend,
+                                             margin = list(
+                                               l = 100,
+                                               r = 300,
+                                               b = 100,
+                                               t = 100,
+                                               pad = 4
+                                             ))
+    if(save){
+      if (!require("webshot")) {
+        install.packages("webshot")
+        webshot::install_phantomjs()
+      }
+      plotly::export(p, file = filename, vwidth = 992 * 2, vheight = 744 * 2)
+      message("Saved as ", filename)
+    } else {
+      return(p)
+    }
   })
-  p
 }

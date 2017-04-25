@@ -6,7 +6,7 @@
 \usage{
 createMAE(exp, met, colData, sampleMap, linearize.exp = FALSE,
   filter.probes = NULL, met.na.cut = 0.2, filter.genes = NULL,
-  met.platform = "450k", genome = NULL, save = TRUE, save.filename,
+  met.platform = "450K", genome = NULL, save = TRUE, save.filename,
   TCGA = FALSE)
 }
 \arguments{

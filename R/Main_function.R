@@ -294,6 +294,12 @@ get.diff.meth <- function(data,
 #'  test whether putative target gene are differentially expressed between two groups.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::colData(data)).
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
@@ -335,6 +341,8 @@ get.pair <- function(data,
                      dir.out = "./",
                      diffExp = FALSE,
                      group.col,
+                     group1,
+                     group2,
                      cores = 1,
                      filter.probes = TRUE,
                      filter.portion = 0.3, 
@@ -352,6 +360,11 @@ get.pair <- function(data,
   }
   if(diffExp & missing(group.col)) 
     stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
+
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   
   parallel <- FALSE
   if (cores > 1){
