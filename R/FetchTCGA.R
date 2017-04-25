@@ -9,7 +9,6 @@
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
 #' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param basedir A path shows where the data will be stored.
-#' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
 #' @usage getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
@@ -22,8 +21,7 @@ getTCGA <- function(disease,
                     RNA = TRUE,
                     Clinic = TRUE,
                     basedir = "./Data",
-                    genome = "hg38",
-                    Methfilter = 0.2){
+                    genome = "hg38"){
   
   if(missing(disease)) stop("disease need to be specified.")
   
@@ -132,8 +130,6 @@ getRNAseq <- function(disease,
 #'  for  all samples of certain cancer types from GDC website.
 #' @param disease A character specifies the disease to download from TCGA such as BLCA
 #' @param basedir A path. Shows where the data will be stored.
-#' @param filter For each probe, the percentage of NA among the all the samples
-#'  should smaller than filter.
 #' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @return Download all DNA methylation from HM450K level 3 data for
 #'  the specified disease.
@@ -141,7 +137,6 @@ getRNAseq <- function(disease,
 #' @usage get450K(disease, basedir="./Data",filter=0.2, genome = "hg38")
 get450K <- function(disease, 
                     basedir = "./Data",
-                    filter  = 0.2,
                     genome  = "hg38"){
   
   disease <- tolower(disease)
@@ -172,8 +167,6 @@ get450K <- function(disease,
                       directory = dir.meth,
                       summarizedExperiment = TRUE)
     
-    # Remove probes that has more than 20% of its values as NA
-    met <- met[rowMeans(is.na(assay(met))) < filter,]
     message(paste0("Saving DNA methylation to: ", fout))
     save(met,file = fout)
   } else {

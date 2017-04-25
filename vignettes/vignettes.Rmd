@@ -88,7 +88,7 @@ available cancer data sets and custom DNA methylation and gene expression data s
 ELMER analyses have 5 main steps: 
 
 1. Identify distal enhancer probes on HM450K.
-2. Identify distal enhancer probes with significantly different DNA methyaltion level
+2. Identify distal enhancer probes with significantly different DNA methylation level
 in control group and experiment group.
 3. Identify putative target genes for differentially methylated distal enhancer probes.
 4. Identify enriched motifs for the distal enhancer probes which are significantly 
