@@ -43,6 +43,7 @@
 #'all genes and significantly linked probes in the range and the significant links.
 #' @export
 #' @import Gviz lattice
+#' @importFrom GenomicInteractions GenomicInteractions InteractionTrack
 #' @examples 
 #' data(elmer.data.example)
 #' pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
@@ -143,6 +144,13 @@ schematic <- function(data,
                       ylab = "", xlab = ""), newpage = FALSE,
           prefix = "plot")
   }
+  
+  interactions <- GenomicInteractions(gene.gr[match(significant$GeneID,names(gene.gr))], 
+                              probe.gr[match(significant$Probe,names(probe.gr))],
+                              experiment_name="Putative pair genes", 
+                              description="this is a test", counts=2)
+  interactions.track <-  InteractionTrack(name="Putative pair genes", interactions, chromosome=chr)
+  
   if(!is.null(group.col)){
   deTrack <- AnnotationTrack(range = probe.gr, 
                              genome = metadata(data)$genome, 
@@ -158,20 +166,20 @@ schematic <- function(data,
                              name = "probe details",
                              stacking = "squish", 
                              fun = details)
-  plotTracks(list(idxTrack,  axTrack, genetrack,deTrack),  
+  plotTracks(list(idxTrack,  axTrack, interactions.track,genetrack,deTrack),  
              background.title = "darkblue",
              detailsBorder.col = "white",
-             sizes=c(1,1,1,8), 
+             sizes=c(1,1,1,1,8), 
              details.ratio = 1,
              details.size = 0.8,
              col = NULL,
              geneSymbols=TRUE)
   
   } else {
-    plotTracks(list(idxTrack,  axTrack, genetrack),  
+    plotTracks(list(idxTrack,  axTrack, interactions.track, genetrack),  
                background.title = "darkblue",
                detailsBorder.col = "white",
-               sizes=c(1,1,1), 
+               sizes=c(1,1,1,1), 
                details.ratio = 1,
                details.size = 0.8,
                col = NULL,
