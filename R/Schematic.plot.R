@@ -14,8 +14,8 @@
 #' @importFrom IRanges IRanges
 #'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
-#' @param pair A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
-#' This is the ouput of get.pairfunction.
+#' @param pair A data frame with three columns: Probe, Gene ID (Ensemble gene ID) 
+#' and Pe (empirical p-value). This is the ouput of get.pair function.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::colData(data)).
 #' @param byProbe A vector of probe names.
@@ -26,21 +26,21 @@
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param save A logic. If true, figures will be saved to dir.out.
 #' @details
-#'byProbes:
-#'When a vector of probes' name are provided,
-#'function will produce schematic plots for each individual probes.
-#'The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
-#'genes and the significantly linked gene to the probe.
+#' byProbes:
+#'  When a vector of probes' name are provided,
+#'  function will produce schematic plots for each individual probes.
+#'  The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
+#'  genes and the significantly linked gene to the probe.
 #'
-#'byGene:
-#'When a vector of gene ID are provided, function will produce schematic plots 
-#'for each individual genes. The schematic plot contains the gene and all the 
-#'significantly linked probes.
+#' byGene:
+#'  When a vector of gene ID are provided, function will produce schematic plots 
+#'  for each individual genes. The schematic plot contains the gene and all the 
+#'  significantly linked probes.
 #'
-#'byCoordinate:
-#'When a genomic coordinate is provided, function will 
-#'produce a schematic plot for this coordinate. The schematic plot contains 
-#'all genes and significantly linked probes in the range and the significant links.
+#' byCoordinate:
+#'  When a genomic coordinate is provided, function will 
+#'  produce a schematic plot for this coordinate. The schematic plot contains 
+#'  all genes and significantly linked probes in the range and the significant links.
 #' @export
 #' @import Gviz lattice
 #' @importFrom GenomicInteractions GenomicInteractions InteractionTrack
@@ -100,9 +100,9 @@ schematic.plot <- function(data,
       gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
       significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
       schematic(data = data,gene.gr, probe.gr, significant,
-                    label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
-                                  dir.out,byCoordinate$chr[i],byCoordinate$start[i],
-                                  byCoordinate$end[i]), save=save, group.col = group.col)
+                label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
+                              dir.out,byCoordinate$chr[i],byCoordinate$start[i],
+                              byCoordinate$end[i]), save=save, group.col = group.col)
     }
   }
 }
@@ -126,7 +126,7 @@ schematic <- function(data,
   
   # We will find which is the significant pairs of genes
   fill <- rep("blue", length(values(gene.gr)$ensembl_gene_id))
- 
+  
   sig.colors <- rainbow(length(unique(significant$Probe)))
   for(i in seq_len(length(unique(significant$Probe)))) {
     fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],"GeneID"]] <- sig.colors[i]
@@ -146,40 +146,41 @@ schematic <- function(data,
   }
   
   interactions <- GenomicInteractions(gene.gr[match(significant$GeneID,names(gene.gr))], 
-                              probe.gr[match(significant$Probe,names(probe.gr))],
-                              experiment_name="Putative pair genes", 
-                              description="this is a test", counts=2)
+                                      probe.gr[match(significant$Probe,names(probe.gr))],
+                                      experiment_name="Putative pair genes", 
+                                      description="this is a test", counts=-log10(significant$Pe))
   interactions.track <-  InteractionTrack(name="Putative pair genes", interactions, chromosome=chr)
   
   if(!is.null(group.col)){
-  deTrack <- AnnotationTrack(range = probe.gr, 
-                             genome = metadata(data)$genome, 
-                             showId = FALSE, 
-                             groupAnnotation = "group",
-                             chromosome = chr, 
-                             fill = sig.colors, # We need to select the color based on the group
-                             detailsConnector.col="red",
-                             detailsBorder.col="red",
-                             col.line="red",
-                             detailsBorder.lwd=0,
-                             id = names(probe.gr), 
-                             name = "probe details",
-                             stacking = "squish", 
-                             fun = details)
-  plotTracks(list(idxTrack,  axTrack, interactions.track,genetrack,deTrack),  
-             background.title = "darkblue",
-             detailsBorder.col = "white",
-             sizes=c(1,1,1,1,8), 
-             details.ratio = 1,
-             details.size = 0.8,
-             col = NULL,
-             geneSymbols=TRUE)
-  
-  } else {
-    plotTracks(list(idxTrack,  axTrack, interactions.track, genetrack),  
+    deTrack <- AnnotationTrack(range = probe.gr, 
+                               genome = metadata(data)$genome, 
+                               showId = FALSE, 
+                               groupAnnotation = "group",
+                               chromosome = chr, 
+                               fill = sig.colors, # We need to select the color based on the group
+                               detailsConnector.col="red",
+                               detailsBorder.col="red",
+                               col.line="red",
+                               detailsBorder.lwd=0,
+                               id = names(probe.gr), 
+                               name = "probe details",
+                               stacking = "squish", 
+                               fun = details)
+    plotTracks(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),  
                background.title = "darkblue",
                detailsBorder.col = "white",
-               sizes=c(1,1,1,1), 
+               sizes=c(1,1,8,1,2), 
+               details.ratio = 1,
+               details.size = 0.8,
+               col = NULL,
+               geneSymbols=TRUE)
+    
+  } else {
+    atrack <- AnnotationTrack(probe.gr, name = "Probes")
+    plotTracks(list(idxTrack,  axTrack, atrack, interactions.track, genetrack),  
+               background.title = "darkblue",
+               detailsBorder.col = "white",
+               sizes=c(1,1,1,1,1), 
                details.ratio = 1,
                details.size = 0.8,
                col = NULL,

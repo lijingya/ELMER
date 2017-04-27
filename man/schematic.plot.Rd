@@ -20,8 +20,8 @@ gene expression Summarized Experiment objects}
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
-\item{pair}{A data frame with two columns: Probe and Gene ID (Ensemble gene ID)
-This is the ouput of get.pairfunction.}
+\item{pair}{A data frame with three columns: Probe, Gene ID (Ensemble gene ID) 
+and Pe (empirical p-value). This is the ouput of get.pair function.}
 
 \item{byProbe}{A vector of probe names.}
 
@@ -41,20 +41,20 @@ schematic.plot is a function to plot schematic plots showing the locations of ge
 }
 \details{
 byProbes:
-When a vector of probes' name are provided,
-function will produce schematic plots for each individual probes.
-The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
-genes and the significantly linked gene to the probe.
+ When a vector of probes' name are provided,
+ function will produce schematic plots for each individual probes.
+ The schematic plot contains probe, nearby 20 (or the number of gene user specified.)
+ genes and the significantly linked gene to the probe.
 
 byGene:
-When a vector of gene ID are provided, function will produce schematic plots 
-for each individual genes. The schematic plot contains the gene and all the 
-significantly linked probes.
+ When a vector of gene ID are provided, function will produce schematic plots 
+ for each individual genes. The schematic plot contains the gene and all the 
+ significantly linked probes.
 
 byCoordinate:
-When a genomic coordinate is provided, function will 
-produce a schematic plot for this coordinate. The schematic plot contains 
-all genes and significantly linked probes in the range and the significant links.
+ When a genomic coordinate is provided, function will 
+ produce a schematic plot for this coordinate. The schematic plot contains 
+ all genes and significantly linked probes in the range and the significant links.
 }
 \examples{
 data(elmer.data.example)
