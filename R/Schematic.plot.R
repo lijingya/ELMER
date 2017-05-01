@@ -18,7 +18,12 @@
 #' and Pe (empirical p-value). This is the ouput of get.pair function.
 #' @param group.col A column defining the groups of the sample. You can view the 
 #' available columns using: colnames(MultiAssayExperiment::colData(data)).
-#' @param byProbe A vector of probe names.
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.#' @param byProbe A vector of probe names.
 #' @param byGeneID A vector of gene ID
 #' @param byCoordinate A list contains chr, start and end. 
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
@@ -57,6 +62,8 @@
 #'                byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
 schematic.plot <- function(data,
                            group.col = NULL,
+                           group1 = NULL,
+                           group2 = NULL,
                            pair, 
                            byProbe, 
                            byGeneID, 
@@ -71,10 +78,18 @@ schematic.plot <- function(data,
     nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
                                              geneAnnot=rowRanges(getExp(data))),params))
     for(probe in byProbe){
-      significant <- pair[pair$Probe==probe,]
+      significant <- pair[pair$Probe == probe,]
       gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
       probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
-      schematic(data = data, gene.gr, probe.gr, significant, label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), save=save, group.col = group.col)
+      schematic(data = data, 
+                gene.gr, 
+                probe.gr, 
+                significant, 
+                label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), 
+                save=save, 
+                group.col = group.col, 
+                group1 = group1,
+                group2 = group2)
     }
   }
   if(!missing(byGeneID)){
@@ -87,7 +102,15 @@ schematic.plot <- function(data,
       }
       gene.gr <- rowRanges(getExp(data))[gene,]
       probe.gr <- rowRanges(getMet(data))[significant$Probe,]
-      schematic(data = data,gene.gr, probe.gr, significant,label=sprintf("%s/%s.schematic.byGene",dir.out,gene), save=save, group.col = group.col)
+      schematic(data = data,
+                gene.gr, 
+                probe.gr, 
+                significant,
+                label = sprintf("%s/%s.schematic.byGene",dir.out,gene), 
+                save  = save, 
+                group.col = group.col,
+                group1 = group1,
+                group2 = group2)
     }
     
   }
@@ -97,12 +120,20 @@ schematic.plot <- function(data,
                             ranges = IRanges(byCoordinate$start[i],byCoordinate$end[i]))
       probe.gr  <- rowRanges(getMet(data))[pair$Probe,]
       probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
+      if(length(probe.gr) == 0) stop("No probes in that region")
       gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
+      if(length(gene.gr) == 0) stop("No genes in that region")
       significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
-      schematic(data = data,gene.gr, probe.gr, significant,
+      schematic(data = data,
+                gene.gr, 
+                probe.gr, 
+                significant,
                 label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
                               dir.out,byCoordinate$chr[i],byCoordinate$start[i],
-                              byCoordinate$end[i]), save=save, group.col = group.col)
+                              byCoordinate$end[i]), save=save, 
+                group.col = group.col,
+                group1 = group1,
+                group2 = group2)
     }
   }
 }
@@ -116,8 +147,10 @@ schematic <- function(data,
                       significant, 
                       label,
                       save=TRUE,
-                      group.col = NULL){
-  
+                      group.col = NULL,
+                      group1 = NULL,
+                      group2 = NULL){
+  options(ucscChromosomeNames=FALSE)
   if(save) pdf(paste0(label,".pdf"))
   chr <- as.character(seqnames(probe.gr))
   
@@ -127,9 +160,8 @@ schematic <- function(data,
   # We will find which is the significant pairs of genes
   fill <- rep("blue", length(values(gene.gr)$ensembl_gene_id))
   
-  sig.colors <- rainbow(length(unique(significant$Probe)))
   for(i in seq_len(length(unique(significant$Probe)))) {
-    fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],"GeneID"]] <- sig.colors[i]
+    fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],]$GeneID] <- "red"
   }
   genetrack <- GeneRegionTrack(gene.gr, name = "Gene", 
                                fill = fill, 
@@ -152,16 +184,19 @@ schematic <- function(data,
   interactions.track <-  InteractionTrack(name="Putative pair genes", interactions, chromosome=chr)
   
   if(!is.null(group.col)){
+    
+    if(!is.null(group1) & !is.null(group1))
+      data <- data[,colData(data)[,group.col] %in% c( group1, group2)]
+    
     deTrack <- AnnotationTrack(range = probe.gr, 
                                genome = metadata(data)$genome, 
                                showId = FALSE, 
                                groupAnnotation = "group",
                                chromosome = chr, 
-                               fill = sig.colors, # We need to select the color based on the group
+                               fill = "red", # We need to select the color based on the group
                                detailsConnector.col="red",
                                detailsBorder.col="red",
                                col.line="red",
-                               
                                detailsBorder.lwd=0,
                                id = names(probe.gr), 
                                name = "probe details",
@@ -171,19 +206,21 @@ schematic <- function(data,
                background.title = "darkblue",
                detailsBorder.col = "white",
                sizes=c(1,1,8,1,2), 
-               extend.right = 1000,
-               extend.left = 1000,
+               extend.right = 10000,
+               extend.left = 10000,
                details.ratio = 1,
                details.size = 0.8,
                col = NULL,
                geneSymbols=TRUE)
     
   } else {
-    atrack <- AnnotationTrack(probe.gr, name = "Probes")
+    atrack <- AnnotationTrack(probe.gr, name = "Probes",
+                              genome = metadata(data)$genome, 
+                              chromosome = chr)
     plotTracks(list(idxTrack,  axTrack, atrack, interactions.track, genetrack),  
                background.title = "darkblue",
-               extend.right = 1000,
-               extend.left = 1000,
+               extend.right = 10000,
+               extend.left = 10000,
                detailsBorder.col = "white",
                sizes=c(1,1,1,1,1), 
                details.ratio = 1,

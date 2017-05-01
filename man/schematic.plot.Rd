@@ -20,10 +20,16 @@ gene expression Summarized Experiment objects}
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.#' @param byProbe A vector of probe names.}
+
 \item{pair}{A data frame with three columns: Probe, Gene ID (Ensemble gene ID) 
 and Pe (empirical p-value). This is the ouput of get.pair function.}
-
-\item{byProbe}{A vector of probe names.}
 
 \item{byGeneID}{A vector of gene ID}
 
