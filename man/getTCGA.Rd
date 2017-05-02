@@ -19,8 +19,6 @@ getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data",
 \item{basedir}{A path shows where the data will be stored.}
 
 \item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
-
-\item{Methfilter}{A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.}
 }
 \value{
 Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for

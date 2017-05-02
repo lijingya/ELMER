@@ -14,9 +14,6 @@ get450K(disease, basedir="./Data",filter=0.2, genome = "hg38")
 
 \item{basedir}{A path. Shows where the data will be stored.}
 
-\item{filter}{For each probe, the percentage of NA among the all the samples
-should smaller than filter.}
-
 \item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
 }
 \value{

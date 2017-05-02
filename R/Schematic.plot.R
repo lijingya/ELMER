@@ -55,11 +55,34 @@
 #'                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
 #'                    Symbol = c("TRAF3IP3","LAMB3","LAMB3"), 
 #'                    Pe = c(0.001,0.00001,0.001))
-#' schematic.plot(data, group.col = "definition", pair = pair, byProbe = "cg19403323")
-#' schematic.plot(data, group.col = "definition", pair = pair, byGeneID = "ENSG00000009790")
-#' schematic.plot(data, group.col = "definition",
+#' schematic.plot(data, 
+#'                group.col = "definition", 
+#'                group1 = "Primary solid Tumor",
+#'                group2 = "Solid Tissue Normal",
+#'                pair = pair, 
+#'                byProbe = "cg19403323")
+#' schematic.plot(data, 
+#'                group.col = "definition", 
+#'                group1 = "Primary solid Tumor",
+#'                group2 = "Solid Tissue Normal",
+#'                pair = pair, 
+#'                byGeneID = "ENSG00000009790")
+#'                
+#' schematic.plot(data, 
+#'                group.col = "definition",
+#'                group1 = "Primary solid Tumor",
+#'                group2 = "Solid Tissue Normal",
 #'                pair = pair, 
 #'                byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
+#' \dontrun{               
+#'    schematic.plot(data, 
+#'                   group.col = "definition",
+#'                   group1 = "Primary solid Tumor",
+#'                   group2 = "Solid Tissue Normal",
+#'                   pair = pair, 
+#'                   byProbe = "cg19403323", 
+#'                   statehub.tracks = "hg38/ENCODE/mcf-7.16mark.segmentation.bed")
+#' }
 schematic.plot <- function(data,
                            group.col = NULL,
                            group1 = NULL,
@@ -68,10 +91,12 @@ schematic.plot <- function(data,
                            byProbe, 
                            byGeneID, 
                            byCoordinate=list(chr=c(), start=c(), end=c()),
+                           statehub.tracks = NULL,
                            dir.out="./",
                            save=TRUE,...){
   # Begin of new schematic plot
   # For a probe get nearby genes
+
   if(!missing(byProbe)){
     args <- list(...)
     params <- args[names(args) %in% c("geneNum","cores")]
@@ -86,6 +111,7 @@ schematic.plot <- function(data,
                 probe.gr, 
                 significant, 
                 label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), 
+                statehub.tracks = statehub.tracks,
                 save=save, 
                 group.col = group.col, 
                 group1 = group1,
@@ -108,6 +134,7 @@ schematic.plot <- function(data,
                 significant,
                 label = sprintf("%s/%s.schematic.byGene",dir.out,gene), 
                 save  = save, 
+                statehub.tracks = statehub.tracks,
                 group.col = group.col,
                 group1 = group1,
                 group2 = group2)
@@ -131,6 +158,7 @@ schematic.plot <- function(data,
                 label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
                               dir.out,byCoordinate$chr[i],byCoordinate$start[i],
                               byCoordinate$end[i]), save=save, 
+                statehub.tracks = statehub.tracks,
                 group.col = group.col,
                 group1 = group1,
                 group2 = group2)
@@ -147,11 +175,12 @@ schematic <- function(data,
                       significant, 
                       label,
                       save=TRUE,
+                      statehub.tracks = NULL,
                       group.col = NULL,
                       group1 = NULL,
                       group2 = NULL){
   options(ucscChromosomeNames=FALSE)
-  if(save) pdf(paste0(label,".pdf"))
+  
   chr <- as.character(seqnames(probe.gr))
   
   idxTrack <- IdeogramTrack(genome = metadata(data)$genome, chromosome = chr)
@@ -183,6 +212,31 @@ schematic <- function(data,
                                       description="this is a test", counts=-log10(significant$Pe))
   interactions.track <-  InteractionTrack(name="Putative pair genes", interactions, chromosome=chr)
   
+  # StateHub tracks
+  state.tracks <- c()
+  if(!is.null(statehub.tracks)){
+    base <- "http://s3-us-west-2.amazonaws.com/statehub-trackhub/tracks/5813b67f46e0fb06b493ceb0/"
+    for(state in statehub.tracks){
+      message("Adding stateHub track: ", state)
+      bed <- paste0(base,state)
+      if(!file.exists(basename(bed))) downloader::download(bed,basename(bed))
+      model <- readLines(basename(bed), n = 10)
+      
+      state <- rtracklayer::import.bed(basename(bed))
+      state.chr <-  state[seqnames(state) == chr & 
+                            start(state) >= min(start(gene.gr) , start(probe.gr) ) & 
+                            end(state) <= max(end(gene.gr) , end(probe.gr) )]
+    
+    tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
+      aux <- state.chr[state.chr$name == x]
+      AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",fill = unique(aux$itemRgb))
+    })
+    }
+    state.tracks <- c(state.tracks,tracks)
+  }
+  if(save) pdf(paste0(label,".pdf"), height = max(7,floor(length(state.tracks)/2 + 7)))
+  
+  
   if(!is.null(group.col)){
     
     if(!is.null(group1) & !is.null(group1))
@@ -202,32 +256,37 @@ schematic <- function(data,
                                name = "probe details",
                                stacking = "squish", 
                                fun = details)
-    plotTracks(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),  
+    plotTracks(c(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),state.tracks),  
                background.title = "darkblue",
                detailsBorder.col = "white",
-               sizes=c(1,1,8,1,2), 
+               sizes=c(1,1,8,1,1,rep(0.5,length(state.tracks))), 
                extend.right = 10000,
                extend.left = 10000,
                details.ratio = 1,
-               details.size = 0.8,
+               details.size = 0.9,
                col = NULL,
+               title.width = 2,
+               cex.title = 0.5,
+               rotation.title=360,
                geneSymbols=TRUE)
     
   } else {
     atrack <- AnnotationTrack(probe.gr, name = "Probes",
                               genome = metadata(data)$genome, 
                               chromosome = chr)
-    plotTracks(list(idxTrack,  axTrack, atrack, interactions.track, genetrack),  
+    plotTracks(c(list(idxTrack,  axTrack, atrack, interactions.track, genetrack),state.tracks),  
                background.title = "darkblue",
                extend.right = 10000,
                extend.left = 10000,
                detailsBorder.col = "white",
-               sizes=c(1,1,1,1,1), 
+               sizes=c(1,1,1,1,1,rep(0.5,length(state.tracks))), 
                details.ratio = 1,
+               rotation.title=360,
+               title.width = 2,
                details.size = 0.8,
                col = NULL,
+               cex.title = 0.5,
                geneSymbols=TRUE)
-    
   }
   if(save) dev.off()
 }
