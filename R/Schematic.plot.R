@@ -96,74 +96,75 @@ schematic.plot <- function(data,
                            save=TRUE,...){
   # Begin of new schematic plot
   # For a probe get nearby genes
-
-  if(!missing(byProbe)){
-    args <- list(...)
-    params <- args[names(args) %in% c("geneNum","cores")]
-    nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
-                                             geneAnnot=rowRanges(getExp(data))),params))
-    for(probe in byProbe){
-      significant <- pair[pair$Probe == probe,]
-      gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
-      probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
-      schematic(data = data, 
-                gene.gr, 
-                probe.gr, 
-                significant, 
-                label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), 
-                statehub.tracks = statehub.tracks,
-                save=save, 
-                group.col = group.col, 
-                group1 = group1,
-                group2 = group2)
-    }
-  }
-  if(!missing(byGeneID)){
-    for(gene in byGeneID){
-      
-      significant <- pair[pair$GeneID==gene,]
-      if(nrow(significant) == 0) {
-        warning(paste0("Gene ", gene, " is not in pair list. We cannot plot it."))
-        next
+  suppressWarnings({
+    if(!missing(byProbe)){
+      args <- list(...)
+      params <- args[names(args) %in% c("geneNum","cores")]
+      nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
+                                               geneAnnot=rowRanges(getExp(data))),params))
+      for(probe in byProbe){
+        significant <- pair[pair$Probe == probe,]
+        gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
+        probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
+        schematic(data = data, 
+                  gene.gr, 
+                  probe.gr, 
+                  significant, 
+                  label=sprintf("%s/%s.schematic.byProbe",dir.out,probe), 
+                  statehub.tracks = statehub.tracks,
+                  save=save, 
+                  group.col = group.col, 
+                  group1 = group1,
+                  group2 = group2)
       }
-      gene.gr <- rowRanges(getExp(data))[gene,]
-      probe.gr <- rowRanges(getMet(data))[significant$Probe,]
-      schematic(data = data,
-                gene.gr, 
-                probe.gr, 
-                significant,
-                label = sprintf("%s/%s.schematic.byGene",dir.out,gene), 
-                save  = save, 
-                statehub.tracks = statehub.tracks,
-                group.col = group.col,
-                group1 = group1,
-                group2 = group2)
     }
-    
-  }
-  if(length(byCoordinate$chr)!=0){
-    for(i in 1:length(byCoordinate$chr)){
-      coordinate <- GRanges(seqnames = byCoordinate$chr[i], 
-                            ranges = IRanges(byCoordinate$start[i],byCoordinate$end[i]))
-      probe.gr  <- rowRanges(getMet(data))[unique(pair$Probe),]
-      probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
-      if(length(probe.gr) == 0) stop("No probes in that region")
-      gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
-      if(length(gene.gr) == 0) stop("No genes in that region")
-      significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
-      schematic(data = data,
-                gene.gr, 
-                probe.gr, 
-                significant,
-                label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
-                              dir.out,byCoordinate$chr[i],byCoordinate$start[i],
-                              byCoordinate$end[i]), save=save, 
-                statehub.tracks = statehub.tracks,
-                group.col = group.col,
-                group1 = group1,
-                group2 = group2)
+    if(!missing(byGeneID)){
+      for(gene in byGeneID){
+        
+        significant <- pair[pair$GeneID==gene,]
+        if(nrow(significant) == 0) {
+          warning(paste0("Gene ", gene, " is not in pair list. We cannot plot it."))
+          next
+        }
+        gene.gr <- rowRanges(getExp(data))[gene,]
+        probe.gr <- rowRanges(getMet(data))[significant$Probe,]
+        schematic(data = data,
+                  gene.gr, 
+                  probe.gr, 
+                  significant,
+                  label = sprintf("%s/%s.schematic.byGene",dir.out,gene), 
+                  save  = save, 
+                  statehub.tracks = statehub.tracks,
+                  group.col = group.col,
+                  group1 = group1,
+                  group2 = group2)
+      }
+      
     }
-  }
+    if(length(byCoordinate$chr)!=0){
+      for(i in 1:length(byCoordinate$chr)){
+        coordinate <- GRanges(seqnames = byCoordinate$chr[i], 
+                              ranges = IRanges(byCoordinate$start[i],byCoordinate$end[i]))
+        probe.gr  <- rowRanges(getMet(data))[unique(pair$Probe),]
+        probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
+        if(length(probe.gr) == 0) stop("No probes in that region")
+        gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
+        if(length(gene.gr) == 0) stop("No genes in that region")
+        significant <- pair[pair$GeneID %in% names(gene.gr) & pair$Probe %in% names(probe.gr),]
+        schematic(data = data,
+                  gene.gr, 
+                  probe.gr, 
+                  significant,
+                  label=sprintf("%s/%s_%s_%s.schematic.byCoordinate",
+                                dir.out,byCoordinate$chr[i],byCoordinate$start[i],
+                                byCoordinate$end[i]), save=save, 
+                  statehub.tracks = statehub.tracks,
+                  group.col = group.col,
+                  group1 = group1,
+                  group2 = group2)
+      }
+    }
+  })
 }
 
 #' @importFrom grDevices rainbow
@@ -210,7 +211,7 @@ schematic <- function(data,
                                       probe.gr[match(significant$Probe,names(probe.gr))],
                                       experiment_name="Putative pair genes", 
                                       description="this is a test", counts=-log10(significant$Pe))
-  interactions.track <-  InteractionTrack(name="Putative pair genes", interactions, chromosome=chr)
+  interactions.track <-  InteractionTrack(name="Putative \npair genes", interactions, chromosome=chr)
   
   # StateHub tracks
   state.tracks <- c()
@@ -220,17 +221,16 @@ schematic <- function(data,
       message("Adding stateHub track: ", state)
       bed <- paste0(base,state)
       if(!file.exists(basename(bed))) downloader::download(bed,basename(bed))
-      model <- readLines(basename(bed), n = 10)
-      
+
       state <- rtracklayer::import.bed(basename(bed))
       state.chr <-  state[seqnames(state) == chr & 
                             start(state) >= min(start(gene.gr) , start(probe.gr) ) & 
                             end(state) <= max(end(gene.gr) , end(probe.gr) )]
-    
-    tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
-      aux <- state.chr[state.chr$name == x]
-      AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",fill = unique(aux$itemRgb))
-    })
+      
+      tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
+        aux <- state.chr[state.chr$name == x]
+        AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",fill = unique(aux$itemRgb))
+      })
     }
     state.tracks <- c(state.tracks,tracks)
   }
