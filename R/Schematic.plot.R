@@ -145,7 +145,7 @@ schematic.plot <- function(data,
     for(i in 1:length(byCoordinate$chr)){
       coordinate <- GRanges(seqnames = byCoordinate$chr[i], 
                             ranges = IRanges(byCoordinate$start[i],byCoordinate$end[i]))
-      probe.gr  <- rowRanges(getMet(data))[pair$Probe,]
+      probe.gr  <- rowRanges(getMet(data))[unique(pair$Probe),]
       probe.gr <-  probe.gr[queryHits(findOverlaps(probe.gr, coordinate)),]
       if(length(probe.gr) == 0) stop("No probes in that region")
       gene.gr <- rowRanges(getExp(data))[queryHits(findOverlaps(rowRanges(getExp(data)), coordinate)),]
@@ -234,7 +234,8 @@ schematic <- function(data,
     }
     state.tracks <- c(state.tracks,tracks)
   }
-  if(save) pdf(paste0(label,".pdf"), height = max(7,floor(length(state.tracks)/2 + 7)))
+  if(save) pdf(paste0(label,".pdf"), height = max(5, 5 + rep(2,!is.null(group.col)),
+                                                  floor(length(state.tracks)/2 + 5 + rep(2,!is.null(group.col)))))
   
   
   if(!is.null(group.col)){
@@ -259,7 +260,7 @@ schematic <- function(data,
     plotTracks(c(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),state.tracks),  
                background.title = "darkblue",
                detailsBorder.col = "white",
-               sizes=c(1,1,8,1,1,rep(0.5,length(state.tracks))), 
+               sizes=c(1,1,8,2,3,rep(0.5,length(state.tracks))), 
                extend.right = 10000,
                extend.left = 10000,
                details.ratio = 1,
@@ -279,7 +280,7 @@ schematic <- function(data,
                extend.right = 10000,
                extend.left = 10000,
                detailsBorder.col = "white",
-               sizes=c(1,1,1,1,1,rep(0.5,length(state.tracks))), 
+               sizes=c(0.5,0.5,1,1,3,rep(0.5,length(state.tracks))), 
                details.ratio = 1,
                rotation.title=360,
                title.width = 2,
