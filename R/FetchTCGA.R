@@ -114,6 +114,8 @@ getRNAseq <- function(disease,
     # Preparing to save output if it does not exists
     rna <- GDCprepare(query, 
                       directory = dir.rna,
+                      save = TRUE,
+                      save.filename =   sprintf("%s/%s_RNA_%s_no_filter.rda",diseasedir,toupper(disease), genome),
                       remove.files.prepared = TRUE,
                       summarizedExperiment = TRUE)
     if(genome == "hg19"){
@@ -169,9 +171,11 @@ get450K <- function(disease,
     }, error = function(e) {
       GDCdownload(query,directory = dir.meth,  method = "client")
     })
-    
+    message("Preparing data")
     met <- GDCprepare(query = query,
                       directory = dir.meth,
+                      save = TRUE,
+                      save.filename =  sprintf("%s/%s_meth_%s_no_filter.rda",diseasedir,toupper(disease),genome),
                       remove.files.prepared = TRUE,
                       summarizedExperiment = TRUE)
     
