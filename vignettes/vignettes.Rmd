@@ -562,7 +562,7 @@ metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2,
 
 ## Identifying putative probe-gene pairs
 
-This step is to link enhancer probes with mehtylation changes to target genes with expression
+This step is to link enhancer probes with methylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out
 by function get.pair. 
 
