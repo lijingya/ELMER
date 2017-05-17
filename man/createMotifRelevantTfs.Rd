@@ -13,7 +13,14 @@ createMotifRelevantTfs(classification = "family")
 A list of TFs and its family members
 }
 \description{
-This function will use TF Class database to create the object
-that maps for each TF the members of its family. TF in the same family have 
-high correlared PWM.
+This will output a list each TF motif and TFs that binding the motis. Multiple TFs may
+recognize a same motif such as TF family.  
+The association between each motif famil and transcription factor was created using the 
+(HOCOMOCO)[http://hocomoco.autosome.ru/human/mono] which TF structural families 
+was created according to TFClass [@wingender2014tfclass]
+This data is stored as a list whose elements 
+are motifs and contents for each element are TFs which recognize the same motif that
+is the name of the element. This data is used in function get.TFs in \Biocpkg{ELMER} 
+to identify the real regulator TF whose motif is enriched in a given set of probes 
+and expression associate with average DNA methylation of these motif sites.
 }

@@ -577,14 +577,14 @@ lesser than K and n percentage of beta values greater K.
 For example, if percentage is 5\%, the number of samples 100 and `K = 0.3`, 
 this filter will select probes that we have at least 5 (5\% of 100\%) samples have beta 
 values > 0.3 and at least 5 samples have beta values < 0.3.
-This filter is importante as true promoters and enhancers usually have a pretty low 
+This filter is important as true promoters and enhancers usually have a pretty low 
 value (of course purity can screw that up).  
 we often see lots of PMD probes across the genome with intermediate values like 0.4.  
 Choosing a value of 0.3 will certainly give some false negatives, but not compared
 to the number of false positives we thought we might get without this filter.
 Please see the documentation for the function `preAssociationProbeFiltering`.
 
-After, for each enhancer probe with differential methylation and passing 
+After, for each distal probe with differential methylation and passing 
 this filter, the closest 10 upstream 
 genes and the closest 10 downstream genes were tested for correlation between 
 methylation of the probe and expression of the gene. To select these genes, 
@@ -709,7 +709,7 @@ function `get.enriched.motif`.
 The build in data Probes.motif is generated using HOMER with a p-value < 1e–4 
 to scan a +/- 250bp region around each probe using HOmo sapiens 
 COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10  position
-weight matrices (PWMs). HOCOMOCO offers 640 PMWs each has a quality rating from A to D where 
+weight matrices (PWMs). HOCOMOCO offers 601 PMWs each has a quality rating from A to D where 
 A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
 limited applications for quantitative analyses. By default only quality A and B will be used for the 
 Motif enrichment analysis, but the Minimum quality score can be selected by the user.
@@ -828,13 +828,16 @@ If save parameter is false, only a data frame containing the same content
 with the first file mentioned below will be output.
 
 The first one csv file. This file contain the regulatory TF significantly 
-associate with average DNA methylation at particular motif sites. It contains 4 
-columns: motif, top.potential.TF, potential.TFs and top_5percent.
+associate with average DNA methylation at particular motif sites. It contains 6 
+columns: motif, top.potential.TF.family, top.potential.TF.subfamily, 
+potential.TFs.family, potential.TFs.subfamily and top_5percent.
 
 1. motif: the names of motif.
-2. top.potential.TF: the highest ranking upstream TFs which are known recognized the motif.
-3. potential.TFs: TFs which are within top 5% list and are known recognized the motif.
-4. top_5percent: all TFs which are within top 5% list.
+2. top.potential.TF.family: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.family
+3. top.potential.TF.subfamily: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.subfamily
+4. potential.TFs.family: TFs which are within top 5% list and are known recognized the motif  (considering family classification).
+5. potential.TFs.subfamily: TFs which are within top 5% list and are known recognized the motif (considering subfamily classification).
+6. top_5percent: all TFs which are within top 5% list.
 
 The second file is rda file. This file contains a matrix storing the statistic 
 results for associations between TFs (row) and average DNA methylation 
@@ -851,7 +854,7 @@ The main arguments of this function are:
 | data | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function. |
 | enriched.motif | A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function. |
 | TFs | A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol. If missing, human.TF list will be used (human.TF data in ELMER.data). For detail information, refer the reference paper. |
-| motif.relavent.TFs | A list containing motif as names and relavent TFs as contents for each list element or a path of XX.rda file containing a list as above. If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). For detail information, refer the reference paper. |
+| motif.relevant.TFs | A list containing motif as names and relavent TFs as contents for each list element or a path of XX.rda file containing a list as above. If missing, TFClass classification will be used. See function createMotifRelevantTfs|
 | percentage | A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2. |
 | dir.out | A path specifies the directory for outputs of get.pair function. Default is current directory |
 | label | A character labels the outputs. |
