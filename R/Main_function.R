@@ -1121,7 +1121,7 @@ get.enriched.motif <- function(data,
 #'   get.TFs(data, 
 #'           enriched.motif, 
 #'           TFs, 
-#'           motif.relavent.TFs, 
+#'           motif.relevant.TFs, 
 #'           percentage = 0.2,
 #'           dir.out = "./",
 #'           label = NULL, 
@@ -1157,8 +1157,10 @@ get.enriched.motif <- function(data,
 #'  Potential responsible TFs will be reported in a dataframe with 4 columns:
 #'  \itemize{
 #'    \item{motif: the names of motif.}
-#'    \item{top.potential.TF: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.}
-#'    \item{potential.TFs: TFs which are within top 5\% list and are known recognized the motif.}
+#'    \item{top.potential.TF.family: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.family}
+#'    \item{top.potential.TF.subfamily: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.subfamily}
+#'    \item{potential.TFs.family: TFs which are within top 5\% list and are known recognized the motif  (considering family classification).}
+#'    \item{potential.TFs.subfamily: TFs which are within top 5\% list and are known recognized the motif (considering subfamily classification).}
 #'    \item{top_5percent: all TFs which are within top 5\% list.}
 #'  }
 #' @author 
@@ -1189,7 +1191,7 @@ get.enriched.motif <- function(data,
 get.TFs <- function(data, 
                     enriched.motif, 
                     TFs, 
-                    motif.relavent.TFs,
+                    motif.relevant.TFs,
                     percentage = 0.2,
                     dir.out = "./",
                     label = NULL,
@@ -1217,12 +1219,14 @@ get.TFs <- function(data,
   } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
-  
-  if(missing(motif.relavent.TFs)){
+
+  if(missing(motif.relevant.TFs)){
     message("Accessing TF families from TFClass database to indentify known potential TF")
-    motif.relavent.TFs <- createMotifRelevantTfs()
-  } else if(is.character(motif.relavent.TFs)){
-    motif.relavent.TFs <- get(load(motif.relavent.TFs)) # The data is in the one and only variable
+    TF.family <-  createMotifRelevantTfs()
+    TF.subfamily <-  createMotifRelevantTfs("subfamily")
+  } else if(is.character(motif.relevant.TFs)){
+    TF.family <- get(load(motif.relevant.TFs)) # The data is in the one and only variable
+    TF.subfamily <-  TF.family
   }
   
   parallel <- FALSE
@@ -1293,24 +1297,32 @@ get.TFs <- function(data,
   # have a higher correlation.
   
   message("Finding potential TF and known potential TF")
+
   # For each motif evaluate TF
   cor.summary <- adply(colnames(TF.meth.cor), 
-                       function(x, TF.meth.cor, motif.relavent.TFs){ 
+                       function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){ 
                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
-                         if (any(top %in% motif.relavent.TFs[[x]])) {
-                           potential.TF <- top[top %in% motif.relavent.TFs[[x]]]
+                         if (any(top %in% motif.relavent.TFs.family[[x]])) {
+                           potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
                          } else {
-                           potential.TF <- NA
+                           potential.TF.family <- NA
+                         }
+                         if (any(top %in% motif.relavent.TFs.subfamily[[x]])) {
+                           potential.TF.subfamily <- top[top %in% motif.relavent.TFs.subfamily[[x]]]
+                         } else {
+                           potential.TF.subfamily <- NA
                          }
                          out <- data.frame("motif" = x,
-                                           "top potential TF" = ifelse(!is.na(potential.TF[1]),potential.TF[1],NA),
-                                           "potential TFs" = ifelse(!any(sapply(potential.TF,is.na)),paste(potential.TF, collapse = ";"),NA),
-                                           "top_5percent" = paste(top,collapse = ";"),
+                                           "top.potential.TF.family" = ifelse(!is.na(potential.TF.family[1]),potential.TF.family[1],NA),
+                                           "top.potential.TF.subfamily" = ifelse(!is.na(potential.TF.subfamily[1]),potential.TF.subfamily[1],NA),
+                                           "potential.TF.family" = ifelse(!any(sapply(potential.TF.family,is.na)),paste(potential.TF.family, collapse = ";"),NA),
+                                           "potential.TF.subfamily" = ifelse(!any(sapply(potential.TF.subfamily,is.na)),paste(potential.TF.subfamily, collapse = ";"),NA),
+                                           "top_5percent_TFs" = paste(top,collapse = ";"),
                                            stringsAsFactors = FALSE)
                          return(out)
                        },                                         
-                       TF.meth.cor=TF.meth.cor, motif.relavent.TFs=motif.relavent.TFs, 
+                       TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily, 
                        .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
   rownames(cor.summary) <- cor.summary$motif
   
@@ -1327,14 +1339,14 @@ get.TFs <- function(data,
   dir.create(sprintf("%s/TFrankPlot_family",dir.out),showWarnings = FALSE)
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
-               TF.label =  createMotifRelevantTfs()[colnames(TF.meth.cor)],
+               TF.label =  TF.family[colnames(TF.meth.cor)],
                dir.out=sprintf("%s/TFrankPlot_family",dir.out), 
                save=TRUE)
   message("TF rank plot highlighting TF in the same subfamily (folder: ", sprintf("%s/TFrankPlot_subfamily",dir.out),")")
   dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out),showWarnings = FALSE)
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
-               TF.label =  createMotifRelevantTfs("subfamily")[colnames(TF.meth.cor)],
+               TF.label =  TF.subfamily[colnames(TF.meth.cor)],
                dir.out=sprintf("%s/TFrankPlot_subfamily",dir.out), 
                save=TRUE)
   
