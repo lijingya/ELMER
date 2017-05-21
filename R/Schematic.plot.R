@@ -230,13 +230,17 @@ schematic <- function(data,
 
       tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
         aux <- state.chr[state.chr$name == x]
-        AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",fill = unique(aux$itemRgb))
+        AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",
+                        col = NULL,
+                        col.line = NULL,
+                        shape = "box",
+                        fill = unique(aux$itemRgb))
       })
     }
     #all.states <- AnnotationTrack(state.chr,fill = state.chr$itemRgb, stacking = "squish")
     state.tracks <- c(state.tracks,tracks)
     message("Probes overlapping")
-    print(IRanges::subsetByOverlaps(state.chr,probe.gr))
+    print(IRanges::subsetByOverlaps(state.chr,probe.gr)$name)
   }
   if(save) pdf(paste0(label,".pdf"), height = max(5, 5 + rep(2,!is.null(group.col)),
                                                   floor(length(state.tracks)/2 + 5 + rep(2,!is.null(group.col)))))
@@ -271,6 +275,7 @@ schematic <- function(data,
                extend.left = 10000,
                details.ratio = 1,
                details.size = 0.9,
+               baseline=0, innerMargin=0,
                col = NULL,
                title.width = 2,
                cex.title = 0.5,
@@ -286,6 +291,7 @@ schematic <- function(data,
                to = max(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                extend.right = 10000,
                extend.left = 10000,
+               baseline=0, innerMargin=0,
                detailsBorder.col = "white",
                sizes=c(0.5,0.5,1,1,3,rep(0.5,length(state.tracks))),
                details.ratio = 1,

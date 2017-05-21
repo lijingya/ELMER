@@ -28,7 +28,7 @@ will ploted. 20 is default for geneNum. Output see detail.}
 symbol and probe contains the a vector of probes' name. Output see detail.}
 
 \item{category}{A vector labels subtype of samples or a character which is the 
-column name in the pData(data) in the multiAssayExperiment object. Once specified, samples 
+column name in the colData(data) in the multiAssayExperiment object. Once specified, samples 
 will label different color. The color can be customized by using color.value.}
 
 \item{dir.out}{A path specify the directory to which the figures will be saved. 

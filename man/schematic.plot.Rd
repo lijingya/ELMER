@@ -6,34 +6,34 @@
 \usage{
 schematic.plot(data,
                group.col = NULL,
-               pair, 
-               byProbe, 
-               byGeneID, 
+               pair,
+               byProbe,
+               byGeneID,
                byCoordinate=list(chr=c(), start=c(), end=c()),
                dir.out="./",
                save=TRUE,...)
 }
 \arguments{
-\item{data}{A Multi Assay Experiment object with DNA methylation and 
+\item{data}{A Multi Assay Experiment object with DNA methylation and
 gene expression Summarized Experiment objects}
 
-\item{group.col}{A column defining the groups of the sample. You can view the 
+\item{group.col}{A column defining the groups of the sample. You can view the
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
-\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group2}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.#' @param byProbe A vector of probe names.}
 
-\item{pair}{A data frame with three columns: Probe, Gene ID (Ensemble gene ID) 
+\item{pair}{A data frame with three columns: Probe, Gene ID (Ensemble gene ID)
 and Pe (empirical p-value). This is the ouput of get.pair function.}
 
 \item{byGeneID}{A vector of gene ID}
 
-\item{byCoordinate}{A list contains chr, start and end. 
+\item{byCoordinate}{A list contains chr, start and end.
 byCoordinate=list(chr=c(),start=c(),end=c()).}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
@@ -53,47 +53,47 @@ byProbes:
  genes and the significantly linked gene to the probe.
 
 byGene:
- When a vector of gene ID are provided, function will produce schematic plots 
- for each individual genes. The schematic plot contains the gene and all the 
+ When a vector of gene ID are provided, function will produce schematic plots
+ for each individual genes. The schematic plot contains the gene and all the
  significantly linked probes.
 
 byCoordinate:
- When a genomic coordinate is provided, function will 
- produce a schematic plot for this coordinate. The schematic plot contains 
+ When a genomic coordinate is provided, function will
+ produce a schematic plot for this coordinate. The schematic plot contains
  all genes and significantly linked probes in the range and the significant links.
 }
 \examples{
 data(elmer.data.example)
 pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
-                   Symbol = c("TRAF3IP3","LAMB3","LAMB3"), 
+                   Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
                    Pe = c(0.001,0.00001,0.001))
-schematic.plot(data, 
-               group.col = "definition", 
-               group1 = "Primary solid Tumor",
-               group2 = "Solid Tissue Normal",
-               pair = pair, 
-               byProbe = "cg19403323")
-schematic.plot(data, 
-               group.col = "definition", 
-               group1 = "Primary solid Tumor",
-               group2 = "Solid Tissue Normal",
-               pair = pair, 
-               byGeneID = "ENSG00000009790")
-               
-schematic.plot(data, 
+schematic.plot(data,
                group.col = "definition",
                group1 = "Primary solid Tumor",
                group2 = "Solid Tissue Normal",
-               pair = pair, 
+               pair = pair,
+               byProbe = "cg19403323")
+schematic.plot(data,
+               group.col = "definition",
+               group1 = "Primary solid Tumor",
+               group2 = "Solid Tissue Normal",
+               pair = pair,
+               byGeneID = "ENSG00000009790")
+
+schematic.plot(data,
+               group.col = "definition",
+               group1 = "Primary solid Tumor",
+               group2 = "Solid Tissue Normal",
+               pair = pair,
                byCoordinate = list(chr="chr1", start = 209000000, end = 209960000))
-\dontrun{               
-   schematic.plot(data, 
+\dontrun{
+   schematic.plot(data,
                   group.col = "definition",
                   group1 = "Primary solid Tumor",
                   group2 = "Solid Tissue Normal",
-                  pair = pair, 
-                  byProbe = "cg19403323", 
+                  pair = pair,
+                  byProbe = "cg19403323",
                   statehub.tracks = "hg38/ENCODE/mcf-7.16mark.segmentation.bed")
 }
 }
