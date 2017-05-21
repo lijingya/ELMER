@@ -134,7 +134,8 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
     params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
-    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,group.col = "TN")))
+    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,group.col = "TN", group1 = "Tumor",
+                                                     group2 = "Normal")))
     if(length(analysis)==1) return(diff.meth)
   }
   
@@ -182,6 +183,8 @@ TCGA.pipe <- function(disease,
                                 nearGenes = nearGenes.file,
                                 permu.dir = permu.dir,
                                 group.col = "TN",
+                                group1 = "Tumor",
+                                group2 = "Normal",
                                 dir.out   = dir.out,
                                 cores     = cores,
                                 label     = diff.dir),
