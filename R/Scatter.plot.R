@@ -25,7 +25,7 @@
 #'@param byTF A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's 
 #'symbol and probe contains the a vector of probes' name. Output see detail.
 #'@param category A vector labels subtype of samples or a character which is the 
-#'column name in the pData(data) in the multiAssayExperiment object. Once specified, samples 
+#'column name in the colData(data) in the multiAssayExperiment object. Once specified, samples 
 #'will label different color. The color can be customized by using color.value. 
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
@@ -65,12 +65,12 @@ scatter.plot <- function(data,
   
   if(!is.null(category) && length(category)==1) { 
     
-    if(! category %in% colnames(pData(data))) 
-      stop("Cateogry not found in the  phenotypic data (pData(data)) ")
+    if(! category %in% colnames(colData(data))) 
+      stop("Cateogry not found in the  phenotypic data (colData(data)) ")
     
     legend.title <- simpleCap(category)
     samples <- sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"]
-    category <- pData(data)[samples,category]
+    category <- colData(data)[samples,category]
     category <- sapply(category, simpleCap)
   }
   

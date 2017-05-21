@@ -43,5 +43,8 @@ Every steps' results are saved.
 \dontrun{
   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
   TCGA.pipe(disease = "LUSC",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
+  projects <- TCGAbiolinks:::getGDCprojects()$project_id
+  projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=T)])
+  for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
 }
 }
