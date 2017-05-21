@@ -481,6 +481,7 @@ lm_eqn = function(df,Dep,Exp){
 #' @import GenomeInfoDb
 #' @importFrom GenomicFeatures transcripts
 #' @importFrom GenomicRanges makeGRangesFromDataFrame
+#' @importFrom biomaRt useEnsembl
 getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   if (genome == "hg19"){
     # for hg19
@@ -591,7 +592,7 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' was created according to TFClass [@wingender2014tfclass]
 #' This data is stored as a list whose elements 
 #' are motifs and contents for each element are TFs which recognize the same motif that
-#' is the name of the element. This data is used in function get.TFs in \Biocpkg{ELMER} 
+#' is the name of the element. This data is used in function get.TFs in \pkg{ELMER} 
 #' to identify the real regulator TF whose motif is enriched in a given set of probes 
 #' and expression associate with average DNA methylation of these motif sites.
 #' @importFrom rvest html_table  %>%
