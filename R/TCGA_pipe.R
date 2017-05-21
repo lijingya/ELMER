@@ -113,8 +113,10 @@ TCGA.pipe <- function(disease,
         message("There are no samples for both groups")
         return(NULL)
       }
+      
       mae <- mae[,colData(mae)[,group.col] %in% sample.type]
       save(mae,file = file)
+      message("File saved as: ", file)
       readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
     }
   }
