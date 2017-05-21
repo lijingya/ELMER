@@ -83,11 +83,13 @@ get.feature.probe <- function(feature,
         if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
         feature <- get(ls(newenv)[1],envir=newenv)   
       } else if(is.null(feature)) {
-        message("Returning distal probes")
+        message("Returning distal probes: ", length(probe))
         return(probe)
       }
       if(is(feature,"GRanges")) {             
         probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+        message("Returning distal probes overlapping with features: ", length(probe))
+        
       } else {
         stop("feature is not GRanges object.")
       }

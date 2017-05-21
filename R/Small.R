@@ -496,7 +496,14 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
                     "external_gene_id")
   } else {
     # for hg38
-    ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
+    ensembl <- tryCatch({
+      useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl",
+                 mirror = "useast")
+    },  error = function(e) {
+      useEnsembl("ensembl",
+                 dataset = "hsapiens_gene_ensembl",
+                 mirror = "uswest")
+    })
     attributes <- c("chromosome_name",
                     "start_position",
                     "end_position", "strand",

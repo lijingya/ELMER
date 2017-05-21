@@ -118,6 +118,8 @@ TCGA.pipe <- function(disease,
       save(mae,file = file)
       message("File saved as: ", file)
       readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
+    } else {
+      message("File already exists: ", file)
     }
   }
   
