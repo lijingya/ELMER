@@ -110,6 +110,9 @@ TCGA.pipe <- function(disease,
                        linearize.exp = TRUE,
                        TCGA          = TRUE)
       if(!all(sample.type %in% colData(mae)[,group.col])){
+        print(table(colData(mae)[,group.col]))
+        print(mae)
+        print(table(colData(mae)[,"definition"]))
         message("There are no samples for both groups")
         return(NULL)
       }
