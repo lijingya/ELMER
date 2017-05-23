@@ -86,7 +86,6 @@ test_that("Gene expression is calculated", {
                         diffExp = TRUE,
                         group.col = "definition",
                         dir.out="./",
-                        calculate.Pe = TRUE,
                         permu.dir = "permu_test",
                         label = "hypo")
   expect_true(any(grepl("log2FC", colnames(Hypo.pair))))
