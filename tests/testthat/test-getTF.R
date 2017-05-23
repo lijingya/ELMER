@@ -29,10 +29,11 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   })
   sink();
   tf.family <- createMotifRelevantTfs()  
-  expect_true(TF$potential.TFs %in% tf.family$P53_HUMAN.H10MO.B)
-  expect_true(TF$top.potential.TF %in% TF$top_5percent)
-  expect_true(TF$top.potential.TF %in% TF$potential.TFs)
-  expect_true(TF$potential.TFs %in% TF$top_5percent)
+  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
+  expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
+  expect_true(TF$top.potential.TF.family %in% TF$potential.TF.family)
+  expect_true(is.na(TF$top.potential.TF.subfamily))
+  expect_true(TF$potential.TF.family %in% TF$top_5percent)
   
 })  
 
@@ -56,8 +57,10 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
   expect_equal(floor(sum(human.tf$ensembl_gene_id %in% rownames(getExp(data))) * 0.05), 
                length(unlist(strsplit(as.character(TF$top_5percent),";"))))
   if(!TF$top_5percent %in% tf.family$P53_HUMAN.H10MO.B){
-    expect_true(is.na(TF$top.potential.TF))
-    expect_true(is.na(TF$potential.TFs))
+    expect_true(is.na(TF$top.potential.TF.family))
+    expect_true(is.na(TF$potential.TF.family))
+    expect_true(is.na(TF$top.potential.TF.subfamily))
+    expect_true(is.na(TF$potential.TF.subfamily))
   }
 })  
 
@@ -83,9 +86,9 @@ test_that("Test if the results is right", {
   colnames(met) <- c(as.character(1:6))
   met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
   
-  pData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
+  colData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
   # Create datas
-  data <- createMAE(exp,met, genome = "hg19", pData = pData)
+  data <- createMAE(exp,met, genome = "hg19", colData =  colData)
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
   
@@ -104,8 +107,8 @@ test_that("Test if the results is right", {
   })
   sink();
   
-  expect_true(TF$potential.TFs == "TP73")
-  expect_true(TF$top.potential.TF == "TP73")
+  expect_true(TF$potential.TF.family == "TP73")
+  expect_true(TF$top.potential.TF.family == "TP73")
   expect_true(TF$top_5percent == "TP73")
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
@@ -124,8 +127,8 @@ test_that("Test if the results is right", {
                   label = "hypo")
   })
   sink();
-  expect_true(TF$potential.TFs == "TP73")
-  expect_true(TF$top.potential.TF == "TP73")
+  expect_true(TF$potential.TF.family == "TP73")
+  expect_true(TF$top.potential.TF.family == "TP73")
   expect_true(TF$top_5percent == "TP73")
   
   
@@ -142,9 +145,9 @@ test_that("Test if the results is right", {
   colnames(met) <- c(as.character(1:6))
   met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
   
-  pData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
+  colData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
   # Create datas
-  data <- createMAE(exp,met, genome = "hg19", pData = pData)
+  data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
   sink("/dev/null");
@@ -160,8 +163,8 @@ test_that("Test if the results is right", {
                   label = "hypo")
   })
   sink();
-  expect_true(TF$potential.TFs == "TP53")
-  expect_true(TF$top.potential.TF == "TP53")
+  expect_true(TF$potential.TF.family == "TP53")
+  expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
@@ -180,13 +183,15 @@ test_that("Test if the results is right", {
                   label = "hypo")
   })
   sink();
-  expect_true(TF$potential.TFs == "TP53")
-  expect_true(TF$top.potential.TF == "TP53")
+  expect_true(TF$potential.TF.family == "TP53")
+  expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
 })
 
 test_that("It creates a PDF with the TF ranking plot", {
-  expect_true(file.exists("TFrankPlot/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
-  unlink("TFrankPlot",recursive = TRUE, force = TRUE)
+  expect_true(file.exists("TFrankPlot_family/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+  expect_true(file.exists("TFrankPlot_subfamily/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+  unlink("TFrankPlot_family",recursive = TRUE, force = TRUE)
+  unlink("TFrankPlot_subfamily",recursive = TRUE, force = TRUE)
 })
   
