@@ -17,6 +17,11 @@ test_that("The directions should change if we change the groups", {
                                  group2 = "Primary solid Tumor",
                                  sig.dif = 0.1) # get hypomethylated probes
   expect_equal(Hyper.probe.1$probe,Hypo.probe.1$probe)
+  expect_true(min(Hypo.probe.1$adjust.p) >= 0)
+  expect_true(max(Hypo.probe.1$adjust.p) <= 1)
+  expect_true(min(Hypo.probe.1$pvalue) >= 0)
+  expect_true(max(Hypo.probe.1$pvalue) <= 1)
+  
   expect_equal(round(Hyper.probe.1[,3],digits = 2),-round(Hypo.probe.1[,3],digits = 2))
   
   mean.tp <- rowMeans(assay(getMet(data)[Hyper.probe.1$probe[1],colData(data)[sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"],"definition"] == "Primary solid Tumor"]))
