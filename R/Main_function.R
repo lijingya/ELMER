@@ -233,8 +233,8 @@ get.diff.meth <- function(data,
   out <- as.data.frame(out,stringsAsFactors = FALSE)
   out$probe <- probes
   diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
-  out$adjust.p <- p.adjust(as.numeric(out[,2]),method = "BH")
-  out <- out[,c(3,1,2,4)]
+  out$adjust.p <- p.adjust(as.numeric(out$PP),method = "BH")
+  out <- out[,c("probe","PP","MeanDiff","adjust.p")]
   colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
   rownames(out) <- out$probe
   
