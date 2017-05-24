@@ -1138,7 +1138,7 @@ get.enriched.motif <- function(data,
 #'  for each list element or a path of XX.rda file containing a list as above. 
 #' If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
 #' For detail information, refer the reference paper.
-#' @param percentage A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2.
+#' @param percentage A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2.
 #' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
