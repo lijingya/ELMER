@@ -491,7 +491,10 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
                        dataset = "hsapiens_gene_ensembl")
     attributes <- c("chromosome_name",
                     "start_position",
-                    "end_position", "strand",
+                    "end_position", 
+                    "strand",
+                    "transcript_start",
+                    "transcript_end",
                     "ensembl_transcript_id",
                     "ensembl_gene_id", "entrezgene",
                     "external_gene_id")
@@ -509,13 +512,16 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
                     "start_position",
                     "end_position", "strand",
                     "ensembl_gene_id", 
+                    "transcription_start_site",
+                    "transcript_start",
                     "ensembl_transcript_id",
+                    "transcript_end",
                     "external_gene_name")
   }
   chrom <- c(1:22, "X", "Y","M","*")
   db.datasets <- listDatasets(ensembl)
   description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
-  message(paste0("Downloading genome information. Using: ", description))
+  message(paste0("Downloading transcripts information. Using: ", description))
   
   filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
   if(!file.exists(filename)) {
@@ -529,7 +535,7 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
   tss$strand[tss$strand == 1] <- "+" 
   tss$strand[tss$strand == -1] <- "-" 
-  tss <- makeGRangesFromDataFrame(tss,start.field = "start_position", end.field = "end_position", keep.extra.columns = TRUE)
+  tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
   
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
