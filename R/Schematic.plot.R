@@ -96,10 +96,14 @@ schematic.plot <- function(data,
                            save=TRUE,...){
   # Begin of new schematic plot
   # For a probe get nearby genes
+  args <- list(...)
+  params <- args[names(args) %in% c("geneNum","cores")]
+  
+  extra.tracks <- args[grepl("track",names(args))]
   suppressWarnings({
     if(!missing(byProbe)){
-      args <- list(...)
-      params <- args[names(args) %in% c("geneNum","cores")]
+     
+      
       nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
                                                geneAnnot=rowRanges(getExp(data))),params))
       for(probe in byProbe){
@@ -115,7 +119,8 @@ schematic.plot <- function(data,
                   save=save,
                   group.col = group.col,
                   group1 = group1,
-                  group2 = group2)
+                  group2 = group2,
+                  extra.tracks = extra.tracks)
       }
     }
     if(!missing(byGeneID)){
@@ -137,7 +142,8 @@ schematic.plot <- function(data,
                   statehub.tracks = statehub.tracks,
                   group.col = group.col,
                   group1 = group1,
-                  group2 = group2)
+                  group2 = group2,
+                  extra.tracks = extra.tracks)
       }
 
     }
@@ -161,7 +167,8 @@ schematic.plot <- function(data,
                   statehub.tracks = statehub.tracks,
                   group.col = group.col,
                   group1 = group1,
-                  group2 = group2)
+                  group2 = group2,
+                  extra.tracks = extra.tracks)
       }
     }
   })
@@ -179,7 +186,8 @@ schematic <- function(data,
                       statehub.tracks = NULL,
                       group.col = NULL,
                       group1 = NULL,
-                      group2 = NULL){
+                      group2 = NULL,
+                      extra.tracks = NULL){
   options(ucscChromosomeNames=FALSE)
 
   chr <- as.character(seqnames(probe.gr))
@@ -196,23 +204,47 @@ schematic <- function(data,
   genetrack <- GeneRegionTrack(gene.gr, name = "Gene",
                                fill = fill,
                                symbol = values(gene.gr)$external_gene_name,
-                               shape = "arrow")
+                               shape = "smallArrow")
 
   details <- function(identifier, ...) {
     d <- data.frame(signal = assay(getMet(data))[identifier, ], group = colData(data)[,group.col])
-    print(densityplot(~signal, group = group, data = d, auto.key = TRUE,
-                      main = list(label = identifier, cex = 0.7),
-                      scales = list(draw = FALSE, x = list(draw = TRUE)),
-                      ylab = "", xlab = ""), newpage = FALSE,
+    print( 
+      bwplot(signal~group,
+             data=d,,
+             xlab=group.col, ylab='DNA methylation levels',
+             horizontal=FALSE,
+             panel = function(..., box.ratio) {
+               panel.violin(..., col = "lightblue",
+                            varwidth = FALSE, box.ratio = box.ratio)
+               panel.bwplot(..., col='black',
+                            cex=0.8, pch='|', fill='gray', box.ratio = .1)
+             },
+             par.settings = list(box.rectangle=list(col='black'),
+                                 plot.symbol = list(pch='.', cex = 0.1)),
+             scales=list(x=list(rot=0, cex=0.5))),
+             #densityplot(~signal, group = group, data = d, auto.key = TRUE,
+      #                main = list(label = identifier, cex = 0.7),
+      #                scales = list(draw = FALSE, x = list(draw = TRUE)),
+      #                ylab = "", xlab = ""), 
+          newpage = FALSE,
           prefix = "plot")
   }
 
-  interactions <- GenomicInteractions(gene.gr[match(significant$GeneID,names(gene.gr))],
+  genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
+  genes.plot <- resize(genes.plot,width = 1)
+  interactions <- GenomicInteractions(genes.plot,
                                       probe.gr[match(significant$Probe,names(probe.gr))],
-                                      experiment_name="Putative pair genes",
-                                      description="this is a test", counts=-log10(significant$Pe))
-  interactions.track <-  InteractionTrack(name="Putative \npair genes", interactions, chromosome=chr)
-  probe.col <- "red"
+                                      experiment_name="Putative pair genes ",
+                                      description="this is a test", counts=-log10(significant$Raw.p))
+  interactions.track <-  InteractionTrack(name="Putative pair genes\n (-log10 raw p-value)", interactions, chromosome=chr)
+  displayPars(interactions.track) = list(col.interactions="red", 
+                                        col.anchors.fill ="transparent",
+                                        col.anchors.line = "transparent",
+                                        interaction.dimension="height", 
+                                        interaction.measure ="counts",
+                                        anchor.height = 0.1)
+
+  probe.col <- "black"
   # StateHub tracks
   state.tracks <- c()
   if(!is.null(statehub.tracks)){
@@ -230,7 +262,8 @@ schematic <- function(data,
 
       tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
         aux <- state.chr[state.chr$name == x]
-        AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), stacking = "dense",
+        AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), 
+                        stacking = "dense",
                         col = NULL,
                         col.line = NULL,
                         shape = "box",
@@ -257,26 +290,29 @@ schematic <- function(data,
                                groupAnnotation = "group",
                                chromosome = chr,
                                fill = probe.col,
-                               detailsConnector.col=probe.col,
-                               detailsBorder.col=probe.col,
+                               detailsConnector.col="grey",
+                               detailsBorder.col="grey",
                                col.line=probe.col,
                                detailsBorder.lwd=0,
+                               detailsConnector.pch = NA,
                                id = names(probe.gr),
-                               name = "probe details",
+                               name = "Probe details",
                                stacking = "squish",
                                fun = details)
-    plotTracks(c(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),state.tracks),
+    plotTracks(c(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),extra.tracks,state.tracks),
                background.title = "darkblue",
                detailsBorder.col = "white",
                from = min(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                to = max(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
-               sizes=c(1,1,8,2,3,rep(0.5,length(state.tracks))),
+               sizes=c(1,1,8,2,3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
                extend.right = 10000,
-               extend.left = 10000,
+               extend.left = 100000,
                details.ratio = 1,
                details.size = 0.9,
                baseline=0, innerMargin=0,
                col = NULL,
+               #fontsize = 8,
+               showBandId = TRUE, cex.bands = 0.5,
                title.width = 2,
                cex.title = 0.5,
                rotation.title=360,
@@ -285,16 +321,18 @@ schematic <- function(data,
     atrack <- AnnotationTrack(probe.gr, name = "Probes",
                               genome = metadata(data)$genome,
                               chromosome = chr)
-    plotTracks(c(list(idxTrack,  axTrack, atrack, interactions.track, genetrack),state.tracks),
+    plotTracks(c(list(idxTrack,  axTrack, interactions.track,atrack , genetrack),extra.tracks,state.tracks),
                background.title = "darkblue",
                from = min(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                to = max(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                extend.right = 10000,
-               extend.left = 10000,
+               extend.left = 100000,
                baseline=0, innerMargin=0,
+               showBandId = TRUE, cex.bands = 0.5,
                detailsBorder.col = "white",
-               sizes=c(0.5,0.5,1,1,3,rep(0.5,length(state.tracks))),
+               sizes=c(0.5,0.5,1,1,3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
                details.ratio = 1,
+               #fontsize = 8,
                rotation.title=360,
                title.width = 2,
                details.size = 0.8,
