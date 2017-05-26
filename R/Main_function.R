@@ -1144,6 +1144,14 @@ get.enriched.motif <- function(data,
 #' @param label A character labels the outputs.
 #' @param save A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and 
 #' getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.
+#' @param group.col A column defining the groups of the sample. You can view the 
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
 #' @export 
 #' @details 
 #' save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
@@ -1193,6 +1201,9 @@ get.enriched.motif <- function(data,
 get.TFs <- function(data, 
                     enriched.motif, 
                     TFs, 
+                    group.col,
+                    group1,
+                    group2,
                     motif.relevant.TFs,
                     percentage = 0.2,
                     dir.out = "./",
@@ -1209,6 +1220,11 @@ get.TFs <- function(data,
   }else if(!is.list(enriched.motif)){
     stop("enriched.motif option should be a list object.")
   }
+  
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   
   if(missing(TFs)){
     # Here we will make some assumptions:

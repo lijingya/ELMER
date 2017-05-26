@@ -23,6 +23,17 @@ get.TFs(data,
 If missing, human.TF list will be used (human.TF data in ELMER.data). 
 For detail information, refer the reference paper.}
 
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
+
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
 \item{percentage}{A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2.}
 
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
