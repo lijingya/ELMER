@@ -78,8 +78,12 @@ scatter.plot <- function(data,
     
     if(length(byPair$probe) != length(byPair$gene))
       stop("In pairs, the length of probes should be the same with the length of genes.")
+
+    pb <-  txtProgressBar(min = 0, max = length(byPair$gene), title = "creating images", 
+                          style = 3, initial = 0, char = "=")
     
     for(i in 1:length(byPair$probe)){
+      setTxtProgressBar(pb, i)
       probe <- byPair$probe[i]
       gene <- byPair$gene[i]
       symbol <- getSymbol(data,geneID=gene)
@@ -94,8 +98,9 @@ scatter.plot <- function(data,
       if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
                       plot = P,useDingbats=FALSE, width=7, height = 6)
     }
+    close(pb)  
+    
   }
-  
   if(length(byProbe$probe) != 0){
     nearGenes <- GetNearGenes(data    = data,
                               probes  = byProbe$probe,

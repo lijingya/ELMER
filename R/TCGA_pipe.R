@@ -27,6 +27,8 @@
 #'   projects <- TCGAbiolinks:::getGDCprojects()$project_id
 #'   projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=T)])
 #'   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
+#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
+#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
 #' }
 TCGA.pipe <- function(disease,
                       genome = "hg38",
