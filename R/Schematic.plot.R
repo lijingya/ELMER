@@ -102,8 +102,6 @@ schematic.plot <- function(data,
   extra.tracks <- args[grepl("track",names(args))]
   suppressWarnings({
     if(!missing(byProbe)){
-     
-      
       nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
                                                geneAnnot=rowRanges(getExp(data))),params))
       for(probe in byProbe){
@@ -340,5 +338,8 @@ schematic <- function(data,
                cex.title = 0.5,
                geneSymbols=TRUE)
   }
-  if(save) dev.off()
+  if(save) {
+    message("Saving as: ", label)
+    dev.off()
+  }
 }
