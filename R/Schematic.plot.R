@@ -202,7 +202,7 @@ schematic <- function(data,
   genetrack <- GeneRegionTrack(gene.gr, name = "Gene",
                                fill = fill,
                                symbol = values(gene.gr)$external_gene_name,
-                               shape = "smallArrow")
+                               shape = "arrow")
 
   details <- function(identifier, ...) {
     d <- data.frame(signal = assay(getMet(data))[identifier, ], group = colData(data)[,group.col])
