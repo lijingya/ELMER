@@ -70,7 +70,7 @@ knitr::opts_chunk$set(dpi = 300, cache = FALSE)
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
-dir.create("result")
+dir.create("result",showWarnings = FALSE)
 library(BiocStyle)
 ```
 
@@ -676,6 +676,9 @@ nearGenes <- GetNearGenes(data = data, probes = Sig.probes, cores = parallel::de
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
+                      group.col = "definition",
+                      group1 =  "Primary solid Tumor",
+                      group2 = "Solid Tissue Normal",
                       nearGenes = nearGenes,
                       permu.dir = "result/permu",
                       permu.size = 100, # Please set to 100000 to get significant results
@@ -865,6 +868,9 @@ The main arguments of this function are:
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE}
 ## identify regulatory TF for the enriched motifs
 TF <- get.TFs(data = data, 
+              group.col = "definition",
+              group1 =  "Primary solid Tumor",
+              group2 = "Solid Tissue Normal",
               enriched.motif = enriched.motif,
               dir.out = "result", 
               cores = 1, 
@@ -963,10 +969,10 @@ TF.rank.plot(motif.pvalue = TF.meth.cor,
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the TP53 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
 motif <- "P73_HUMAN.H10MO.A"
-TF.rank.plot(motif.pvalue=TF.meth.cor,  
-            motif=motif, 
-            TF.label=createMotifRelevantTfs("subfamily")[motif],
-            save=FALSE)
+TF.rank.plot(motif.pvalue = TF.meth.cor,  
+            motif = motif, 
+            TF.label = createMotifRelevantTfs("subfamily")[motif],
+            save = FALSE)
 ```
 
 # Session Information

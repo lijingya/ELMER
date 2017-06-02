@@ -47,7 +47,7 @@ metBoxPlot <- function(data,
                        probe, 
                        percentage = 0.2, 
                        diff.dir = "hypo",
-                       legend.col= NULL,
+                       legend.col = NULL,
                        title = NULL,
                        filename = NULL,
                        save = TRUE) {
@@ -79,11 +79,11 @@ metBoxPlot <- function(data,
     showlegend <- TRUE
   }  
   if(diff.dir == "hyper") {
-    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(ceiling(sum(aux$group == group2) * .2)) %>% select(pos),
-                      aux %>% filter(group %in% group1) %>% top_n(ceiling(sum(aux$group == group1) * .2)) %>% select(pos))
+    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(min(5,ceiling(sum(aux$group == group2) * .2))) %>% select(pos),
+                      aux %>% filter(group %in% group1) %>% top_n(min(5,ceiling(sum(aux$group == group1) * .2))) %>% select(pos))
   } else {
-    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(-ceiling(sum(aux$group == group2) * .2)) %>% select(pos),
-                      aux %>% filter(group %in% group1) %>% top_n(-ceiling(sum(aux$group == group1) * .2)) %>% select(pos))
+    val.used <- rbind(aux %>% filter(group %in% group2) %>% top_n(-min(5,ceiling(sum(aux$group == group2) * .2))) %>% select(pos),
+                      aux %>% filter(group %in% group1) %>% top_n(-min(5,ceiling(sum(aux$group == group1) * .2))) %>% select(pos))
   }
   aux$used <- " (100%)"
   aux.used <- aux[aux$DNA.methylation.beta.value %in% val.used$DNA.methylation.beta.value,]

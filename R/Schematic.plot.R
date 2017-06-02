@@ -100,32 +100,41 @@ schematic.plot <- function(data,
   params <- args[names(args) %in% c("geneNum","cores")]
   
   extra.tracks <- args[grepl("track",names(args))]
+  
   suppressWarnings({
     if(!missing(byProbe)){
-     
-      
       nearGenes <- do.call(GetNearGenes,c(list(TRange=rowRanges(getMet(data))[byProbe,],
                                                geneAnnot=rowRanges(getExp(data))),params))
+      pb <-  txtProgressBar(min = 0, max = length(byProbe), title = "creating images", 
+                            style = 3, initial = 0, char = "=")
+      progress <- 0
       for(probe in byProbe){
+        progress <- progress + 1
+        setTxtProgressBar(pb, progress)
         significant <- pair[pair$Probe == probe,]
         gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
         probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
         schematic(data = data,
-                  gene.gr,
-                  probe.gr,
-                  significant,
-                  label=sprintf("%s/%s.schematic.byProbe",dir.out,probe),
+                  gene.gr   = gene.gr,
+                  probe.gr  =  probe.gr,
+                  significant = significant,
+                  label     = sprintf("%s/%s.schematic.byProbe",dir.out,probe),
                   statehub.tracks = statehub.tracks,
-                  save=save,
+                  save      = save,
                   group.col = group.col,
-                  group1 = group1,
-                  group2 = group2,
+                  group1    = group1,
+                  group2    = group2,
                   extra.tracks = extra.tracks)
       }
+      close(pb)  
     }
     if(!missing(byGeneID)){
+      pb <-  txtProgressBar(min = 0, max = length(byGeneID), title = "creating images", 
+                            style = 3, initial = 0, char = "=")
+      progress <- 0
       for(gene in byGeneID){
-
+        progress <- progress + 1
+        setTxtProgressBar(pb, progress)
         significant <- pair[pair$GeneID==gene,]
         if(nrow(significant) == 0) {
           warning(paste0("Gene ", gene, " is not in pair list. We cannot plot it."))
@@ -145,7 +154,7 @@ schematic.plot <- function(data,
                   group2 = group2,
                   extra.tracks = extra.tracks)
       }
-
+      close(pb)
     }
     if(length(byCoordinate$chr)!=0){
       for(i in 1:length(byCoordinate$chr)){
