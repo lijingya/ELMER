@@ -54,6 +54,7 @@
 #' pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
 #'                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
 #'                    Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'                    Raw.p =c(0.001,0.00001,0.001),
 #'                    Pe = c(0.001,0.00001,0.001))
 #' schematic.plot(data,
 #'                group.col = "definition",
@@ -123,7 +124,7 @@ schematic.plot <- function(data,
     }
     if(!missing(byGeneID)){
       for(gene in byGeneID){
-
+        
         significant <- pair[pair$GeneID==gene,]
         if(nrow(significant) == 0) {
           warning(paste0("Gene ", gene, " is not in pair list. We cannot plot it."))
@@ -143,7 +144,7 @@ schematic.plot <- function(data,
                   group2 = group2,
                   extra.tracks = extra.tracks)
       }
-
+      
     }
     if(length(byCoordinate$chr)!=0){
       for(i in 1:length(byCoordinate$chr)){
@@ -187,15 +188,15 @@ schematic <- function(data,
                       group2 = NULL,
                       extra.tracks = NULL){
   options(ucscChromosomeNames=FALSE)
-
+  
   chr <- as.character(seqnames(probe.gr))
-
+  
   idxTrack <- IdeogramTrack(genome = metadata(data)$genome, chromosome = chr)
   axTrack <- GenomeAxisTrack()
-
+  
   # We will find which is the significant pairs of genes
   fill <- rep("blue", length(values(gene.gr)$ensembl_gene_id))
-
+  
   for(i in seq_len(length(unique(significant$Probe)))) {
     fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],]$GeneID] <- "red"
   }
@@ -203,12 +204,12 @@ schematic <- function(data,
                                fill = fill,
                                symbol = values(gene.gr)$external_gene_name,
                                shape = "arrow")
-
+  
   details <- function(identifier, ...) {
     d <- data.frame(signal = assay(getMet(data))[identifier, ], group = colData(data)[,group.col])
     print( 
       bwplot(signal~group,
-             data=d,,
+             data=d,
              xlab=group.col, ylab='DNA methylation levels',
              horizontal=FALSE,
              panel = function(..., box.ratio) {
@@ -220,28 +221,29 @@ schematic <- function(data,
              par.settings = list(box.rectangle=list(col='black'),
                                  plot.symbol = list(pch='.', cex = 0.1)),
              scales=list(x=list(rot=0, cex=0.5))),
-             #densityplot(~signal, group = group, data = d, auto.key = TRUE,
+      #densityplot(~signal, group = group, data = d, auto.key = TRUE,
       #                main = list(label = identifier, cex = 0.7),
       #                scales = list(draw = FALSE, x = list(draw = TRUE)),
       #                ylab = "", xlab = ""), 
-          newpage = FALSE,
-          prefix = "plot")
+      newpage = FALSE,
+      prefix = "plot")
   }
-
-  genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
-  genes.plot <- resize(genes.plot,width = 1)
-  interactions <- GenomicInteractions(genes.plot,
-                                      probe.gr[match(significant$Probe,names(probe.gr))],
-                                      experiment_name="Putative pair genes ",
-                                      description="this is a test", counts=-log10(significant$Raw.p))
-  interactions.track <-  InteractionTrack(name="Putative pair genes\n (-log10 raw p-value)", interactions, chromosome=chr)
-  displayPars(interactions.track) = list(col.interactions="red", 
-                                        col.anchors.fill ="transparent",
-                                        col.anchors.line = "transparent",
-                                        interaction.dimension="height", 
-                                        interaction.measure ="counts",
-                                        anchor.height = 0.1)
-
+  interactions.track <- c()
+  if(nrow(significant) > 0 ) {
+    genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
+    genes.plot <- resize(genes.plot,width = 1)
+    interactions <- GenomicInteractions(genes.plot,
+                                        probe.gr[match(significant$Probe,names(probe.gr))],
+                                        experiment_name="Putative pair genes ",
+                                        description="this is a test", counts=-log10(significant$Raw.p))
+    interactions.track <-  InteractionTrack(name="Putative pair genes\n (-log10 raw p-value)", interactions, chromosome=chr)
+    displayPars(interactions.track) = list(col.interactions="red", 
+                                           col.anchors.fill ="transparent",
+                                           col.anchors.line = "transparent",
+                                           interaction.dimension="height", 
+                                           interaction.measure ="counts",
+                                           anchor.height = 0.1)
+  }
   probe.col <- "black"
   # StateHub tracks
   state.tracks <- c()
@@ -251,13 +253,13 @@ schematic <- function(data,
       message("Adding stateHub track: ", state)
       bed <- paste0(base,state)
       if(!file.exists(basename(bed))) downloader::download(bed,basename(bed))
-
+      
       state.chr <- rtracklayer::import.bed(basename(bed))
       state.chr <- state.chr[seqnames(state.chr) == chr]
       #state.chr <-  state[seqnames(state) == chr &
       #                      start(state) >= min(start(gene.gr) , start(probe.gr) ) &
       #                      end(state) <= max(end(gene.gr) , end(probe.gr) )]
-
+      
       tracks <- plyr::alply(unique(state.chr$name), 1, function(x){
         aux <- state.chr[state.chr$name == x]
         AnnotationTrack(aux,name = paste0(state.chr@trackLine@name, "\n",x), 
@@ -275,13 +277,13 @@ schematic <- function(data,
   }
   if(save) pdf(paste0(label,".pdf"), height = max(5, 5 + rep(2,!is.null(group.col)),
                                                   floor(length(state.tracks)/2 + 5 + rep(2,!is.null(group.col)))))
-
-
+  
+  
   if(!is.null(group.col)){
-
+    
     if(!is.null(group1) & !is.null(group1))
       data <- data[,colData(data)[,group.col] %in% c( group1, group2)]
-
+    
     deTrack <- AnnotationTrack(range = probe.gr,
                                genome = metadata(data)$genome,
                                showId = FALSE,
@@ -297,12 +299,12 @@ schematic <- function(data,
                                name = "Probe details",
                                stacking = "squish",
                                fun = details)
-    plotTracks(c(list(idxTrack,  axTrack, deTrack, interactions.track,genetrack),extra.tracks,state.tracks),
+    plotTracks(c(list(idxTrack,  axTrack, deTrack), interactions.track,list(genetrack),extra.tracks,state.tracks),
                background.title = "darkblue",
                detailsBorder.col = "white",
                from = min(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                to = max(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
-               sizes=c(1,1,8,2,3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
+               sizes=c(1,1,8,rep(2,length(interactions.track)),3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
                extend.right = 10000,
                extend.left = 100000,
                details.ratio = 1,
@@ -319,7 +321,7 @@ schematic <- function(data,
     atrack <- AnnotationTrack(probe.gr, name = "Probes",
                               genome = metadata(data)$genome,
                               chromosome = chr)
-    plotTracks(c(list(idxTrack,  axTrack, interactions.track,atrack , genetrack),extra.tracks,state.tracks),
+    plotTracks(c(list(idxTrack,  axTrack), interactions.track,list(atrack , genetrack),extra.tracks,state.tracks),
                background.title = "darkblue",
                from = min(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
                to = max(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
@@ -328,7 +330,7 @@ schematic <- function(data,
                baseline=0, innerMargin=0,
                showBandId = TRUE, cex.bands = 0.5,
                detailsBorder.col = "white",
-               sizes=c(0.5,0.5,1,1,3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
+               sizes=c(0.5,0.5,rep(2,length(interactions.track)),1,3,rep(2,length(extra.tracks)),rep(0.5,length(state.tracks))),
                details.ratio = 1,
                #fontsize = 8,
                rotation.title=360,
