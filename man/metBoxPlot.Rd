@@ -4,9 +4,9 @@
 \alias{metBoxPlot}
 \title{scatter.plot to plot scatter plots between gene expression and DNA methylation.}
 \usage{
-metBoxPlot(data, group.col, group1, group2, probe, percentage = 0.2,
-  diff.dir = "hypo", legend.col = NULL, title = NULL, filename = NULL,
-  save = TRUE)
+metBoxPlot(data, group.col, group1, group2, probe, min.samples = 5,
+  percentage = 0.2, diff.dir = "hypo", legend.col = NULL, title = NULL,
+  filename = NULL, save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
@@ -22,6 +22,10 @@ hypermethylated in group 1 compared to group 2.}
 \item{group2}{A group from group.col. ELMER will run group1 vs group2. 
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
+
+\item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
+If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+in the lower quintile, but then 5 will be used.}
 
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples 
 from group1 and group2 that are used to identify the differential methylation. 

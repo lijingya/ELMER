@@ -6,8 +6,8 @@
 groups such as normal verus tumor samples.}
 \usage{
 get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
-  pvalue = 0.01, group.col, group1, group2, test = t.test, sig.dif = 0.3,
-  dir.out = "./", save = TRUE)
+  pvalue = 0.01, group.col, min.samples = 5, group1, group2,
+  test = t.test, sig.dif = 0.3, dir.out = "./", save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
@@ -30,6 +30,10 @@ for selecting significant hypo/hyper-methylated probes. Default is 0.01}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
+
+\item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
+If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+in the lower quintile, but then 5 will be used.}
 
 \item{group1}{A group from group.col. ELMER will run group1 vs group2. 
 That means, if direction is hyper, get probes

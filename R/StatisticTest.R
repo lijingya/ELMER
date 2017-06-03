@@ -10,19 +10,23 @@
 #' samples used in the test.
 #' @param Top.m A logic. If to identify hypomethylated probe Top.m should be FALSE. 
 #' hypermethylated probe is TRUE.
+#' @param min.samples Minimun number of samples to use in the analysis. Default 5.
+#' If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+#' in the lower quintile, but then 5 will be used.
 #' @importFrom stats sd t.test wilcox.test
 #' @return Statistic test results to identify differentially methylated probes.
 Stat.diff.meth <- function(meth,
                            groups,
                            group1,
                            group2,
-                           test=t.test,
-                           percentage=0.2,
-                           Top.m=NULL){
+                           test = t.test,
+                           min.samples = 5,
+                           percentage = 0.2,
+                           Top.m = NULL){
   g1 <- meth[groups %in% group1]
   g2 <- meth[groups %in% group2]
-  group1.nb <- ifelse(round(length(g1) * percentage) < 5, min(5,length(g1)), round(length(g1) * percentage))
-  group2.nb <- ifelse(round(length(g2) * percentage) < 5, min(5,length(g2)), round(length(g2) * percentage))
+  group1.nb <- ifelse(round(length(g1) * percentage) < min.samples, min(min.samples,length(g1)), round(length(g1) * percentage))
+  group2.nb <- ifelse(round(length(g2) * percentage) < min.samples, min(min.samples,length(g2)), round(length(g2) * percentage))
   
   group1.tmp <- sort(g1, decreasing = Top.m)
   group2.tmp <- sort(g2, decreasing = Top.m)

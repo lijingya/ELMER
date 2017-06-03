@@ -4,7 +4,7 @@
 \alias{Stat.diff.meth}
 \title{Stat.diff.meth}
 \usage{
-Stat.diff.meth(meth, groups, group1, group2, test = t.test,
+Stat.diff.meth(meth, groups, group1, group2, test = t.test, min.samples = 5,
   percentage = 0.2, Top.m = NULL)
 }
 \arguments{
@@ -17,6 +17,10 @@ Stat.diff.meth(meth, groups, group1, group2, test = t.test,
 \item{group2}{Group 2 label in groups vector}
 
 \item{test}{A function specify which statistic test will be used.}
+
+\item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
+If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+in the lower quintile, but then 5 will be used.}
 
 \item{percentage}{A number specify the percentage of normal and tumor 
 samples used in the test.}

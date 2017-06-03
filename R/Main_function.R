@@ -138,6 +138,9 @@ get.feature.probe <- function(feature,
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
 #' @param test Statistical test to be used. Options: t.test (DEFAULT), wilcox.test
 #' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
+#' @param min.samples Minimun number of samples to use in the analysis. Default 5.
+#' If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+#' in the lower quintile, but then 5 will be used.
 #' @details 
 #'  save: 
 #'  When save is TRUE, function will generate two XX.csv files.The first one is named 
@@ -175,7 +178,8 @@ get.diff.meth <- function(data,
                           cores = 1,
                           percentage = 0.2,
                           pvalue = 0.01,
-                          group.col, 
+                          group.col,
+                          min.samples = 5,
                           group1,
                           group2,
                           test = t.test,
@@ -222,6 +226,7 @@ get.diff.meth <- function(data,
                .fun = function(x) {
                  Stat.diff.meth(percentage = percentage,
                                 meth = x,
+                                min.samples = min.samples,
                                 groups = groups.info,
                                 group1 = group1,
                                 test = test,
