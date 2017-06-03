@@ -22,6 +22,9 @@
 #' from group1 and group2 that are used to identify the differential methylation. 
 #' Default is 0.2 because we did not expect all cases to be from a single molecular 
 #' subtype.But, If you are working with molecular subtypes please set it to 1.
+#' @param min.samples Minimun number of samples to use in the analysis. Default 5.
+#' If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+#' in the lower quintile, but then 5 will be used.
 #' @param title plot title
 #' @return Box plot
 #' @importFrom plotly plot_ly layout
