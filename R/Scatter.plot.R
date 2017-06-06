@@ -67,7 +67,7 @@ scatter.plot <- function(data,
     
     if(! category %in% colnames(colData(data))) 
       stop("Cateogry not found in the  phenotypic data (colData(data)) ")
-    
+    if(is.null(category)) stop("Please, set category argument")
     legend.title <- simpleCap(category)
     samples <- sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"]
     category <- colData(data)[samples,category]

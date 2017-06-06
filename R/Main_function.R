@@ -278,8 +278,11 @@ get.diff.meth <- function(data,
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
 #'  Default is 1: don't use parallel process.
-#' @param percentage A number ranges from 0 to 0.5 specifying the percentage of 
-#' samples used to link probes to genes. Default is 0.2.
+#' @param percentage A number ranging from 0 to 0.5 
+#' specifying the percentage of samples in groups U (unmethylated) 
+#' and M (methylated) used to link probes to genes. 
+#' Default is 0.2 (lowest quintile samples will be in the 
+#' U group and the highest quintile samples in the M group).
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.

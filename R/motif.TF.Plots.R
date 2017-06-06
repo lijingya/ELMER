@@ -180,8 +180,9 @@ TF.rank.plot <- function(motif.pvalue,
     
 
     if(save){
-      pdf(sprintf("%s/%s.TFrankPlot.pdf",dir.out,i),
-          useDingbats=FALSE, width=15, height = 12)
+      file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
+      message("Saving plot as: ", file)
+      pdf(file, useDingbats=FALSE, width=10, height = 8)
       plot(P)
       invisible(dev.off())
     }

@@ -3,63 +3,19 @@ title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes an
 author: "Lijing Yao, Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb], Simon Coetzee [ctb], Tiago Chedraoui Silva [ctb]"
 date: "`r Sys.Date()`"
 output: 
-  BiocStyle::html_document:
-    toc: true
-    number_sections: true
-    toc_depth: 3
+  html_notebook:
     highlight: tango
-    fig_caption: yes
+    theme: flatly
+    toc: yes
+    fig_caption: yes     
+    toc_depth: 3
     toc_float:
       collapsed: yes
-  BiocStyle::pdf_document2:
-    toc: true
     number_sections: true
-    toc_depth: 3
-    highlight: tango
-    fig_caption: yes        
+  editor_options: 
+    chunk_output_type: inline   
 
-references:
-- id: zhou2016comprehensive
-  title: Comprehensive characterization, annotation and innovative use of Infinium DNA methylation BeadChip probes
-  author: 
-  - family: Zhou, Wanding and Laird, Peter W and Shen, Hui
-  given:
-  journal: Nucleic Acids Research
-  URL: "http://doi.org/10.1093/nar/gkw967"
-  DOI: "10.1093/nar/gkw967"
-  volume: 159
-  number: 3
-  pages: 676-690
-  issued:
-  year: 2016         
-
-- id: tcgabiolinks2
-  title: "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages"
-  author: 
-  - family:  Silva, TC and Colaprico, A and Olsen, C and D'Angelo, F and Bontempi, G and Ceccarelli, M and Noushmehr, H
-  given:
-  journal: F1000Research
-  URL: "http://dx.doi.org/10.12688/f1000research.8923.1"
-  DOI: "10.12688/f1000research.8923.1"
-  volume: 5
-  number: 1542
-  issued:
-  year: 2016 
-
-- id: tcgabiolinks1
-  title: "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data"
-  author: 
-  - family:  Colaprico, Antonio and Silva, Tiago C. and Olsen, Catharina and Garofano, Luciano and Cava, Claudia and Garolini, Davide and Sabedot, Thais S. and Malta, Tathiane M. and Pagnotta, Stefano M. and Castiglioni, Isabella and Ceccarelli, Michele and Bontempi, Gianluca and   Noushmehr, Houtan
-  given:
-  journal: Nucleic Acids Research
-  URL: "http://dx.doi.org/10.1093/nar/gkv1507"
-  DOI: "10.1093/nar/gkv1507"
-  volume: 44
-  number: 8
-  pages: e71
-  issued:
-  year: 2016 
-
+bibliography: bibliography.bib
 vignette: >
   %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
   %\VignetteEngine{knitr::rmarkdown}
@@ -78,9 +34,9 @@ library(BiocStyle)
 
 # Introduction
 
-This document provides an introduction of the R/Biocondcutor  `r Biocpkg("ELMER")` package, which is designed 
+This document provides an introduction of the R/Biocondcutor  `r BiocStyle::Biocpkg("ELMER")` package, which is designed 
 to combine DNA methylation and gene expression data from human tissues to infer 
-multi-level cis-regulatory networks. `r Biocpkg("ELMER")` uses DNA methylation to 
+multi-level cis-regulatory networks. `r BiocStyle::Biocpkg("ELMER")` uses DNA methylation to 
 identify enhancers, and correlates enhancer state with expression of nearby genes 
 to identify one or more transcriptional targets. Transcription factor (TF) binding 
 site analysis of enhancers is coupled with expression analysis of all TFs to 
@@ -89,7 +45,7 @@ available cancer data sets and custom DNA methylation and gene expression data s
 
 ELMER analyses have 5 main steps: 
 
-1. Identify distal enhancer probes on HM450K.
+1. Identify distal probes on HM450K.
 2. Identify distal enhancer probes with significantly different DNA methylation level
 in control group and experiment group.
 3. Identify putative target genes for differentially methylated distal enhancer probes.
@@ -97,22 +53,45 @@ in control group and experiment group.
 differentially methylated and linked to putative target gene.
 5. Identify regulatory TFs whose expression associate with DNA methylation at motifs.
 
+## Package workflow
+
+The package workflow is showed in the figure below:
+
+![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as filter which can be retrieved using the `get.feature.probe` function. The function createMAE  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlate with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represents user input data, blue boxes represents output object, orange boxes represents auxiliary pre-computed data and gray boxes are functions. ](workflow.png)
 
 ## Installing and loading ELMER
 
-To install this package, start R and enter
+To install this package, start R and enter:
 
 ```{r, eval = FALSE}
-source("http://bioconductor.org/biocLite.R")
-biocLite("ELMER")
+devtools::install_github(repo = "tiagochst/ELMER.data")
+devtools::install_github(repo = "tiagochst/ELMER")
 ```
 
-# Download example data
-
-The following steps can be used to download the example data set for `r Biocpkg("ELMER")`.
+Then, to load ELMER enter:
 
 ```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 library(ELMER, quietly = TRUE)
+```
+
+## Citing this work
+
+If you used ELMER package or its results, please cite:
+
+* Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
+* Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573.
+
+If you get TCGA data using `getTCGA` function, please cite TCGAbiolinks package: 
+
+* Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G and Noushmehr H. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research (2015): gkv1507.
+* "TCGA Workflow: Analyze cancer genomics and epigenomics data using Bioconductor packages". F1000Research [10.12688/f1000research.8923.2](http://dx.doi.org/doi:10.12688/f1000research.8923.2) [@10.12688/f1000research.8923.2]
+
+
+# Download example data
+
+The following steps can be used to download the example data set for `r BiocStyle::Biocpkg("ELMER")`.
+
+```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
 data(elmer.data.example)
 data(LUSC_meth_refined)
 data(LUSC_RNA_refined)
@@ -122,10 +101,10 @@ library(DT)
 
 # Quick start: running TCGA example
 
-TCGA.pipe is a function for easily downloading TCGA data and performing all 
+`TCGA.pipe` is a function for easily downloading TCGA data and performing all 
 the analyses in ELMER. For illustration purpose, we skip the downloading step. 
-The user can use the getTCGA function to download TCGA data or
-use TCGA.pipe by including "download" in the analysis option.
+The user can use the `getTCGA` function to download TCGA data or
+use `TCGA.pipe` by including "download" in the analysis option.
 
 The following command will do distal enhancer DNA methylation analysis and predict putative
 target genes, motif analysis and idnetify regulatory transcription factors.
@@ -144,36 +123,39 @@ TCGA.pipe("LUSC",
 
 # Input data
 
-A Multi Assay Experiment object is the input for all main functions of `r Biocpkg("ELMER")`. 
-A [Multi Assay Experiment](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html)
-object can be generated by `createMAE` function. In order to perform all analyses
-in `r Biocpkg("ELMER")`. A Multi Assay Experiment needs at least 2 files: a matrix of DNA methylation 
-from HM450K platform for multiple samples; a matrix of gene expression for the same samples; 
-information for probes on HM450K such as names 
-and coordinates will be taken from  [Wanding Zhou annotation](http://zwdzwd.github.io/InfiniumAnnotation)[@zhou2016comprehensive]; 
-a gene annotation which will be taken from ensemble database using `r Biocpkg("biomaRt")` 
-When TCGA data are used, the sample information will be automatically generated by `createMAE` 
-function using `r Biocpkg("TCGAbiolinks")` package [@tcgabiolinks1,@tcgabiolinks2]. 
-However sample information should be provided when using custom data.
+A Multi Assay Experiment object is the input for all main functions of `r BiocStyle::Biocpkg("ELMER")` and can be generated by `createMAE` function. 
+
+To perform `r BiocStyle::Biocpkg("ELMER")` analyses, the [Multi Assay Experiment](https://bioconductor.org/packages/release/bioc/html/MultiAssayExperiment.html) needs:
+
+- a DNA methylation matrix or SummarizedExperiment object from HM450K or EPIC platform for multiple samples;
+- a gene expression matrix or SummarizedExperiment object for the same samples;
+- a matrix mapping DNA methylation samples to gene expression samples 
+- a matrix with samples metadata (i.e. clinical data, molecular  subtype information). 
+
+If TCGA data are used, the the last two matrices will be automatically generated.
+Based on the genome of reference selected, metadata for the DNA methylation probes, such as genomic coordinates, will be added from  [Wanding Zhou annotation](http://zwdzwd.github.io/InfiniumAnnotation)[@zhou2016comprehensive]; 
+and metadata for gene annotation  will be added from ensemble database [@yates2015ensembl] using [biomaRt](http://bioconductor.org/packages/biomaRt/)
+[@durinck2009mapping].
+
 
 ## DNA methylation data
 
-DNA methylation data feeding to `r Biocpkg("ELMER")` should be a matrix of DNA methylation
+DNA methylation data feeding to `r BiocStyle::Biocpkg("ELMER")` should be a matrix of DNA methylation
 beta ($\beta$) value for samples (column) and probes (row) processed from row HM450K 
 array data. If TCGA data is used, processed data from GDC website will be downloaded  
-and automatically transformed to the matrix by `r Biocpkg("ELMER")`. The processed TCGA 
+and automatically transformed to the matrix by `r BiocStyle::Biocpkg("ELMER")`. The processed TCGA 
 DNA methylation data were calculated as (M/(M+U)), where M represents the methylated 
 allele intensity and U the unmethylated allele intensity. Beta values range from 0 to 1, 
 reflecting the fraction of methylated alleles at each CpG in the each tumor; beta values 
 close to 0 indicates low levels of DNA methylation and beta values close to 1 
 indicates high levels of DNA methylation.
 
-If user have raw HM450K data, these data can be processed by `r Biocpkg("Methylumi")` 
-or `r Biocpkg("minfi")` generating DNA methylation beta ($\beta$) value for each CpG site 
-and multiple samples. The `getBeta` function in `r Biocpkg("minfi")` can be used to generate a matrix 
-of DNA methylation beta ($\beta$) value to feed in `r Biocpkg("ELMER")`. And we recommend to 
+If user have raw HM450K data, these data can be processed by `r BiocStyle::Biocpkg("Methylumi")` 
+or `r BiocStyle::Biocpkg("minfi")` generating DNA methylation beta ($\beta$) value for each CpG site 
+and multiple samples. The `getBeta` function in `r BiocStyle::Biocpkg("minfi")` can be used to generate a matrix 
+of DNA methylation beta ($\beta$) value to feed in `r BiocStyle::Biocpkg("ELMER")`. And we recommend to 
 save this matrix as `meth.rda` since  `createMAE` 
-can read in files by specifying files' path which will help to reduce memory usage.
+can read in files by specifying their path which will help to reduce memory usage.
 
 ```{r}
 # Example of DNA methylation data input
@@ -184,7 +166,7 @@ datatable(Meth[1:10, 1:10],
 
 ## Gene expression data
 
-Gene expresion data feeding to `r Biocpkg("ELMER")` should be a matrix of gene expression
+Gene expresion data feeding to `r BiocStyle::Biocpkg("ELMER")` should be a matrix of gene expression
 values for samples (column) and genes (row). Gene expression value can be generated
 from different platforms: array or RNA-seq. The row data should be processed by other
 software to get gene or transcript level gene expression calls such as mapping by 
@@ -195,10 +177,10 @@ calling expression value by [cufflink](https://github.com/cole-trapnell-lab/cuff
 It is recommended to normalize expression data making gene expression 
 comparable across samples such as quantile normalization. User can refer TCGA RNA-seq
 analysis pipeline to do generate comparable gene expression data. Then transform the 
-gene expression values from each sample to the matrix for feeding into `r Biocpkg("ELMER")`.
-If users want to use TCGA data, `r Biocpkg("ELMER")` has functions to download the 
+gene expression values from each sample to the matrix for feeding into `r BiocStyle::Biocpkg("ELMER")`.
+If users want to use TCGA data, `r BiocStyle::Biocpkg("ELMER")` has functions to download the 
 RNA-Seq Quantification data(HTSeq-FPKM-UQ)  from GDC website and transform the data to the matrix for feeding 
-into `r Biocpkg("ELMER")`. It is recommended to save this matrix as `RNA.rda` since `createMAE` 
+into `r BiocStyle::Biocpkg("ELMER")`. It is recommended to save this matrix as `RNA.rda` since `createMAE` 
 can read in files by specifying the path of files which will help to reduce memory usage.
 
 ```{r}
@@ -219,6 +201,7 @@ When TCGA data were used, samples information will be automatically generated by
 create the groups Tumor and Normal using the following samples to each group:
 
 Tumor samples are:   
+
   *   Primary solid Tumor
   *   Recurrent Solid Tumor
   *   Primary Blood Derived Cancer - Peripheral Blood
@@ -230,6 +213,7 @@ Tumor samples are:
   *   Primary Blood Derived Cancer - Bone Marrow
   
 Normal samples:
+
   * Blood Derived Normal
   * Solid Tissue Normal
   * Buccal Cell Normal
@@ -245,9 +229,7 @@ data <- createMAE(exp = GeneExp,
                   save = FALSE,
                   TCGA = TRUE)
 data
-datatable(as.matrix(colData(data)[,c("patient","definition","TN")]),
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+as.data.frame(colData(data)[,c("patient","definition","TN")])
 
 # Adding sample information for non TCGA samples
 # You should have two objects with one for DNA methylation and 
@@ -291,9 +273,7 @@ data.hg38 <- createMAE(exp = not.tcga.exp,
                        genome = "hg38", 
                        colData = phenotype.data)
 data.hg38
-datatable(as.matrix(colData(data.hg38)[1:20,]),
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+as.data.frame(colData(data.hg38)[1:20,])
 ```
 
 ## Probe information
@@ -311,7 +291,7 @@ rowRanges(getMet(data))[1:3,1:8]
 
 Gene information is stored as a GRanges object containing coordinates of 
 each gene, gene id, gene symbol and gene isoform id. The default gene information 
-is the ensembl gene annotation fetching from `r Biocpkg("biomaRt")` by `r Biocpkg("ELMER")` 
+is the ensembl gene annotation fetched from `r BiocStyle::Biocpkg("biomaRt")` by `r BiocStyle::Biocpkg("ELMER")` 
 function.
 
 ```{r}
@@ -320,7 +300,8 @@ rowRanges(getExp(data))
 
 ##  Multi Assay Experiment object 
 
-A Multi Assay Experiment object from the `r Biocpkg("MultiAssayExperiment")` package is the input for multiple main functions of `r Biocpkg("ELMER")`. 
+A Multi Assay Experiment object from the `r BiocStyle::Biocpkg("MultiAssayExperiment")` 
+package is the input for multiple main functions of `r BiocStyle::Biocpkg("ELMER")`. 
 It contains the above components and making a Multi Assay Experiment object by `createMAE` function will keep each
 component consistent with each other. For example, althougth DNA methylation and gene 
 expression matrixes have different rows (probe for DNA methylation and gene id for gene
@@ -340,21 +321,18 @@ data <- createMAE(exp = GeneExp,
 all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
 
 # See sample information for data
-datatable(as.matrix(colData(data)[colData(data)$sample == "TCGA-43-3394-11A",]),
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
-
+as.data.frame(colData(data))
+          
 # See sample names for each experiment
-sampleMap(data)
-
+as.data.frame(sampleMap(data))
 ```
 
 You can also use your own data and annotations to create  Multi Assay Experiment object. 
 
 ```{r, message=FALSE}
 # NON TCGA example: matrices has diffetrent column names
- gene.exp <- DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-                        sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
+gene.exp <- DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                      sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
                      sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
@@ -382,6 +360,30 @@ mae <- createMAE(exp = gene.exp,
                  genome = "hg38") 
 ```
 
+
+# Downloading TCGA data
+
+The function `getTCGA` uses [TCGAbiolinks](http://bioconductor.org/packages/TCGAbiolinks/)
+package [@colaprico2015tcgabiolinks] to download TCGA data for all samples 
+for a given disease (such as BLCA, LGG, GBM). Its main arguments are 
+the `genome`  that if set to "hg19" it will download data from GDC legacy archive and if set 
+to "hg38" it will download data from the GDC harmonized data portal.
+
+```{r, message = FALSE,eval = FALSE}
+getTCGA(disease = "LUSC", # TCGA disease abbreviation (BRCA,BLCA,GBM, LGG, etc)
+        basedir = "DATA", # Where data will be downloaded
+        genome  = "hg38") # Genome of refenrece "hg38" or "hg19"
+```
+
+
+If the `getTCGA` function called before was successful it will create the following objects and folders:
+```{r, message = FALSE,eval = FALSE}
+--- DATA/BRCA/
+  |----------- BRCA_meth_hg38.rda (object with DNA methylation)
+  |----------- BRCA_RNA_hg38.rda (object with gene expression)
+  |----------- BRCA_clinic.rda   (object with indexed clinical information)
+  |----------- Raw/ (folder: contains All raw data from GDC)
+```
 # Illustration of ELMER analysis steps
 
 The example data set is a subset of chromosome 1 data from TCGA LUSC.
@@ -392,25 +394,19 @@ results and figures.
 ## Selection of probes within biofeatures
 
 This step is to select HM450K/EPIC probes, which locate far from TSS (at least 2Kb away) 
-and within distal enhancer regions. These probes are called distal enhancer probes.
-For distal enhancer regions, we constructed a comprehensive list of putative enhancers 
-combining REMC, ENCODE and FANTOM5 data. Enhancers were identified using ChromHMM 
-for 98 tissues or cell lines from REMC and ENCODE project and we used the union of 
-genomic elements labeled as EnhG1, EnhG2, EnhA1 or EnhA2 (representing intergenic and 
-intragenic active enhancers) in any of the 98 cell types, resulting in a total of 
-389,967 non-overlapping enhancer regions. Additionally, FANTOM5 enhancers (43,011) 
-identified by eRNAs for 400 distinct cell types were added to this list. 
-Be default, this comprehensive list of putative enhancer and TSS annotated by GENCODE,
-which is programatically accessed using `r Biocpkg("biomaRt")` to get its last version,
-will be used to select distal enhancer probes. But user can use their 
-own TSS annotation or features such as H3K27ac ChIP-seq in a certain cell line.
+ These probes are called distal  probes.
+
+Be default, this comprehensive list of  TSS annotated by ENSEMBL database,
+which is programatically accessed using `r BiocStyle::Biocpkg("biomaRt")` to get its last version,
+will be used to select distal probes. But user can use their 
+own TSS annotation or add features such as H3K27ac ChIP-seq in a certain cell line, to select probes 
+overlapping thoses features regions.
 
 
 ```{r, message=FALSE}
-#get distal enhancer probes that are 2kb away from TSS and overlap with REMC and FANTOM5 
-#enhancers on chromosome 1
-Probe <- get.feature.probe(genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
-save(Probe,file="result/probeInfo_feature_distal.rda")
+# get distalprobes that are 2kb away from TSS on chromosome 1
+Probe <- get.feature.probe(feature = NULL, genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
+save(Probe,file = "result/probeInfo_feature_distal.rda")
 ```
 
 ## Identifying differentially methylated probes
@@ -420,8 +416,8 @@ carried out by function `get.diff.meth`.
 
 ### Description 
 
-For each enhancer probe, function first ranked experiment samples and control samples 
-by their DNA methylation beta values. To identify hypomethylated probes, function 
+For each distal probe, the function first rank samples from group 1 and group 2 samples 
+by their DNA methylation beta values. To identify hypomethylated probes, the function 
 compared the lower control quintile (20% of control samples with the lowest methylation) 
 to the lower experiment quintile (20% of experiment samples with the lowest methylation), 
 using an unpaired one-tailed t-test. Only the lower quintiles were used because we 
@@ -431,22 +427,22 @@ was picked as a cutoff to include high enough sample numbers to yield t-test p-v
 that could overcome multiple hypothesis correction, yet low enough to be able to 
 capture changes in individual molecular subtypes occurring in 20% or more of the cases.
 This number can be set arbitrarily as an input to the get.diff.meth function in the 
-`r Biocpkg("ELMER")`, and should be tuned based on sample sizes in individual studies. 
-The one tailed t-test was used to rule out the null hypothesis: $\mu experiment \geq \mu control$, 
-where $\mu$experiment is the mean methylation within the lowest experiment quintile and $\mu$control 
+`r BiocStyle::Biocpkg("ELMER")`, and should be tuned based on sample sizes in individual studies. 
+The one tailed t-test was used to rule out the null hypothesis: $\mu_{experiment} \geq \mu_{control}$, 
+where $\mu_{experiment}$ is the mean methylation within the lowest experiment quintile and $\mu$control 
 is the mean within the lowest control quintile. Raw p-values were adjusted for multiple
 hypothesis testing using the Benjamini-Hochberg method, and probes were selected 
 when they had adjusted p-value less than 0.01. For additional stringency, probes 
-were only selected if the methylation difference: $\Delta = \mu experiment - \mu control$ was 
+were only selected if the methylation difference: $\Delta = \mu_{experiment} - \mu_{control}$ was 
 greater than 0.3. The same method was used to identify hypermethylated probes, 
 except we used upper experiment quintile and upper control quintile, and chose 
 the opposite tail in the t-test. 
 
-If save parameter of get.diff.meth is true, two cvs files will be saved. If false,
+If `save` parameter of `get.diff.meth` is `TRUE`, two cvs files will be saved. If false,
 a data frame with the same content as the second file mentioned below will be reported.
 
 The first file contains all statistic results for all probes which were fed into the 
-function. Based on this file, user can change different P value or sig.dir cutoff 
+function. Based on this file, user can change different P value or `sig.dif` cutoff 
 to select the significant results without redo the analysis.
 
 The second file contains statistic results for the probes that pass the significant
@@ -566,12 +562,12 @@ metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2,
 
 This step is to link enhancer probes with methylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out
-by function get.pair. 
+by function `get.pair`. 
 
 ### Description
-First, the fucntion get.pair for additional stringency and to avoid correlations due to non-cancer contamination, 
-selects only those enhancer probes that had differential methylation as defined above, 
-and where at least 5 % of all samples (combining tumor and normal) had beta values > 0.3.
+First, the function `get.pair` for additional stringency and to avoid correlations due to non-cancer contamination, 
+selects only those distal probes that had differential methylation as defined above, 
+and where at least 5\% of all samples (combining tumor and normal) had beta values > 0.3.
  We usually call locus unmethylated when the methylation value < 0.3 and methylated 
  when the methylation value > 0.3. 
 Basically, this step will make sure we have at least a percentage of beta values 
@@ -591,7 +587,7 @@ this filter, the closest 10 upstream
 genes and the closest 10 downstream genes were tested for correlation between 
 methylation of the probe and expression of the gene. To select these genes, 
 the probe-gene distance was defined as the distance from the probe to a transcription 
-start site specified by the GENCODE gene annotation. Thus, exactly 20 statistical 
+start site specified by the ENSEMBL gene annotation. Thus, exactly 20 statistical 
 tests were performed for each probe, as follows. For each probe-gene pair, 
 the samples (all experiment samples and control samples) were divided into two 
 groups: the M group, which consisted of the upper methylation quintile (the 20%
@@ -607,24 +603,24 @@ This non-parametric test was used in order to minimize the effects
 of expression outliers, which can  occur across a very wide dynamic range. 
 For each probe-gene pair tested, the raw p-value `Pr` was corrected for multiple 
 hypothesis using a permutation approach as follows (implemented in the `get.permu`
-function of the `r Biocpkg("ELMER")` package).
+function of the `r BiocStyle::Biocpkg("ELMER")` package).
 The gene in the pair was held constant, and x random methylation probes were 
 used to perform the same one-tailed U test, generating a set of x permutation
 p-values (`Pp`). We chose the x random probes only from among those that were 
 "distal" (greater than 2kb from an annotated transcription start site), in order 
 to make these null-model probes qualitatively similar to the probe being tested. 
-An empirical p-value Pe value was calculated using the following formula 
+An empirical p-value $P_e$ value was calculated using the following formula 
 (which introduces a pseudo-count of 1):
 
-$$Pe = \frac{num(Pp \leq Pr)+ 1}{x+1}$$
+$$Pe = \frac{num(P_p \leq P_r)+ 1}{x+1}$$
 
 This step is the most time consuming step since it requires a large amount calculations 
 for permutation. The greater the permutation time is, the longer it will take. 
 It is recommended to use multiple cores for this step. 10,000 permutations is recommended 
 if high confidence results are desired but it may cost some hours.
 
-If save parameter of get.pair function is true, two cvs files will be output. 
-If save parameter is false, a data frame with the same contect as the second file
+If `save` parameter of get.pair function is true, two cvs files will be output. 
+If `save` parameter is false, a data frame with the same contect as the second file
 mentioned as below will be output.
 
 The first file contains all statistic results for all probe-gene pairs. Based on this file, user 
@@ -651,7 +647,7 @@ The main arguments of this function are:
 |-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | data              | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.                                                                                                                                                                                                                                                                       |
 | nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.                                                                                                                                                                                                                                     |
-| percentage        | A number ranges from 0 to 0.5 specifying the percentage of samples used to link probes to genes. Default is 0.2.                                                                                                                                                                                                                                                    |
+| percentage        | A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2 (lowest quintile samples will be in the U group and the highest quintile samples in the M group).                                                                                                                                                                                                                                             |
 | permu.size        | A number specify the times of permuation. Default is 10000.                                                                                                                                                                                                                                                                                                         |
 | permu.dir         | A path where the output of permutation will be.                                                                                                                                                                                                                                                                                                                     |
 | pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
@@ -659,6 +655,8 @@ The main arguments of this function are:
 | dir.out           | A path specify the directory for outputs. Default is current directory                                                                                                                                                                                                                                                                                              |
 | diffExp           | A logic. Default is FALSE. If TRUE, t test will be applied to test whether putative target gene are differentially expressed between two groups.                                                                                                                                                                                                                    |
 | group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                                                                                                                                                                                                                                  |
+| group1 | A group from group.col. |
+| group2 | A group from group.col. |
 | cores             | A interger which defines number of core to be used in parallel process. Default is 1: don't use parallel process.                                                                                                                                                                                                                                                   |
 | filter.probes     | Should filter probes by selecting only probes that have at least a certain number of samples below and above a certain cut-off. See `preAssociationProbeFiltering` function.                                                                                                                                                                                          |
 | filter.portion    | A number specify the cut point to define binary methlation level for probe loci. Default is 0.3. When beta value is above 0.3, the probe is methylated and vice versa. For one probe, the percentage of methylated and unmethylated samples should be above filter.percentage value. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function. |
@@ -682,6 +680,7 @@ Hypo.pair <- get.pair(data = data,
                       group1 =  "Primary solid Tumor",
                       group2 = "Solid Tissue Normal",
                       nearGenes = nearGenes,
+                      percentage = 0.2, # Percentage of samples to use in both groups U/M
                       permu.dir = "result/permu",
                       permu.size = 100, # Please set to 100000 to get significant results
                       pvalue = 0.05,   
@@ -711,9 +710,9 @@ function `get.enriched.motif`.
 
 ### Description
 
-The build in data Probes.motif is generated using HOMER with a p-value < 1e–4 
-to scan a +/- 250bp region around each probe using HOmo sapiens 
-COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10  position
+The build-in data `Probes.motif` is generated using HOMER with a $p-value \le 10^{–4}$ 
+to scan a $\pm250bp$  region around each probe using HOmo sapiens 
+COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10 [@kulakovskiy2016hocomoco] position
 weight matrices (PWMs). HOCOMOCO offers 601 PMWs each has a quality rating from A to D where 
 A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
 limited applications for quantitative analyses. By default only quality A and B will be used for the 
@@ -730,17 +729,17 @@ $$ Odds\quad  Ratio = \frac{\frac{p}{1-p}}{\frac{P}{1-P}} $$
 $$ SD = \sqrt{\frac{1}{a}+\frac{1}{b}+\frac{1}{c}+\frac{1}{d}} $$
 $$ lower\quad boundary\quad of\quad  95\%\quad  confidence\quad  interval = \exp{(\ln{OR}-SD)} $$
 
-where a is the number of probes within the selected probe set that contain one 
-or more motif occurrences; b is the number of probes within the selected probe 
-set that do not contain a motif occurrence; c and d are the same counts within 
+where `a` is the number of probes within the selected probe set that contain one 
+or more motif occurrences; `b` is the number of probes within the selected probe 
+set that do not contain a motif occurrence; `c` and `d` are the same counts within 
 the entire enhancer probe set. A probe set was considered significantly enriched 
 for a particular motif if the 95% confidence interval of the Odds Ratio was 
-greater than 1.1 (specified by option lower.OR, 1.1 is default), and the motif 
-occurred at least 10 times (specified by option min.incidence. 10 is default) in 
+greater than 1.1 (specified by option `lower.OR`, 1.1 is default), and the motif 
+occurred at least 10 times (specified by option `min.incidence`. 10 is default) in 
 the probe set. As described in the text, Odds Ratios were also used for ranking 
 candidate motifs. 
 
-There will be two results if save parameter of get.enriched.motif is true. When save is false, 
+There will be two results if `save` parameter of `get.enriched.motif` is `TRUE`. When `save` is `FALSE`, 
 only second result mentioned below will be reported.
 
 The first one is a csv file. This file contains the Odds Ratio and 95% confidence 
@@ -806,11 +805,11 @@ dir(path = "result", pattern = "motif.enrichment.pdf")
 ## Identifying regulatory TFs
 
 This step is to identify regulatory TF whose expression associates with TF binding motif 
-DNA methylation which is carried out by function get.TFs.
+DNA methylation which is carried out by function `get.TFs`.
 
 ### Description
 For each motif considered to be enriched within a particular probe set, function will
-compare the average DNA methylation at all distal enhancer probes within +/- 100bp 
+compare the average DNA methylation at all distal enhancer probes within $\pm$ 100bp 
 of a motif occurrence, to the expression of human TFs. A statistical test 
 was performed for each motif-TF pair, as follows. The samples (all control and 
 experiment samples) were divided into two groups: the M group, which consisted 
@@ -822,14 +821,14 @@ cases. For each candidate motif-TF pair, the Mann-Whitney U test was used to tes
 the null hypothesis that overall gene expression in group M was greater or equal 
 than that in group U. This non-parametric test was used in order to minimize the 
 effects of expression outliers, which can occur across a very wide dynamic range. 
-For each motif tested, this resulted in a raw p-value (Pr) for each of the human TFs.
-All TFs were ranked by the -log10(Pr), and those falling within the top 5% of 
+For each motif tested, this resulted in a raw p-value ($P_r$) for each of the human TFs.
+All TFs were ranked by the $-log_{10}(P_{r})$, and those falling within the top 5% of 
 this ranking were considered candidate upstream regulators. The best upstream 
 TFs which are known recognized the motif was automatically extracted as putative 
 regulatory TFs.
 
-If save parameter of get.TFs function is true, two files will be generated. 
-If save parameter is false, only a data frame containing the same content 
+If `save` parameter of `get.TFs` function is true, two files will be generated. 
+If `save` parameter is `FALSE`, only a data frame containing the same content 
 with the first file mentioned below will be output.
 
 The first one csv file. This file contain the regulatory TF significantly 
@@ -856,12 +855,15 @@ The main arguments of this function are:
 
 | Argument | Description |
 |--------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| data | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function. |
+| data | A multiAssayExperiment with DNA methylation and Gene Expression data. See `createMAE` function. |
 | enriched.motif | A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function. |
 | TFs | A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol. If missing, human.TF list will be used (human.TF data in ELMER.data). For detail information, refer the reference paper. |
-| motif.relevant.TFs | A list containing motif as names and relavent TFs as contents for each list element or a path of XX.rda file containing a list as above. If missing, TFClass classification will be used. See function createMotifRelevantTfs|
+| motif.relevant.TFs | A list containing motif as names and relavent TFs as contents for each list element or a path of XX.rda file containing a list as above. If missing, TFClass classification will be used. See function `createMotifRelevantTfs`|
+| group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                
+| group1 | A group from group.col. |
+| group2 | A group from group.col. |
 | percentage | A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2. |
-| dir.out | A path specifies the directory for outputs of get.pair function. Default is current directory |
+| dir.out | A path specifies the directory for outputs of `get.pair` function. Default is current directory |
 | label | A character labels the outputs. |
 | cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
 | save | A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file. |
@@ -873,6 +875,7 @@ TF <- get.TFs(data = data,
               group.col = "definition",
               group1 =  "Primary solid Tumor",
               group2 = "Solid Tissue Normal",
+              percentage = 0.5,
               enriched.motif = enriched.motif,
               dir.out = "result", 
               cores = 1, 
@@ -885,7 +888,7 @@ TF <- get.TFs(data = data,
 dir(path = "result", pattern = "getTF")  
 
 # TF ranking plot based on statistics will be automatically generated.
-dir(path = "result/TFrankPlot", pattern = "pdf") 
+dir(path = "result/TFrankPlot_family/", pattern = "pdf") 
 ```
 
 # Generating figures
@@ -962,7 +965,7 @@ motif.enrichment.plot(motif.enrichment = "result/getMotif.hypo.motif.enrichment.
 ```
 
 ## TF ranking plot
-TF ranking plot shows statistic -log10(P value) assessing the anti-correlation level 
+TF ranking plot shows statistic $-log_{10}(P value)$ assessing the anti-correlation level 
 of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
 By default, the top 3 associated TFs and the TF family members (dots in red) that are associated with that specific motif  are labeled in the plot.
 But there is also a option show highlight only TF sub-family members (TCClass database classification)
