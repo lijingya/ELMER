@@ -482,10 +482,7 @@ data <- createMAE(exp = GeneExp,
                   met.platform = "450K",
                   genome = "hg19",
                   TCGA = TRUE)
-save(data,file = "result/mae.rda")
-datatable(as.matrix(colData(data)[1:5,]), 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+as.data.frame(colData(data)[1:5,])
 
 sig.diff <- get.diff.meth(data, 
                           group.col = "definition",
@@ -498,9 +495,7 @@ sig.diff <- get.diff.meth(data,
                           dir.out ="result", 
                           pvalue = 0.01)
 
-datatable(sig.diff, 
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+as.data.frame(sig.diff)
 # get.diff.meth automatically save output files. 
 # getMethdiff.hypo.probes.csv contains statistics for all the probes.
 # getMethdiff.hypo.probes.significant.csv contains only the significant probes which
