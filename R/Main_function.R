@@ -360,6 +360,8 @@ get.pair <- function(data,
                      label = NULL,
                      save = TRUE){
   ## check data
+  if(percentage > 0.5) stop("Percentage argument ranges is between 0 and 0.5")
+  
   if(!all(names(nearGenes) %in% rownames(getMet(data))))
     stop("Probes option should be subset of rownames of methylation matrix.")
   if(is.character(nearGenes)){
