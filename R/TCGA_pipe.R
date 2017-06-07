@@ -53,7 +53,7 @@ TCGA.pipe <- function(disease,
   
   disease <- toupper(disease)
   dir.out <- sprintf("%s/Result/%s",wd,disease)
-  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE)
+  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
   args <- list(...)
   
   # Download 
