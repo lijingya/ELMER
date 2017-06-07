@@ -804,7 +804,7 @@ DNA methylation which is carried out by function `get.TFs`.
 
 ### Description
 For each motif considered to be enriched within a particular probe set, function will
-compare the average DNA methylation at all distal enhancer probes within $\pm$ 100bp 
+compare the average DNA methylation at all distal enhancer probes within $\pm250bp$  
 of a motif occurrence, to the expression of human TFs. A statistical test 
 was performed for each motif-TF pair, as follows. The samples (all control and 
 experiment samples) were divided into two groups: the M group, which consisted 
@@ -887,10 +887,13 @@ dir(path = "result/TFrankPlot_family/", pattern = "pdf")
 ```
 
 # Generating figures
-## Scatter plots
-Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe. Figure \ref{fig:figure1}
 
-```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=10, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+## Scatter plots
+
+Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe.
+
+Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes.
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=5, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
 scatter.plot(data,
              byProbe = list(probe = c("cg19403323"), geneNum = 20), 
              category = "definition", 
@@ -901,6 +904,7 @@ scatter.plot(data,
 ###  Scatter plot of one pair
 Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
 
+Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14.
 ```{r results='hide',eval=TRUE, fig.cap="Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14."}
 scatter.plot(data,
              byPair = list(probe = c("cg19403323"), gene = c("ENSG00000143469")), 
@@ -909,7 +913,9 @@ scatter.plot(data,
 
 ###  TF expression vs. average DNA methylation
 Generate scatter plot for TF expression vs average DNA methylation of the sites 
-with certain motif. Figure \ref{fig:figure3}
+with certain motif.
+
+Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively.
 
 ```{r,eval=TRUE, fig.cap="Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively."}
 load("result/getMotif.hypo.enriched.motifs.rda")
@@ -925,11 +931,10 @@ scatter.plot(data,
 Schematic plot shows a breif view of linkages between genes and probes.
 
 ### Nearby Genes
-Generate schematic plot for one probe with 20 nearby genes and label 
-the gene significantly linked with the probe in red. Figure \ref{fig:figure4}
+Generate schematic plot for one probe with 20 nearby genes and label  the gene significantly linked with the probe in red. 
 
 
-```{r results='hide', eval=TRUE,fig.height=10,  fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
+```{r results='hide', eval=TRUE,fig.height=5,  fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
 schematic.plot(pair = Hypo.pair, 
                data = data,
                group.col = "definition",
@@ -939,7 +944,7 @@ schematic.plot(pair = Hypo.pair,
 
 ### Nearby Probes
 Generate schematic plot for one gene with the probes which the gene is significantly 
-linked to. Figure \ref{fig:figure5}
+linked to.
 
 ```{r results='hide', eval=TRUE, fig.width=6, fig.height=10, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
 schematic.plot(pair = Hypo.pair, 
@@ -950,8 +955,9 @@ schematic.plot(pair = Hypo.pair,
 ```
 
 ## Motif enrichment plot
-Motif enrichment plot shows the enrichment levels for the selected motifs. Figure\ref{fig:figure6}
+Motif  enrichment plot shows the enrichment levels for the selected motifs. 
 
+The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio
 ```{r results='hide', eval=TRUE, fig.width=6,fig.cap="The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio."}
 motif.enrichment.plot(motif.enrichment = "result/getMotif.hypo.motif.enrichment.csv", 
                       significant = list(OR = 1.3,lowerOR = 1.3), 
@@ -961,9 +967,11 @@ motif.enrichment.plot(motif.enrichment = "result/getMotif.hypo.motif.enrichment.
 
 ## TF ranking plot
 TF ranking plot shows statistic $-log_{10}(P value)$ assessing the anti-correlation level 
-of TFs expression level with average DNA methylation level at sites with a given motif. Figure \ref{fig:figure7}
+of TFs expression level with average DNA methylation level at sites with a given motif. 
 By default, the top 3 associated TFs and the TF family members (dots in red) that are associated with that specific motif  are labeled in the plot.
 But there is also a option show highlight only TF sub-family members (TCClass database classification)
+
+Shown are TF ranking plots based on the score ($-log_{10}(P value))$ of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot
 
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
@@ -972,6 +980,9 @@ TF.rank.plot(motif.pvalue = TF.meth.cor,
              motif = motif,
              save = FALSE) 
 ```
+
+
+Shown are TF ranking plots based on the score ($-log_{10}(P value)$) of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot.
 
 ```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
