@@ -52,7 +52,8 @@ TCGA.pipe <- function(disease,
                 paste(c("",available.analysis), collapse = "\n=> ")))
   
   disease <- toupper(disease)
-  dir.out <- sprintf("%s/Result/%s",wd,disease)
+  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
+  dir.out <- sprintf("%s/Result/%s/%s",wd,disease,diff.dir)
   if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
   args <- list(...)
   
@@ -85,7 +86,7 @@ TCGA.pipe <- function(disease,
   
   if(tolower("createMAE") %in% tolower(analysis)){
     print.header("Creating Multi Assay Experiment")
-    file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
+    file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(file)) {
       group.col <- "TN"
       sample.type <- c("Tumor","Normal")
@@ -131,7 +132,7 @@ TCGA.pipe <- function(disease,
   # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
     print.header("Get differential DNA methylation loci")
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
@@ -147,7 +148,7 @@ TCGA.pipe <- function(disease,
   #predict pair
   if("pair" %in% tolower(analysis)){
     print.header("Predict pairs")
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease, genome)
+     mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
