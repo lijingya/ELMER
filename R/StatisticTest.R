@@ -62,11 +62,11 @@ Stat.diff.meth <- function(meth,
 #' @return U test results
 Stat.nonpara.permu <- function(Probe,
                                Gene,
-                               Top=0.2,
-                               Meths=Meths,
-                               Exps=Exps){
+                               Top = 0.2,
+                               Meths = Meths,
+                               Exps = Exps){
   idx <- order(Meths)
-  nb <- round(length(Meths)*Top)
+  nb <- round(length(Meths) * Top)
   unmethy <- head(idx, n = nb) 
   methy <- tail(idx, n = nb) 
   

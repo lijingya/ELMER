@@ -5,7 +5,8 @@
 \title{ELMER analysis pipeline for TCGA data.}
 \usage{
 TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
-  cores = 1, Data = NULL, diff.dir = "hypo", ...)
+  cores = 1, mode = "supervised", Data = NULL, diff.dir = "hypo",
+  group.col = "TN", group1 = "Tumor", group2 = "Normal", ...)
 }
 \arguments{
 \item{disease}{TCGA short form disease name such as COAD}
@@ -20,6 +21,9 @@ Default is "all" meaning all the analysis will be processed.}
 
 \item{cores}{A interger which defines number of core to be used in parallel process. 
 Default is 1: don't use parallel process.}
+
+\item{mode}{This option will automatically set the percentage of samples to be used in the analysis.
+Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).}
 
 \item{Data}{A path shows the folder containing DNA methylation, expression and clinic data}
 

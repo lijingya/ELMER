@@ -8,7 +8,7 @@ get.TFs(data,
           enriched.motif, 
           TFs, 
           motif.relevant.TFs, 
-          percentage = 0.2,
+          minSubgroupFrac = 0.4,
           dir.out = "./",
           label = NULL, 
           cores = 1,
@@ -34,7 +34,11 @@ hypermethylated in group 1 compared to group 2.}
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{percentage}{A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2.}
+\item{minSubgroupFrac}{A number ranging from 0 to 1 
+specifying the percentage of samples used to create the groups U (unmethylated) 
+and M (methylated) used to link probes to TF expression. 
+Default is 0.4 (lowest quintile of all samples will be in the 
+U group and the highest quintile of all samples in the M group).}
 
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
 

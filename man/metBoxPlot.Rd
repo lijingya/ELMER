@@ -5,8 +5,8 @@
 \title{scatter.plot to plot scatter plots between gene expression and DNA methylation.}
 \usage{
 metBoxPlot(data, group.col, group1, group2, probe, min.samples = 5,
-  percentage = 0.2, diff.dir = "hypo", legend.col = NULL, title = NULL,
-  filename = NULL, save = TRUE)
+  minSubgroupFrac = 0.2, diff.dir = "hypo", legend.col = NULL,
+  title = NULL, filename = NULL, save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
@@ -27,7 +27,7 @@ hypermethylated in group 1 compared to group 2.}
 If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
 in the lower quintile, but then 5 will be used.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples 
+\item{minSubgroupFrac}{A number ranges from 0 to 1 specifying the percentage of samples 
 from group1 and group2 that are used to identify the differential methylation. 
 Default is 0.2 because we did not expect all cases to be from a single molecular 
 subtype.But, If you are working with molecular subtypes please set it to 1.}
@@ -58,7 +58,7 @@ metBoxPlot(data,
            group1 = group1,
            group2 = group2, 
            probe ="cg17898069",
-           percentage = 0.2, 
+           minSubgroupFrac = 0.2, 
            diff.dir = "hypo")
 }
 \author{

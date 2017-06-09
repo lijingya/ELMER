@@ -9,11 +9,9 @@
 #' If FALSE, function will ouput the distal probes overlaping with features. The 
 #' default is FALSE.
 #' @param met.platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
-#' @param genome Genome  GENCODE
-#' 
+#' @param genome Which genome build will be used: hg38 (default) or hg19.
 #' @param feature A GRange object containing biofeature coordinate such as 
-#' enhancer coordinates. Default is comprehensive genomic enhancer regions from 
-#' REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}. 
+#' enhancer coordinates. 
 #' If NULL only distal probes (2Kbp away from TSS will be selected)
 #' feature option is only usable when promoter option is FALSE.
 #' @param TSS A GRange object contains the transcription start sites. When promoter is FALSE, Union.TSS
@@ -49,7 +47,7 @@
 #' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(feature,
+get.feature.probe <- function(feature = NULL,
                               TSS,
                               genome = "hg38",
                               met.platform = "450K",
@@ -76,23 +74,17 @@ get.feature.probe <- function(feature,
     probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
     
     
-      if(missing(feature)){
-        message("Get enhancer positions from ELMER.data")
-        newenv <- new.env()
-        if(genome == "hg19") data("Union.enhancer.hg19",package = "ELMER.data", envir = newenv)
-        if(genome == "hg38") data("Union.enhancer.hg38",package = "ELMER.data", envir = newenv)
-        feature <- get(ls(newenv)[1],envir=newenv)   
-      } else if(is.null(feature)) {
-        message("Returning distal probes: ", length(probe))
-        return(probe)
-      }
-      if(is(feature,"GRanges")) {             
-        probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-        message("Returning distal probes overlapping with features: ", length(probe))
-        
-      } else {
-        stop("feature is not GRanges object.")
-      }
+    if(is.null(feature)) {
+      message("Returning distal probes: ", length(probe))
+      return(probe)
+    }
+    if(is(feature,"GRanges")) {             
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+      message("Returning distal probes overlapping with features: ", length(probe))
+      
+    } else {
+      stop("feature is not GRanges object.")
+    }
   } else {
     probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
   }
@@ -106,7 +98,7 @@ get.feature.probe <- function(feature,
 #' groups such as normal verus tumor samples.
 #' @description 
 #' get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
-#' hypo/hyper-methyalated using proportional samples (defined by percentage option) from group 1 
+#' hypo/hyper-methyalated using proportional samples (defined by minSubgroupFrac option) from group 1 
 #' and group 2. The P values will be adjusted by Benjamini-Hochberg method. 
 #' Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant 
 #' differentially methylated CpG sites.
@@ -126,20 +118,21 @@ get.feature.probe <- function(feature,
 #' "hyper" which is only selecting hypermethylated probes; 
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples 
+#' @param minSubgroupFrac A number ranges from 0 to 1 specifying the percentage of samples 
 #' from group1 and group2 that are used to identify the differential methylation. 
 #' Default is 0.2 because we did not expect all cases to be from a single molecular 
 #' subtype.But, If you are working with molecular subtypes please set it to 1.
 #' @param cores A interger which defines the number of cores to be used in parallel 
-#' @param pvalue A number specifies the significant P value (adjusted P value by BH) cutoff 
-#' for selecting significant hypo/hyper-methylated probes. Default is 0.01
+#' @param pvalue A number specifies the significant P value (adjusted P value by BH) 
+#' threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01
+#' If pvalue is smaller than pvalue than it is considered significant.
 #' @param sig.dif A number specifies the smallest DNA methylation difference as a cutoff for 
 #' selecting significant hypo/hyper-methylated probes. Default is 0.3.
 #' @param dir.out A path specify the directory for outputs. Default is is current directory.
 #' @param test Statistical test to be used. Options: t.test (DEFAULT), wilcox.test
 #' @param save A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)
 #' @param min.samples Minimun number of samples to use in the analysis. Default 5.
-#' If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+#' If you have 10 samples in one group, minSubgroupFrac is 0.2 this will give 2 samples 
 #' in the lower quintile, but then 5 will be used.
 #' @details 
 #'  save: 
@@ -176,7 +169,7 @@ get.feature.probe <- function(feature,
 get.diff.meth <- function(data,
                           diff.dir = "hypo",
                           cores = 1,
-                          percentage = 0.2,
+                          minSubgroupFrac = 0.2,
                           pvalue = 0.01,
                           group.col,
                           min.samples = 5,
@@ -224,7 +217,7 @@ get.diff.meth <- function(data,
   probes <- rownames(met)
   out <- alply(.data = met, .margins = 1,
                .fun = function(x) {
-                 Stat.diff.meth(percentage = percentage,
+                 Stat.diff.meth(percentage = minSubgroupFrac,
                                 meth = x,
                                 min.samples = min.samples,
                                 groups = groups.info,
@@ -268,7 +261,7 @@ get.diff.meth <- function(data,
 #' (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
-#' get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
+#' get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir = NULL, 
 #'          pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
 #'          group.col, cores = 1, filter.probes = TRUE, 
 #'          filter.portion = 0.3,  filter.percentage = 0.05,
@@ -278,11 +271,11 @@ get.diff.meth <- function(data,
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
 #'  Default is 1: don't use parallel process.
-#' @param percentage A number ranging from 0 to 0.5 
-#' specifying the percentage of samples in groups U (unmethylated) 
+#' @param minSubgroupFrac A number ranging from 0 to 1 
+#' specifying the percentage of samples used to create the groups U (unmethylated) 
 #' and M (methylated) used to link probes to genes. 
-#' Default is 0.2 (lowest quintile samples will be in the 
-#' U group and the highest quintile samples in the M group).
+#' Default is 0.4 (lowest quintile of all samples will be in the 
+#' U group and the highest quintile of all samples in the M group).
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
@@ -343,7 +336,7 @@ get.diff.meth <- function(data,
 #'                       label = "hypo")                    
 get.pair <- function(data,
                      nearGenes,
-                     percentage = 0.2,
+                     minSubgroupFrac = 0.2,
                      permu.size = 10000,
                      permu.dir = NULL, 
                      pvalue = 0.001,
@@ -359,8 +352,6 @@ get.pair <- function(data,
                      filter.percentage = 0.05,
                      label = NULL,
                      save = TRUE){
-  ## check data
-  if(percentage > 0.5) stop("Percentage argument ranges is between 0 and 0.5")
   
   if(!all(names(nearGenes) %in% rownames(getMet(data))))
     stop("Probes option should be subset of rownames of methylation matrix.")
@@ -372,7 +363,7 @@ get.pair <- function(data,
   }
   if(diffExp & missing(group.col)) 
     stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
-
+  
   if(missing(group.col)) stop("Please set group.col argument")
   if(missing(group1)) stop("Please set group1 argument")
   if(missing(group2)) stop("Please set group2 argument")
@@ -397,7 +388,7 @@ get.pair <- function(data,
                         Stat.nonpara(Probe = x,
                                      Meths = met[x,], 
                                      NearGenes = nearGenes,
-                                     Top = percentage,
+                                     Top = minSubgroupFrac/2, # Each group will have half of the samples
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
@@ -425,7 +416,7 @@ get.pair <- function(data,
   # get permutation
   permu <- get.permu(data,
                      geneID     = GeneID, 
-                     percentage = percentage, 
+                     percentage = minSubgroupFrac/2,
                      rm.probes  = names(nearGenes), 
                      permu.size = permu.size, 
                      permu.dir  = permu.dir,
@@ -657,11 +648,13 @@ get.permu <- function(data,
 #' gene expression Summarized Experiment objects
 #'@param sig.pvalue A number specifies significant cutoff for gene silenced by promoter
 #' methylation. Default is 0.01. P value is raw P value without adjustment.
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of
-#'  samples of control and experimental groups used to link promoter DNA methylation to genes.
-#'  Default is 0.2.
-#'  @param upstream Number of bp upstream of TSS to consider as promoter region
-#'  @param downstream  Number of bp downstream of TSS to consider as promoter region
+#' @param minSubgroupFrac A number ranging from 0 to 1 
+#' specifying the percentage of samples used to create the groups U (unmethylated) 
+#' and M (methylated) used to link probes to genes. 
+#' Default is 0.4 (lowest quintile of all samples will be in the 
+#' U group and the highest quintile of all samples in the M group).
+#' @param upstream Number of bp upstream of TSS to consider as promoter region
+#' @param downstream  Number of bp downstream of TSS to consider as promoter region
 #'  @param cores Number of cores to be used in paralellization. Default 1 (no paralellization)
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
@@ -674,7 +667,7 @@ get.permu <- function(data,
 #' @export
 promoterMeth <- function(data,
                          sig.pvalue = 0.01,
-                         percentage = 0.2,
+                         minSubgroupFrac = 0.4,
                          upstream = 200,
                          downstream = 2000,
                          save = TRUE,
@@ -723,13 +716,13 @@ promoterMeth <- function(data,
     
     message("Calculating Pp (probe - gene) for all nearby genes")
     out <- adply(.data = rownames(Gene.promoter)[1:3], .margins = 1,
-                        .fun = function(x) {
-                          Stat.nonpara(Probe = x,
-                                       Meths = Gene.promoter[x,], 
-                                       NearGenes = Fake,
-                                       Top = percentage,
-                                       Exps = exps)},
-                        .progress = "text", .parallel = parallel, .id = NULL
+                 .fun = function(x) {
+                   Stat.nonpara(Probe = x,
+                                Meths = Gene.promoter[x,], 
+                                NearGenes = Fake,
+                                Top = minSubgroupFrac/2,
+                                Exps = exps)},
+                 .progress = "text", .parallel = parallel, .id = NULL
     )
     
     out <- out[,c("GeneID","Symbol","Raw.p")]
@@ -1134,7 +1127,7 @@ get.enriched.motif <- function(data,
 #'           enriched.motif, 
 #'           TFs, 
 #'           motif.relevant.TFs, 
-#'           percentage = 0.2,
+#'           minSubgroupFrac = 0.4,
 #'           dir.out = "./",
 #'           label = NULL, 
 #'           cores = 1,
@@ -1148,7 +1141,11 @@ get.enriched.motif <- function(data,
 #'  for each list element or a path of XX.rda file containing a list as above. 
 #' If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
 #' For detail information, refer the reference paper.
-#' @param percentage A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2.
+#' @param minSubgroupFrac A number ranging from 0 to 1 
+#' specifying the percentage of samples used to create the groups U (unmethylated) 
+#' and M (methylated) used to link probes to TF expression. 
+#' Default is 0.4 (lowest quintile of all samples will be in the 
+#' U group and the highest quintile of all samples in the M group).
 #' @param cores A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
@@ -1215,7 +1212,7 @@ get.TFs <- function(data,
                     group1,
                     group2,
                     motif.relevant.TFs,
-                    percentage = 0.2,
+                    minSubgroupFrac = 0.4,
                     dir.out = "./",
                     label = NULL,
                     cores = 1,
@@ -1247,7 +1244,7 @@ get.TFs <- function(data,
   } else if(is.character(TFs)){
     TFs <- read.csv(TFs, stringsAsFactors=FALSE)
   }
-
+  
   if(missing(motif.relevant.TFs)){
     message("Accessing TF families from TFClass database to indentify known potential TF")
     TF.family <-  createMotifRelevantTfs()
@@ -1306,7 +1303,7 @@ get.TFs <- function(data,
                            Probe = x,
                            Meths=motif.meth[x,],
                            Gene=gene,
-                           Top=percentage,
+                           Top=minSubgroupFrac/2,
                            Exps=exps)},
                        .progress = "text", .parallel = parallel
   )
@@ -1325,7 +1322,7 @@ get.TFs <- function(data,
   # have a higher correlation.
   
   message("Finding potential TF and known potential TF")
-
+  
   # For each motif evaluate TF
   cor.summary <- adply(colnames(TF.meth.cor), 
                        function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){ 

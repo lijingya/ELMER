@@ -15,11 +15,15 @@ gene expression Summarized Experiment objects}
 \item{sig.pvalue}{A number specifies significant cutoff for gene silenced by promoter
 methylation. Default is 0.01. P value is raw P value without adjustment.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of
-samples of control and experimental groups used to link promoter DNA methylation to genes.
-Default is 0.2.
-@param upstream Number of bp upstream of TSS to consider as promoter region
-@param downstream  Number of bp downstream of TSS to consider as promoter region
+\item{minSubgroupFrac}{A number ranging from 0 to 1 
+specifying the percentage of samples used to create the groups U (unmethylated) 
+and M (methylated) used to link probes to genes. 
+Default is 0.4 (lowest quintile of all samples will be in the 
+U group and the highest quintile of all samples in the M group).}
+
+\item{upstream}{Number of bp upstream of TSS to consider as promoter region}
+
+\item{downstream}{Number of bp downstream of TSS to consider as promoter region
 @param cores Number of cores to be used in paralellization. Default 1 (no paralellization)}
 
 \item{save}{A logic. If it is true, the result will be saved.}

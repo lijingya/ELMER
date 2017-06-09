@@ -4,14 +4,13 @@
 \alias{get.feature.probe}
 \title{get.feature.probe to select probes within promoter regions or distal regions.}
 \usage{
-get.feature.probe(feature, TSS, genome = "hg38", met.platform = "450K",
-  TSS.range = list(upstream = 2000, downstream = 2000), promoter = FALSE,
-  rm.chr = NULL)
+get.feature.probe(feature = NULL, TSS, genome = "hg38",
+  met.platform = "450K", TSS.range = list(upstream = 2000, downstream =
+  2000), promoter = FALSE, rm.chr = NULL)
 }
 \arguments{
 \item{feature}{A GRange object containing biofeature coordinate such as 
-enhancer coordinates. Default is comprehensive genomic enhancer regions from 
-REMC and FANTOM5 which is Union.enhancer data in \pkg{ELMER.data}. 
+enhancer coordinates. 
 If NULL only distal probes (2Kbp away from TSS will be selected)
 feature option is only usable when promoter option is FALSE.}
 
@@ -19,7 +18,7 @@ feature option is only usable when promoter option is FALSE.}
 in \pkg{ELMER.data} will be used for default. When promoter is TRUE, UCSC gene TSS will
 be used as default (see detail). User can specify their own preference TSS annotation.}
 
-\item{genome}{Genome  GENCODE}
+\item{genome}{Which genome build will be used: hg38 (default) or hg19.}
 
 \item{met.platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
 

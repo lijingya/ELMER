@@ -5,7 +5,7 @@
 \title{GetNearGenes to collect nearby genes for one locus.}
 \usage{
 GetNearGenes(data = NULL, probes = NULL, geneAnnot = NULL,
-  TRange = NULL, geneNum = 20, cores = 1)
+  TRange = NULL, numFlankingGenes = 20, cores = 1)
 }
 \arguments{
 \item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
@@ -18,7 +18,7 @@ human genome.}
 
 \item{TRange}{A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.}
 
-\item{geneNum}{A number determines how many gene will be collected totally. 
+\item{numFlankingGenes}{A number determines how many gene will be collected totally. 
 Then the number devided by 2 is the number of genes collected from 
 each side of targets (number shoule be even) Default to 20.}
 

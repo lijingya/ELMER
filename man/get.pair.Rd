@@ -4,7 +4,7 @@
 \alias{get.pair}
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
-get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL, 
+get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir = NULL, 
          pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
          group.col, cores = 1, filter.probes = TRUE, 
          filter.portion = 0.3,  filter.percentage = 0.05,
@@ -16,11 +16,11 @@ get.pair(data, nearGenes, percentage = 0.2, permu.size = 10000, permu.dir = NULL
 \item{nearGenes}{Can be either a list containing output of GetNearGenes 
 function or path of rda file containing output of GetNearGenes function.}
 
-\item{percentage}{A number ranging from 0 to 0.5 
-specifying the percentage of samples in groups U (unmethylated) 
+\item{minSubgroupFrac}{A number ranging from 0 to 1 
+specifying the percentage of samples used to create the groups U (unmethylated) 
 and M (methylated) used to link probes to genes. 
-Default is 0.2 (lowest quintile samples will be in the 
-U group and the highest quintile samples in the M group).}
+Default is 0.4 (lowest quintile of all samples will be in the 
+U group and the highest quintile of all samples in the M group).}
 
 \item{permu.size}{A number specify the times of permuation. Default is 10000.}
 

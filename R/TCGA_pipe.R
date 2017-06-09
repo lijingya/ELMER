@@ -9,6 +9,8 @@
 #' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
 #' Default is "all" meaning all the analysis will be processed.
 #' @param wd A path shows working dirctory. Default is "./"
+#' @param mode This option will automatically set the percentage of samples to be used in the analysis.
+#' Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).
 #' @param cores A interger which defines number of core to be used in parallel process. 
 #' Default is 1: don't use parallel process.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes.  
@@ -35,9 +37,24 @@ TCGA.pipe <- function(disease,
                       analysis = "all",
                       wd = "./",
                       cores = 1,
+                      mode = "supervised",
                       Data = NULL, 
                       diff.dir = "hypo",
+                      group.col = "TN", 
+                      group1 = "Tumor",
+                      group2 = "Normal",
                       ...){
+  if(mode  %in% c("supervised","unsupervised")){
+    stop("Set mode arugment to supervised or unsupervised")
+  }
+  if(mode %in% c("supervised")) {
+    minSubgroupFrac <- 1
+    message(mode, " was selected: using all samples")
+  } else {
+    minSubgroupFrac <- 0.2
+    message(mode, " was selected: using ", minSubgroupFrac, " samples")
+    
+  }
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://gdc-portal.nci.nih.gov")
@@ -138,10 +155,12 @@ TCGA.pipe <- function(disease,
       return(NULL)
     }
     load(mae.file)
-    params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
-    params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
-    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,group.col = "TN", group1 = "Tumor",
-                                                     group2 = "Normal")))
+    params <- args[names(args) %in% c("pvalue","sig.dif")]
+    params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores, minSubgroupFrac = minSubgroupFrac))
+    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,
+                                                     group.col = group.col, 
+                                                     group1 = group1,
+                                                     group2 = group2)))
     if(length(analysis)==1) return(diff.meth)
   }
   
@@ -188,9 +207,10 @@ TCGA.pipe <- function(disease,
                          c(list(data      = mae,
                                 nearGenes = nearGenes.file,
                                 permu.dir = permu.dir,
-                                group.col = "TN",
-                                group1 = "Tumor",
-                                group2 = "Normal",
+                                group.col = group.col, 
+                                group1    = group1,
+                                minSubgroupFrac = min(1,minSubgroupFrac * 2),
+                                group2    = group2,
                                 dir.out   = dir.out,
                                 cores     = cores,
                                 label     = diff.dir),
@@ -298,9 +318,10 @@ TCGA.pipe <- function(disease,
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
                    c(list(data           = mae, 
-                          group.col = "TN",
-                          group1 = "Tumor",
-                          group2 = "Normal",
+                          group.col      = group.col, 
+                          group1         = group1,
+                          group2         = group2,
+                          minSubgroupFrac =  min(1,minSubgroupFrac * 2),
                           enriched.motif = enriched.motif,
                           dir.out        = dir.out, 
                           cores          = cores, 

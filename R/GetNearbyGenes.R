@@ -145,7 +145,7 @@ NearGenes <- function (Target=NULL,
 #' object in the data argument object)
 #' @param geneAnnot A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 #' human genome.
-#' @param geneNum A number determines how many gene will be collected totally. 
+#' @param numFlankingGenes A number determines how many gene will be collected totally. 
 #' Then the number devided by 2 is the number of genes collected from 
 #' each side of targets (number shoule be even) Default to 20.
 #' @param TRange A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.
@@ -172,9 +172,9 @@ GetNearGenes <- function(data = NULL,
                          probes = NULL,
                          geneAnnot = NULL,
                          TRange = NULL,
-                         geneNum = 20,
+                         numFlankingGenes = 20,
                          cores = 1){
-  message("Searching for the ", geneNum, " near genes")
+  message("Searching for the ", numFlankingGenes, " near genes")
   if(!is.null(data)){
     if(is.null(probes)) stop("Please set the probes argument (names of probes to select nearby genes)")
     TRange <- subset(getMet(data), rownames(getMet(data)) %in% probes)
@@ -209,7 +209,7 @@ GetNearGenes <- function(data = NULL,
   NearGenes <- alply(.data = as.data.frame(TRange), .margins = 1,
                      .fun = function(x) {
                        NearGenes( Target = rownames(x),
-                                  geneNum = geneNum,
+                                  geneNum = numFlankingGenes,
                                   Gene = geneAnnot,
                                   TRange = TRange)},
                      .progress = "text", .parallel = parallel

@@ -106,19 +106,43 @@ the analyses in ELMER. For illustration purpose, we skip the downloading step.
 The user can use the `getTCGA` function to download TCGA data or
 use `TCGA.pipe` by including "download" in the analysis option.
 
-The following command will do distal enhancer DNA methylation analysis and predict putative
-target genes, motif analysis and idnetify regulatory transcription factors.
+The following command will do distal DNA methylation analysis and predict putative
+target genes, motif analysis and identify regulatory transcription factors.
 
 ```{r, fig.height=6,eval=FALSE}
 TCGA.pipe("LUSC",
           wd = "./ELMER.example",
           cores = parallel::detectCores()/2,
+          mode = "unsupervised"
           permu.size = 300,
           Pe = 0.01,
           analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
           diff.dir = "hypo",
           rm.chr = paste0("chr",c("X","Y")))
 ```
+
+<div class="panel panel-info">
+<div class="panel-heading">TCGA.pipe: Mode argument</div>
+<div class="panel-body">
+
+In this new version we added the argument `mode` in the `TCGA.pipe` function.
+This will automatically set the `minSubgroupFrac` to the following values:
+
+Modes available: 
+
+- `unsupervised`:
+  - Use 20% of each group to identify differently methylated regions (`minSubgroupFrac` = 0.2 in `get.diff.meth`)
+  - Use 40% of all samples to create Unmethytlated (U) and Methylated (M) groups in the other steps  (the lowest quintile of samples is the U group and the highest quintile samples is the M group) (`minSubgroupFrac` = 0.4 in `get.pairs` and `get.TFs` functions)
+- `supervised`:
+  - Use all samples in all functions.
+
+The `unsupervised` mode should be used when want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
+these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power.
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use `supervised` mode (use all samples)
+
+For more informtaion continue reading the vignette.
+</div>
+</div>
 
 
 # Input data
@@ -405,7 +429,7 @@ overlapping thoses features regions.
 
 ```{r, message=FALSE}
 # get distalprobes that are 2kb away from TSS on chromosome 1
-Probe <- get.feature.probe(feature = NULL, genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
+Probe <- get.feature.probe(genome = "hg19", met.platform = "450K", rm.chr = paste0("chr",c(2:22,"X","Y")))
 save(Probe,file = "result/probeInfo_feature_distal.rda")
 ```
 
@@ -463,7 +487,7 @@ The main arguments of this function are:
 | data | A `multiAssayExperiment` with DNA methylation and Gene Expression data. See `createMAE` function. |
 | diff.dir |  A character can be "hypo" or "hyper", showing differential methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes;  "hyper" which is only selecting hypermethylated probes |
 | cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
-| percentage |  A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. Default is 0.2 because we did not expect all cases to be from a single molecular subtype.But, If you are working with molecular subtypes please set it to 1. |
+| minSubgroupFrac |  A number ranges from 0 to 1 specifying the percentage of samples from group1 and group2 that are used to identify the differential methylation. Default is 0.2 because we did not expect all cases to be from a single molecular subtype.But, If you are working with molecular subtypes please set it to 1. |
 | pvalue | A number specifies the significant P value (adjusted P value by BH) cutoff for selecting significant hypo/hyper-methylated probes. Default is 0.01 |
 | group.col | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`. |
 | group1 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2. |
@@ -488,7 +512,7 @@ sig.diff <- get.diff.meth(data,
                           group.col = "definition",
                           group1 =  "Primary solid Tumor",
                           group2 = "Solid Tissue Normal",
-                          percentage = 0.2,
+                          minSubgroupFrac = 0.2,
                           sig.dif = 0.3,
                           diff.dir = "hypo", # Search for hypomethylated probes in group 1
                           cores = parallel::detectCores()/2, 
@@ -503,14 +527,14 @@ as.data.frame(sig.diff)
 dir(path = "result", pattern = "getMethdiff")  
 ```
 
-### Percentage: Dealing with molecular subytpes 
+### minSubgroupFrac: Dealing with molecular subytpes 
 
-As stated before the argument `percentage` (a number ranging from 0 to 1) controls 
+As stated before the argument `minSubgroupFrac` (a number ranging from 0 to 1) controls 
 the number of samples to be used from both groups when you are comparing the DNA methylation level at each probe.
 When comparing Primary Solid tumor samples versus Normal tissue samples only the lower quintiles were used because we 
 did not expect all cases to be from a single molecular subtype, and we sought to 
 identify methylation changes within cases from the same molecular subtype.
-But if you are dealing already with subtypes it is better to set `percentage` to 1.
+But if you are dealing already with subtypes it is better to set `minSubgroupFrac` to 1.
 
 The code example below highlight some different probes founds when using 100\% or 20\%.
 
@@ -525,7 +549,7 @@ sig.diff.20 <- get.diff.meth(data,
                              group.col = groupCol,
                              group1 = group1,
                              group2 = group2,
-                             percentage = 0.2,
+                             minSubgroupFrac = 0.2,
                              sig.dif = 0.3,
                              diff.dir = "hypo",
                              pvalue = 0.01)
@@ -535,7 +559,7 @@ sig.diff.100 <- get.diff.meth(data,
                               group.col = groupCol,
                               group1 = group1,
                               group2 = group2,
-                              percentage = 1.0,
+                              minSubgroupFrac = 1.0,
                               sig.dif = 0.3,
                               diff.dir = "hypo", 
                               pvalue = 0.01)
@@ -543,13 +567,13 @@ sig.diff.100 <- get.diff.meth(data,
 ```{r  eval=TRUE, message=FALSE,fig.height=4, fig.width=4, warning=FALSE}
 # Which probes were found with 20% of samples and not with 100%
 probe <- sig.diff.20[which(!sig.diff.20$probe %in% sig.diff.100$probe),"probe"]
-metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2,
+metBoxPlot(data,groupCol,group1,group2,probe = probe[1],minSubgroupFrac = 0.2,
            diff.dir = "hypo", title = "probes were found with 20% of samples and not with 100%")
 ```
 ```{r  eval=TRUE, message=FALSE,fig.height=4, fig.width=4, warning=FALSE}
 # Which probes were found with 100% of samples and not with 20%
 probe <- sig.diff.100[which(!sig.diff.100$probe %in% sig.diff.20$probe),"probe"]
-metBoxPlot(data,groupCol,group1,group2,probe = probe[1],percentage = 0.2, 
+metBoxPlot(data,groupCol,group1,group2,probe = probe[1], minSubgroupFrac = 0.2, 
            diff.dir = "hypo", title = "probes were found with 100% of samples and not with 20%")
 ```
 
@@ -641,8 +665,8 @@ The main arguments of this function are:
 | Argument          | Description                                                                                                                                                                                                                                                                                                                                                         |
 |-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | data              | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.                                                                                                                                                                                                                                                                       |
-| nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of GetNearGenes function.                                                                                                                                                                                                                                     |
-| percentage        | A number ranging from 0 to 0.5 specifying the percentage of samples in groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.2 (lowest quintile samples will be in the U group and the highest quintile samples in the M group).                                                                                                                                                                                                                                             |
+| nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of `GetNearGenes` function.                                                                                                                                                                                                                                     |
+| minSubgroupFrac        | A number ranging from 0 to 1.0 specifying the percentage of samples used to create groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.4 (lowest quintile samples will be in the U group and the highest quintile samples in the M group).                                                                                                                                                                                                                                             |
 | permu.size        | A number specify the times of permuation. Default is 10000.                                                                                                                                                                                                                                                                                                         |
 | permu.dir         | A path where the output of permutation will be.                                                                                                                                                                                                                                                                                                                     |
 | pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
@@ -667,7 +691,10 @@ Sig.probes <- read.csv("result/getMethdiff.hypo.probes.significant.csv",
 head(Sig.probes)  # significantly hypomethylated probes
 
 ## Collect nearby 20 genes for Sig.probes
-nearGenes <- GetNearGenes(data = data, probes = Sig.probes, cores = parallel::detectCores()/2)
+nearGenes <- GetNearGenes(data = data, 
+                          probes = Sig.probes, 
+                          numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
+                          cores = parallel::detectCores()/2)
 
 ## Identify significant probe-gene pairs
 Hypo.pair <- get.pair(data = data,
@@ -675,7 +702,7 @@ Hypo.pair <- get.pair(data = data,
                       group1 =  "Primary solid Tumor",
                       group2 = "Solid Tissue Normal",
                       nearGenes = nearGenes,
-                      percentage = 0.2, # Percentage of samples to use in both groups U/M
+                      minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
                       permu.dir = "result/permu",
                       permu.size = 100, # Please set to 100000 to get significant results
                       pvalue = 0.05,   
@@ -857,7 +884,7 @@ The main arguments of this function are:
 | group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                
 | group1 | A group from group.col. |
 | group2 | A group from group.col. |
-| percentage | A number ranges from 0 to 0.5 specifying the percentage of samples of control and experimental groups used to link probes to genes. Default is 0.2. |
+| minSubgroupFrac |  A number ranging from 0 to 1 specifying the percentage of samples used to create the groups U (unmethylated)  and M (methylated) used to link probes to TF expression.  Default is 0.4 (lowest quintile of all samples will be in the  U group and the highest quintile of all samples in the M group). |
 | dir.out | A path specifies the directory for outputs of `get.pair` function. Default is current directory |
 | label | A character labels the outputs. |
 | cores | A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process. |
@@ -870,7 +897,7 @@ TF <- get.TFs(data = data,
               group.col = "definition",
               group1 =  "Primary solid Tumor",
               group2 = "Solid Tissue Normal",
-              percentage = 0.5,
+              minSubgroupFrac = 1.0,
               enriched.motif = enriched.motif,
               dir.out = "result", 
               cores = 1, 
@@ -895,7 +922,7 @@ Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylat
 Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes.
 ```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=5, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
 scatter.plot(data,
-             byProbe = list(probe = c("cg19403323"), geneNum = 20), 
+             byProbe = list(probe = c("cg19403323"), numFlankingGenes = 20), 
              category = "definition", 
              lm = TRUE, # Draw linear regression curve
              save = FALSE) 

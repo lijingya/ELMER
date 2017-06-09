@@ -18,7 +18,7 @@
 #' @param diff.dir A character can be "hypo" or "hyper", showing differential 
 #'  methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
 #' "hyper" which is only selecting hypermethylated probes; 
-#' @param percentage A number ranges from 0 to 1 specifying the percentage of samples 
+#' @param minSubgroupFrac A number ranges from 0 to 1 specifying the percentage of samples 
 #' from group1 and group2 that are used to identify the differential methylation. 
 #' Default is 0.2 because we did not expect all cases to be from a single molecular 
 #' subtype.But, If you are working with molecular subtypes please set it to 1.
@@ -41,7 +41,7 @@
 #'            group1 = group1,
 #'            group2 = group2, 
 #'            probe ="cg17898069",
-#'            percentage = 0.2, 
+#'            minSubgroupFrac = 0.2, 
 #'            diff.dir = "hypo")
 metBoxPlot <- function(data, 
                        group.col, 
@@ -49,7 +49,7 @@ metBoxPlot <- function(data,
                        group2, 
                        probe, 
                        min.samples = 5,
-                       percentage = 0.2, 
+                       minSubgroupFrac = 0.2, 
                        diff.dir = "hypo",
                        legend.col = NULL,
                        title = NULL,
@@ -91,7 +91,7 @@ metBoxPlot <- function(data,
   }
   aux$used <- " (100%)"
   aux.used <- aux[aux$DNA.methylation.beta.value %in% val.used$DNA.methylation.beta.value,]
-  aux.used$used <- paste0(" (", percentage * 100, "%",")")
+  aux.used$used <- paste0(" (", minSubgroupFrac * 100, "%",")")
   aux <- rbind(aux,aux.used)
   aux$group <- paste0(aux$group, aux$used)
   if(is.null(title)) title <- paste0("Boxplot DNA methylation (probe ", probe,")")

@@ -5,7 +5,7 @@
 \title{get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental 
 groups such as normal verus tumor samples.}
 \usage{
-get.diff.meth(data, diff.dir = "hypo", cores = 1, percentage = 0.2,
+get.diff.meth(data, diff.dir = "hypo", cores = 1, minSubgroupFrac = 0.2,
   pvalue = 0.01, group.col, min.samples = 5, group1, group2,
   test = t.test, sig.dif = 0.3, dir.out = "./", save = TRUE)
 }
@@ -20,19 +20,20 @@ methylation dirction.  It can be "hypo" which is only selecting hypomethylated p
 \item{cores}{A interger which defines the number of cores to be used in parallel 
 process. Default is 1: no parallel process.}
 
-\item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples 
+\item{minSubgroupFrac}{A number ranges from 0 to 1 specifying the percentage of samples 
 from group1 and group2 that are used to identify the differential methylation. 
 Default is 0.2 because we did not expect all cases to be from a single molecular 
 subtype.But, If you are working with molecular subtypes please set it to 1.}
 
-\item{pvalue}{A number specifies the significant P value (adjusted P value by BH) cutoff 
-for selecting significant hypo/hyper-methylated probes. Default is 0.01}
+\item{pvalue}{A number specifies the significant P value (adjusted P value by BH) 
+threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01
+If pvalue is smaller than pvalue than it is considered significant.}
 
 \item{group.col}{A column defining the groups of the sample. You can view the 
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
-If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
+If you have 10 samples in one group, minSubgroupFrac is 0.2 this will give 2 samples 
 in the lower quintile, but then 5 will be used.}
 
 \item{group1}{A group from group.col. ELMER will run group1 vs group2. 
@@ -59,7 +60,7 @@ Statistics for all probes and significant hypo or hyper-methylated probes.
 }
 \description{
 get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
-hypo/hyper-methyalated using proportional samples (defined by percentage option) from group 1 
+hypo/hyper-methyalated using proportional samples (defined by minSubgroupFrac option) from group 1 
 and group 2. The P values will be adjusted by Benjamini-Hochberg method. 
 Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant 
 differentially methylated CpG sites.
