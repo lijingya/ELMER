@@ -37,14 +37,14 @@ TCGA.pipe <- function(disease,
                       analysis = "all",
                       wd = "./",
                       cores = 1,
-                      mode = "supervised",
+                      mode = "unsupervised",
                       Data = NULL, 
                       diff.dir = "hypo",
                       group.col = "TN", 
                       group1 = "Tumor",
                       group2 = "Normal",
                       ...){
-  if(mode  %in% c("supervised","unsupervised")){
+  if(!mode  %in% c("supervised","unsupervised")){
     stop("Set mode arugment to supervised or unsupervised")
   }
   if(mode %in% c("supervised")) {
