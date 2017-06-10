@@ -220,7 +220,7 @@ TCGA.pipe <- function(disease,
     }
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
-    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out,disease, genome)
+    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
     
     if(!file.exists(file)){    
       ## promoter methylation correlation.
@@ -302,7 +302,7 @@ TCGA.pipe <- function(disease,
   if(tolower("TF.search") %in% tolower(analysis)){
     print.header("Search responsible TFs")
     ## load mae
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out,disease,genome)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
