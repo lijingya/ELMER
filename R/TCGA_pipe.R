@@ -1,226 +1,334 @@
-## Anaylsis TCGA data pipeline------------
-#' ELMER analysis pipe for TCGA data.
+#' ELMER analysis pipeline for TCGA data.
+#' @description 
+#' ELMER analysis pipeline for TCGA data. This pipeline combine every steps of \pkg{ELMER}
+#' analyses: get.feature.probe, get.diff.meth, get.pair, get.permu, get.enriched.motif and get.TFs.
+#' Every steps' results are saved.
 #' @param disease TCGA short form disease name such as COAD
-#' @param analysis a vector of characters listing the analysis need to be done. 
-#' Analysis are "download","distal.probes","diffMeth","pair","motif","TF.search". 
-#' Default is "all" meaning all the analysis will be processed. 
-#' @param wd a path showing working dirctory. Default is "./"
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
+#' @param analysis A vector of characters listing the analysis need to be done.
+#' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
+#' Default is "all" meaning all the analysis will be processed.
+#' @param wd A path shows working dirctory. Default is "./"
+#' @param mode This option will automatically set the percentage of samples to be used in the analysis.
+#' Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).
 #' @param cores A interger which defines number of core to be used in parallel process. 
-#' Default is NULL: don't use parallel process.
-#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes;
-#' "hyper" which is only selecting hypermethylated probes; 
-#' @param Data A path showing the folder containing DNA methylation, expression and clinic data
+#' Default is 1: don't use parallel process.
+#' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes.  
+#' If it is "hypo", get.diff.meth function will identify all significantly hypomethylated
+#' CpG sites; If "hyper", get.diff.meth function will identify all significantly hypermethylated
+#' CpG sites
+#' @param Data A path shows the folder containing DNA methylation, expression and clinic data
 #' @param ... A list of parameters for functions: GetNearGenes, get.feature.probe, 
-#' get.diff.meth, get.pair,
+#' get.diff.meth, get.pair
 #' @return Different analysis results.
 #' @export 
 #' @examples
 #' \dontrun{
-#' distal.probe <- TCGA.pipe(disease = "LUSC", analysis="Probe.selection", wd="~/")
+#'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
+#'   TCGA.pipe(disease = "LUSC",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
+#'   projects <- TCGAbiolinks:::getGDCprojects()$project_id
+#'   projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=T)])
+#'   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
+#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
+#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
 #' }
-TCGA.pipe <- function(disease,analysis="all",wd="./",cores=NULL,Data=NULL, diff.dir="hypo",...){
-  if(missing(disease)) 
+TCGA.pipe <- function(disease,
+                      genome = "hg38",
+                      analysis = "all",
+                      wd = "./",
+                      cores = 1,
+                      mode = "unsupervised",
+                      Data = NULL, 
+                      diff.dir = "hypo",
+                      group.col = "TN", 
+                      group1 = "Tumor",
+                      group2 = "Normal",
+                      ...){
+  if(!mode  %in% c("supervised","unsupervised")){
+    stop("Set mode arugment to supervised or unsupervised")
+  }
+  if(mode %in% c("supervised")) {
+    minSubgroupFrac <- 1
+    message(mode, " was selected: using all samples")
+  } else {
+    minSubgroupFrac <- 0.2
+    message(mode, " was selected: using ", minSubgroupFrac, " samples")
+    
+  }
+  if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
-         please check https://tcga-data.nci.nih.gov/tcga/.")
-  if(analysis[1] == "all") analysis=c("download","distal.enhancer",
-                                      "diffMeth","pair","motif","TF.search")
+         please check https://gdc-portal.nci.nih.gov")
+  
+  available.analysis <- c("download","distal.probes",
+                          "createMAE","diffMeth","pair",
+                          "motif","TF.search","all")
+  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = T, invert = T)
+  
+  if(any(!tolower(analysis) %in% tolower(analysis))) 
+    stop(paste0("Availbale options for analysis argument are: ",
+                paste(c("",available.analysis), collapse = "\n=> ")))
+  
   disease <- toupper(disease)
-  dir.out <- sprintf("%s/Result/%s",wd,disease)
-  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE)
+  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
+  dir.out <- sprintf("%s/Result/%s/%s",wd,disease,diff.dir)
+  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
   args <- list(...)
-  #Download 
-  if("download" %in% analysis){
-    message("###################\nDownload data\n###################\n\n")
+  
+  # Download 
+  if("download" %in% tolower(analysis)){
+    print.header("Download data")
     if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-    params <- args[names(args) %in% c("RNAtype","Methfilter")]
+    params <- c()
     params$disease <- disease
     params$basedir <- sprintf("%s/Data",wd)
+    params$genome <- genome
     do.call(getTCGA,params)
     analysis <- analysis[!analysis %in% "download"]
   }
-    
+  
   ## select distal enhancer probes
-  if("distal.probes" %in% analysis){
-    message("###################\nSelect distal enhancer probes\n###################\n\n")
-    params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
+  if(tolower("distal.probes") %in% tolower(analysis)){
+    print.header("Select distal probes")
+    params <- args[names(args) %in% c("TSS", "TSS.range","rm.chr")]
+    params <- c(params,list("genome" = genome, "feature"= NULL))
     probeInfo <- do.call(get.feature.probe,params)
-    save(probeInfo,file=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
-    if(length(analysis)==1){
+    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome))
+    if(length(analysis) == 1){
       return(probeInfo)
-    }else{
+    } else {
       analysis <- analysis[!analysis %in% "distal.probes"]
       invisible(gc())
     }
   }
-  #get differential DNA methylation
-  if("diffMeth" %in% analysis){
-    message("###################\nGet differential DNA methylation loci\n###################\n\n")
-    #refine meth data: filter out non tumor or normal samples--------------
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    if(!file.exists(meth.file)){
+  
+  if(tolower("createMAE") %in% tolower(analysis)){
+    print.header("Creating Multi Assay Experiment")
+    file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    if(!file.exists(file)) {
+      group.col <- "TN"
+      sample.type <- c("Tumor","Normal")
+      
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      load(sprintf("%s/%s_meth.rda",Data,disease))
-      TN <- sapply(colnames(Meth),tcgaSampleType)
-      Meth <- Meth[,TN %in% c("Tumor","Normal")]
-      save(Meth,file= sprintf("%s/%s_meth_refined.rda",dir.out,disease))
-      rm(Meth)
-    }
-    mee <- fetch.mee(meth=meth.file,TCGA=TRUE,
-                     probeInfo=sprintf("%s/probeInfo_feature_distal.rda",dir.out))
-    params <- args[names(args) %in% c("percentage","pvalue","sig.dif")]
-    params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores))
-    diff.meth <- do.call(get.diff.meth,c(params,list(mee=mee)))
-    if(length(analysis)==1){
-      return(diff.meth)
-    }else{
-      analysis <- analysis[!analysis %in% "diffMeth"]
-      rm(mee,diff.meth)
-      invisible(gc())
+      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease,genome)
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
+      
+      ## get distal probe info
+      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
+      if(!file.exists(distal.probe)){
+        params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
+        params <- c(params,list("genome" = genome, "feature"= NULL))
+        distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
+      }
+      
+      mae <- createMAE(met           = meth.file, 
+                       exp           = exp.file, 
+                       filter.probes = distal.probe,
+                       genome        = genome,
+                       met.platform  = "450K",
+                       save          = FALSE,
+                       linearize.exp = TRUE,
+                       TCGA          = TRUE)
+      if(!all(sample.type %in% colData(mae)[,group.col])){
+        print(table(colData(mae)[,group.col]))
+        print(mae)
+        print(table(colData(mae)[,"definition"]))
+        message("There are no samples for both groups")
+        return(NULL)
+      }
+      
+      mae <- mae[,colData(mae)[,group.col] %in% sample.type]
+      save(mae,file = file)
+      message("File saved as: ", file)
+      readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
+    } else {
+      message("File already exists: ", file)
     }
   }
   
+  # get differential DNA methylation
+  if(tolower("diffMeth") %in% tolower(analysis)){
+    print.header("Get differential DNA methylation loci")
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    if(!file.exists(mae.file)){
+      message("MAE not found, please run pipe with createMAE or all options")
+      return(NULL)
+    }
+    load(mae.file)
+    params <- args[names(args) %in% c("pvalue","sig.dif")]
+    params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores, minSubgroupFrac = minSubgroupFrac))
+    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,
+                                                     group.col = group.col, 
+                                                     group1 = group1,
+                                                     group2 = group2)))
+    if(length(analysis)==1) return(diff.meth)
+  }
   
   #predict pair
-  if("pair" %in% analysis){
-    message("###################\nPredict pairs\n###################\n\n")
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
-    if(!file.exists(exp.file)){
-      load(sprintf("%s/%s_RNA.rda",Data,disease))
-      TN <- sapply(colnames(GeneExp),tcgaSampleType)
-      GeneExp <- GeneExp[,TN %in% c("Tumor","Normal")]
-      GeneExp <- log2(GeneExp+1)
-      save(GeneExp,file= sprintf("%s/%s_RNA_refined.rda",dir.out,disease))
-      rm(GeneExp)
+  if("pair" %in% tolower(analysis)){
+    print.header("Predict pairs")
+     mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    if(!file.exists(mae.file)){
+      message("MAE not found, please run pipe with createMAE or all options")
+      return(NULL)
     }
-    ## construct geneAnnot for finding nearby gene
-    geneAnnot <- args[names(args) %in% "geneAnnot"]
-    if(length(geneAnnot)==0){
-      geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
-      if(!file.exists(geneAnnot)){
-        geneInfo <- txs(TSS=list(upstream=0, downstream=0))
-        geneInfo$GENEID <- paste0("ID",geneInfo$GENEID)
-        save(geneInfo,file=geneAnnot)
-      }
-    }else{
-      geneAnnot <- geneAnnot[["geneAnnot"]]
-    }
-    ## get distal probe info
-    distal.probe <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
-    if(!file.exists(distal.probe)){
-      params <- args[names(args) %in% c("TSS","feature","TSS.range","rm.chr")]
-      distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
-    }
-   
-    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=distal.probe, 
-                    geneInfo=geneAnnot,TCGA=TRUE)
-
-    ## calculation
-    message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
-    #Construct data.
+    load(mae.file)
+    
     Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
     ## Get nearby genes-----------------------
-    nearGenes.file <- args[names(args) %in% "nearGenes"]
-    if(length(nearGenes.file)==0){
-      nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
-      if(!file.exists(nearGenes.file)){
-        params <- args[names(args) %in% c("geneNum")]
-        nearGenes <- do.call(GetNearGenes,
-                             c(list(TRange=getProbeInfo(mee,probe=Sig.probes),
-                                    geneAnnot=getGeneInfo(mee),cores=cores),
-                               params))
-        save(nearGenes,file=nearGenes.file)
-      }
-    }else{
-      nearGenes.file <- nearGenes.file[["nearGenes"]]
-    }
-    ## get pair
-    permu.dir <- paste0(dir.out,"/permu")
-    params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp")]
-    SigPair <- do.call(get.pair,c(list(mee=mee,probes=Sig.probes,
-                                       nearGenes=nearGenes.file,
-                                       permu.dir=permu.dir,
-                                       dir.out=dir.out,
-                                       cores=cores,label=diff.dir),
-                                  params))
+    message("Get nearby genes")
+    file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
-    ## promoter methylation correlation.
-    # get promoter 
-    promoter.probe <- suppressWarnings(get.feature.probe(promoter=TRUE, 
-                                                         TSS.range=list(upstream=100,
-                                                                        downstream=700)))
-    mee<- fetch.mee(meth=meth.file, exp=exp.file, probeInfo=promoter.probe, 
-                    geneInfo=geneAnnot,TCGA=TRUE, genes=unique(SigPair$GeneID))
-    params <- args[names(args) %in% "percentage"]
-    Promoter.meth <- do.call(promoterMeth, c(list(mee=mee, sig.pvalue=0.01, save=FALSE),
-                                             params))
-    add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
-    SigPair <- cbind(SigPair, GSbPM.pvalue=add)
-    write.csv(SigPair, file=sprintf("%s/getPair.%s.pairs.significant.csv",
-                                    dir.out, diff.dir),
-              row.names=FALSE)
-
-                                               
-    if(length(analysis)==1){
-      return(SigPair)
-    }else{
-      analysis <- analysis[!analysis %in% "pair"]
-      rm(mee,SigPair)
-      invisible(gc())
+    if(!file.exists(file)){    
+      nearGenes.file <- args[names(args) %in% "nearGenes"]
+      if(length(nearGenes.file)==0){
+        nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
+        if(!file.exists(nearGenes.file)){
+          params <- args[names(args) %in% c("geneNum")]
+          nearGenes <- do.call(GetNearGenes,
+                               c(list(data = mae, 
+                                      probes = Sig.probes,
+                                      cores = cores),
+                                 params))
+          save(nearGenes,file=nearGenes.file)
+        }
+      } else {
+        nearGenes.file <- nearGenes.file[["nearGenes"]]
+      }
+      ## calculation
+      message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
+      
+      ## get pair
+      permu.dir <- paste0(dir.out,"/permu")
+      params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp","calculate.Pe","group.col")]
+      SigPair <- do.call(get.pair,
+                         c(list(data      = mae,
+                                nearGenes = nearGenes.file,
+                                permu.dir = permu.dir,
+                                group.col = group.col, 
+                                group1    = group1,
+                                minSubgroupFrac = min(1,minSubgroupFrac * 2),
+                                group2    = group2,
+                                dir.out   = dir.out,
+                                cores     = cores,
+                                label     = diff.dir),
+                           params))
+    } else {
+      SigPair <- readr::read_csv(file)
     }
+    message("calculate associations of gene expression with DNA methylation at promoter regions")
+    message("Fetching promoter regions")
+    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
+    
+    if(!file.exists(file)){    
+      ## promoter methylation correlation.
+      # get promoter 
+      suppressWarnings({
+        promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
+                                            TSS.range=list(upstream = 200, downstream = 2000))
+      })
+      group.col <- "TN"
+      sample.type <- c("Tumor","Normal")
+      
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
+      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
+      
+      mae.promoter <- createMAE(met           = meth.file, 
+                                exp           = exp.file, 
+                                filter.probes = promoter.probe,
+                                genome        = genome,
+                                met.platform  = "450K",
+                                linearize.exp = TRUE,
+                                save          = FALSE,
+                                TCGA          = TRUE)
+      if(!all(sample.type %in% colData(mae)[,group.col])){
+        message("There are no samples for both groups")
+        return(NULL)
+      }
+      mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
+      save(mae.promoter,file = file)
+    } else {
+      mae.promoter <- get(load(file))
+    }
+    params <- args[names(args) %in% "percentage"]
+    Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
+                                             params))
+    write.csv(Promoter.meth, 
+              file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
+              row.names=FALSE)
+    add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
+    SigPair <- cbind(SigPair, GSbPM.pvalue = add)
+    write.csv(SigPair, 
+              file = sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir),
+              row.names=FALSE)
+    
+    if(length(analysis) == 1) return(SigPair)
   }
   
   # search enriched motif
-  if("motif" %in% analysis){
-    message("###################\nMotif search\n###################\n\n")
+  if("motif" %in% tolower(analysis)){
+    print.header("Motif search")
+    
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
                                             dir.out, diff.dir), 
                                     stringsAsFactors=FALSE)$Probe)
-    }else{
+    } else {
       stop(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
     }
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
-    enriched.motif <- do.call(get.enriched.motif, c(list(probes=Sig.probes,
-                                                         dir.out=dir.out,
-                                                         label=diff.dir),
-                                                    params))
     
-    if(length(analysis)==1){
-      return(enriched.motif)
-    }else{
-      analysis <- analysis[!analysis %in% "motif"]
-      rm(enriched.motif)
-      invisible(gc())
-    }
+    newenv <- new.env()
+    if(genome == "hg19") data("Probes.motif.hg19.450K", package = "ELMER.data", envir = newenv)
+    if(genome == "hg38") data("Probes.motif.hg38.450K", package = "ELMER.data", envir = newenv)
+    probes.motif <- get(ls(newenv)[1],envir=newenv)   
+    
+    enriched.motif <- do.call(get.enriched.motif, 
+                              c(list(probes.motif = probes.motif,
+                                     probes       = Sig.probes,
+                                     dir.out      = dir.out,
+                                     label        = diff.dir),
+                                params))
+    
+    if(length(analysis) == 1) return(enriched.motif)
   }
-   
-   #search responsible TFs
-  if("TF.search" %in% analysis){
-    message("###################\nSearch responsible TFs\n###################\n\n")
-    ## make mee 
+  
+  #search responsible TFs
+  if(tolower("TF.search") %in% tolower(analysis)){
+    print.header("Search responsible TFs")
+    ## load mae
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    if(!file.exists(mae.file)){
+      message("MAE not found, please run pipe with createMAE or all options")
+      return(NULL)
+    }
+    load(mae.file)
     #construct RNA seq data
-    meth.file <- sprintf("%s/%s_meth_refined.rda",dir.out,disease)
-    exp.file <- sprintf("%s/%s_RNA_refined.rda",dir.out,disease)
-    probeInfo <- sprintf("%s/probeInfo_feature_distal.rda",dir.out)
-    geneAnnot <- sprintf("%s/geneInfo.rda",dir.out)
-    mee <- fetch.mee(meth=meth.file,exp=exp.file,TCGA=TRUE,
-                     probeInfo=probeInfo,geneInfo=geneAnnot)
-    message(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
-                    diff.dir))
+    print.header(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
+                         diff.dir), "subsection")
     enriched.motif <- args[names(args) %in% "enriched.motif"]
-    if(length(enriched.motif)==0){
-      enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out, diff.dir)
+    if(length(enriched.motif) == 0){
+      enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
-    TFs <- do.call(get.TFs, c(list(mee=mee, enriched.motif=enriched.motif,
-                            dir.out=dir.out, cores=cores, 
-                            label=diff.dir),
-                       params))
+    TFs <- do.call(get.TFs, 
+                   c(list(data           = mae, 
+                          group.col      = group.col, 
+                          group1         = group1,
+                          group2         = group2,
+                          minSubgroupFrac =  min(1,minSubgroupFrac * 2),
+                          enriched.motif = enriched.motif,
+                          dir.out        = dir.out, 
+                          cores          = cores, 
+                          label          = diff.dir),
+                     params))
+    if(length(analysis) == 1) return(TFs)
   }
+  
 }
 

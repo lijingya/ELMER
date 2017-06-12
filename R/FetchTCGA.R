@@ -1,158 +1,200 @@
-#' getTCGA
-#' @param disease A character to specify disease in TCGA such as BLCA
+#' getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.
+#' @description 
+#' getTCGA is a function to download DNA methylation, RNA expression and clinic data for all
+#' samples of certain cancer type from TCGA website. And downloaded data will be transform
+#' to matrixes or data frame for further analysis.
+#' @param disease A character specifies the disease to download in TCGA such as BLCA
 #' @param Meth A logic if TRUE HM450K DNA methylation data will download.
 #' @param RNA A logic if TRUE RNA-seq Hiseq-V2 from TCGA level 3 will be download.
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param basedir A path shows where the data will be stored.
-#' @param RNAtype A charactor to specify whether use isoform level or gene level.
-#'  When RNAtype=gene, gene level gene expression will be used. When isoform, 
-#'  then isoform data will be used.
-#' @param Methfilter A number. For each probe, the percentage of NA among the 
-#' all the samples should smaller than Methfilter.
+#' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
+#' @usage getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
+#'                genome = "hg38", Methfilter=0.2)
 #' @export
 #' @examples
-#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~")
-getTCGA <- function(disease,Meth=TRUE,RNA=TRUE,Clinic=TRUE,basedir="./Data",
-                    RNAtype="gene",Methfilter=0.2){
+#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
+getTCGA <- function(disease,
+                    Meth = TRUE,
+                    RNA = TRUE,
+                    Clinic = TRUE,
+                    basedir = "./Data",
+                    genome = "hg38",
+                    Methfilter = 0.2){
+  
   if(missing(disease)) stop("disease need to be specified.")
+  
   if(Meth){
-    message("################\nDownloading methylation\n################\n\n")
-    test.meth <- tryCatch({get450K(disease, basedir)},
-                          error=function(err){return("error")})
-    if(!test.meth == "error") matrixMeth(disease,basedir,filter=Methfilter)
+    print.header("Downloading DNA methylation", "subsection")
+    test.meth <- tryCatch({
+      get450K(disease, basedir,filter = Methfilter, genome = genome)
+    }, error = function(err){
+      return("error")
+    })
   }
   
   if(RNA){
-    message("################\nDownloading RNA\n################\n\n")
-    test.rna <- tryCatch({getRNAseq(disease, basedir)},
-                         error=function(err){return("error")})
-    if(!test.rna == "error") matrixRNA(disease,basedir,RNAtype)
+    print.header("Downloading RNA", "subsection")
+    test.rna <- tryCatch({
+      getRNAseq(disease, basedir, genome = genome)
+    }, error = function(err){
+      return("error")
+    })
   }
- 
+  
   if(Clinic){
-    message("################\nDownloading Clinic \n################\n\n")
-    test.clinic <- tryCatch({getClinic(disease, basedir)},
-                            error=function(err){return("error")})
-    if(!test.clinic == "error") matrixClinic(disease,basedir)
+    print.header("Downloading Clinic", "subsection")
+    test.clinic <- tryCatch({
+      getClinic(disease, basedir)
+    }, error = function(err){
+      return("error")
+    })
   }
-  if(Meth && test.meth=="error") 
+  
+  if(Meth && test.meth == "error") 
     warning(
       sprintf("Failed to download DNA methylation data. Possible possibility: 
               1. No 450K DNA methylation data for %s patients; 
-              2.Wget doesn't work.",disease))
-  if(RNA && test.rna=="error") 
+              2. Download error.",disease))
+  if(RNA && test.rna == "error") 
     warning(
       sprintf("Failed to download RNA-seq data. Possible possibility: 
-              1. No RNA-seq data for %s patients; 
-              2.Wget doesn't work.",disease))
-  if(Clinic && test.clinic=="error") 
+               1. No RNA-seq data for %s patients; 
+               2. Download error.",disease))
+  if(Clinic && test.clinic == "error") 
     warning(
       sprintf("Failed to download clinic data. Possible possibility:
-              1. No clinical data for %s patients; 
-              2.Wget doesn't work.",disease))
+               1. No clinical data for %s patients; 
+               2. Download error.", disease))
 }
 
-#' getRNAseq
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
+#' getRNAseq to download all RNAseq data for a certain cancer type from TCGA.
+#' @description getRNAseq is a function to download RNAseq data for all samples of a certain cancer type from TCGA
+#' @param disease A character specifies disease in TCGA such as BLCA
+#' @param basedir Download all RNA seq level 3 data for the specified disease.
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
+#' @usage getRNAseq(disease, basedir = "./Data", genome = "hg38")
 #' @return Download all RNA seq level 3 data for the specified disease.
-getRNAseq <- function(disease, basedir="./Data")
-{
+#' @importFrom TCGAbiolinks GDCdownload GDCquery GDCprepare
+getRNAseq <- function(disease, 
+                      basedir="./Data",
+                      genome = "hg38") {
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.rna <- file.path(dir.raw,"RNA")
-  if(!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE)
-  target <- 
-    "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
-  domain <- "cgcc/unc.edu/illuminahiseq_rnaseqv2/rnaseqv2"
-  baseURL <- paste(target, disease, domain, sep="/")
-  cmd <- paste0("wget --no-check-certificate -O - ",baseURL,
-                " | grep -o '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' | ",
-                "sed -e 's/^<a href=[\"'\"'\"']//' -e 's/[\"'\"'\"']$//'",
-                " | grep -v 'tar'")
-  links <-system(cmd, intern=TRUE)
-  mage <- links[grep("mage-tab", links)]
-  RNA <- links[grep("RNASeqV2.Level_3", links)]
-  mage.versions <- unlist(lapply(strsplit(mage,"[.]"),
-                                 function(x){return(as.numeric(x[[6]]))}))
-  RNA.versions <- unlist(lapply(strsplit(RNA,"[.]"),
-                                function(x){return(as.numeric(x[[6]]))}))
-  mage.version <- sub("/", ".tar.gz",mage[mage.versions == max(mage.versions)])
-  RNA.version <- sub("/", ".tar.gz",RNA[RNA.versions == max(RNA.versions)])
-  mage.URL <- paste(baseURL, mage.version, sep="/")
-  RNA.URL <- paste(baseURL, RNA.version, sep="/")
-  if(length(mage.URL)==0 | length(RNA.URL)==0){
-    stop("No RNA-seq data.")
-  }else{
-    cmd <- list(mage = paste("wget --no-check-certificate -O",
-                             paste0(dir.rna,"/",mage.version), mage.URL, "-a", 
-                             "mage_download.log", sep=" "), 
-                RNA = paste("wget --no-check-certificate -O",
-                            paste0(dir.rna,"/",RNA.version), RNA.URL, "-a",  
-                            "RNA_download.log",sep=" "))
-    lapply(cmd, system)
-    system(sprintf("tar -zxvf %s -C %s", paste0(dir.rna,"/",mage.version), dir.rna),ignore.stdout=TRUE)
-    system(sprintf("tar -zxvf %s -C %s", paste0(dir.rna,"/",RNA.version), dir.rna),ignore.stdout=TRUE)
-    system (sprintf("rm %s %s", paste0(dir.rna,"/",mage.version), paste0(dir.rna,"/",RNA.version)))
-  } 
+  if (!file.exists(dir.rna)) dir.create(dir.rna,recursive = TRUE, showWarnings = FALSE)
+  
+  fout <- sprintf("%s/%s_RNA_%s.rda",diseasedir,toupper(disease), genome)
+  if(!file.exists(fout)){
+    
+    if (genome == "hg38"){
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "Transcriptome Profiling", 
+                        data.type = "Gene Expression Quantification", 
+                        workflow.type = "HTSeq - FPKM-UQ")
+    } else {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)),
+                        data.category = "Gene expression",
+                        data.type = "Gene expression quantification",
+                        platform = "Illumina HiSeq", 
+                        file.type  = "normalized_results",
+                        experimental.strategy = "RNA-Seq",
+                        legacy = TRUE)
+    }
+    tryCatch({
+      GDCdownload(query, directory = dir.rna, chunks.per.download = 200)
+    }, error = function(e) {
+      GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
+    })
+    
+    # Preparing to save output if it does not exists
+    rna <- GDCprepare(query, 
+                      directory = dir.rna,
+                      save = TRUE,
+                      save.filename =   sprintf("%s/%s_RNA_%s_no_filter.rda",diseasedir,toupper(disease), genome),
+                      remove.files.prepared = TRUE,
+                      summarizedExperiment = TRUE)
+    if(genome == "hg19"){
+      rownames(rna) <- values(rna)$ensembl_gene_id
+    }
+    message(paste0("Saving Gene Expression to: ", fout))
+    save(rna,file=fout)
+  } else {
+    message(paste("Gene Expression object already exists:", fout))
+  }
+  return("OK")
 }
 
-#' get450K
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
-#' @return Download all DNA methylation from HM450K level 3 data for the
-#' specified disease.
-get450K <- function(disease, basedir="./Data")
-{
+#' get450K to download HM40K DNA methylation data for certain cancer types from TCGA website.
+#'  @description 
+#'  get450K is a function to download latest version of HM450K DNA methylation 
+#'  for  all samples of certain cancer types from GDC website.
+#' @param disease A character specifies the disease to download from TCGA such as BLCA
+#' @param basedir A path. Shows where the data will be stored.
+#' @param filter For each probe, the percentage of NA among the all the samples
+#'  should smaller than filter.
+#' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
+#' @return Download all DNA methylation from HM450K level 3 data for
+#'  the specified disease.
+#' @importFrom TCGAbiolinks GDCquery GDCdownload GDCprepare
+#' @usage get450K(disease, basedir="./Data",filter=0.2, genome = "hg38")
+get450K <- function(disease, 
+                    basedir = "./Data",
+                    filter  = 0.2,
+                    genome  = "hg38"){
+  
   disease <- tolower(disease)
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.meth <- file.path(dir.raw,"Meth")
-  if(!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE)
-  target <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
-  domain <- "cgcc/jhu-usc.edu/humanmethylation450/methylation/"
-  baseURL <- paste(target, disease, domain, sep="/")
-  cmd <- paste0("wget --no-check-certificate -O - ",baseURL,
-                " | grep -o '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' ",
-                "| sed -e 's/^<a href=[\"'\"'\"']//' -e 's/[\"'\"'\"']$//' ",
-                "| grep -v 'tar'")
-  links <- system(cmd, intern=TRUE)
-  mage <- links[grep("mage-tab", links)]
-  Meth <- links[grep("HumanMethylation450.Level_3", links)]
-  mage.versions <- unlist(lapply(strsplit(mage,"[.]"),
-                                 function(x){return(as.numeric(x[[6]]))}))
-  meth.versions <- unlist(lapply(strsplit(Meth,"[.]"),
-                                 function(x){return(as.numeric(x[[6]]))}))
-  mage.version <- sub("/", ".tar.gz",mage[mage.versions == max(mage.versions)])
-  meth.version <- sub("/", ".tar.gz",Meth[meth.versions == max(meth.versions)])
-  mage.URL <- paste(baseURL, mage.version, sep="/")
-  Meth.URL <- paste(baseURL,meth.version, sep="/")
+  if (!file.exists(dir.meth)) dir.create(dir.meth,recursive = TRUE, showWarnings = FALSE)
   
-  if(length(mage.URL)==0 | length(mage.URL)==0){
-    stop("No 450K DNA methylation data.")
-  }else{
-    cmd <- list(mage = paste("wget --no-check-certificate -O",
-                             paste0(dir.meth,"/",mage.version), mage.URL,"-a", 
-                             "mage_download.log", sep=" "), 
-                Meth = paste(paste("wget --no-check-certificate -O", 
-                                   paste0(dir.meth,"/",meth.version), Meth.URL, "-a", 
-                                   "Meth_download.log", sep=" "),
-                             collapse = ";"))
-    lapply(cmd, system)
-    system(sprintf("tar -zxvf %s -C %s", paste0(dir.meth,"/",mage.version), dir.meth),ignore.stdout=TRUE)
-    system(paste(sprintf("tar -zxvf %s -C %s", paste0(dir.meth,"/",meth.version),dir.meth),collapse=";"),
-           ignore.stdout=TRUE)
-    system (sprintf("rm %s %s", paste0(dir.meth,"/",mage.version), 
-                    paste(paste0(dir.meth,"/",meth.version),collapse = " ")))
+  fout <- sprintf("%s/%s_meth_%s.rda",diseasedir,toupper(disease),genome)
+  if(!file.exists(fout)){
+    
+    if (genome == "hg38") {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "DNA Methylation",
+                        platform = "Illumina Human Methylation 450")
+    } else {
+      query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
+                        data.category = "DNA methylation",
+                        legacy = TRUE,
+                        platform = "Illumina Human Methylation 450")
+    }  
+    tryCatch({
+      GDCdownload(query,directory = dir.meth,chunks.per.download = 5)
+    }, error = function(e) {
+      GDCdownload(query,directory = dir.meth,  method = "client")
+    })
+    message("Preparing data")
+    met <- GDCprepare(query = query,
+                      directory = dir.meth,
+                      save = TRUE,
+                      save.filename =  sprintf("%s/%s_meth_%s_no_filter.rda",diseasedir,toupper(disease),genome),
+                      remove.files.prepared = TRUE,
+                      summarizedExperiment = TRUE)
+    
+    # Remove probes that has more than 20% of its values as NA
+    met <- met[rowMeans(is.na(assay(met))) < filter,]
+    message(paste0("Saving DNA methylation to: ", fout))
+    save(met,file = fout)
+  } else {
+    message(paste("DNA methylation object already exists:", fout))
   }
+  return("OK")
 }
 
-#' getClinic
-#' @param disease A character to specify disease in TCGA such as BLCA
+#' getClinic to download clinic data for certain cancer types from TCGA website.
+#' @description 
+#' getClinic is a function to download latest version of clinic data for all samples of certain cancer types from TCGA website.
+#' @param disease A character specifies the disease to download from TCGA such as BLCA
 #' @param basedir A path shows where the data will be stored.
+#' @importFrom TCGAbiolinks GDCquery_clinic
 #' @return Download all clinic information for the specified disease.
 getClinic <- function(disease, basedir="./Data")
 {
@@ -160,133 +202,15 @@ getClinic <- function(disease, basedir="./Data")
   diseasedir <- file.path(basedir, toupper(disease))
   dir.raw <- file.path(diseasedir,"Raw")
   dir.clinic <- file.path(dir.raw,"Clinic")
-  if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE)
-  target <- "https://tcga-data.nci.nih.gov/tcgafiles/ftp_auth/distro_ftpusers/anonymous/tumor"
-  domain <- "bcr/biotab/clin/"
-  baseURL <- paste(target, disease, domain, sep="/")
-  cmd <- paste0("wget --no-check-certificate -O - ",baseURL,
-                " | grep -o '<a href=['\"'\"'\"][^\"'\"'\"']*['\"'\"'\"]' ",
-                "| sed -e 's/^<a href=[\"'\"'\"']//' -e 's/[\"'\"'\"']$//' ",
-                "| grep -v 'tar'")
-  links <- system(cmd, intern=TRUE)
-  clinic <- links[grep("clinical_patient", links)]
-  if(length(clinic)==0){
-    stop(sprintf("No clinical data for %s patients.",disease))
-  }else{
-    Clinic.URL <- paste(baseURL,clinic, sep="/")
-    cmd <-paste("wget --no-check-certificate","-O",paste0(dir.clinic,"/",clinic), Clinic.URL, "-a", 
-                "download.log", sep=" ")
-    system(cmd)
-  }
-}
-
-## type is gene level expression, isoform level expression
-#' matrixRNA
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
-#' @param type A charactor to specify whether use isoform level or gene level.
-#'  When RNAtype=gene, gene level gene expression will be used. When isoform, 
-#'  then isoform data will be used.
-#' @return A matrix of gene expression values for samples (column) and genes (row)
-matrixRNA <- function(disease,basedir="./Data",type="gene"){
-  if(missing(disease)) stop("disease should be specified.")
-  disease <- tolower(disease)
-  diseasedir <- file.path(basedir, toupper(disease))
-  dir.RNA <- file.path(diseasedir,"Raw","RNA")
-  ## read file names
-  mage.file <- dir(dir(path = dir.RNA,pattern = "mage-tab",full.names = TRUE),
-                   "sdrf.txt", full.names = TRUE)
-  Files <- read.table(mage.file, sep="\t", stringsAsFactors = FALSE, header=TRUE)[,c(2,22)]
-  if(type %in% "isoform"){
-    Files <- Files[grepl("rsem.isoforms.normalized_results",Files[,2]),]
-  }else{
-    Files <- Files[grepl("rsem.genes.normalized_results",Files[,2]),]
-  }
-  ID <- Files[,1]
-  subfolder <- list.dirs(dir.RNA)[grepl("HiSeq_RNASeqV2.Level",list.dirs(dir.RNA))]
-  Files <- paste0(subfolder,"/",Files[,2])
-  names(Files) <- ID
-  ##load data
-  if(requireNamespace("parallel", quietly=TRUE)) {
-  GeneExp <- do.call(cbind,parallel::mclapply(Files, 
-                                    function(x){
-                                      read.table(x,stringsAsFactors = FALSE, 
-                                                 sep="\t",header=TRUE)[,2]},
-                                    mc.cores=parallel::detectCores()/2))
-  } else {
-  GeneExp <- do.call(cbind,lapply(Files, 
-								  function(x){
-									  read.table(x,stringsAsFactors = FALSE, 
-												 sep="\t",header=TRUE)[,2]}))
-  }
-
-  GENEID <- read.table(Files[1], stringsAsFactors = FALSE, sep="\t", header=TRUE)[,1]
-  rownames(GeneExp) <- GENEID
-  GeneExp <- GeneIDName(GeneExp)
-  save(GeneExp,file=sprintf("%s/%s_RNA.rda",diseasedir,toupper(disease)))
-}
-
-#' matrixMeth
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
-#' @param filter For each probe, the percentage of NA among the all the samples
-#'  should smaller than filter.
-#' @return A matrix of DNA methylation values for samples (column) and probes (row)
-matrixMeth <- function(disease,basedir="./Data",filter=0.2){
-  if(missing(disease)) stop("disease should be specified.")
-  disease <- tolower(disease)
-  diseasedir <- file.path(basedir, toupper(disease))
-  dir.meth <- file.path(diseasedir,"Raw","Meth")
-  ## read file names
-  mage.file <- dir(dir(path = dir.meth,pattern = "mage-tab",full.names = TRUE),
-                   "sdrf.txt", full.names = TRUE)
-  Files <- unique(read.table(mage.file, sep="\t", stringsAsFactors = FALSE, header=TRUE)[,c(2,29,28)])
-  ID <- Files[,1]
-  Files <- paste0(dir.meth,"/",paste(Files[,2],Files[,3],sep="/"))
-  names(Files) <- ID
-  ##load data
-  if(requireNamespace("parallel", quietly=TRUE)) {
-	  Meth <- do.call(cbind,parallel::mclapply(Files, 
-											   function(x){
-												   read.table(x,stringsAsFactors = FALSE, sep="\t",header=TRUE,skip=1)[,2]},
-												   mc.cores=parallel::detectCores()/2))
-  } else {
-	  Meth <- do.call(cbind,lapply(Files, 
-								   function(x){
-									   read.table(x,stringsAsFactors = FALSE, sep="\t",header=TRUE,skip=1)[,2]}))
-  }
-  Probe <- read.table(Files[1], stringsAsFactors = FALSE, sep="\t", header=TRUE,skip=1)[,1]
-  rownames(Meth) <- Probe
-  Meth <- Meth[rowMeans(is.na(Meth))<0.2,]
-  save(Meth,file=sprintf("%s/%s_meth.rda",diseasedir,toupper(disease)))
-}
-
-
-#' matrixClinic
-#' @param disease A character to specify disease in TCGA such as BLCA
-#' @param basedir A path shows where the data will be stored.
-#' @return A data frame contains clinic information for samples
-matrixClinic <- function(disease,basedir="./Data"){
-  if(missing(disease)) stop("disease should be specified.")
-  disease <- tolower(disease)
-  diseasedir <- file.path(basedir, toupper(disease))
-  dir.Clinic <- file.path(diseasedir,"Raw","Clinic")
-  File <- dir(dir.Clinic,pattern = "nationwidechildrens.org_clinical_patient",full.names = TRUE)
-  Clinic <- read.delim(File,sep="\t",header=TRUE,stringsAsFactors = FALSE)[-c(1:2),]
-  Useful <- unlist(apply(Clinic,2,function(x){tmp <- unique(x) 
-                                          if(length(tmp)<2 & all(grepl("Not",tmp)))
-                                            {return(FALSE)
-                                             }else{
-                                             return(TRUE)}}))
-  Clinic <- Clinic[,Useful]
+  if(!file.exists(dir.clinic)) dir.create(dir.clinic,recursive = TRUE, showWarnings = FALSE)
+  
+  Clinic <- GDCquery_clinic(project = paste0("TCGA-",toupper(disease)))
   save(Clinic,file=sprintf("%s/%s_clinic.rda",diseasedir,toupper(disease)))
+  return("OK")
 }
 
-#Gene make rowname separat -------------------------------------
-GeneIDName <- function(x){
-  tmp<-strsplit(rownames(x),"\\|")
-  GeneID<-unlist(lapply(tmp,function(x) x[2]))
-  GeneID <- paste0("ID",GeneID)
-  row.names(x) <- GeneID
-  return(x)
+print.header <- function(text, type ="section"){
+  message(paste(rep("-",nchar(text) + 3),collapse = ""))
+  message(paste(ifelse(type=="section","*","**"),text))
+  message(paste(rep("-",nchar(text) + 3),collapse = ""))
 }

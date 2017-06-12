@@ -6,25 +6,51 @@
 # @param TRange A GRange object contains coordinate of targets.
 # @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
-#'@import BiocGenerics GenomicRanges
-NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
+#'@importFrom GenomicRanges strand<-
+NearGenes <- function (Target=NULL,
+                       Gene=NULL,
+                       geneNum=20,
+                       TRange=NULL){
+  # Algorithm:
+  # 1) get the follow gene (overlapping genes are diconsidered) to be the first in L1 (index variable)
+  #                 probe
+  #     -------       O      ------
+  #    |      |      ||     |     |
+  #    -------       ||     ------
+  #  follow gene          precede gene
+  # 2) Sort genes (by start) 
+  # 3.1) Get 9 genes before index (L1)
+  #      If we only have l genes (l < 9) due to end of genomic region, get the l ones and get more 10-l to the right
+  # 3.2) Get 10 after index (L1)
+  #      If we only have r genes (r < 10) due to end of genomic region, get the r ones and get more 10-r to the left 
+  # Where 10 is genum/2
+  Gene$GENEID <- Gene$ensembl_gene_id
+  if("external_gene_name" %in% colnames(mcols(Gene))){
+  Gene$SYMBOL <- Gene$external_gene_name
+  } else  if("external_gene_id" %in% colnames(mcols(Gene))){
+    Gene$SYMBOL <- Gene$external_gene_id
+  } else {
+    stop("No gene symbol column found (expected external_gene_id or external_gene_name")
+  }
   if(is.null(Gene) | is.null(Target)){
     stop ("Target and Genes should both be defined")
   }
-  message(Target)
   if(is.null(TRange)){
     stop( "TRange must be defined")
   }else{
-    regionInfo <- TRange[as.character(TRange$name) %in% Target]
+    # Just to be sure we have only one probe. To be removed ?
+    regionInfo <- TRange[names(TRange) %in% Target]
   }
-  GeneIDs <-c()
+  GeneIDs <- c()
   Distances <- c()
   strand(Gene) <- "*"
+  # We will get only genes in the same same chromossome
   Gene <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
+  #print(Gene)
   if(length(Gene)==0){
     warning(paste0(Target," don't have any nearby gene in the given gene list."))
     Final <- NA
-  }else{
+  } else {
     Gene <- sort(Gene)
     index <- follow(regionInfo,Gene)
     #left side
@@ -41,19 +67,19 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     }else{
       Left <- index
       while(length(Left) < Leftlimit){
-        if(!as.character(Gene$GENEID[index-n])%in%as.character(Gene$GENEID[Left]))
-          Left <- c((index-n),Left) 
-        if((index-n)==1){
-          Leftlimit <- length(Left)
-        } 
-        n <- n+1
+        # If the gene is not in the list already add it, otherwise go to the next
+        if(!as.character(Gene$GENEID[index-n]) %in% as.character(Gene$GENEID[Left])) Left <- c((index-n),Left) 
+        
+        # Is it the first gene? If so there is nothing in the left anymore
+        if((index-n)==1) Leftlimit <- length(Left)
+        n <- n + 1
       }
     }
     
     Right <- c()
     n <- 1
     if(index==length(Gene) || 
-         all(unique(Gene$GENEID[(index+1):length(Gene)]) %in% as.character(Gene$GENEID[index]))){
+       all(unique(Gene$GENEID[(index+1):length(Gene)]) %in% as.character(Gene$GENEID[index]))){
       Rightlimit <- length(Right)
     }else{
       while(length(Right) < Rightlimit){
@@ -67,7 +93,7 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
         }     
       }
     }
-   
+    
     if(Rightlimit < geneNum/2){
       n <- 1
       if(Left[1]-n > 0){
@@ -95,64 +121,103 @@ NearGenes <- function (Target=NULL,Gene=NULL,geneNum=20,TRange=NULL){
     Distances <-  suppressWarnings(distance(Gene[Whole],regionInfo))
     if(Rightlimit < 1){
       Sides <- paste0("L",length(Left):1)
-    }else if( Leftlimit < 1){
+    } else if( Leftlimit < 1){
       Sides <- paste0("R",1:length(Right))
-    }else{
+    } else{
       Sides <- c(paste0("L",length(Left):1),paste0("R",1:length(Right)))
     }
+    
     Final <- data.frame(Target=rep(Target,length(GeneIDs)),GeneID=GeneIDs,
                         Symbol=Symbols,Distance=Distances, Side=Sides, 
                         stringsAsFactors = FALSE)
+    Final <- Final[order(Final$Side,Final$Distance),]
   }
   return(Final)
 }
 
-#' Collect nearby gene for one locus.
-#' @param geneAnnot A GRange object contains coordinates of promoters for 
+#' GetNearGenes to collect nearby genes for one locus.
+#' @description 
+#' GetNearGenes is a function to collect equal number of gene on each side of one locus.
+#' It can receite either multi Assay Experiment with both DNA methylation and gene Expression matrix
+#' and the names of probes to select nearby genes, or it can receive two granges objects TRange and geneAnnot.
+#' @param data A multi Assay Experiment with both DNA methylation and gene Expression objects
+#' @param probes Name of probes to get nearby genes (it should be rownames of the DNA methylation 
+#' object in the data argument object)
+#' @param geneAnnot A GRange object  or Summarized Experiment object that contains coordinates of promoters for 
 #' human genome.
-#' @param geneNum A number determine how many gene will be collected from 
-#' each side of target (number shoule be even) Default to 20. 
-#' @param TRange A GRange object contains coordinate of a list targets.
-#' @param cores A number to specific how many cores to use to compute. 
-#' Default to detectCores()/2.
+#' @param numFlankingGenes A number determines how many gene will be collected totally. 
+#' Then the number devided by 2 is the number of genes collected from 
+#' each side of targets (number shoule be even) Default to 20.
+#' @param TRange A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.
+#' @param cores A interger which defines the number of cores to be used in parallel process.
+#'  Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
-#' @import BiocGenerics IRanges GenomicRanges
+#' @importFrom GenomicRanges strand follow distance 
+#' @importFrom plyr alply
+#' @importFrom doParallel registerDoParallel
+#' @importFrom SummarizedExperiment rowRanges
+#' @references 
+#' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+#' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' geneAnnot <- txs(TSS=list(upstream=0, downstream=0))
-#' probe <- GRanges(seqnames = c("chr1","chr2"), 
-#' range=IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
+#' geneAnnot <- getTSS(TSS=list(upstream=0, downstream=0))
+#' probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
+#' range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
+#' names(probe) <- c("cg18108049","cg17125141")
 #' NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
-GetNearGenes <- function(geneAnnot=NULL,TRange=NULL,geneNum=20,
-                         cores=NULL){
-	if(requireNamespace("parallel", quietly=TRUE) && requireNamespace("snow", quietly=TRUE)) {
-		if(!is.null(cores)){
-			if(cores > parallel::detectCores()) cores <- parallel::detectCores()/2
-			cl <- snow::makeCluster(cores,type = "SOCK")
-		}
-	}
-	if(is.null(TRange)){
-		stop(" TRange must be defined")
-	}else{
-		if(requireNamespace("parallel", quietly = TRUE) && requireNamespace("snow", quietly=TRUE)) {
-			if(!is.null(cores)) {
-				##snow::clusterEvalQ(cl, library(GenomicRanges))
-			  NearGenes <- parallel::parSapplyLB(cl,as.character(TRange$name),NearGenes,
-			                                     geneNum=geneNum,Gene=geneAnnot,TRange=TRange,
-			                                     simplify=FALSE)
-				parallel::stopCluster(cl)
-			} else {
-			  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-			                      Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-			}
-		} else {
-		  NearGenes <- sapply(as.character(TRange$name),NearGenes,geneNum=geneNum,
-		                      Gene=geneAnnot,TRange=TRange,simplify=FALSE)
-		}
-	}
-	return(NearGenes)
+GetNearGenes <- function(data = NULL,
+                         probes = NULL,
+                         geneAnnot = NULL,
+                         TRange = NULL,
+                         numFlankingGenes = 20,
+                         cores = 1){
+  message("Searching for the ", numFlankingGenes, " near genes")
+  if(!is.null(data)){
+    if(is.null(probes)) stop("Please set the probes argument (names of probes to select nearby genes)")
+    TRange <- subset(getMet(data), rownames(getMet(data)) %in% probes)
+    geneAnnot <- getExp(data)
+  }    
+  if(is.null(TRange)){
+    stop("TRange must be defined")
+  }
+  if(is.null(geneAnnot)){
+    stop("geneAnnot must be defined")
+  }
+  
+  if(class(TRange) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    TRange <- rowRanges(TRange)
+  }
+  if(class(geneAnnot) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+    geneAnnot <- rowRanges(geneAnnot)
+  }
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > parallel::detectCores()) cores <- parallel::detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+
+  if(is.null(names(TRange))) {
+    if(is.null(TRange$name)) stop("No probe names found in TRange")
+        names(TRange) <- TRange$name
+  }
+    
+  NearGenes <- alply(.data = as.data.frame(TRange), .margins = 1,
+                     .fun = function(x) {
+                       NearGenes( Target = rownames(x),
+                                  geneNum = numFlankingGenes,
+                                  Gene = geneAnnot,
+                                  TRange = TRange)},
+                     .progress = "text", .parallel = parallel
+  )
+  names(NearGenes) <- names(TRange)
+  if("split_labels" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_labels"] <- NULL 
+  if("split_type" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_type"] <- NULL 
+  return(NearGenes)
 }
 
 
