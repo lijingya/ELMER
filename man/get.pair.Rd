@@ -70,7 +70,7 @@ which are used to link probes to genes.
 The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group) 
 because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
 these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
-If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (\textit{Supervised} mode).}
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).}
 }
 \value{
 Statistics for all pairs and significant pairs

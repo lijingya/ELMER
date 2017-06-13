@@ -10,7 +10,7 @@
 #' Default is "all" meaning all the analysis will be processed.
 #' @param wd A path shows working dirctory. Default is "./"
 #' @param mode This option will automatically set the percentage of samples to be used in the analysis.
-#' Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).
+#' Options: "supervised" (use 100\% of samples) or "unsupervised" (use 20\% of samples).
 #' @param cores A interger which defines number of core to be used in parallel process. 
 #' Default is 1: don't use parallel process.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes.  

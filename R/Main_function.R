@@ -125,7 +125,7 @@ get.feature.probe <- function(feature = NULL,
 #' (possibly unknown) molecular subtype among tumor; these subtypes often make up only 
 #' a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
 #' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, 
-#' use a value of 1.0 (\textit{Supervised} mode)
+#' use a value of 1.0 (Supervised mode)
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' @param pvalue A number specifies the significant P value (adjusted P value by BH) 
 #' threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01
@@ -281,7 +281,7 @@ get.diff.meth <- function(data,
 #' The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group) 
 #' because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
 #' these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
-#' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (\textit{Supervised} mode).
+#' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.

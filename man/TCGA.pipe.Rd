@@ -23,7 +23,7 @@ Default is "all" meaning all the analysis will be processed.}
 Default is 1: don't use parallel process.}
 
 \item{mode}{This option will automatically set the percentage of samples to be used in the analysis.
-Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).}
+Options: "supervised" (use 100\% of samples) or "unsupervised" (use 20\% of samples).}
 
 \item{Data}{A path shows the folder containing DNA methylation, expression and clinic data}
 
