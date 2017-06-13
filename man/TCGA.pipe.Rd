@@ -5,7 +5,7 @@
 \title{ELMER analysis pipeline for TCGA data.}
 \usage{
 TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
-  cores = 1, mode = "supervised", Data = NULL, diff.dir = "hypo",
+  cores = 1, mode = "unsupervised", Data = NULL, diff.dir = "hypo",
   group.col = "TN", group1 = "Tumor", group2 = "Normal", ...)
 }
 \arguments{

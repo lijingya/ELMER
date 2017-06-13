@@ -9,7 +9,7 @@
 #' @usage 
 #' scatter.plot(data, 
 #'              byPair = list(probe = c(), gene = c()),
-#'              byProbe = list(probe = c(), geneNum = 20), 
+#'              byProbe = list(probe = c(), numFlankingGenes = 20), 
 #'              byTF = list(TF = c(), probe = c()),
 #'              category = NULL,
 #'              dir.out = "./",
@@ -18,10 +18,10 @@
 #' See \code{\link{createMAE}} function.
 #' @param byPair A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
 #'of probes' name and gene contains a vector of gene ID. The length of probe 
-#'should be the same with length of gene. Output see detail.
+#'should be the same with length of gene. Output see numFlankingGenes
 #'@param byProbe A list byProbe =list(probe=c(), geneNum=20); probe contains 
 #'a vector of probes'name and geneNum specify the number of gene near the probes 
-#'will ploted. 20 is default for geneNum. Output see detail.
+#'will ploted. 20 is default for numFlankingGenes Output see detail.
 #'@param byTF A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's 
 #'symbol and probe contains the a vector of probes' name. Output see detail.
 #'@param category A vector labels subtype of samples or a character which is the 
@@ -42,16 +42,16 @@
 #'@examples
 #' data(elmer.data.example)
 #' scatter.plot(data,
-#'             byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#'             byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
 #'             category="definition", save=FALSE)
-#' scatter.plot(data,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+#' scatter.plot(data,byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
 #'             category="definition", save=TRUE) ## save to pdf
 #' # b. generate one probe-gene pair
 #' scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143322")),
 #'              category="definition", save=FALSE,lm_line=TRUE) 
 scatter.plot <- function(data,
                          byPair=list(probe=c(),gene=c()),
-                         byProbe=list(probe=c(),geneNum=20),
+                         byProbe=list(probe=c(),numFlankingGenes=20),
                          byTF=list(TF=c(),probe=c()), 
                          category=NULL, 
                          dir.out ="./", 
@@ -104,7 +104,7 @@ scatter.plot <- function(data,
   if(length(byProbe$probe) != 0){
     nearGenes <- GetNearGenes(data    = data,
                               probes  = byProbe$probe,
-                              geneNum = byProbe$geneNum)
+                              numFlankingGenes = byProbe$numFlankingGenes)
     for(i in byProbe$probe){
       probe <- i
       gene <- nearGenes[[i]]$GeneID
@@ -117,7 +117,7 @@ scatter.plot <- function(data,
                    legend.title = legend.title,
                    xlab     = sprintf("DNA methyation at %s", probe), 
                    ylab     = sprintf("Gene expression"), 
-                   title    = sprintf("%s nearby %s genes", probe, byProbe$geneNum),
+                   title    = sprintf("%s nearby %s genes", probe, byProbe$numFlankingGenes),
                    ...)
       if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf", dir.out, probe),
                       plot = P, useDingbats=FALSE)

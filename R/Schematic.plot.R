@@ -98,7 +98,7 @@ schematic.plot <- function(data,
   # Begin of new schematic plot
   # For a probe get nearby genes
   args <- list(...)
-  params <- args[names(args) %in% c("geneNum","cores")]
+  params <- args[names(args) %in% c("numFlankingGenes","cores")]
   
   extra.tracks <- args[grepl("track",names(args))]
   
