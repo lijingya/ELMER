@@ -4,26 +4,13 @@
 #### Installing and loading ELMER
 To obtain a copy of ELMER, you will need to install devtools and ELMER.data which contains essential data for running ELMER package 
 
-
 ```r
 install.packages(devtools)
 library(devtools);
 devtools::install_github("tiagochst/ELMER.data");
 devtools::install_github("tiagochst/ELMER");
 ```
-Then you can load the package and see an introduction with
-```r
-library(ELMER)
-Biobase::openVignette("ELMER.data")
-Biobase::openVignette("ELMER")
-```
-```
-# Please select a vignette:
-# 1: ELMER - ELMER: Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes
-# Selection: 1
-```
-Or you can have the vignette, and sourcecode for the vignette open directly in the browser
-```r
-browseVignettes("ELMER.data")
-browseVignettes("ELMER")
-```
+
+#### Documentation
+* [ELMER documentation](https://tiagochst.github.io/ELMER/index.nb.html)
+* [ELMER.data documentation](https://tiagochst.github.io/ELMER.data/index.nb.html)

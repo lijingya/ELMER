@@ -900,7 +900,7 @@ get.enriched.motif <- function(data,
     # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
     # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
     # c and d are the same counts within the entire enhancer probe set (background)
-    # lower boundary of 95% conf idence interval = exp (ln OR − SD)
+    # lower boundary of 95% conf idence interval = exp (ln OR - SD)
     a <- Matrix::colSums(probes.TF)
     b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
     c <- Matrix::colSums(bg.probes.TF )
@@ -1031,7 +1031,7 @@ get.enriched.motif <- function(data,
     # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
     # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
     # c and d are the same counts within the entire enhancer probe set (background)
-    # lower boundary of 95% conf idence interval = exp (ln OR − SD)
+    # lower boundary of 95% conf idence interval = exp (ln OR - SD)
     a <- colSums(regions.TF[,-"regions"])
     b <- nrow(regions.TF) - colSums(regions.TF[,-"regions"])
     c <- colSums(bg.regions.TF[,-"regions"])

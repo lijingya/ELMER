@@ -150,7 +150,7 @@ Get.Pvalue.p <- function(U.matrix,permu){
     if(is.na(Raw.p)){
       out <- NA
     } else {
-      #       num( Pp ≤ Pr) + 1
+      #       num( Pp <= Pr) + 1
       # Pe = ---------------------
       #            x + 1
       # Pp = pvalue probe (Raw.p)
