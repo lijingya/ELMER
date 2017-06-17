@@ -280,9 +280,7 @@ TCGA.pipe <- function(disease,
         promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
                                             TSS.range=list(upstream = 200, downstream = 2000))
       })
-      group.col <- "TN"
-      sample.type <- c("Tumor","Normal")
-      
+     
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
       meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
