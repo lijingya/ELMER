@@ -6,7 +6,8 @@
 \usage{
 TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
   cores = 1, mode = "unsupervised", Data = NULL, diff.dir = "hypo",
-  group.col = "TN", group1 = "Tumor", group2 = "Normal", ...)
+  genes = NULL, group.col = "TN", group1 = "Tumor", group2 = "Normal",
+  ...)
 }
 \arguments{
 \item{disease}{TCGA short form disease name such as COAD}
@@ -34,6 +35,11 @@ CpG sites}
 
 \item{...}{A list of parameters for functions: GetNearGenes, get.feature.probe, 
 get.diff.meth, get.pair}
+
+\item{gene}{List of genes for which mutations will be verified. 
+A column in the MAE with the name of the gene
+will be created with two groups WT (tumor samples without mutation), MUT (tumor samples w/ mutation), 
+NA (not tumor samples)}
 }
 \value{
 Different analysis results.
@@ -52,5 +58,13 @@ Every steps' results are saved.
   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
+
+  # Evaluation mutation
+  TCGA.pipe(disease = "LUSC",analysis = "createMAE",gene = "NFE2L2")
+  TCGA.pipe(disease = "LUSC",analysis = c("diffMeth","pair", "motif","TF.search"), 
+            mode = "supervised",
+            group.col = "NFE2L2", group1 = "Mutant", group2 = "WT",
+            diff.dir = c("hypo"),
+            dir.out = "LUSC_NFE2L2_MutvsWT")
 }
 }
