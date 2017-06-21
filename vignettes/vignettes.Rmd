@@ -3,9 +3,8 @@ title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes an
 author: "Lijing Yao, Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb], Simon Coetzee [ctb], Tiago Chedraoui Silva [ctb]"
 date: "`r Sys.Date()`"
 output: 
-  html_notebook:
+  BiocStyle::html_document:
     highlight: tango
-    theme: flatly
     toc: yes
     fig_caption: yes     
     toc_depth: 3
@@ -28,6 +27,8 @@ knitr::opts_chunk$set(dpi = 300, cache = FALSE)
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning=FALSE}
 devtools::load_all(".")
+library(DT)
+library(dplyr)
 dir.create("result",showWarnings = FALSE)
 library(BiocStyle)
 ```
@@ -253,7 +254,8 @@ data <- createMAE(exp = GeneExp,
                   save = FALSE,
                   TCGA = TRUE)
 data
-as.data.frame(colData(data)[,c("patient","definition","TN")])
+as.data.frame(colData(data)[,c("patient","definition","TN")]) %>% 
+  datatable(options = list(scrollX = TRUE,pageLength = 5)) 
 
 # Adding sample information for non TCGA samples
 # You should have two objects with one for DNA methylation and 
@@ -297,7 +299,8 @@ data.hg38 <- createMAE(exp = not.tcga.exp,
                        genome = "hg38", 
                        colData = phenotype.data)
 data.hg38
-as.data.frame(colData(data.hg38)[1:20,])
+as.data.frame(colData(data.hg38)[1:20,]) %>%
+  datatable(options = list(scrollX = TRUE,pageLength = 5)) 
 ```
 
 ## Probe information
@@ -345,10 +348,10 @@ data <- createMAE(exp = GeneExp,
 all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
 
 # See sample information for data
-as.data.frame(colData(data))
+as.data.frame(colData(data)) %>% datatable(options = list(scrollX = TRUE)) 
           
 # See sample names for each experiment
-as.data.frame(sampleMap(data))
+as.data.frame(sampleMap(data)) %>% datatable(options = list(scrollX = TRUE)) 
 ```
 
 You can also use your own data and annotations to create  Multi Assay Experiment object. 
@@ -519,7 +522,7 @@ sig.diff <- get.diff.meth(data,
                           dir.out ="result", 
                           pvalue = 0.01)
 
-as.data.frame(sig.diff)
+as.data.frame(sig.diff)  %>% datatable(options = list(scrollX = TRUE))
 # get.diff.meth automatically save output files. 
 # getMethdiff.hypo.probes.csv contains statistics for all the probes.
 # getMethdiff.hypo.probes.significant.csv contains only the significant probes which
@@ -714,9 +717,7 @@ Hypo.pair <- get.pair(data = data,
                       cores = parallel::detectCores()/2,
                       label = "hypo")
 
-datatable(Hypo.pair, ## significant probe-gene pairs
-          options = list(scrollX = TRUE, keys = TRUE, pageLength = 5), 
-          rownames = TRUE)
+Hypo.pair %>% datatable(options = list(scrollX = TRUE))
 # get.pair automatically save output files. 
 #getPair.hypo.all.pairs.statistic.csv contains statistics for all the probe-gene pairs.
 #getPair.hypo.pairs.significant.csv contains only the significant probes which is 
