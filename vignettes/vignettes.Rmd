@@ -509,7 +509,7 @@ data <- createMAE(exp = GeneExp,
                   met.platform = "450K",
                   genome = "hg19",
                   TCGA = TRUE)
-as.data.frame(colData(data)[1:5,])
+as.data.frame(colData(data)[1:5,])  %>% datatable(options = list(scrollX = TRUE))
 
 sig.diff <- get.diff.meth(data, 
                           group.col = "definition",
