@@ -16,12 +16,6 @@ get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir =
 \item{nearGenes}{Can be either a list containing output of GetNearGenes 
 function or path of rda file containing output of GetNearGenes function.}
 
-\item{minSubgroupFrac}{A number ranging from 0 to 1 
-specifying the percentage of samples used to create the groups U (unmethylated) 
-and M (methylated) used to link probes to genes. 
-Default is 0.4 (lowest quintile of all samples will be in the 
-U group and the highest quintile of all samples in the M group).}
-
 \item{permu.size}{A number specify the times of permuation. Default is 10000.}
 
 \item{permu.dir}{A path where the output of permutation will be.}
@@ -69,6 +63,14 @@ for the filter.portion option. Default 5\%. Only used if filter.probes is TRUE.
 
 \item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 and getPair.XX.pairs.significant.csv (see detail).}
+
+\item{minSubgroupFracA}{number ranging from 0 to 1, specifying the fraction of 
+extreme  samples that define group U (unmethylated) and group M (methylated), 
+which are used to link probes to genes. 
+The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group) 
+because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
+these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).}
 }
 \value{
 Statistics for all pairs and significant pairs

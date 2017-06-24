@@ -34,7 +34,8 @@ Stat.diff.meth <- function(meth,
   group1.tmp <- group1.tmp[1:group1.nb]
   group2.tmp <- group2.tmp[1:group2.nb]
 
-  if(sd(meth,na.rm=TRUE)>0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
+  
+  if(sd(meth,na.rm=TRUE) > 0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
       alternative <- ifelse(Top.m,"greater","less")
     } else {
@@ -42,12 +43,16 @@ Stat.diff.meth <- function(meth,
     }
     # If hyper (top. TRUE alternative greater) group 1 > group 2
     # If hypo  (top. FALSE alternative greater) group 1 < group 2
-    TT <- test(x = group1.tmp, y = group2.tmp, alternative = alternative, conf.int = TRUE)
-    
-    MeanDiff <- ifelse(length(TT$estimate) == 2, TT$estimate[1]-TT$estimate[2],TT$estimate)
-    PP <- TT$p.value
-    out <- data.frame(PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
-  }else{
+    out <- tryCatch({
+      TT <- test(x = group1.tmp, y = group2.tmp, alternative = alternative, conf.int = TRUE)
+      MeanDiff <- ifelse(length(TT$estimate) == 2, TT$estimate[1]-TT$estimate[2],TT$estimate)
+      PP <- TT$p.value
+      out <- data.frame(PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
+    }, error = function(e) {
+      message(e)
+      out <- data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
+    })
+  } else{
     out <- data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
   }
   return(out)
@@ -145,7 +150,7 @@ Get.Pvalue.p <- function(U.matrix,permu){
     if(is.na(Raw.p)){
       out <- NA
     } else {
-      #       num( Pp ≤ Pr) + 1
+      #       num( Pp <= Pr) + 1
       # Pe = ---------------------
       #            x + 1
       # Pp = pvalue probe (Raw.p)

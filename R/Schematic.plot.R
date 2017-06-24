@@ -98,7 +98,7 @@ schematic.plot <- function(data,
   # Begin of new schematic plot
   # For a probe get nearby genes
   args <- list(...)
-  params <- args[names(args) %in% c("geneNum","cores")]
+  params <- args[names(args) %in% c("numFlankingGenes","cores")]
   
   extra.tracks <- args[grepl("track",names(args))]
   
@@ -211,7 +211,8 @@ schematic <- function(data,
   for(i in seq_len(length(unique(significant$Probe)))) {
     fill[values(gene.gr)$ensembl_gene_id %in% significant[significant$Probe %in% unique(significant$Probe)[i],]$GeneID] <- "red"
   }
-  genetrack <- GeneRegionTrack(gene.gr, name = "Gene",
+  genetrack <- GeneRegionTrack(gene.gr, 
+                               name = "Gene",
                                fill = fill,
                                symbol = values(gene.gr)$external_gene_name,
                                shape = "arrow")

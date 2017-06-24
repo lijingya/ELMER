@@ -9,8 +9,12 @@
 #' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
 #' Default is "all" meaning all the analysis will be processed.
 #' @param wd A path shows working dirctory. Default is "./"
+#' @param gene List of genes for which mutations will be verified. 
+#' A column in the MAE with the name of the gene
+#' will be created with two groups WT (tumor samples without mutation), MUT (tumor samples w/ mutation), 
+#' NA (not tumor samples)
 #' @param mode This option will automatically set the percentage of samples to be used in the analysis.
-#' Options: "supervised" (use 100% of samples) or "unsupervised" (use 20 % of samples).
+#' Options: "supervised" (use 100\% of samples) or "unsupervised" (use 20\% of samples).
 #' @param cores A interger which defines number of core to be used in parallel process. 
 #' Default is 1: don't use parallel process.
 #' @param diff.dir A character can be "hypo" or "hyper", showing dirction DNA methylation changes.  
@@ -31,6 +35,14 @@
 #'   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
 #'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
 #'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
+#'
+#'   # Evaluation mutation
+#'   TCGA.pipe(disease = "LUSC",analysis = "createMAE",gene = "NFE2L2")
+#'   TCGA.pipe(disease = "LUSC",analysis = c("diffMeth","pair", "motif","TF.search"), 
+#'             mode = "supervised",
+#'             group.col = "NFE2L2", group1 = "Mutant", group2 = "WT",
+#'             diff.dir = c("hypo"),
+#'             dir.out = "LUSC_NFE2L2_MutvsWT")
 #' }
 TCGA.pipe <- function(disease,
                       genome = "hg38",
@@ -40,6 +52,7 @@ TCGA.pipe <- function(disease,
                       mode = "unsupervised",
                       Data = NULL, 
                       diff.dir = "hypo",
+                      genes = NULL,
                       group.col = "TN", 
                       group1 = "Tumor",
                       group2 = "Normal",
@@ -49,11 +62,10 @@ TCGA.pipe <- function(disease,
   }
   if(mode %in% c("supervised")) {
     minSubgroupFrac <- 1
-    message(mode, " was selected: using all samples")
+    message("=> ",mode, " was selected: using all samples")
   } else {
     minSubgroupFrac <- 0.2
-    message(mode, " was selected: using ", minSubgroupFrac, " samples")
-    
+    message("=> ",mode, " was selected: using ", minSubgroupFrac, " samples")
   }
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
@@ -70,7 +82,8 @@ TCGA.pipe <- function(disease,
   
   disease <- toupper(disease)
   dir.out.root <- sprintf("%s/Result/%s",wd,disease)
-  dir.out <- sprintf("%s/Result/%s/%s",wd,disease,diff.dir)
+  dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
+  message("=> Saving results to ", dir.out)
   if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
   args <- list(...)
   
@@ -105,8 +118,7 @@ TCGA.pipe <- function(disease,
     print.header("Creating Multi Assay Experiment")
     file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(file)) {
-      group.col <- "TN"
-      sample.type <- c("Tumor","Normal")
+      sample.type <- c(group1,group2)
       
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
       meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease,genome)
@@ -129,10 +141,29 @@ TCGA.pipe <- function(disease,
                        save          = FALSE,
                        linearize.exp = TRUE,
                        TCGA          = TRUE)
+      
+      # if user set genes argument label MUT WT will be added to mae
+      if(!is.null(genes)) {
+        maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
+        for(g in genes) {
+          if(g %in% maf$Hugo_Symbol) {
+            message("Adding information for gene: ", g)
+            aux <- filter(maf, Hugo_Symbol == g & !Variant_Classification %in% c("3'UTR","3'Flank","5'UTR","5'Flank","Silent","Intron"))
+            mutant.samples <- substr(y$Tumor_Sample_Barcode,1,15)
+            colData(mae)[,g] <- NA
+            colData(mae)[colData(mae)$TN == " Tumor",g] <- "WT"
+            colData(mae)[colData(mae)$TN == " Tumor" & 
+                           colData(mae)$samples %in% mutant.samples,g] <- paste0(g, " mutant")
+            print(plyr::count(colData(mae)[,g]))
+          } else {
+            message("No mutation found for: ", g)
+          }
+        }
+      }
+      
       if(!all(sample.type %in% colData(mae)[,group.col])){
         print(table(colData(mae)[,group.col]))
         print(mae)
-        print(table(colData(mae)[,"definition"]))
         message("There are no samples for both groups")
         return(NULL)
       }
@@ -143,6 +174,25 @@ TCGA.pipe <- function(disease,
       readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
     } else {
       message("File already exists: ", file)
+      if(!is.null(genes)) {
+        mae <- get(load(file))
+        maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
+        for(g in genes) {
+          if(g %in% maf$Hugo_Symbol) {
+            message("Adding information for gene: ", g)
+            aux <- filter(maf, Hugo_Symbol == g & !Variant_Classification %in% c("3'UTR","3'Flank","5'UTR","5'Flank","Silent","Intron"))
+            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
+            colData(mae)[,g] <- NA
+            colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
+            colData(mae)[colData(mae)$TN == "Tumor" & 
+                           colData(mae)$sample %in% mutant.samples,g] <- paste0("Mutant")
+            print(plyr::count(colData(mae)[,g]))
+          } else {
+            message("No mutation found for: ", g)
+          }
+        }
+        save(mae,file = file)
+      }
     }
   }
   
@@ -157,7 +207,7 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     params <- args[names(args) %in% c("pvalue","sig.dif")]
     params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores, minSubgroupFrac = minSubgroupFrac))
-    diff.meth <- do.call(get.diff.meth,c(params,list(data=mae,
+    diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
                                                      group.col = group.col, 
                                                      group1 = group1,
                                                      group2 = group2)))
@@ -167,7 +217,7 @@ TCGA.pipe <- function(disease,
   #predict pair
   if("pair" %in% tolower(analysis)){
     print.header("Predict pairs")
-     mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
     if(!file.exists(mae.file)){
       message("MAE not found, please run pipe with createMAE or all options")
       return(NULL)
@@ -177,6 +227,7 @@ TCGA.pipe <- function(disease,
     Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
+    if(length(Sig.probes) == 0) stop("No significant probes were found")
     ## Get nearby genes-----------------------
     message("Get nearby genes")
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
@@ -229,9 +280,7 @@ TCGA.pipe <- function(disease,
         promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
                                             TSS.range=list(upstream = 200, downstream = 2000))
       })
-      group.col <- "TN"
-      sample.type <- c("Tumor","Normal")
-      
+     
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
       meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)

@@ -20,10 +20,14 @@ methylation dirction.  It can be "hypo" which is only selecting hypomethylated p
 \item{cores}{A interger which defines the number of cores to be used in parallel 
 process. Default is 1: no parallel process.}
 
-\item{minSubgroupFrac}{A number ranges from 0 to 1 specifying the percentage of samples 
-from group1 and group2 that are used to identify the differential methylation. 
-Default is 0.2 because we did not expect all cases to be from a single molecular 
-subtype.But, If you are working with molecular subtypes please set it to 1.}
+\item{minSubgroupFrac}{A number ranging from 0 to 1, 
+specifying the fraction of extreme samples from group 1 and group 2 
+that are used to identify the differential DNA methylation. 
+The default is 0.2 because we typically want to be able to detect a specific 
+(possibly unknown) molecular subtype among tumor; these subtypes often make up only 
+a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, 
+use a value of 1.0 (Supervised mode)}
 
 \item{pvalue}{A number specifies the significant P value (adjusted P value by BH) 
 threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01

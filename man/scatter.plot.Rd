@@ -6,7 +6,7 @@
 \usage{
 scatter.plot(data, 
              byPair = list(probe = c(), gene = c()),
-             byProbe = list(probe = c(), geneNum = 20), 
+             byProbe = list(probe = c(), numFlankingGenes = 20), 
              byTF = list(TF = c(), probe = c()),
              category = NULL,
              dir.out = "./",
@@ -18,11 +18,11 @@ See \code{\link{createMAE}} function.}
 
 \item{byPair}{A list: byPair =list(probe=c(),gene=c()); probe contains a vector 
 of probes' name and gene contains a vector of gene ID. The length of probe 
-should be the same with length of gene. Output see detail.}
+should be the same with length of gene. Output see numFlankingGenes}
 
 \item{byProbe}{A list byProbe =list(probe=c(), geneNum=20); probe contains 
 a vector of probes'name and geneNum specify the number of gene near the probes 
-will ploted. 20 is default for geneNum. Output see detail.}
+will ploted. 20 is default for numFlankingGenes Output see detail.}
 
 \item{byTF}{A list byTF =list(TF=c(), probe=c()); TF contains a vector of TF's 
 symbol and probe contains the a vector of probes' name. Output see detail.}
@@ -59,9 +59,9 @@ DNA methylation at the probes set specified in byTF list.
 \examples{
 data(elmer.data.example)
 scatter.plot(data,
-            byProbe=list(probe=c("cg19403323"),geneNum=20), 
+            byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
             category="definition", save=FALSE)
-scatter.plot(data,byProbe=list(probe=c("cg19403323"),geneNum=20), 
+scatter.plot(data,byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
             category="definition", save=TRUE) ## save to pdf
 # b. generate one probe-gene pair
 scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143322")),
