@@ -30,6 +30,7 @@ Imports:
     IRanges,
     GenomeInfoDb,
     S4Vectors,
+    data.table,
     GenomicFeatures,
     TCGAbiolinks,
     GenomicInteractions,
