@@ -74,7 +74,7 @@ TCGA.pipe <- function(disease,
   available.analysis <- c("download","distal.probes",
                           "createMAE","diffMeth","pair",
                           "motif","TF.search","all")
-  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = T, invert = T)
+  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = TRUE, invert = T)
   
   if(any(!tolower(analysis) %in% tolower(analysis))) 
     stop(paste0("Availbale options for analysis argument are: ",
@@ -232,7 +232,6 @@ TCGA.pipe <- function(disease,
     message("Get nearby genes")
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
-    if(!file.exists(file)){    
       nearGenes.file <- args[names(args) %in% "nearGenes"]
       if(length(nearGenes.file)==0){
         nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
@@ -253,7 +252,7 @@ TCGA.pipe <- function(disease,
       
       ## get pair
       permu.dir <- paste0(dir.out,"/permu")
-      params <- args[names(args) %in% c("percentage","permu.size","Pe","diffExp","calculate.Pe","group.col")]
+      params <- args[names(args) %in% c("percentage","permu.size","Pe","pvalue","diffExp","group.col")]
       SigPair <- do.call(get.pair,
                          c(list(data      = mae,
                                 nearGenes = nearGenes.file,
@@ -266,9 +265,8 @@ TCGA.pipe <- function(disease,
                                 cores     = cores,
                                 label     = diff.dir),
                            params))
-    } else {
-      SigPair <- readr::read_csv(file)
-    }
+      
+    message("==== Promoter analysis ====")
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
     file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
