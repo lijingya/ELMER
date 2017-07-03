@@ -95,7 +95,7 @@ scatter.plot <- function(data,
                    ylab     = sprintf("%s gene expression",symbol), 
                    title    = sprintf("%s_%s",probe,symbol),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s_%s.bypair.pdf",dir.out,probe,symbol),
+      if(save) ggsave(filename = sprintf("%s/%s_%s_bypair.pdf",dir.out,probe,symbol),
                       plot = P,useDingbats=FALSE, width=7, height = 6)
     }
     close(pb)  
@@ -119,7 +119,7 @@ scatter.plot <- function(data,
                    ylab     = sprintf("Gene expression"), 
                    title    = sprintf("%s nearby %s genes", probe, byProbe$numFlankingGenes),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s.byprobe.pdf", dir.out, probe),
+      if(save) ggsave(filename = sprintf("%s/%s_byprobe.pdf", dir.out, probe),
                       plot = P, useDingbats=FALSE)
     }
   }
@@ -155,7 +155,7 @@ scatter.plot <- function(data,
                  title    = "TF vs avg DNA methylation",
                  ...)
     
-    if(save) ggsave(filename = sprintf("%s/%s.byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
+    if(save) ggsave(filename = sprintf("%s/%s_byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
                     plot = P,useDingbats = FALSE, width = max(6,3*(length(byTF$TF)%%5)), 
                     height = max(4,3 * ceiling(length(byTF$TF)/5)))
   }

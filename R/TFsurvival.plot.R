@@ -13,6 +13,7 @@
 #' @export
 TFsurvival.plot <- function(data,
                             TF,
+                            xlim = NULL,
                             percentage = 0.3,
                             save = TRUE){
   if(!all(c("vital_status", "days_to_last_follow_up","days_to_death") %in% colnames(colData(data)))){
@@ -47,5 +48,8 @@ TFsurvival.plot <- function(data,
   TCGAanalyze_survival(df,
                        "tf_groups",
                        legend=paste0(TF," Exp level"),
-                       filename = filename)
+                       filename = filename,
+                       xlim = xlim,
+                       conf.int = FALSE,
+                       risk.table = FALSE)
 }

@@ -4,7 +4,7 @@
 \alias{TFsurvival.plot}
 \title{Creates survival plot of based on the expression of a TF}
 \usage{
-TFsurvival.plot(data, TF, percentage = 0.3, save = TRUE)
+TFsurvival.plot(data, TF, xlim = NULL, percentage = 0.3, save = TRUE)
 }
 \arguments{
 \item{data}{A multi assay Experiment with clinical data in the  phenotypic data matrix
