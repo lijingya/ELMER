@@ -16,7 +16,7 @@ Description: ELMER is designed to use DNA methylation and gene expression from a
     large number of samples to infere regulatory element landscape and transcription
     factor network in primary tissue.
 Depends:
-    R (>= 3.2.0),
+    R (>= 3.4.0),
     ELMER.data
 License: GPL-3
 LazyData: true
@@ -26,7 +26,12 @@ Imports:
     ggplot2,
     reshape,
     grid,
-    gridExtra,
+    data.table, 
+    grDevices, 
+    graphics, 
+    parallel, 
+    stats, 
+    utils,
     IRanges,
     GenomeInfoDb,
     S4Vectors,
@@ -60,5 +65,7 @@ biocViews:
     GeneExpression, 
     MotifAnnotation, 
     Software,
-    GeneRegulation
+    GeneRegulation,
+    Transcription, 
+    Network
 RoxygenNote: 6.0.1

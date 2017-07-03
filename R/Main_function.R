@@ -935,7 +935,7 @@ get.enriched.motif <- function(data,
     message("-----------")
     
     en.motifs <- names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                      names(en.motifs), value = T)])
+                                      names(en.motifs), value = TRUE)])
     message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
     enriched.motif <- alply(en.motifs, 
                             function(x, probes.TF) {
