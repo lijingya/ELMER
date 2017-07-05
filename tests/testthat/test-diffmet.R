@@ -3,14 +3,14 @@ context("Testing get.diff.meth")
 test_that("The directions should change if we change the groups", {
   data(elmer.data.example, envir = environment())
   Hypo.probe.1 <- get.diff.meth(data, 
-                                percentage = 1,
+                                minSubgroupFrac = 1,
                                 diff.dir="hypo",
                                 group.col = "definition", 
                                 group1 = "Primary solid Tumor", 
                                 group2 = "Solid Tissue Normal",
                                 sig.dif = 0.1) # get hypomethylated probes
   Hyper.probe.1 <- get.diff.meth(data, 
-                                 percentage = 1,
+                                 minSubgroupFrac = 1,
                                  diff.dir="hyper",
                                  group.col = "definition", 
                                  group1 = "Solid Tissue Normal", 
@@ -33,14 +33,14 @@ test_that("The directions should change if we change the groups", {
   expect_equal(Hypo.probe.1[1,3] < 0, (mean.tp - mean.nt )[[1]] < 0)
   
   Hyper.probe.2 <- get.diff.meth(data, 
-                                 percentage = 1,
+                                 minSubgroupFrac = 1,
                                  diff.dir="hyper",
                                  group.col = "definition", 
                                  group1 = "Primary solid Tumor", 
                                  group2 = "Solid Tissue Normal",
                                  sig.dif = 0.1) # get hypomethylated probes
   Hypo.probe.2 <- get.diff.meth(data, 
-                                percentage = 1,
+                                minSubgroupFrac = 1,
                                 diff.dir="hypo",
                                 group.col = "definition", 
                                 group1 = "Solid Tissue Normal", 
@@ -64,7 +64,7 @@ test_that("The test argument can be changed", {
   sink("/dev/null");
   suppressMessages({
     Hypo.probe.1 <- get.diff.meth(data, 
-                                  percentage = 1,
+                                  minSubgroupFrac = 1,
                                   diff.dir="hypo",
                                   test = t.test,   
                                   group.col = "definition",
@@ -72,7 +72,7 @@ test_that("The test argument can be changed", {
                                   group2 = "Solid Tissue Normal",
                                   sig.dif = 0.1) # get hypomethylated probes
     Hyper.probe.1 <- get.diff.meth(data, 
-                                   percentage = 1,
+                                   minSubgroupFrac = 1,
                                    diff.dir="hyper",
                                    test = t.test,   
                                    group.col = "definition", 
@@ -94,7 +94,7 @@ test_that("The test argument can be changed", {
   sink("/dev/null");
   suppressMessages({
     Hyper.probe.2 <- get.diff.meth(data, 
-                                   percentage = 1,
+                                   minSubgroupFrac = 1,
                                    diff.dir="hyper",
                                    group.col = "definition", 
                                    test = t.test,   
@@ -102,7 +102,7 @@ test_that("The test argument can be changed", {
                                    group2 = "Solid Tissue Normal",
                                    sig.dif = 0.1) # get hypomethylated probes
     Hypo.probe.2 <- get.diff.meth(data, 
-                                  percentage = 1,
+                                  minSubgroupFrac = 1,
                                   diff.dir="hypo",
                                   test = t.test,   
                                   group.col = "definition", 
@@ -127,7 +127,7 @@ test_that("It threats correclty NAs and thrseholds", {
   sink("/dev/null");
   suppressMessages({
     diff.probes <- get.diff.meth(data, 
-                                 percentage = 1,
+                                 minSubgroupFrac = 1,
                                  diff.dir="hypo",
                                  test = t.test,   
                                  group.col = "definition",
@@ -137,7 +137,7 @@ test_that("It threats correclty NAs and thrseholds", {
                                  pvalue = 0.0) # get hypomethylated probes
     expect_true(nrow(diff.probes) == 0)
     diff.probes <- get.diff.meth(data, 
-                                 percentage = 1,
+                                 minSubgroupFrac = 1,
                                  diff.dir="hypo",
                                  test = t.test,   
                                  group.col = "definition",

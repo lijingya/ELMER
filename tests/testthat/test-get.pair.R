@@ -84,7 +84,9 @@ test_that("Gene expression is calculated", {
                         pvalue =  0.001,
                         Pe = 0.2,
                         diffExp = TRUE,
-                        group.col = "definition",
+                        group.col = "definition", 
+                        group1 = "Primary solid Tumor", 
+                        group2 = "Solid Tissue Normal",
                         dir.out="./",
                         permu.dir = "permu_test",
                         label = "hypo")

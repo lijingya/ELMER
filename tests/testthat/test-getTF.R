@@ -19,6 +19,9 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                                                       "DLX6",
                                                       "DMRT1"
                   ),
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
                   ensembl_gene_id= c("ENSG00000141510",
                                      "ENSG00000073282",
                                      "ENSG00000078900",
@@ -48,7 +51,10 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
                                                  "cg09247779", "cg09181054"))
   sink("/dev/null");
   suppressMessages({
-    TF <- get.TFs(data, enriched.motif, label = "hypo")  
+    TF <- get.TFs(data, enriched.motif, label = "hypo",
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT")  
   })
   sink();
   tf.family <- createMotifRelevantTfs()  
@@ -97,6 +103,9 @@ test_that("Test if the results is right", {
     
     TF <- get.TFs(data, 
                   enriched.motif, 
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",  
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
@@ -118,6 +127,9 @@ test_that("Test if the results is right", {
     TF <- get.TFs(data, 
                   enriched.motif, 
                   percentage = 0.5, 
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
@@ -154,6 +166,9 @@ test_that("Test if the results is right", {
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
@@ -174,6 +189,9 @@ test_that("Test if the results is right", {
     TF <- get.TFs(data, 
                   enriched.motif, 
                   percentage = 0.5, 
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
