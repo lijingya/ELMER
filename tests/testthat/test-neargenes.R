@@ -8,7 +8,9 @@ test_that("It maps correctly to hg38", {
                    range = IRanges(start = c(16058489), end= c(16058489)))
   # chr1:16010827:16062808
   # chr1:16058489:16058489
-  NearbyGenes <- GetNearGenes(geneNum=2,geneAnnot=geneAnnot,TRange=probe)
+  NearbyGenes <- GetNearGenes(numFlankingGenes = 2,
+                              geneAnnot = geneAnnot,
+                              TRange = probe)
   res <- NearbyGenes$cg18108049
   expect_equal(res[res$Side == "L1","GeneID"], "ENSG00000184908")
   expect_equal(res[res$Side == "R1","GeneID"], "ENSG00000185519")
@@ -24,7 +26,9 @@ test_that("It maps correctly to hg19", {
                    range = IRanges(start = c(16058489), end= c(16058489)))
   # chr1:16010827:16062808
   # chr1:16058489:16058489
-  NearbyGenes <- GetNearGenes(geneNum=4,geneAnnot=geneAnnot,TRange=probe)
+  NearbyGenes <- GetNearGenes(numFlankingGenes = 4,
+                              geneAnnot = geneAnnot,
+                              TRange = probe)
   res <- NearbyGenes$cg18108049
   expect_true("RP11-288I21.1" %in% res$Symbol)
   expect_true("AL121992.1" %in% res$Symbol)
