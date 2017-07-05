@@ -19,15 +19,15 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                                                       "DLX6",
                                                       "DMRT1"
                   ),
-                  group.col = "shortLetterCode",
-                  group1 = "TP",
-                  group2 = "NT",
                   ensembl_gene_id= c("ENSG00000141510",
                                      "ENSG00000073282",
                                      "ENSG00000078900",
                                      "ENSG00000006377",
                                      "ENSG00000137090"),
                   stringsAsFactors = FALSE),
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
                   label="hypo")
   })
   sink();
@@ -92,7 +92,9 @@ test_that("Test if the results is right", {
   colnames(met) <- c(as.character(1:6))
   met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
   
-  colData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
+  colData <- data.frame(sample = as.character(1:6), 
+                        group = c(rep("g2",3),rep("g1",3)),
+                        row.names =  as.character(1:6))
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData =  colData)
   
@@ -100,12 +102,11 @@ test_that("Test if the results is right", {
   
   sink("/dev/null");
   suppressMessages({
-    
     TF <- get.TFs(data, 
                   enriched.motif, 
-                  group.col = "shortLetterCode",
-                  group1 = "TP",
-                  group2 = "NT",  
+                  group.col = "group",
+                  group1 = "g1",
+                  group2 = "g2",  
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
@@ -126,7 +127,7 @@ test_that("Test if the results is right", {
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
-                  percentage = 0.5, 
+                  minSubgroupFrac = 0.5, 
                   group.col = "shortLetterCode",
                   group1 = "TP",
                   group2 = "NT",
