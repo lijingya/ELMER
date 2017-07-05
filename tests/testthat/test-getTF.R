@@ -191,7 +191,7 @@ test_that("Test if the results is right", {
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
-                  percentage = 0.5, 
+                  minSubgroupFrac = 0.5, 
                   group.col = "group",
                   group1 = "g1",
                   group2 = "g2",
