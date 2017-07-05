@@ -29,10 +29,9 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(max(Hypo.pair$Raw.p) <= 1)
     
   # If we add one more probe the value should be saved
-  
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
-                        permu.size=6,
+                        permu.size = 6,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
