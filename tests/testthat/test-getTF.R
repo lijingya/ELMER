@@ -158,7 +158,9 @@ test_that("Test if the results is right", {
   colnames(met) <- c(as.character(1:6))
   met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
   
-  colData <- data.frame(sample = as.character(1:6), row.names =  as.character(1:6))
+  colData <- data.frame(sample = as.character(1:6), 
+                        group = c(rep("g2",3),rep("g1",3)),
+                        row.names =  as.character(1:6))
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
