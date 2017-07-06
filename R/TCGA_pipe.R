@@ -21,6 +21,8 @@
 #' If it is "hypo", get.diff.meth function will identify all significantly hypomethylated
 #' CpG sites; If "hyper", get.diff.meth function will identify all significantly hypermethylated
 #' CpG sites
+#' @param mutant_variant_classification List of TCGA variant classification from MAF files to consider a samples
+#' mutant. Only used when argument gene is set.
 #' @param Data A path shows the folder containing DNA methylation, expression and clinic data
 #' @param ... A list of parameters for functions: GetNearGenes, get.feature.probe, 
 #' get.diff.meth, get.pair
@@ -53,6 +55,15 @@ TCGA.pipe <- function(disease,
                       Data = NULL, 
                       diff.dir = "hypo",
                       genes = NULL,
+                      mutant_variant_classification = c("Frame_Shift_Del",
+                                                 "Frame_Shift_Ins",
+                                                 " Missense_Mutation",
+                                                 "Nonsense_Mutation",
+                                                 "Splice_Site",
+                                                 "In_Frame_Del",
+                                                 "In_Frame_Ins",
+                                                 "Translation_Start_Site",
+                                                 "Nonstop_Mutation"),
                       group.col = "TN", 
                       group1 = "Tumor",
                       group2 = "Normal",
@@ -148,8 +159,8 @@ TCGA.pipe <- function(disease,
         for(g in genes) {
           if(g %in% maf$Hugo_Symbol) {
             message("Adding information for gene: ", g)
-            aux <- filter(maf, Hugo_Symbol == g & !Variant_Classification %in% c("3'UTR","3'Flank","5'UTR","5'Flank","Silent","Intron"))
-            mutant.samples <- substr(y$Tumor_Sample_Barcode,1,15)
+            aux <- filter(maf, Hugo_Symbol == g & Variant_Classification %in% mutant_variant_classification)
+            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,15)
             colData(mae)[,g] <- NA
             colData(mae)[colData(mae)$TN == " Tumor",g] <- "WT"
             colData(mae)[colData(mae)$TN == " Tumor" & 
