@@ -592,7 +592,7 @@ get.permu <- function(data,
   if(!is.null(permu) & length(file) > 0) {
     if(file.exists(file)){
       # Put genes in the same order before rbind it
-      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),]
+      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=F]
       permu <- cbind(permu, permu.file)
     }
   }
@@ -635,7 +635,7 @@ get.permu <- function(data,
     save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
   }
   if(is.null(permu)) {
-    permu <- permu.file[geneID,probes.permu]
+    permu <- permu.file[geneID,probes.permu, drop = F]
   }
   return(permu)
 }
@@ -935,7 +935,7 @@ get.enriched.motif <- function(data,
     message("-----------")
     
     en.motifs <- names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                      names(en.motifs), value = TRUE)])
+                                      names(en.motifs), value = T)])
     message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
     enriched.motif <- alply(en.motifs, 
                             function(x, probes.TF) {

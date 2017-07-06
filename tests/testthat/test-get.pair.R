@@ -29,14 +29,14 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(max(Hypo.pair$Raw.p) <= 1)
     
   # If we add one more probe the value should be saved
-  
   Hypo.pair <- get.pair(data=data,
                         nearGenes=nearGenes,
                         permu.size=6,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
-                        pvalue =  0.2,
+                        pvalue =  0.001,
+                        Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")
@@ -51,7 +51,8 @@ test_that("Function uses correctly the permu.dir", {
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
                         permu.size=5,
-                        pvalue =  0.02,
+                        pvalue =  0.001,
+                        Pe = 0.001,
                         dir.out="./",
                         label= "hypo")
   # Pvalue filter is working
@@ -66,7 +67,8 @@ test_that("Function uses correctly the permu.dir", {
                         group2 = "Solid Tissue Normal",
                         nearGenes=nearGenes,
                         permu.size=7,
-                        pvalue =  0.2,
+                        pvalue =  0.001,
+                        Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")
