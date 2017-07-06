@@ -635,7 +635,7 @@ get.permu <- function(data,
     save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
   }
   if(is.null(permu)) {
-    permu <- permu.file[geneID,probes.permu, drop = F]
+    permu <- permu.file[geneID,probes.permu, drop = FALSE]
   }
   return(permu)
 }
