@@ -267,7 +267,7 @@ get.diff.meth <- function(data,
 #' @usage 
 #' get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir = NULL, 
 #'          pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
-#'          group.col, cores = 1, filter.probes = TRUE, 
+#'          group.col, group1, group2, cores = 1, filter.probes = TRUE, 
 #'          filter.portion = 0.3,  filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
@@ -648,7 +648,7 @@ get.permu <- function(data,
 #' promoterMeth is a function to calculate associations of gene expression with DNA methylation
 #' at promoter regions.
 #' @usage 
-#' promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2,
+#' promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.2,
 #'              upstream = 200,  downstream = 2000, save = TRUE)
 #'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
@@ -829,12 +829,6 @@ promoterMeth <- function(data,
 #'                                      probes=probes,
 #'                                      min.incidence=2, 
 #'                                      label="hypo")
-#' enriched.motif <- get.enriched.motif(data = data,
-#'                                      min.motif.quality = "DS",
-#'                                      probes=probes,
-#'                                      min.incidence=2, 
-#'                                      label="hypo",
-#'                                      method = "regions")
 get.enriched.motif <- function(data,
                                probes.motif, 
                                probes,
@@ -844,8 +838,7 @@ get.enriched.motif <- function(data,
                                min.incidence = 10, 
                                dir.out="./",
                                label=NULL,
-                               save=TRUE,
-                               method = "probes"){
+                               save=TRUE){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -873,7 +866,6 @@ get.enriched.motif <- function(data,
     }
   }
   
-  if(method == "probes") {
     background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
     bg.probes.TF <- all.probes.TF[background.probes,]
     bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
@@ -986,141 +978,6 @@ get.enriched.motif <- function(data,
       }
     }
     return(enriched.motif)
-  } else { 
-    # methods == region
-    
-    newenv <- new.env()
-    if(metadata(data)$genome == "hg19" & metadata(data)$met.platform == "450K")  data("hm450.manifest", package = "ELMER.data",envir=newenv)
-    if(metadata(data)$genome == "hg38" & metadata(data)$met.platform == "450K")  data("hm450.manifest.hg38", package = "ELMER.data",envir=newenv)
-    if(metadata(data)$genome == "hg19" & metadata(data)$met.platform == "EPIC")  data("EPIC.manifest", package = "ELMER.data",envir=newenv)
-    if(metadata(data)$genome == "hg38" & metadata(data)$met.platform == "EPIC")  data("EPIC.manifest.hg38", package = "ELMER.data",envir=newenv)
-    manifest <- get(ls(newenv)[1],envir=newenv)   
-    regions.objects <- getRegionsFromPlatforms(manifest, all.probes.TF)
-    
-    # Our background probes will be our background regions
-    # Get only regions within our background probes
-    probes.region <- regions.objects$probes.region
-    background.regions <- probes.region[probes.region$names %in% background.probes,"regions"]
-    
-    # Get motif for those regions
-    bg.regions.TF <- regions.objects$regions.motif
-    bg.regions.TF <- bg.regions.TF[rownames(bg.regions.TF) %in% background.regions$regions,] # -1  is regions column
-    
-    bg.regions.TF.percent <- colMeans(bg.regions.TF[,-"regions"]) # This is equal to: c/(c+d)
-    
-    ## load probes for enriched motif ----------------------------------------------
-    aux <- probes.region[probes.region$names %in% probes,"regions"]
-    regions.TF <- regions.objects$regions.motif[regions.objects$regions.motif$regions %in% aux$regions,] 
-    regions.TF.num <- colSums(regions.TF[,-"regions"], na.rm = TRUE)
-    
-    # Odds ratio
-    #      p/(1-p)     p * (1-P)   where p = a/(a + b) probes with motif
-    # OR =--------- = -----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
-    #      P/(1-P)     P * (1-p)
-    p <- colMeans(regions.TF[,-"regions"])
-    P <- bg.regions.TF.percent
-    sub.enrich.TF <- multiply_by(p,(1-P)) %>%  divide_by(P)  %>%  divide_by(1-p)  
-    # Extreme cases: p = 1(likely)/0 (likely) or P = 1 (unlikely) / 0 (likely) 
-    # case 1 p:1,P=1 OR = 1/0/1/0 = Inf
-    # case 2 p:0,P=0 OR = 0/1/0/1 = NaN
-    # case 3 p:1,P=0 OR = 1/0/0/1 = Inf
-    # case 4 p:0,P=1 OR = 0/1/1/0 = NaN
-    # Cases with NaN p = 0, so we will set OR to 0
-    sub.enrich.TF[is.nan(sub.enrich.TF)] <- 0 
-    # SD = sqrt(1/a + 1/b + 1/c + 1/d)
-    # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
-    # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
-    # c and d are the same counts within the entire enhancer probe set (background)
-    # lower boundary of 95% conf idence interval = exp (ln OR - SD)
-    a <- colSums(regions.TF[,-"regions"])
-    b <- nrow(regions.TF) - colSums(regions.TF[,-"regions"])
-    c <- colSums(bg.regions.TF[,-"regions"])
-    d <- nrow(bg.regions.TF) - colSums(bg.regions.TF[,-"regions"])
-    SD <- add(1/a,1/b) %>% add(1/c) %>% add(1/d) %>% sqrt
-    sub.enrich.TF.lower <- exp(log(sub.enrich.TF) - 1.96 * SD)
-    sub.enrich.TF.upper <- exp(log(sub.enrich.TF) + 1.96 * SD)
-    # If sub.enrich.TF is 0 my SD is Inf we will remove those cases
-    sub.enrich.TF.upper[is.nan(sub.enrich.TF.upper)] <- 0
-    ## summary
-    Summary <- data.frame(motif = colnames(regions.TF[,-"regions"]), 
-                          NumOfRegions = regions.TF.num,
-                          OR = sub.enrich.TF, 
-                          lowerOR = sub.enrich.TF.lower, 
-                          upperOR = sub.enrich.TF.upper)
-    
-    Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
-    if(save) write.csv(Summary, 
-                       file = sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                                      dir.out,label))
-    
-    ## enriched motif and probes
-    en.motifs <- sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
-                                       !sub.enrich.TF.lower %in% "Inf" & 
-                                       regions.TF.num > min.incidence]
-    
-    # Subset by quality
-    print.header("Filtering motifs based on quality", "subsection")
-    message("Number of enriched motifs with quality:")
-    message("-----------")
-    for(q in c("A","B","C","D","S")) message(paste0(" => ",q,": ", length(grep(paste0("H10MO.",q),names(en.motifs)))))
-    message("-----------")
-    
-    en.motifs <- names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                      names(en.motifs), value = T)])
-    message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
-    enriched.motif <- alply(en.motifs, 
-                            function(x, regions.TF) {
-                              regions.TF[regions.TF[,x]==1,]$regions
-                            },
-                            regions.TF=as.data.frame(regions.TF),.margins = 1, .dims = FALSE)
-    attributes(enriched.motif) <- NULL
-    names(enriched.motif) <- en.motifs
-    
-    if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs_regions.rda",dir.out,label))
-    
-    ## make plot 
-    suppressWarnings({
-      motif.enrichment.plot(motif.enrichment = Summary[Summary$motif %in% names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
-                                                                                               names(en.motifs), value = T)]),], 
-                            significant = list(OR = 1.3), 
-                            dir.out = dir.out,
-                            label=paste0(label,".all.quality.regions"), 
-                            save=TRUE)
-    })
-    suppressWarnings({
-      motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                            significant = list(OR = 1.3), 
-                            dir.out = dir.out,
-                            label=paste0(label,".quality.A-",toupper(min.motif.quality),".regions"),
-                            save=TRUE)
-    })
-    ## add information to siginificant pairs
-    if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
-      sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label), 
-                            stringsAsFactors=FALSE)
-      sig.Pairs <- merge(sig.Pairs,probes.region, by.x = "Probe", by.y = "names", sort = FALSE)
-      if(all(sig.Pairs$regions %in% regions.TF$regions)){
-        motif.Info <- sapply(unique(sig.Pairs$regions),
-                             function(x, regions.TF,en.motifs){
-                               TFs <- names(regions.TF)[which(regions.TF[regions.TF$regions == x,] == 1)]
-                               non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
-                               en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                               out <- data.frame(region = x,
-                                                 non_enriched_motifs=non.en.motif, 
-                                                 enriched_motifs=en.motif, 
-                                                 stringsAsFactors = FALSE)
-                               return(out)
-                             },
-                             regions.TF=regions.TF, en.motifs=en.motifs,simplify=FALSE)
-        motif.Info <- do.call(rbind,motif.Info)
-        sig.Pairs <- merge(sig.Pairs, motif.Info, by.x = "regions", by.y = "region", all.x = TRUE)
-        write.csv(sig.Pairs, 
-                  file=sprintf("%s/getPair.%s.pairs.significant.withmotif_regions.csv",dir.out, label),
-                  row.names=FALSE)
-      }
-    }
-    return(enriched.motif)
-  }
 }
 
 #' get.TFs to identify regulatory TFs.
@@ -1132,6 +989,9 @@ get.enriched.motif <- function(data,
 #'   get.TFs(data, 
 #'           enriched.motif, 
 #'           TFs, 
+#'           group.col,
+#'           group1,
+#'           group2,
 #'           motif.relevant.TFs, 
 #'           minSubgroupFrac = 0.4,
 #'           dir.out = "./",
