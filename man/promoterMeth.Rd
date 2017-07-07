@@ -5,7 +5,7 @@
 \title{promoterMeth to calculate associations of gene expression with DNA methylation
 at promoter regions}
 \usage{
-promoterMeth(data, sig.pvalue = 0.01, percentage = 0.2,
+promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.2,
              upstream = 200,  downstream = 2000, save = TRUE)
 }
 \arguments{

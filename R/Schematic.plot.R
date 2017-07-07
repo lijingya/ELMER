@@ -4,6 +4,8 @@
 #' @usage
 #' schematic.plot(data,
 #'                group.col = NULL,
+#'                group1 = NULL,
+#'                group2 = NULL,
 #'                pair,
 #'                byProbe,
 #'                byGeneID,

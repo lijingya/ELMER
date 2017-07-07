@@ -92,12 +92,6 @@ enriched.motif <- get.enriched.motif(data = data,
                                      probes=probes,
                                      min.incidence=2, 
                                      label="hypo")
-enriched.motif <- get.enriched.motif(data = data,
-                                     min.motif.quality = "DS",
-                                     probes=probes,
-                                     min.incidence=2, 
-                                     label="hypo",
-                                     method = "regions")
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 

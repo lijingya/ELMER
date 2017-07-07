@@ -6,8 +6,10 @@
 \usage{
 TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
   cores = 1, mode = "unsupervised", Data = NULL, diff.dir = "hypo",
-  genes = NULL, group.col = "TN", group1 = "Tumor", group2 = "Normal",
-  ...)
+  genes = NULL, mutant_variant_classification = c("Frame_Shift_Del",
+  "Frame_Shift_Ins", " Missense_Mutation", "Nonsense_Mutation", "Splice_Site",
+  "In_Frame_Del", "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"),
+  group.col = "TN", group1 = "Tumor", group2 = "Normal", ...)
 }
 \arguments{
 \item{disease}{TCGA short form disease name such as COAD}
@@ -32,6 +34,9 @@ Options: "supervised" (use 100\% of samples) or "unsupervised" (use 20\% of samp
 If it is "hypo", get.diff.meth function will identify all significantly hypomethylated
 CpG sites; If "hyper", get.diff.meth function will identify all significantly hypermethylated
 CpG sites}
+
+\item{mutant_variant_classification}{List of TCGA variant classification from MAF files to consider a samples
+mutant. Only used when argument gene is set.}
 
 \item{...}{A list of parameters for functions: GetNearGenes, get.feature.probe, 
 get.diff.meth, get.pair}
