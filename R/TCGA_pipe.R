@@ -33,7 +33,7 @@
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
 #'   TCGA.pipe(disease = "LUSC",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
 #'   projects <- TCGAbiolinks:::getGDCprojects()$project_id
-#'   projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=T)])
+#'   projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=TRUE)])
 #'   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
 #'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
 #'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
@@ -85,7 +85,7 @@ TCGA.pipe <- function(disease,
   available.analysis <- c("download","distal.probes",
                           "createMAE","diffMeth","pair",
                           "motif","TF.search","all")
-  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = TRUE, invert = T)
+  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = TRUE, invert = TRUE)
   
   if(any(!tolower(analysis) %in% tolower(analysis))) 
     stop(paste0("Availbale options for analysis argument are: ",
