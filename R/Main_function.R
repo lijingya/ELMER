@@ -599,7 +599,7 @@ get.permu <- function(data,
   if(!is.null(permu) & length(file) > 0) {
     if(file.exists(file)){
       # Put genes in the same order before rbind it
-      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=F]
+      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=FALSE]
       permu <- cbind(permu, permu.file)
     }
   }
@@ -1205,7 +1205,7 @@ get.TFs <- function(data,
   # For each motif evaluate TF
   cor.summary <- adply(colnames(TF.meth.cor), 
                        function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){ 
-                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=T)$ix]
+                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=TRUE)$ix]
                          top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
                          if (any(top %in% motif.relavent.TFs.family[[x]])) {
                            potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
