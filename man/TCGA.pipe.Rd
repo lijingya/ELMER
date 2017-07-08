@@ -35,16 +35,27 @@ If it is "hypo", get.diff.meth function will identify all significantly hypometh
 CpG sites; If "hyper", get.diff.meth function will identify all significantly hypermethylated
 CpG sites}
 
-\item{mutant_variant_classification}{List of TCGA variant classification from MAF files to consider a samples
-mutant. Only used when argument gene is set.}
-
-\item{...}{A list of parameters for functions: GetNearGenes, get.feature.probe, 
-get.diff.meth, get.pair}
-
-\item{gene}{List of genes for which mutations will be verified. 
+\item{genes}{List of genes for which mutations will be verified. 
 A column in the MAE with the name of the gene
 will be created with two groups WT (tumor samples without mutation), MUT (tumor samples w/ mutation), 
 NA (not tumor samples)}
+
+\item{mutant_variant_classification}{List of TCGA variant classification from MAF files to consider a samples
+mutant. Only used when argument gene is set.}
+
+\item{group.col}{A column defining the groups of the sample. You can view the 
+available columns using: colnames(MultiAssayExperiment::colData(data)).}
+
+\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+That means, if direction is hyper, get probes
+hypermethylated in group 1 compared to group 2.}
+
+\item{...}{A list of parameters for functions: GetNearGenes, get.feature.probe, 
+get.diff.meth, get.pair}
 }
 \value{
 Different analysis results.

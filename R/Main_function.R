@@ -126,7 +126,6 @@ get.feature.probe <- function(feature = NULL,
 #' a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
 #' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, 
 #' use a value of 1.0 (Supervised mode)
-#' @param cores A interger which defines the number of cores to be used in parallel 
 #' @param pvalue A number specifies the significant P value (adjusted P value by BH) 
 #' threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01
 #' If pvalue is smaller than pvalue than it is considered significant.
@@ -275,7 +274,7 @@ get.diff.meth <- function(data,
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
 #'  Default is 1: don't use parallel process.
-#' @param minSubgroupFracA number ranging from 0 to 1, specifying the fraction of 
+#' @param minSubgroupFrac A number ranging from 0 to 1, specifying the fraction of 
 #' extreme  samples that define group U (unmethylated) and group M (methylated), 
 #' which are used to link probes to genes. 
 #' The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group) 
@@ -655,7 +654,7 @@ get.permu <- function(data,
 #' promoterMeth is a function to calculate associations of gene expression with DNA methylation
 #' at promoter regions.
 #' @usage 
-#' promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.2,
+#' promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.4, cores = 1,
 #'              upstream = 200,  downstream = 2000, save = TRUE)
 #'@param data A Multi Assay Experiment object with DNA methylation and 
 #' gene expression Summarized Experiment objects
@@ -668,7 +667,7 @@ get.permu <- function(data,
 #' U group and the highest quintile of all samples in the M group).
 #' @param upstream Number of bp upstream of TSS to consider as promoter region
 #' @param downstream  Number of bp downstream of TSS to consider as promoter region
-#'  @param cores Number of cores to be used in paralellization. Default 1 (no paralellization)
+#'@param cores Number of cores to be used in paralellization. Default 1 (no paralellization)
 #' @param save A logic. If it is true, the result will be saved.  
 #' @importFrom GenomicRanges promoters
 #' @importFrom utils write.csv
@@ -1010,7 +1009,7 @@ get.enriched.motif <- function(data,
 #' @param TFs A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
 #' If missing, human.TF list will be used (human.TF data in ELMER.data). 
 #' For detail information, refer the reference paper.
-#' @param motif.relavent.TFs A list containing motif as names and relavent TFs as contents
+#' @param motif.relevant.TFs A list containing motif as names and relavent TFs as contents
 #'  for each list element or a path of XX.rda file containing a list as above. 
 #' If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
 #' For detail information, refer the reference paper.

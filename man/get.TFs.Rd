@@ -37,6 +37,11 @@ hypermethylated in group 1 compared to group 2.}
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
+\item{motif.relevant.TFs}{A list containing motif as names and relavent TFs as contents
+ for each list element or a path of XX.rda file containing a list as above. 
+If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
+For detail information, refer the reference paper.}
+
 \item{minSubgroupFrac}{A number ranging from 0 to 1 
 specifying the percentage of samples used to create the groups U (unmethylated) 
 and M (methylated) used to link probes to TF expression. 
@@ -51,11 +56,6 @@ U group and the highest quintile of all samples in the M group).}
 
 \item{save}{A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and 
 getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.}
-
-\item{motif.relavent.TFs}{A list containing motif as names and relavent TFs as contents
- for each list element or a path of XX.rda file containing a list as above. 
-If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
-For detail information, refer the reference paper.}
 }
 \value{
 Potential responsible TFs will be reported in a dataframe with 4 columns:

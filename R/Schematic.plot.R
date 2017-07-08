@@ -10,6 +10,7 @@
 #'                byProbe,
 #'                byGeneID,
 #'                byCoordinate=list(chr=c(), start=c(), end=c()),
+#'                statehub.tracks,
 #'                dir.out="./",
 #'                save=TRUE,...)
 #' @importFrom GenomicRanges GRanges findOverlaps
@@ -27,6 +28,7 @@
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.#' @param byProbe A vector of probe names.
 #' @param byGeneID A vector of gene ID
+#' @param byProbe A vector of probe names
 #' @param byCoordinate A list contains chr, start and end.
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
 #' @param ... Parameters for GetNearGenes

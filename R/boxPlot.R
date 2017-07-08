@@ -26,6 +26,10 @@
 #' If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
 #' in the lower quintile, but then 5 will be used.
 #' @param title plot title
+#' @param save Save plot as PNG
+#' @param filename File names (.png) to save the file (i.e. "plot.png")
+#' @param legend.col legend title
+#' @param probe Character with probe name (i.e. "cg24517858")
 #' @return Box plot
 #' @importFrom plotly plot_ly layout
 #' @importFrom dplyr top_n filter select %>%

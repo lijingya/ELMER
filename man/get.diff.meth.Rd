@@ -56,8 +56,6 @@ selecting significant hypo/hyper-methylated probes. Default is 0.3.}
 \item{dir.out}{A path specify the directory for outputs. Default is is current directory.}
 
 \item{save}{A logic. When TRUE, two getMethdiff.XX.csv files will be generated (see detail)}
-
-\item{cores}{A interger which defines the number of cores to be used in parallel}
 }
 \value{
 Statistics for all probes and significant hypo or hyper-methylated probes.
