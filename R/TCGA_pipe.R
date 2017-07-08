@@ -8,8 +8,16 @@
 #' @param analysis A vector of characters listing the analysis need to be done.
 #' Analysis can be "download","distal.probes","diffMeth","pair","motif","TF.search".
 #' Default is "all" meaning all the analysis will be processed.
+#' @param group.col A column defining the groups of the sample. You can view the 
+#' available columns using: colnames(MultiAssayExperiment::colData(data)).
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
 #' @param wd A path shows working dirctory. Default is "./"
-#' @param gene List of genes for which mutations will be verified. 
+#' @param genes List of genes for which mutations will be verified. 
 #' A column in the MAE with the name of the gene
 #' will be created with two groups WT (tumor samples without mutation), MUT (tumor samples w/ mutation), 
 #' NA (not tumor samples)

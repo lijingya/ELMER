@@ -5,7 +5,7 @@
 \title{promoterMeth to calculate associations of gene expression with DNA methylation
 at promoter regions}
 \usage{
-promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.2,
+promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.4, cores = 1,
              upstream = 200,  downstream = 2000, save = TRUE)
 }
 \arguments{
@@ -23,10 +23,11 @@ U group and the highest quintile of all samples in the M group).}
 
 \item{upstream}{Number of bp upstream of TSS to consider as promoter region}
 
-\item{downstream}{Number of bp downstream of TSS to consider as promoter region
-@param cores Number of cores to be used in paralellization. Default 1 (no paralellization)}
+\item{downstream}{Number of bp downstream of TSS to consider as promoter region}
 
 \item{save}{A logic. If it is true, the result will be saved.}
+
+\item{cores}{Number of cores to be used in paralellization. Default 1 (no paralellization)}
 }
 \value{
 A data frame contains genes whose expression significantly anti-correlated

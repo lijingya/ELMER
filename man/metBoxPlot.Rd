@@ -23,6 +23,8 @@ hypermethylated in group 1 compared to group 2.}
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
+\item{probe}{Character with probe name (i.e. "cg24517858")}
+
 \item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
 If you have 10 samples in one group, percentage is 0.2 this will give 2 samples 
 in the lower quintile, but then 5 will be used.}
@@ -36,7 +38,13 @@ subtype.But, If you are working with molecular subtypes please set it to 1.}
  methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
 "hyper" which is only selecting hypermethylated probes;}
 
+\item{legend.col}{legend title}
+
 \item{title}{plot title}
+
+\item{filename}{File names (.png) to save the file (i.e. "plot.png")}
+
+\item{save}{Save plot as PNG}
 }
 \value{
 Box plot

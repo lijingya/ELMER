@@ -12,6 +12,7 @@ schematic.plot(data,
                byProbe,
                byGeneID,
                byCoordinate=list(chr=c(), start=c(), end=c()),
+               statehub.tracks,
                dir.out="./",
                save=TRUE,...)
 }
@@ -32,6 +33,8 @@ hypermethylated in group 1 compared to group 2.#' @param byProbe A vector of pro
 
 \item{pair}{A data frame with three columns: Probe, Gene ID (Ensemble gene ID)
 and Pe (empirical p-value). This is the ouput of get.pair function.}
+
+\item{byProbe}{A vector of probe names}
 
 \item{byGeneID}{A vector of gene ID}
 

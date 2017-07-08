@@ -55,7 +55,6 @@ Imports:
     xml2,
     plotly
 Suggests:
-    parallel,
     BiocStyle,
     knitr,
     testthat,
