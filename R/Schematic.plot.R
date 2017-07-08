@@ -245,7 +245,7 @@ schematic <- function(data,
   interactions.track <- c()
   if(nrow(significant) > 0 ) {
     genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
-    genes.plot <- resize(genes.plot,width = 1)
+    genes.plot <- SummarizedExperiment::resize(genes.plot,width = 1)
     interactions <- GenomicInteractions(genes.plot,
                                         probe.gr[match(significant$Probe,names(probe.gr))],
                                         experiment_name="Putative pair genes ",

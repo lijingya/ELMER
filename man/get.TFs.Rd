@@ -88,6 +88,9 @@ enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg089
                                  "cg10097755", "cg09247779", "cg09181054"))
 TF <- get.TFs(data, 
               enriched.motif, 
+              group.col = "definition",
+              group1 = "Primary solid Tumor", 
+              group2 = "Solid Tissue Normal",
               TFs = data.frame(
                      external_gene_name=c("TP53","TP63","TP73"),
                      ensembl_gene_id= c("ENSG00000141510",
@@ -97,6 +100,9 @@ TF <- get.TFs(data,
              label="hypo")
 # This case will use Uniprot dabase to get list of Trasncription factors              
 TF <- get.TFs(data, 
+              group.col = "definition",
+              group1 = "Primary solid Tumor", 
+              group2 = "Solid Tissue Normal",
               enriched.motif, 
               label="hypo")              
 }

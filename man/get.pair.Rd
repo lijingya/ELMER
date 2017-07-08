@@ -88,7 +88,11 @@ nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 Hypo.pair <- get.pair(data=data,
                      nearGenes=nearGenes,
                      permu.size=5,
+                     group.col = "definition",
+                     group1 = "Primary solid Tumor", 
+                     group2 = "Solid Tissue Normal",
                      pvalue = 0.2,
+                     Pe = 0.2,
                      dir.out="./",
                      label= "hypo")
                      
@@ -96,9 +100,12 @@ Hypo.pair <- get.pair(data = data,
                       nearGenes = nearGenes,
                       permu.size = 5,
                       pvalue = 0.2,
+                      Pe = 0.2,
                       dir.out = "./",
                       diffExp = TRUE, 
                       group.col = "definition",
+                      group1 = "Primary solid Tumor", 
+                      group2 = "Solid Tissue Normal",
                       label = "hypo")                    
 }
 \references{
