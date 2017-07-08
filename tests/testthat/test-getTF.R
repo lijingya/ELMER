@@ -218,5 +218,6 @@ test_that("It creates a PDF with the TF ranking plot", {
   unlink("subfamily.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
   unlink("HumanTF.rda",recursive = TRUE, force = TRUE)
   unlink("family.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
+  unlink("getTF.hypo.TFs.with.motif.pvalue.rda",recursive = TRUE, force = TRUE)
 })
   

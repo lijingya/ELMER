@@ -52,7 +52,6 @@
 #'  all genes and significantly linked probes in the range and the significant links.
 #' @export
 #' @import Gviz lattice
-#' @importFrom GenomicInteractions GenomicInteractions InteractionTrack
 #' @examples
 #' data(elmer.data.example)
 #' pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
@@ -248,11 +247,11 @@ schematic <- function(data,
   if(nrow(significant) > 0 ) {
     genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
     genes.plot <- SummarizedExperiment::resize(genes.plot,width = 1)
-    interactions <- GenomicInteractions(genes.plot,
+    interactions <- GenomicInteractions::GenomicInteractions(genes.plot,
                                         probe.gr[match(significant$Probe,names(probe.gr))],
                                         experiment_name="Putative pair genes ",
                                         description="this is a test", counts=-log10(significant$Raw.p))
-    interactions.track <-  InteractionTrack(name="Putative pair genes\n (-log10 raw p-value)", interactions, chromosome=chr)
+    interactions.track <-  GenomicInteractions::InteractionTrack(name="Putative pair genes\n (-log10 raw p-value)", interactions, chromosome=chr)
     displayPars(interactions.track) = list(col.interactions="red", 
                                            col.anchors.fill ="transparent",
                                            col.anchors.line = "transparent",

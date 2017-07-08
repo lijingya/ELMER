@@ -37,7 +37,6 @@ Imports:
     data.table,
     GenomicFeatures,
     TCGAbiolinks,
-    GenomicInteractions,
     plyr,
     Matrix,
     dplyr,
@@ -58,7 +57,8 @@ Suggests:
     BiocStyle,
     knitr,
     testthat,
-    DT
+    DT,
+    GenomicInteractions
 biocViews: 
     DNAMethylation, 
     GeneExpression, 
