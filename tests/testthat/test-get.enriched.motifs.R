@@ -100,5 +100,8 @@ test_that("min.incidence works", {
                                          label="hypo")
   })
   expect_true(length(enriched.motif) == 0)
-  
+  unlink("hypo.quality*",recursive = TRUE, force = TRUE)
+  unlink("hypo.all*",recursive = TRUE, force = TRUE)
+  unlink("getMotif.hypo.enriched.motifs.rda",recursive = TRUE, force = TRUE)
+  unlink("getMotif.hypo.motif.enrichment.csv",recursive = TRUE, force = TRUE)
 })

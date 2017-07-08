@@ -214,5 +214,9 @@ test_that("It creates a PDF with the TF ranking plot", {
   expect_true(file.exists("TFrankPlot_subfamily/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
   unlink("TFrankPlot_family",recursive = TRUE, force = TRUE)
   unlink("TFrankPlot_subfamily",recursive = TRUE, force = TRUE)
+  unlink("getTF.hypo.significant.TFs.with.motif.summary.csv",recursive = TRUE, force = TRUE)
+  unlink("subfamily.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
+  unlink("HumanTF.rda",recursive = TRUE, force = TRUE)
+  unlink("family.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
 })
   
