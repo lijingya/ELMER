@@ -141,4 +141,5 @@ test_that("Ramdom probe sleection is the same for every run", {
   unlink("test_permu_2",recursive = TRUE, force = TRUE)
   unlink("test_permu_1",recursive = TRUE, force = TRUE)
   unlink("permu_test",recursive = TRUE, force = TRUE)
+  unlink("getPair.hypo*",recursive = TRUE, force = TRUE)
 })
