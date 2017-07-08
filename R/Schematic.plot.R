@@ -245,6 +245,10 @@ schematic <- function(data,
   }
   interactions.track <- c()
   if(nrow(significant) > 0 ) {
+    if (!requireNamespace("GenomicInteractions", quietly = TRUE)) {
+      stop("GenomicInteractions package is needed for this function to work. Please install it.",
+           call. = FALSE)
+    }
     genes.plot <- gene.gr[match(significant$GeneID,names(gene.gr))]
     genes.plot <- SummarizedExperiment::resize(genes.plot,width = 1)
     interactions <- GenomicInteractions::GenomicInteractions(genes.plot,
