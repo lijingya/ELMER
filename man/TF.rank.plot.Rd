@@ -31,7 +31,24 @@ correlation between TF expression and average DNA methylation at motif sites. Th
 relevant TF and top3 TFs will be labeled in a different color.
 }
 \examples{
-data(getTF.hypo.TFs.with.motif.pvalue)
+data(elmer.data.example)
+enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
+                                 "cg17153775", "cg21156590", "cg19749688", "cg12590404",
+                                 "cg24517858", "cg00329272", "cg09010107", "cg15386853",
+                                 "cg10097755", "cg09247779", "cg09181054"))
+TF <- get.TFs(data, 
+              enriched.motif, 
+              group.col = "definition",
+              group1 = "Primary solid Tumor", 
+              group2 = "Solid Tissue Normal",
+              TFs = data.frame(
+                     external_gene_name=c("TP53","TP63","TP73"),
+                     ensembl_gene_id= c("ENSG00000141510",
+                                        "ENSG00000073282",
+                                        "ENSG00000078900"),
+                     stringsAsFactors = FALSE),
+             label="hypo")
+TF.meth.cor <- get(load("getTF.hypo.TFs.with.motif.pvalue.rda"))            
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
             motif="P53_HUMAN.H10MO.B", 
             TF.label=createMotifRelevantTfs("subfamily")["P53_HUMAN.H10MO.B"],

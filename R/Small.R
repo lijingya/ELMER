@@ -603,6 +603,7 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' and expression associate with average DNA methylation of these motif sites.
 #' @importFrom rvest html_table  %>%
 #' @importFrom xml2 read_html 
+#' @export
 #' @param classification Select if we will use Family classification or sub-family
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(classification = "family"){
@@ -665,18 +666,21 @@ createMotifRelevantTfs <- function(classification = "family"){
 #'  bias_l.probe <- runif(100, 0, 0.3)
 #'  bias_g.probe <- runif(100, 0.3, 1)
 #'  met <- rbind(random.probe,bias_l.probe,bias_g.probe)
-#'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
+#'  met <- preAssociationProbeFiltering(data = met,  K = 0.3, percentage = 0.05)
 #'  met <- rbind(random.probe,random.probe,random.probe)
 #'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
 #'  
 #'  data(elmer.data.example)
 #'  data <- preAssociationProbeFiltering(data,  K = 0.3, percentage = 0.05)
 #'  
-#'  met <- rbind(random.probe,bias_l.probe,bias_g.probe)
+#'  cg24741609 <- runif(100, 0, 1)
+#'  cg17468663 <- runif(100, 0, 0.3)
+#'  cg14036402 <- runif(100, 0.3, 1)
+#'  met <- rbind(cg24741609,cg14036402,cg17468663)
 #'  colnames(met) <- paste("sample",1:100)
 #'  exp <- met
 #'  rownames(exp) <- c("ENSG00000141510","ENSG00000171862","ENSG00000171863")
-#'  sample.info <- DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
+#'  sample.info <- S4Vectors::DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
 #'  rownames(sample.info) <- colnames(exp)
 #'  mae <- createMAE(exp = exp, met = met, colData = sample.info, genome = "hg38") 
 #'  mae <- preAssociationProbeFiltering(mae,  K = 0.3, percentage = 0.05)
@@ -684,14 +688,18 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   print.header("Filtering probes", type = "section")
   message("For more information see function preAssociationProbeFiltering")
   
-  if(class(data) == class(MultiAssayExperiment())) met <- assay(getMet(data))
+  if(class(data) == class(MultiAssayExperiment())) { 
+    met <- assay(getMet(data))
+  } else {
+    met <- data
+  }
   # In percentage how many probes are bigger than K ?
   Meth_B <- rowMeans(met > K, na.rm = TRUE)
   # We should  have at least 5% methylation value < K or at least 5% methylation value > K
   keep <- Meth_B < (1 - percentage) & Meth_B > percentage
   message("Making sure we have at least ", percentage * 100, "% of beta values lesser than ", K," and ", 
           percentage * 100, "% of beta values greater ",K,".") 
-  if( length(keep) - sum(keep) != 0){
+  if(length(keep) - sum(keep) != 0) {
     message("Removing ", length(keep) - sum(keep), " probes out of ", length(keep))
   } else {
     message("There were no probes to be removed")
@@ -703,110 +711,3 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   }
   return(data)
 }
-
-#' @title Merge nearby probes into regions
-#' @description 
-#' This function come after the get.pair function.
-#' We will consider nearby probes as a regions controlling the nearby gene
-#'            
-#' 0------------  genes
-#'          0-------|
-#' | region |    
-#' Maximum distance between probes will be 1KB  
-#' @importFrom GenomicRanges reduce
-#' @param data Multi Assay Experiment
-#' @param pair Table with gene-probe pair list
-#' @param distance Minimum distance to consider from a probe (if it is 100 we will
-#' consider +-100 probe site)
-#' @examples 
-#' data(elmer.data.example)
-#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg13480549","cg15386853","cg15385853"),],
-#'                          geneAnnot=getExp(data))
-#' Hypo.pair <- get.pair(data = data,
-#'                       nearGenes = nearGenes,
-#'                      permu.size = 5,
-#'                      pvalue = 0.1,
-#'                      Pe = 0.2,
-#'                      dir.out = "./",
-#'                      label = "hypo")
-#'  Hypo.pair <- Hypo.pair[Hypo.pair$GeneID %in% Hypo.pair$GeneID[duplicated(Hypo.pair$GeneID)],]
-#'  # No change 
-#'  regions <- getRegionFromProbes(data,Hypo.pair, 1000)  
-#'  # Should be merged as one region
-#'  regions <- getRegionFromProbes(data,Hypo.pair, 3000) 
-#'                    
-getRegionFromProbes <- function(data,
-                                pair,
-                                distance = 250){
-  # This code needs improvements
-  regions <- NULL
-  
-  # No input
-  if(nrow(pair) == 0) stop("pair argument is empty")
-  
-  for(gene in unique(pair$GeneID)){
-    # For each gene consider the pair probes with a window of 250 bp
-    aux <- subset(pair, GeneID == gene)
-    suppressWarnings({
-      probes <- promoters(rowRanges(getMet(data)[aux$Probe,]),distance,distance + 2)
-    })
-    # If they overlap merge them (reduce)
-    reduced <- reduce(probes)
-    reduced$gene <- gene
-    regions <- c(regions,reduced)
-  }
-  
-  return(do.call("c", regions))
-}
-
-#' @title Transform Probes.motif to regions motif
-#' @description Transform Probes.motif to regions motif
-#' @import data.table GenomicRanges 
-#' @importFrom dplyr group_by count
-#' @examples 
-#' data("hm450.manifest")
-#' data("Probes.motif.hg19.450K")
-#' regions.motif <- getRegionsFromPlatforms(hm450.manifest,Probes.motif.hg19.450K)
-getRegionsFromPlatforms <- function(probe.gr,
-                                    probes.motif, 
-                                    distance = 250){
-  # Remove masked probes
-  probe.gr <- probe.gr[probe.gr$MASK.general == FALSE,] 
-  
-  # Create a window over each probes
-  probes <- GenomicRanges::promoters(probe.gr,distance,distance + 2)
-  
-  # If they overlap merge them (reduce)
-  message("Reducing probes to regions")
-  regions <- reduce(probes)
-  
-  # Check probes that belong to the same region
-  probes.region <- tibble::tibble(names = names(probes), regions = GenomicRanges::nearest(probes,regions))
-  nb.probes <- dplyr::group_by(probes.region,regions)  %>% count 
-  values(regions)$nb.probes <- nb.probes$n
-
-  # Check histogram o probes per region
-  # df <- count(as.data.frame(values(reduced)),nb.probes)
-  # plotly::plot_ly(x = df$nb.probes, y = df$n)
-  
-  # only consider probes in probe.gr
-  aux.motif <- tibble::as_tibble(as.matrix(probes.motif[names(probe.gr),]))
-  message("Reducing motifs from probes to regions")
-  aux.motif$regions <- probes.region$regions
-  dt <- as.data.table(aux.motif) 
-  message("This might take a while")
-  regions.motif <- dt[, lapply(.SD, max), by = list(regions)]
-  return(list("regions.motif" = regions.motif,
-              "regions" = regions,
-              "probes.region" = probes.region))
-}
-
-
-hgetMarks4regions <- function(){
-  newenv <- new.env()
-  data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
-  probes.motif <- get(ls(newenv)[1],envir=newenv)   
-  probes <- promoters(rowRanges(getMet(data)), distance, distance + 2)
-  regions <- reduce(probes)
-}
-# get size regions: sum(ranges(gr0)@width)
