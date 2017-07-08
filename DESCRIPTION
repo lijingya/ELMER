@@ -36,8 +36,7 @@ Imports:
     S4Vectors,
     data.table,
     GenomicFeatures,
-    TCGAbiolinks,
-    GenomicInteractions,
+    TCGAbiolinks (>= 2.5.5),
     plyr,
     Matrix,
     dplyr,
@@ -58,7 +57,8 @@ Suggests:
     BiocStyle,
     knitr,
     testthat,
-    DT
+    DT,
+    GenomicInteractions
 biocViews: 
     DNAMethylation, 
     GeneExpression, 
