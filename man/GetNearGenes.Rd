@@ -40,7 +40,7 @@ probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"),
 range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 name= c("cg18108049","cg17125141"))
 names(probe) <- c("cg18108049","cg17125141")
-NearbyGenes <- GetNearGenes(geneNum=20,geneAnnot=geneAnnot,TRange=probe)
+NearbyGenes <- GetNearGenes(numFlankingGenes = 20,geneAnnot=geneAnnot,TRange=probe)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 

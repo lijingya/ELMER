@@ -28,12 +28,12 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame assay assay<-
 #' @examples
 #' # NON TCGA example: matrices has diffetrent column names
-#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#' gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
 #'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-#' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#' dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
 #'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-#' sample.info <- DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
-#' sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
+#' sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
+#' sampleMap <- S4Vectors::DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
 #'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 #' mae <- createMAE(exp = gene.exp, 
 #'                  met = dna.met, 
@@ -43,8 +43,8 @@
 #'                  genome = "hg38") 
 #' # You can also use sample Mapping and Sample information tables from a tsv file
 #' # You can use the createTSVTemplates function to create the tsv files
-#' write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
-#' write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
+#' readr::write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
+#' readr::write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
 #' mae <- createMAE(exp = gene.exp, 
 #'                  met = dna.met, 
 #'                  sampleMap = "sampleMap.tsv", 
@@ -400,9 +400,9 @@ getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
 #' @param met DNA methylation matrix or Summarized Experiment
 #' @param exp Gene expression matrix or Summarized Experiment
 #' @examples 
-#' gene.exp <- DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#' gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
 #'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-#' dna.met <- DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#' dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
 #'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
 #' createTSVTemplates(met = dna.met, exp = gene.exp)                       
 #' @importFrom readr write_tsv
