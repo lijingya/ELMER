@@ -129,9 +129,9 @@ metBoxPlot <- function(data,
                                                pad = 4
                                              ))
     if(save){
-      if (!require("webshot")) {
-        install.packages("webshot", repos = "http://cran.us.r-project.org")
-        webshot::install_phantomjs()
+      if (!requireNamespace("webshot", quietly = TRUE)) {
+        stop("webshot package is needed for this function to work. Please install it and run webshot::install_phantomjs()",
+             call. = FALSE)
       }
       plotly::export(p, file = filename, vwidth = 992 * 2, vheight = 744 * 2)
       message("Saved as ", filename)

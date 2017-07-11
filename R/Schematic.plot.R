@@ -53,6 +53,8 @@
 #'  all genes and significantly linked probes in the range and the significant links.
 #' @export
 #' @import Gviz lattice
+#' @importFrom utils setTxtProgressBar txtProgressBar
+#' @importFrom  methods as is
 #' @examples
 #' data(elmer.data.example)
 #' pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
@@ -273,7 +275,10 @@ schematic <- function(data,
       message("Adding stateHub track: ", state)
       bed <- paste0(base,state)
       if(!file.exists(basename(bed))) downloader::download(bed,basename(bed))
-      
+      if (!requireNamespace("rtracklayer", quietly = TRUE)) {
+        stop("rtracklayer package is needed for this function to work. Please install it.",
+             call. = FALSE)
+      }
       state.chr <- rtracklayer::import.bed(basename(bed))
       state.chr <- state.chr[seqnames(state.chr) == chr]
       #state.chr <-  state[seqnames(state) == chr &

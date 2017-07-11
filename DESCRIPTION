@@ -58,7 +58,9 @@ Suggests:
     knitr,
     testthat,
     DT,
-    GenomicInteractions
+    GenomicInteractions,
+    webshot,
+    rtracklayer
 biocViews: 
     DNAMethylation, 
     GeneExpression, 
