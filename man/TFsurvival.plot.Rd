@@ -12,6 +12,8 @@ containing the following columns: vital_status, days_to_last_follow_up and days_
 
 \item{TF}{A gene symbol}
 
+\item{xlim}{Limit x axis showed in plot}
+
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples in the 
 higher and lower expression groups. Default is 0.3}
 

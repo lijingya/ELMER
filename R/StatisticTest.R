@@ -1,6 +1,5 @@
 ## get differential methylated probes-------------------------
 #' Stat.diff.meth
-#' @param probe A charactor specify probe name
 #' @param meth A matrix contain DNA methylation data.
 #' @param groups A vector of category of samples.
 #' @param group1 Group 1 label in groups vector

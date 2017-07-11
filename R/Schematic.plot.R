@@ -33,6 +33,7 @@
 #'byCoordinate=list(chr=c(),start=c(),end=c()).
 #' @param ... Parameters for GetNearGenes
 #' @param dir.out A path specify the directory for outputs. Default is current directory
+#' @param statehub.tracks Relative path to a statehub track.
 #' @param save A logic. If true, figures will be saved to dir.out.
 #' @details
 #' byProbes:
