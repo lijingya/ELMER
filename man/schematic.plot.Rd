@@ -41,6 +41,8 @@ and Pe (empirical p-value). This is the ouput of get.pair function.}
 \item{byCoordinate}{A list contains chr, start and end.
 byCoordinate=list(chr=c(),start=c(),end=c()).}
 
+\item{statehub.tracks}{Relative path to a statehub track.}
+
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
 \item{save}{A logic. If true, figures will be saved to dir.out.}

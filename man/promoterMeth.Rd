@@ -5,8 +5,8 @@
 \title{promoterMeth to calculate associations of gene expression with DNA methylation
 at promoter regions}
 \usage{
-promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.4, cores = 1,
-             upstream = 200,  downstream = 2000, save = TRUE)
+promoterMeth(data, sig.pvalue = 0.01, minSubgroupFrac = 0.4, 
+             upstream = 200,  downstream = 2000, save = TRUE, cores = 1)
 }
 \arguments{
 \item{data}{A Multi Assay Experiment object with DNA methylation and 

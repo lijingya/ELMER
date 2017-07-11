@@ -6,6 +6,7 @@
 #' @param data A multi assay Experiment with clinical data in the  phenotypic data matrix
 #'  containing the following columns: vital_status, days_to_last_follow_up and days_to_death. Default from GDC and TCGAbiolinks
 #' @param TF A gene symbol
+#' @param xlim Limit x axis showed in plot
 #' @param percentage   A number ranges from 0 to 1 specifying the percentage of samples in the 
 #' higher and lower expression groups. Default is 0.3
 #' @param save Save plot as PDF
