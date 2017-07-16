@@ -103,8 +103,10 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   
   sink("/dev/null");
   suppressMessages({
-    mae <- createMAE(exp = getExp(data), met =  getMet(data), 
-                     TCGA = TRUE, genome = "hg38")
+    mae <- createMAE(exp = getExp(data), 
+                     met =  getMet(data), 
+                     TCGA = TRUE, 
+                     genome = "hg38")
   })
   expect_equal(metadata(mae)$genome,"hg38")
   expect_true(metadata(mae)$TCGA)
@@ -122,7 +124,8 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   expect_equal(metadata(mae)$genome,"hg19")
   sink("/dev/null");
   suppressMessages({
-    mae <- createMAE(exp = assay(getExp(data)), met =  assay(getMet(data)), 
+    mae <- createMAE(exp = assay(getExp(data)), 
+                     met =  assay(getMet(data)), 
                      TCGA = TRUE, genome = "hg38")
   })
   expect_equal(metadata(mae)$genome,"hg38")
@@ -180,10 +183,11 @@ test_that("Number of probes in MAE matches the distal probes", {
                      genome        = genome, 
                      met.platform  = "450K", 
                      linearize.exp = TRUE, 
+                     met.na.cut    = 1.1,
                      filter.probes = distal.probe, 
                      TCGA          = TRUE) 
     
-    expect_gt(length(distal.probe),nrow(getMet(mae)))
+    expect_equal(length(distal.probe),nrow(getMet(mae)))
     expect_equal(metadata(mae)$genome,genome)
     expect_true("TN" %in% colnames(colData(mae)))
   }
