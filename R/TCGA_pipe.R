@@ -172,11 +172,11 @@ TCGA.pipe <- function(disease,
             aux <- maf %>% filter(Hugo_Symbol == g)
             idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
             aux <- aux[idx,]
-            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,15)
-            colData(mae)[,g] <- NA
-            colData(mae)[colData(mae)$TN == " Tumor",g] <- "WT"
-            colData(mae)[colData(mae)$TN == " Tumor" & 
-                           colData(mae)$samples %in% mutant.samples,g] <- paste0(g, " mutant")
+            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
+            colData(mae)[,g] <- "Normal"
+            colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
+            colData(mae)[colData(mae)$TN == "Tumor" & 
+                           colData(mae)$sample %in% mutant.samples,g] <- paste0(g, " mutant")
             print(plyr::count(colData(mae)[,g]))
           } else {
             message("No mutation found for: ", g)
@@ -207,7 +207,7 @@ TCGA.pipe <- function(disease,
             idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
             aux <- aux[idx,]
             mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
-            colData(mae)[,g] <- NA
+            colData(mae)[,g] <- "Normal"
             colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
             colData(mae)[colData(mae)$TN == "Tumor" & 
                            colData(mae)$sample %in% mutant.samples,g] <- paste0("Mutant")
@@ -216,6 +216,7 @@ TCGA.pipe <- function(disease,
             message("No mutation found for: ", g)
           }
         }
+        message("Saving files as: ", file)
         save(mae,file = file)
       }
     }
