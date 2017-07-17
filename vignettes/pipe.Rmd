@@ -1,0 +1,139 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+# TCGA.pipe
+
+`TCGA.pipe` is a function for easily downloading TCGA data and performing all the analyses in ELMER. For illustration purpose, we skip the downloading step. 
+The user can use the `getTCGA` function to download TCGA data or
+use `TCGA.pipe` by including "download" in the analysis option.
+
+The following command will do distal DNA methylation analysis and predict putative target genes, motif analysis and identify regulatory transcription factors.
+
+```{r, fig.height = 6, eval = FALSE}
+TCGA.pipe("LUSC",
+          wd = "./ELMER.example",
+          cores = parallel::detectCores()/2,
+          mode = "unsupervised"
+          permu.size = 300,
+          Pe = 0.01,
+          analysis = c("distal.probes","diffMeth","pair","motif","TF.search"),
+          diff.dir = "hypo",
+          rm.chr = paste0("chr",c("X","Y")))
+```
+
+<div class="panel panel-info">
+<div class="panel-heading">TCGA.pipe: Mode argument</div>
+<div class="panel-body">
+
+In this new version we added the argument `mode` in the `TCGA.pipe` function.
+This will automatically set the `minSubgroupFrac` to the following values:
+
+Modes available: 
+
+- `unsupervised`:
+    * Use 20% of each group to identify differently methylated regions (`minSubgroupFrac` = 0.2 in `get.diff.meth`)
+    * Use 40% of all samples to create Unmethytlated (U) and Methylated (M) groups in the other steps  (the lowest quintile of samples is the U group and the highest quintile samples is the M group) (`minSubgroupFrac` = 0.4 in `get.pairs` and `get.TFs` functions)
+- `supervised`:
+    * Use all samples in all functions.
+
+The `unsupervised` mode should be used when want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
+these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power.
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use `supervised` mode (all samples),
+
+For more information please read the analysis section of the vignette.
+</div>
+</div>
+
+# Using mutation data to identify groups
+
+We add in `TCGA.pipe` function (download step) the option to identify mutant samples to perform WT vs Mutant analysis. It will download open MAF file from GDC database, select a gene and identify the which are the mutant samples based on the following cliassification:
+c("#008B00", "#FFFFFF", "#FFFFFF")
+The  classification below was used, but it can be changed using the atgument `mutant_variant_classification`.
+
+<div class="panel panel-info">
+<div class="panel-heading"> Mutations classification  </div>
+<div class="panel-body">
+| Argument | Description |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Frame_Shift_Del | Mutant |
+| Frame_Shift_Ins | Mutant |
+| Missense_Mutation | Mutant |
+| Nonsense_Mutation | Mutant |
+| Splice_Site | Mutant |
+| In_Frame_Del | Mutant |
+| In_Frame_Ins | Mutant |
+| Translation_Start_Site | Mutant |
+| Nonstop_Mutation | Mutant |
+| Silent | WT |
+|3'UTR| WT |
+|5'UTR| WT |
+|3'Flank| WT |
+|5'Flank| WT |
+|IGR1 (intergenic region)| WT |
+|Intron| WT |
+|RNA| WT |
+|Target_region| WT |
+</div>
+</div>
+
+The arguments to be used are below:
+
+<div class="panel panel-info">
+<div class="panel-heading"> `TCGA.pipe` mutation arguments </div>
+<div class="panel-body">
+| Argument | Description |
+|------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| genes | List of genes for which mutations will be verified. A column in the MAE with the name of the gene will be created with two groups WT (tumor samples without mutation), MUT (tumor samples w/ mutation), NA (not tumor samples)|
+| mutant_variant_classification	| List of GDC variant classification from MAF files to consider a samples mutant. Only used when argument gene is set.|
+| group.col	| A column defining the groups of the sample. You can view the available columns using: colnames(MultiAssayExperiment::colData(data)).|
+| group1 |	A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.|
+| group2 | A group from group.col. ELMER will run group1 vs group2. That means, if direction is hyper, get probes hypermethylated in group 1 compared to group 2.|
+</div>
+</div>
+
+Here is an example we TCGA-LUSC data is downloaded and we will compare TP53 Mutant vs
+TP53 WT samples. 
+
+
+```{r, fig.height = 6, eval = FALSE}
+TCGA.pipe("LUSC",
+          wd = "./ELMER.example",
+          cores = parallel::detectCores()/2,
+          mode = "supervised"
+          genes = "TP53",
+          group.col = "TP53",
+          group1 = "Mutant",
+          group2 = "WT",
+          permu.size = 300,
+          Pe = 0.01,
+          analysis = c("download","diffMeth","pair","motif","TF.search"),
+          diff.dir = "hypo",
+          rm.chr = paste0("chr",c("X","Y")))
+```
+
+# Session Info
+
+```{r sessioninfo, eval=TRUE}
+sessionInfo()
+```
+
+# Bibliography

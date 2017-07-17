@@ -1,0 +1,334 @@
+---
+title: "Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
+author: "Tiago Chedraoui Silva, Simon Coetzee, Dennis Hazelett, Ben Berman, Houtan Noushmehr"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, echo = FALSE,hide=TRUE, message=FALSE,warning = FALSE}
+devtools::load_all(".")
+```
+
+# Introduction
+
+In this section, we will perform the same analysis performed using ELMER,
+but instead of doing it programmatically we will use TCGAbiolinksGUI [@Silva147496].
+
+First we will launch the TCGAbiolinksGUI.
+```{r gui, eval=FALSE, message=FALSE,warning=F}
+library(TCGAbiolinksGUI)
+TCGAbiolinksGUI()
+```
+
+# Downloading data
+
+Please download this two objects:
+
+* [Gene expression Summarized Experiment](https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER/raw/master/data/lusc.exp.rda)
+* [DNA methylation Summarized Experiment](https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER/raw/master/data/lusc.met.rda)
+
+# Analysis
+
+
+## Create MultiAssayExperiment object
+
+<div class="panel panel-info">
+<div class="panel-body">
+To create the MultiAssayExperiment object go to `Integrative analysis/ELMER/Create input data`.
+</div>
+</div>
+
+![](figures/elmer_data_menu.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Select the DNA methylation object previously downloaded.
+</div>
+</div>
+
+![](figures/elmer_data_dnamet_select.png)
+![](figures/elmer_data_dnamet.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Select the gene expression object previously downloaded.
+</div>
+</div>
+
+
+![](figures/elmer_data_exp_select.png)
+![](figures/elmer_data_exp.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Fill the field `Save as:` and click on Create MAE object.
+</div>
+</div>
+
+![](figures/elmer_data_final.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+The object will be created.
+</div>
+</div>
+
+![](figures/elmer_data_saved.png)
+
+<br />
+
+## Perform analysis
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+To perform ELMER analysis go to `Integrative analysis/ELMER/Analysis`.
+</div>
+</div>
+
+![](figures/elmer_analysis_menu.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Select the MAE data created in the previous section.
+</div>
+</div>
+
+![](figures/elmer_analysis_data.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Select the groups that will be analysed:  Primary solid Tumor and Solid Tissue Normal.
+</div>
+</div>
+
+![](figures/elmer_analysis_groups.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+We will identify probes that are hypomethylated in Primary solid Tumor compared to Solid Tissue Normal.
+</div>
+</div>
+
+![](figures/elmer_analysis_diffmeth.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+For the significant differently methylated probes identified before we will correlated
+with the 20 nearest genes. Change the value of the field `Number of permutations` to `100`,
+`Raw P-value cut-off` to `0.05` and `Empirical P value cut-off` to `0.01`.
+</div>
+</div>
+
+
+![](figures/elmer_analysis_pair.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+There will be no changes in the step 3.
+</div>
+</div>
+
+![](figures/elmer_analysis_motif.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+There will be no changes in the step 4.
+</div>
+</div>
+
+![](figures/elmer_analysis_TF.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Click on `Run the analysis`.
+</div>
+</div>
+
+
+![](figures/elmer_analysis_final.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+If the analysis identified significant regulatory TF the results will be saved into an R object.
+</div>
+</div>
+
+![](figures/elmer_analysis_message.png)
+
+<br />
+
+## Visualize results
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+To visualize the results go to `Integrative analysis/ELMER/Visualize results`.
+</div>
+</div>
+
+![](figures/elmer_visualize_results.png)
+
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Click on `Select results` and select the object created on the previous section.
+</div>
+</div>
+
+![](figures/elmer_visualize_select1.png)
+![](figures/elmer_visualize_select2.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+You will be able to visualize the correlation between
+DNA methyation levels and gene expression selecting a pair of gene and probe.
+</div>
+</div>
+
+![](figures/elmer_visualize_plot_scatter_byPair.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+A probe and its near genes.
+</div>
+</div>
+
+![](figures/elmer_visualize_plot_scatter_byProbe.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+Or the avarage DNA methylation levels of probes of a Motif vs the expression of a 
+TF.
+</div>
+</div>
+
+![](figures/elmer_visualize_plot_scatter_byTF.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+For each enriched motif you can verify the ranking of sigificances between the correlation
+of DNA methylation level on the significant paired probes with that motif vs the TF expression (for all human TF).  
+</div>
+</div>
+
+![](figures/elmer_visualize_tfraningplot.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+The enrichement of each motif can be visualized.
+</div>
+</div>
+
+![](figures/elemer_visualize_motif_enrichment.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+You can take a look for a gene which was the probe linked.
+</div>
+</div>
+
+![](figures/elemer_visualize_schematic_gene.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+You can see the plot and its neraby genes.
+</div>
+</div>
+
+![](figures/elemer_visualize_schematic_probe.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+It is possible to visualize the table with the significant differently methylated probes. 
+</div>
+</div>
+
+![](figures/elmer_visualize_table_sigprobes.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+It is possible to visualize the table with the pairs genes probes that have an negative correlation between
+DNA methyation levels and gene expression. 
+</div>
+</div>
+
+![](figures/elmer_visualize_table_pair.png)
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+It is possible to visualize the table with the enriched motifs.
+</div>
+</div>
+
+![](figures/elmer_visualize_table_enriched_motif.png)
+
+
+<br />
+<div class="panel panel-info">
+<div class="panel-body">
+It is possible to visualize the table with the candidates regulatory TF.
+</div>
+</div>
+
+![](figures/elmer_visualize_table_tf.png)
+
+# Session Info
+
+```{r sessioninfo, eval=TRUE}
+sessionInfo()
+```
+
+# Bibliography

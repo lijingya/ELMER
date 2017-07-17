@@ -1,0 +1,96 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+# Introduction
+
+This document provides an introduction of the R/Biocondcutor  `r BiocStyle::Biocpkg("ELMER")` package, which is designed 
+to combine DNA methylation and gene expression data from human tissues to infer 
+multi-level cis-regulatory networks. `r BiocStyle::Biocpkg("ELMER")` uses DNA methylation to 
+identify enhancers, and correlates enhancer state with expression of nearby genes 
+to identify one or more transcriptional targets. Transcription factor (TF) binding 
+site analysis of enhancers is coupled with expression analysis of all TFs to 
+infer upstream regulators. This package can be easily applied to TCGA public 
+available cancer data sets and custom DNA methylation and gene expression data sets.
+
+ELMER analyses have 5 main steps: 
+
+1. Identify distal probes on HM450K.
+2. Identify distal enhancer probes with significantly different DNA methylation level
+in experiment group (group 1) and control group (group 2).
+3. Identify putative target genes for differentially methylated distal enhancer probes.
+4. Identify enriched motifs for the distal enhancer probes which are significantly 
+differentially methylated and linked to putative target gene.
+5. Identify regulatory TFs whose expression associate with DNA methylation at motifs.
+
+## Package workflow
+
+The package workflow is showed in the figure below:
+
+![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as filter which can be retrieved using the `get.feature.probe` function. The function createMAE  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlate with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represents user input data, blue boxes represents output object, orange boxes represents auxiliary pre-computed data and gray boxes are functions. ](figures/workflow.png)
+
+## Installing and loading ELMER
+
+To install this package from github (development version), start R and enter:
+
+```{r, eval = FALSE}
+devtools::install_github(repo = "tiagochst/ELMER.data")
+devtools::install_github(repo = "tiagochst/ELMER")
+```
+
+To install this package from Bioconductor start R and enter:
+
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("ELMER")
+```
+
+Then, to load ELMER enter:
+
+```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+library(ELMER, quietly = TRUE)
+```
+
+## Citing this work
+
+If you used ELMER package or its results, please cite:
+
+* Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
+* Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573. 
+*  Chedraoui Silva, Tiago and Coetzee, Simon G. and Yao, Lijing and Hazelett, Dennis J. and Noushmehr, Houtan and Berman, Benjamin P. "Enhancer Linking by Methylation/Expression Relationships with the R package ELMER version 2" (bioRxiv 148726; doi: https://doi.org/10.1101/148726) 
+
+If you get TCGA data using `getTCGA` function, please cite TCGAbiolinks package: 
+
+* Colaprico A, Silva TC, Olsen C, Garofano L, Cava C, Garolini D, Sabedot T, Malta TM, Pagnotta SM, Castiglioni I, Ceccarelli M, Bontempi G and Noushmehr H. "TCGAbiolinks: an R/Bioconductor package for integrative analysis of TCGA data." Nucleic acids research (2015): gkv1507.
+* Silva, TC, A Colaprico, C Olsen, F D’Angelo, G Bontempi, M Ceccarelli, and H Noushmehr. 2016. “TCGA Workflow: Analyze Cancer Genomics and Epigenomics Data Using Bioconductor Packages [Version 2; Referees: 1 Approved, 1 Approved with Reservations].” F1000Research 5 (1542). doi:10.12688/f1000research.8923.2.
+
+If you get use the Graphical user interface, please cite `TCGAbiolinksGUI` package: 
+
+* Silva, Tiago C. and Colaprico, Antonio and Olsen, Catharina and Bontempi, Gianluca and Ceccarelli, Michele and Berman, Benjamin P. and Noushmehr, Houtan. "TCGAbiolinksGUI: A graphical user interface to analyze cancer molecular and clinical data" (bioRxiv 147496; doi: https://doi.org/10.1101/147496)
+
+
+# Session Info
+
+```{r sessioninfo, eval=TRUE}
+sessionInfo()
+```
+
+# Bibliography

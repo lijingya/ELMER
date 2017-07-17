@@ -1,0 +1,79 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+# Illustration of ELMER analysis steps
+
+The example data set (`GeneExp`,`Meth`) is a subset of chromosome 1 data from TCGA LUSC and it is available with the ELMER package.
+
+```{r, echo = FALSE,hide=TRUE, message=FALSE, warning=FALSE}
+library(ELMER)
+library(DT)
+library(dplyr)
+dir.create("result",showWarnings = FALSE)
+library(BiocStyle)
+```
+
+
+ELMER analysis have 5 main steps which are shown in the next sections individually. 
+And later the function `TCGA.pipe`, which is a pipeline combining all 5 steps and producing all results and figures, is presented. 
+
+# Creating MAE object
+
+## Selection of probes within biofeatures
+
+This step is to select HM450K/EPIC probes, which locate far from TSS (at least 2Kb away) 
+ These probes are called distal  probes.
+
+Be default, this comprehensive list of  TSS annotated by ENSEMBL database,
+which is programatically accessed using `r BiocStyle::Biocpkg("biomaRt")` to get its last version,
+will be used to select distal probes. But user can use their 
+own TSS annotation or add features such as H3K27ac ChIP-seq in a certain cell line, to select probes overlapping thoses features regions.
+
+
+```{r, message=FALSE}
+# get distal probes that are 2kb away from TSS on chromosome 1
+distal.probes <- get.feature.probe(genome = "hg19", 
+                                   met.platform = "450K", 
+                                   rm.chr = paste0("chr",c(2:22,"X","Y")))
+```
+
+## Creating MAE
+```{r,eval=TRUE, message=FALSE}
+library(MultiAssayExperiment)
+GeneExp[1:5,1:5]
+Meth[1:5,1:5]
+mae <- createMAE(exp = GeneExp, 
+                  met = Meth,
+                  save = TRUE,
+                  linearize.exp = TRUE,
+                  save.filename = "mae.rda",
+                  filter.probes = distal.probes,
+                  met.platform = "450K",
+                  genome = "hg19",
+                  TCGA = TRUE)
+as.data.frame(colData(mae)[1:5,])  %>% datatable(options = list(scrollX = TRUE))
+as.data.frame(sampleMap(mae)[1:5,])  %>% datatable(options = list(scrollX = TRUE))
+as.data.frame(assay(getMet(mae)[1:5,1:5]))  %>% datatable(options = list(scrollX = TRUE))
+as.data.frame(assay(getMet(mae)[1:5,1:5])) %>% datatable(options = list(scrollX = TRUE))
+```
