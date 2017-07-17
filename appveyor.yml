@@ -51,11 +51,11 @@ artifacts:
     name: Bits
 
 notifications:
-- provider: Email
-  to:
-  - tiagochst@gmail.com
-  on_build_success: false
-- provider: Slack
-  auth_token:
-    secure: xoxp-3692420208-54148907191-213416881937-f256d446883f5e9e981d2047ac6f341e
-  channel: '#ELMER'
+  - provider: Email
+    to:
+    - tiagochst@gmail.com
+    on_build_success: false
+  - provider: Slack
+    auth_token:
+      secure: xoxp-3692420208-54148907191-213416881937-f256d446883f5e9e981d2047ac6f341e
+    channel: '#ELMER'
