@@ -1,0 +1,93 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: default
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+# Analysis
+
+## Motif enrichment analysis on the selected probes
+
+This step is to identify enriched motif in a set of probes which is carried out by
+function `get.enriched.motif`.
+
+This function uses a pre-calculated data `Probes.motif` which was generated using HOMER with a $p-value \le 10^{–4}$ 
+to scan a $\pm250bp$  region around each probe using HOmo sapiens 
+COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10 [@kulakovskiy2016hocomoco] position
+weight matrices (PWMs). 
+For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given 
+group), a motif enrichment Odds Ratio and a 95% confidence interval were 
+calculated using following formulas:
+$$ p= \frac{a}{a+b} $$
+$$ P= \frac{c}{c+d} $$
+$$ Odds\quad  Ratio = \frac{\frac{p}{1-p}}{\frac{P}{1-P}} $$
+$$ SD = \sqrt{\frac{1}{a}+\frac{1}{b}+\frac{1}{c}+\frac{1}{d}} $$
+$$ lower\quad boundary\quad of\quad  95\%\quad  confidence\quad  interval = \exp{(\ln{OR}-SD)} $$
+
+where `a` is the number of probes within the selected probe set that contain one 
+or more motif occurrences; `b` is the number of probes within the selected probe 
+set that do not contain a motif occurrence; `c` and `d` are the same counts within 
+the entire enhancer probe set. A probe set was considered significantly enriched 
+for a particular motif if the 95% confidence interval of the Odds Ratio was 
+greater than 1.1 (specified by option `lower.OR`, 1.1 is default), and the motif 
+occurred at least 10 times (specified by option `min.incidence`. 10 is default) in 
+the probe set. As described in the text, Odds Ratios were also used for ranking 
+candidate motifs. 
+
+
+<div class="panel panel-info">
+<div class="panel-heading">Main get.pair arguments </div>
+<div class="panel-body">
+| Argument | Description |
+|-------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data | A multi Assay Experiment from  createMAE function. If set and probes.motif/background probes are missing this will be used to get this other two arguments correctly. This argument is not require, you can set probes.motif and the backaground.probes manually. |
+| probes | A vector lists the name of probes to define the set of probes in which motif enrichment OR and confidence interval will be calculated. |
+| lower.OR | A number specifies the smallest lower boundary of 95% confidence interval for Odds Ratio. The motif with higher lower boudnary of 95% confidence interval for Odds Ratio than the number are the significantly enriched motifs (detail see reference). |
+| min.incidence | A non-negative integer specifies the minimum incidence of motif in the given probes set. 10 is default. |
+</div>
+</div>
+
+```{r,eval=TRUE, message=FALSE, warning = FALSE}
+# Load results from previous sections
+mae <- get(load("mae.rda"))
+sig.diff <- read.csv("result/getMethdiff.hypo.probes.significant.csv")
+pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
+head(pair) # significantly hypomethylated probes with putative target genes
+
+# Identify enriched motif for significantly hypomethylated probes which 
+# have putative target genes.
+enriched.motif <- get.enriched.motif(data = mae,
+                                     probes = pair$Probe, 
+                                     dir.out = "result", 
+                                     label = "hypo",
+                                     min.incidence = 10,
+                                     lower.OR = 1.1)
+names(enriched.motif) # enriched motifs
+head(enriched.motif["P73_HUMAN.H10MO.A"]) ## probes in the given set that have TP53 motif.
+
+# get.enriched.motif automatically save output files. 
+# getMotif.hypo.enriched.motifs.rda contains enriched motifs and the probes with the motif. 
+# getMotif.hypo.motif.enrichment.csv contains summary of enriched motifs.
+dir(path = "result", pattern = "getMotif") 
+
+# motif enrichment figure will be automatically generated.
+dir(path = "result", pattern = "motif.enrichment.pdf") 
+```
+
+# Bibliography

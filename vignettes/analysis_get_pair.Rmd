@@ -1,0 +1,105 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+# Analysis
+
+## Identifying putative probe-gene pairs
+
+This step is to link enhancer probes with methylation changes to target genes with expression
+changes and report the putative target gene for selected probes. This is carried out
+by function `get.pair`. 
+
+For each distal probe with differential methylation the closest 10 upstream 
+genes and the closest 10 downstream genes were tested for correlation between 
+methylation of the probe and expression of the gene.
+Thus, exactly 20 statistical 
+tests were performed for each probe, as follows. For each probe-gene pair, 
+the samples (all experiment samples and control samples) were divided into two 
+groups: the M group, which consisted of the upper methylation quintile (the 20\%
+of samples with the highest methylation at the enhancer probe), and the U group, 
+which consisted of the lowest methylation quintile (the 20\% of samples with the 
+lowest methylation.)
+For each probe-gene pair tested, the raw p-value `Pr` was corrected for multiple 
+hypothesis using a permutation approach.
+
+![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.png) [@yao2015inferring,@yao2015demystifying]
+
+
+<div class="panel panel-info">
+<div class="panel-heading">Main get.pair arguments </div>
+<div class="panel-body">
+| Argument          | Description                                                                                                                                                                                                                                                                                                                                                         |
+|-------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| data              | A multiAssayExperiment with DNA methylation and Gene Expression data. See createMAE function.                                                                                                                                                                                                                                                                       |
+| nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of `GetNearGenes` function.                                                                                                                                                                                                                                     |
+| minSubgroupFrac        | A number ranging from 0 to 1.0 specifying the percentage of samples used to create groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.4 (lowest quintile samples will be in the U group and the highest quintile samples in the M group).                                                                                                                                                                                                                                             |
+| permu.size        | A number specify the times of permuation. Default is 10000.                                                                                                                                                                                                                                                                                                         |
+| pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
+| Pe                | A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001.                                                                                                                                                                                                                        |
+| group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                                               |
+| group1 | A group from group.col. |
+| group2 | A group from group.col. |
+| filter.probes     | Should filter probes by selecting only probes that have at least a certain number of samples below and above a certain cut-off. See `preAssociationProbeFiltering` function.                                                                                                                                                                                          |
+| filter.portion    | A number specify the cut point to define binary methlation level for probe loci. Default is 0.3. When beta value is above 0.3, the probe is methylated and vice versa. For one probe, the percentage of methylated and unmethylated samples should be above filter.percentage value. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function. |
+| filter.percentage | Minimum percentage of samples to be considered in methylated and unmethylated for the filter.portion option. Default 5%. Only used if filter.probes is TRUE. See preAssociationProbeFiltering function.   |
+</div>
+</div>
+
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE, results = "hide"}
+# Load results from previous sections
+mae <- get(load("mae.rda"))
+sig.diff <- read.csv("result/getMethdiff.hypo.probes.significant.csv")
+
+nearGenes <- GetNearGenes(data = mae, 
+                         probes = sig.diff$probe, 
+                         numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
+                         cores = 1)
+
+Hypo.pair <- get.pair(data = mae,
+                      group.col = "definition",
+                      group1 =  "Primary solid Tumor",
+                      group2 = "Solid Tissue Normal",
+                      nearGenes = nearGenes,
+                      minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
+                      permu.dir = "result/permu",
+                      permu.size = 100, # Please set to 100000 to get significant results
+                      pvalue = 0.05,   
+                      Pe = 0.01, # Please set to 0.001 to get significant results
+                      filter.probes = TRUE, # See preAssociationProbeFiltering function
+                      filter.percentage = 0.05,
+                      filter.portion = 0.3,
+                      dir.out = "result",
+                      cores = 1,
+                      label = "hypo")
+```
+
+```{r, eval = TRUE, message = FALSE, warning = FALSE}
+Hypo.pair %>% datatable(options = list(scrollX = TRUE))
+# get.pair automatically save output files. 
+#getPair.hypo.all.pairs.statistic.csv contains statistics for all the probe-gene pairs.
+#getPair.hypo.pairs.significant.csv contains only the significant probes which is 
+# same with Hypo.pair.
+dir(path = "result", pattern = "getPair") 
+```
+
+# Bibliography

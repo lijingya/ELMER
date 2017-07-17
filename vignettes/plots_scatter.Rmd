@@ -1,0 +1,71 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+# Loading required data for plot
+```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
+# Load results from previous sections
+mae <- get(load("mae.rda"))
+```
+
+# Scatter plots
+
+##  Scatter plot of one probe and its nearby genes
+
+Generate scatter plots for one probes' nearby 20 gene expression vs DNA methylation at this probe.
+
+Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes.
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=5, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+scatter.plot(data = mae,
+             byProbe = list(probe = c("cg19403323"), numFlankingGenes = 20), 
+             category = "definition", 
+             lm = TRUE, # Draw linear regression curve
+             save = FALSE) 
+```
+
+##  Scatter plot of one pair
+Generate a scatter plot for one probe-gene pair. Figure \ref{fig:figure2}
+
+Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14.
+```{r results='hide',eval=TRUE, fig.cap="Scatter plot shows the methylation level of an example probe cg19403323 in all LUSC samples plotted against the expression of the putative  target gene SYT14."}
+scatter.plot(data = mae,
+             byPair = list(probe = c("cg19403323"), gene = c("ENSG00000143469")), 
+             category = "definition", save = TRUE, lm_line = TRUE) 
+```
+
+##  TF expression vs. average DNA methylation
+Generate scatter plot for TF expression vs average DNA methylation of the sites 
+with certain motif.
+
+Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively.
+
+```{r,eval=TRUE, warning=FALSE, fig.cap="Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively."}
+load("result/getMotif.hypo.enriched.motifs.rda")
+scatter.plot(data = mae,
+             byTF = list(TF = c("TP53","TP63","TP73"),
+                         probe = enriched.motif[["P73_HUMAN.H10MO.A"]]), 
+             category = "definition",
+             save = TRUE, 
+             lm_line = TRUE)
+```
+

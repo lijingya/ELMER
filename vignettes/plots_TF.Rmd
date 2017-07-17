@@ -1,0 +1,54 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+
+# TF ranking plot
+TF ranking plot shows statistic $-log_{10}(P value)$ assessing the anti-correlation level 
+of TFs expression level with average DNA methylation level at sites with a given motif. 
+By default, the top 3 associated TFs and the TF family members (dots in red) that are associated with that specific motif  are labeled in the plot.
+But there is also a option show highlight only TF sub-family members (TCClass database classification)
+
+## TF ranking plot: family classification
+
+Shown are TF ranking plots based on the score ($-log_{10}(P value))$ of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot
+
+```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the SOX2 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
+load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
+motif <- "SOX2_HUMAN.H10MO.B"
+TF.rank.plot(motif.pvalue = TF.meth.cor, 
+             motif = motif,
+             save = FALSE) 
+```
+
+## TF ranking plot:  sub-family classification
+Shown are TF ranking plots based on the score ($-log_{10}(P value)$) of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot.
+
+```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the SOX2 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF sub-family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
+load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
+motif <- "SOX2_HUMAN.H10MO.B"
+TF.rank.plot(motif.pvalue = TF.meth.cor,  
+            motif = motif, 
+            TF.label = createMotifRelevantTfs("subfamily")[motif],
+            save = FALSE)
+```
+

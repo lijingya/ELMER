@@ -1,0 +1,34 @@
+---
+title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
+author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut]Hui Shen [ctb], Peter Laird [ctb]"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: FALSE
+    toc_float: FALSE
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Motif enrichment plot
+Motif  enrichment plot shows the enrichment levels for the selected motifs. 
+
+The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio
+```{r results='hide', eval=TRUE, fig.width=6,fig.cap="The plot shows the Odds Ratio (x axis) for the selected motifs with OR above 1.3 and lower boundary of OR above 1.3. The range shows the 95% confidence interval for each Odds Ratio."}
+motif.enrichment.plot(motif.enrichment = "result/getMotif.hypo.motif.enrichment.csv", 
+                      significant = list(OR = 1.3,lowerOR = 1.3), 
+                      label = "hypo", 
+                      save = TRUE)  
+```
+
