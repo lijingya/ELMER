@@ -2,3 +2,6 @@
 ^\.Rproj\.user$
 README.md
 ELMER.example.tar.xz
+^appveyor\.yml$
+^\.travis\.yml$
+^codecov\.yml$
