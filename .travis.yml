@@ -76,6 +76,6 @@ after_success:
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
 
- notifications:
+notifications:
     slack: junkdnalab:KV8Dr7etoqqDQPsORdaZLOz2
     email: false
