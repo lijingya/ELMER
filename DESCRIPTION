@@ -28,6 +28,7 @@ Imports:
     grid, 
     grDevices, 
     graphics, 
+    methods,
     parallel, 
     stats, 
     utils,
