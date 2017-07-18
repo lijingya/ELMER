@@ -100,6 +100,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' @importFrom graphics plot
 #' @importFrom grDevices dev.off pdf 
 #'@examples
+#' library(ELMER)
 #' data(elmer.data.example)
 #' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",

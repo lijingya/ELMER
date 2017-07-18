@@ -36,6 +36,7 @@
 #' get.diff.meth, get.pair
 #' @return Different analysis results.
 #' @export 
+#' @importFrom SummarizedExperiment colData<-
 #' @examples
 #' \dontrun{
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
@@ -64,14 +65,14 @@ TCGA.pipe <- function(disease,
                       diff.dir = "hypo",
                       genes = NULL,
                       mutant_variant_classification = c("Frame_Shift_Del",
-                                                 "Frame_Shift_Ins",
-                                                 " Missense_Mutation",
-                                                 "Nonsense_Mutation",
-                                                 "Splice_Site",
-                                                 "In_Frame_Del",
-                                                 "In_Frame_Ins",
-                                                 "Translation_Start_Site",
-                                                 "Nonstop_Mutation"),
+                                                        "Frame_Shift_Ins",
+                                                        "Missense_Mutation",
+                                                        "Nonsense_Mutation",
+                                                        "Splice_Site",
+                                                        "In_Frame_Del",
+                                                        "In_Frame_Ins",
+                                                        "Translation_Start_Site",
+                                                        "Nonstop_Mutation"),
                       group.col = "TN", 
                       group1 = "Tumor",
                       group2 = "Normal",
@@ -167,12 +168,15 @@ TCGA.pipe <- function(disease,
         for(g in genes) {
           if(g %in% maf$Hugo_Symbol) {
             message("Adding information for gene: ", g)
-            aux <- filter(maf, Hugo_Symbol == g & Variant_Classification %in% mutant_variant_classification)
-            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,15)
-            colData(mae)[,g] <- NA
-            colData(mae)[colData(mae)$TN == " Tumor",g] <- "WT"
-            colData(mae)[colData(mae)$TN == " Tumor" & 
-                           colData(mae)$samples %in% mutant.samples,g] <- paste0(g, " mutant")
+            
+            aux <- maf %>% filter(Hugo_Symbol == g)
+            idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
+            aux <- aux[idx,]
+            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
+            colData(mae)[,g] <- "Normal"
+            colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
+            colData(mae)[colData(mae)$TN == "Tumor" & 
+                           colData(mae)$sample %in% mutant.samples,g] <- paste0(g, " mutant")
             print(plyr::count(colData(mae)[,g]))
           } else {
             message("No mutation found for: ", g)
@@ -199,9 +203,11 @@ TCGA.pipe <- function(disease,
         for(g in genes) {
           if(g %in% maf$Hugo_Symbol) {
             message("Adding information for gene: ", g)
-            aux <- filter(maf, Hugo_Symbol == g & !Variant_Classification %in% c("3'UTR","3'Flank","5'UTR","5'Flank","Silent","Intron"))
+            aux <- maf %>% filter(Hugo_Symbol == g)
+            idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
+            aux <- aux[idx,]
             mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
-            colData(mae)[,g] <- NA
+            colData(mae)[,g] <- "Normal"
             colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
             colData(mae)[colData(mae)$TN == "Tumor" & 
                            colData(mae)$sample %in% mutant.samples,g] <- paste0("Mutant")
@@ -210,6 +216,7 @@ TCGA.pipe <- function(disease,
             message("No mutation found for: ", g)
           }
         }
+        message("Saving files as: ", file)
         save(mae,file = file)
       }
     }
@@ -225,7 +232,10 @@ TCGA.pipe <- function(disease,
     }
     load(mae.file)
     params <- args[names(args) %in% c("pvalue","sig.dif")]
-    params <- c(params,list(diff.dir=diff.dir, dir.out=dir.out, cores=cores, minSubgroupFrac = minSubgroupFrac))
+    params <- c(params,list(diff.dir = diff.dir, 
+                            dir.out = dir.out, 
+                            cores = cores, 
+                            minSubgroupFrac = minSubgroupFrac))
     diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
                                                      group.col = group.col, 
                                                      group1 = group1,
@@ -251,40 +261,40 @@ TCGA.pipe <- function(disease,
     message("Get nearby genes")
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
-      nearGenes.file <- args[names(args) %in% "nearGenes"]
-      if(length(nearGenes.file)==0){
-        nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
-        if(!file.exists(nearGenes.file)){
-          params <- args[names(args) %in% c("geneNum")]
-          nearGenes <- do.call(GetNearGenes,
-                               c(list(data = mae, 
-                                      probes = Sig.probes,
-                                      cores = cores),
-                                 params))
-          save(nearGenes,file=nearGenes.file)
-        }
-      } else {
-        nearGenes.file <- nearGenes.file[["nearGenes"]]
+    nearGenes.file <- args[names(args) %in% "nearGenes"]
+    if(length(nearGenes.file)==0){
+      nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
+      if(!file.exists(nearGenes.file)){
+        params <- args[names(args) %in% c("geneNum")]
+        nearGenes <- do.call(GetNearGenes,
+                             c(list(data = mae, 
+                                    probes = Sig.probes,
+                                    cores = cores),
+                               params))
+        save(nearGenes,file=nearGenes.file)
       }
-      ## calculation
-      message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
-      
-      ## get pair
-      permu.dir <- paste0(dir.out,"/permu")
-      params <- args[names(args) %in% c("percentage","permu.size","Pe","pvalue","diffExp","group.col")]
-      SigPair <- do.call(get.pair,
-                         c(list(data      = mae,
-                                nearGenes = nearGenes.file,
-                                permu.dir = permu.dir,
-                                group.col = group.col, 
-                                group1    = group1,
-                                minSubgroupFrac = min(1,minSubgroupFrac * 2),
-                                group2    = group2,
-                                dir.out   = dir.out,
-                                cores     = cores,
-                                label     = diff.dir),
-                           params))
-      
+    } else {
+      nearGenes.file <- nearGenes.file[["nearGenes"]]
+    }
+    ## calculation
+    message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
+    
+    ## get pair
+    permu.dir <- paste0(dir.out,"/permu")
+    params <- args[names(args) %in% c("percentage","permu.size","Pe","pvalue","diffExp","group.col")]
+    SigPair <- do.call(get.pair,
+                       c(list(data      = mae,
+                              nearGenes = nearGenes.file,
+                              permu.dir = permu.dir,
+                              group.col = group.col, 
+                              group1    = group1,
+                              minSubgroupFrac = min(1,minSubgroupFrac * 2),
+                              group2    = group2,
+                              dir.out   = dir.out,
+                              cores     = cores,
+                              label     = diff.dir),
+                         params))
+    
     message("==== Promoter analysis ====")
     message("calculate associations of gene expression with DNA methylation at promoter regions")
     message("Fetching promoter regions")
@@ -297,7 +307,7 @@ TCGA.pipe <- function(disease,
         promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
                                             TSS.range=list(upstream = 200, downstream = 2000))
       })
-     
+      
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
       meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
       if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)

@@ -384,13 +384,10 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  newenv <- new.env()
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) data("hm450.manifest",package = "ELMER.data", envir = newenv)
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) data("EPIC.manifest",package = "ELMER.data", envir = newenv)
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) data("hm450.manifest.hg38",package = "ELMER.data", envir = newenv)
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) data("EPIC.manifest.hg38",package = "ELMER.data", envir = newenv)
-  annotation <- get(ls(newenv)[1],envir=newenv)   
-  return(annotation)
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(get(data("hm450.manifest",package = "ELMER.data")))
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest",package = "ELMER.data")))
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(get(data("hm450.manifest.hg38",package = "ELMER.data")))
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest.hg38",package = "ELMER.data")))
 }
 
 #' Create examples files for Sample mapping and information used in createMAE function
