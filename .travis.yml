@@ -60,23 +60,12 @@ bioc_packages:
   - org.Hs.eg.db
 
 r_github_packages:
-  - eddelbuettel/digest
-  - kevinushey/rex
-  - kevinushey/later
-  - jimhester/crayon
-  - edwindj/whisker
-  - jimhester/withr
-  - jimhester/covr
-  - hfang-bristol/dnet
   - tiagochst/ELMER.data
 
 after_script:
   - ls -lah
   - FILE=$(ls -1t *.tar.gz | head -n 1)
   - Rscript -e "library(BiocCheck); BiocCheck(\"${FILE}\")
-
-after_success:
-  -  Rscript -e 'library(covr);codecov()'
 
 r_build_args: --no-build-vignettes --no-manual --no-resave-data
 r_check_args: --no-build-vignettes --no-manual
