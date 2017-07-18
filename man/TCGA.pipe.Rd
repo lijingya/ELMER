@@ -7,7 +7,7 @@
 TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
   cores = 1, mode = "unsupervised", Data = NULL, diff.dir = "hypo",
   genes = NULL, mutant_variant_classification = c("Frame_Shift_Del",
-  "Frame_Shift_Ins", " Missense_Mutation", "Nonsense_Mutation", "Splice_Site",
+  "Frame_Shift_Ins", "Missense_Mutation", "Nonsense_Mutation", "Splice_Site",
   "In_Frame_Del", "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"),
   group.col = "TN", group1 = "Tumor", group2 = "Normal", ...)
 }
