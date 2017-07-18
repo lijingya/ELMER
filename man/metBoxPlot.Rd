@@ -57,17 +57,19 @@ will be generated. When byProbe is specified, scatter plots for one probes with 
 and average DNA methylation at certain motif sites will be generated.
 }
 \examples{
-data(elmer.data.example)
-group.col <- "subtype_Expression.Subtype"
-group1 <- "classical"
-group2 <- "secretory"
-metBoxPlot(data,
-           group.col = group.col,
-           group1 = group1,
-           group2 = group2, 
-           probe ="cg17898069",
-           minSubgroupFrac = 0.2, 
-           diff.dir = "hypo")
+\dontrun{
+  data(elmer.data.example)
+  group.col <- "subtype_Expression.Subtype"
+  group1 <- "classical"
+  group2 <- "secretory"
+  metBoxPlot(data,
+             group.col = group.col,
+             group1 = group1,
+             group2 = group2, 
+             probe ="cg17898069",
+             minSubgroupFrac = 0.2, 
+             diff.dir = "hypo")
+}
 }
 \author{
 Tiago Chedraoui Silva (tiagochst at gmail.com)
