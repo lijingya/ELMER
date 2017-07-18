@@ -39,8 +39,7 @@ contamination and for additional stringency.
  met <- preAssociationProbeFiltering(data = met,  K = 0.3, percentage = 0.05)
  met <- rbind(random.probe,random.probe,random.probe)
  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
- 
- data(elmer.data.example)
+ data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
  data <- preAssociationProbeFiltering(data,  K = 0.3, percentage = 0.05)
  
  cg24741609 <- runif(100, 0, 1)

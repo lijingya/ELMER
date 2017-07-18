@@ -87,7 +87,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   # Testing creating MultyAssayExperiment object
   # Load library
   # Consisering it is TCGA and SE
-  data(elmer.data.example, envir = environment())
+  ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
   sink("/dev/null");
   suppressMessages({
     mae <- createMAE(exp = getExp(data), 

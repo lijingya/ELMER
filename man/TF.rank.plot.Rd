@@ -32,7 +32,7 @@ relevant TF and top3 TFs will be labeled in a different color.
 }
 \examples{
 library(ELMER)
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
 enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",

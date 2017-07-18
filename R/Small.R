@@ -384,10 +384,18 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(get(data("hm450.manifest",package = "ELMER.data")))
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest",package = "ELMER.data")))
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(get(data("hm450.manifest.hg38",package = "ELMER.data")))
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest.hg38",package = "ELMER.data")))
+  file <- ifelse(toupper(plat) == "450K","hm450.manifest","EPIC.manifest")
+  if(tolower(genome) == "hg38") file <- paste0(file, ".hg38")
+  probes.motif <- getdata(file)
+  return(probes.motif)
+}
+
+getdata <- function(...)
+{
+  e <- new.env()
+  name <- data(..., package = "ELMER.data",envir = e)[1]
+  print(name)
+  e[[ls(envir = e)[1]]]
 }
 
 #' Create examples files for Sample mapping and information used in createMAE function
@@ -666,8 +674,7 @@ createMotifRelevantTfs <- function(classification = "family"){
 #'  met <- preAssociationProbeFiltering(data = met,  K = 0.3, percentage = 0.05)
 #'  met <- rbind(random.probe,random.probe,random.probe)
 #'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
-#'  
-#'  data(elmer.data.example)
+#'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
 #'  data <- preAssociationProbeFiltering(data,  K = 0.3, percentage = 0.05)
 #'  
 #'  cg24741609 <- runif(100, 0, 1)
