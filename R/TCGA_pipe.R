@@ -162,27 +162,8 @@ TCGA.pipe <- function(disease,
                        linearize.exp = TRUE,
                        TCGA          = TRUE)
       
-      # if user set genes argument label MUT WT will be added to mae
-      if(!is.null(genes)) {
-        maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
-        for(g in genes) {
-          if(g %in% maf$Hugo_Symbol) {
-            message("Adding information for gene: ", g)
-            
-            aux <- maf %>% filter(Hugo_Symbol == g)
-            idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
-            aux <- aux[idx,]
-            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
-            colData(mae)[,g] <- "Normal"
-            colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
-            colData(mae)[colData(mae)$TN == "Tumor" & 
-                           colData(mae)$sample %in% mutant.samples,g] <- paste0(g, " mutant")
-            print(plyr::count(colData(mae)[,g]))
-          } else {
-            message("No mutation found for: ", g)
-          }
-        }
-      }
+      # if user set genes argument label Mutant WT will be added to mae
+      if(!is.null(genes)) data <- addMutCol(data, disease, genes, mutant_variant_classification)
       
       if(!all(sample.type %in% colData(mae)[,group.col])){
         print(table(colData(mae)[,group.col]))
@@ -190,36 +171,15 @@ TCGA.pipe <- function(disease,
         message("There are no samples for both groups")
         return(NULL)
       }
-      
-      mae <- mae[,colData(mae)[,group.col] %in% sample.type]
-      save(mae,file = file)
-      message("File saved as: ", file)
-      readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
     } else {
       message("File already exists: ", file)
-      if(!is.null(genes)) {
-        mae <- get(load(file))
-        maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
-        for(g in genes) {
-          if(g %in% maf$Hugo_Symbol) {
-            message("Adding information for gene: ", g)
-            aux <- maf %>% filter(Hugo_Symbol == g)
-            idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
-            aux <- aux[idx,]
-            mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
-            colData(mae)[,g] <- "Normal"
-            colData(mae)[colData(mae)$TN == "Tumor",g] <- "WT"
-            colData(mae)[colData(mae)$TN == "Tumor" & 
-                           colData(mae)$sample %in% mutant.samples,g] <- paste0("Mutant")
-            print(plyr::count(colData(mae)[,g]))
-          } else {
-            message("No mutation found for: ", g)
-          }
-        }
-        message("Saving files as: ", file)
-        save(mae,file = file)
-      }
+      mae <- get(load(file))
+      if(!is.null(genes))  data <- addMutCol(data, disease, genes, mutant_variant_classification)
     }
+    mae <- mae[,colData(mae)[,group.col] %in% sample.type]
+    save(mae,file = file)
+    message("File saved as: ", file)
+    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
   }
   
   # get differential DNA methylation
@@ -408,3 +368,42 @@ TCGA.pipe <- function(disease,
   
 }
 
+
+#' @examples
+#' \dontrun { 
+#'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
+#'  data <- addMutCol(data, "LUSC","TP53")
+#'}
+addMutCol <- function(data, 
+                      disease, 
+                      genes, 
+                      mutant_variant_classification = c("Frame_Shift_Del",
+                                                        "Frame_Shift_Ins",
+                                                        "Missense_Mutation",
+                                                        "Nonsense_Mutation",
+                                                        "Splice_Site",
+                                                        "In_Frame_Del",
+                                                        "In_Frame_Ins",
+                                                        "Translation_Start_Site",
+                                                        "Nonstop_Mutation")){
+  maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
+  for(gene in genes) {
+    if(gene %in% maf$Hugo_Symbol) {
+      message("Adding information for gene: ", gene)
+      aux <- maf %>% filter(Hugo_Symbol == gene) # Select only mutation on that gene
+      idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
+      aux <- aux[idx,]
+      print(aux)
+      mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
+      colData(data)[,gene] <- "Normal"
+      colData(data)[colData(data)$TN == "Tumor", gene] <- "WT"
+      colData(data)[colData(data)$TN == "Tumor" & 
+                      colData(data)$sample %in% mutant.samples,gene] <- "Mutant"
+      message("The column ", gene, " was create in the MAE object")
+      print(plyr::count(colData(data)[,gene]))
+    } else {
+      message("No mutation found for: ", gene)
+    }
+  }
+  return(data)
+}

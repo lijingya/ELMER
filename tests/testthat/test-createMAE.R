@@ -87,7 +87,7 @@ test_that("The creation of a using Summarized Experiment objects and TCGA data",
   # Testing creating MultyAssayExperiment object
   # Load library
   # Consisering it is TCGA and SE
-  ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
+  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
   sink("/dev/null");
   suppressMessages({
     mae <- createMAE(exp = getExp(data), 
@@ -192,4 +192,18 @@ test_that("Number of probes in MAE matches the distal probes", {
     expect_true("TN" %in% colnames(colData(mae)))
   }
   unlink("GDCdata",recursive = TRUE, force = TRUE)
+})
+
+test_that("Adding mutation column is working", {
+  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
+  suppressMessages({
+    data <- createMAE(exp = getExp(data), 
+                     met =  getMet(data), 
+                     TCGA = TRUE, genome = "hg38")
+  })
+  data <- addMutCol(data, "LUSC","LDHD")
+  expect_true("LDHD" %in% colnames(colData(mae)))
+  expect_true("WT" %in% colData(mae)$LDHD)
+  expect_true("Mutant" %in% colData(mae)$LDHD)
+  expect_true("Normal" %in% colData(mae)$LDHD)
 })
