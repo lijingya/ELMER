@@ -56,9 +56,11 @@ gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG0000
                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
+sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
+                                    sample.type = c("Normal", "Tumor"))
 sampleMap <- S4Vectors::DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
-                      colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+                                  colname = c("sample1.exp","sample1.met",
+                                              "sample2.exp","sample2.met"))
 mae <- createMAE(exp = gene.exp, 
                  met = dna.met, 
                  sampleMap = sampleMap, 

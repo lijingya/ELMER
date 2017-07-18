@@ -44,8 +44,17 @@
 #'   projects <- TCGAbiolinks:::getGDCprojects()$project_id
 #'   projects <- gsub("TCGA-","",projects[grepl('^TCGA',projects,perl=TRUE)])
 #'   for(proj in projects) TCGA.pipe(disease = proj,analysis = "download")
-#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("createMAE"))})}, .progress = "text")
-#'   plyr::alply(sort(projects),1,function(proj) {tryCatch({print(proj);TCGA.pipe(disease = proj,analysis = c("diffMeth","pair", "motif","TF.search"))})}, .progress = "text")
+#'   plyr::alply(sort(projects),1,function(proj) {
+#'        tryCatch({
+#'          print(proj);
+#'          TCGA.pipe(disease = proj,analysis = c("createMAE"))})
+#'        }, .progress = "text")
+#'   plyr::alply(sort(projects),1,function(proj) {
+#'     tryCatch({
+#'       print(proj);
+#'       TCGA.pipe(disease = proj,
+#'                  analysis = c("diffMeth","pair", "motif","TF.search"))})
+#'   }, .progress = "text")
 #'
 #'   # Evaluation mutation
 #'   TCGA.pipe(disease = "LUSC",analysis = "createMAE",gene = "NFE2L2")
@@ -368,7 +377,12 @@ TCGA.pipe <- function(disease,
   
 }
 
-
+#' Adds mutation information to MAE
+#' @param data MAE object
+#' @param disease TCGA disease (LUSC, GBM, etc)
+#' @param genes list of genes to add information
+#' @param mutant_variant_classification List of mutant_variant_classification that will be 
+#' consider a sample mutant or not.
 #' @examples
 #' \dontrun { 
 #'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
