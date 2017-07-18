@@ -849,7 +849,10 @@ get.enriched.motif <- function(data,
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
     message("Loading object: ",file)
-    probes.motif <- (function(...)get(data(...,package = "ELMER.data",envir = new.env())))(file)
+    if(file == "Probes.motif.hg38.450K") probes.motif <- getdata("Probes.motif.hg38.450K")
+    if(file == "Probes.motif.hg19.450K") probes.motif <- getdata("Probes.motif.hg19.450K")
+    if(file == "Probes.motif.hg38.EPIC") probes.motif <- getdata("Probes.motif.hg38.EPIC")
+    if(file == "Probes.motif.hg19.EPIC") probes.motif <- getdata("Probes.motif.hg19.EPIC")
   }  
   all.probes.TF <- probes.motif
   ## here need to be add motif search part.

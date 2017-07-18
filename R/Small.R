@@ -384,17 +384,16 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  file <- ifelse(toupper(plat) == "450K","hm450.manifest","EPIC.manifest")
-  if(tolower(genome) == "hg38") file <- paste0(file, ".hg38")
-  probes.motif <- getdata(file)
-  return(probes.motif)
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.manifest"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.manifest.hg38"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest.hg38"))
 }
 
 getdata <- function(...)
 {
   e <- new.env()
   name <- data(..., package = "ELMER.data",envir = e)[1]
-  print(name)
   e[[ls(envir = e)[1]]]
 }
 
