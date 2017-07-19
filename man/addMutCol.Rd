@@ -23,7 +23,7 @@ consider a sample mutant or not.}
 Adds mutation information to MAE
 }
 \examples{
-\dontrun { 
+\dontrun{
  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
  data <- addMutCol(data, "LUSC","TP53")
 }

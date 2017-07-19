@@ -384,10 +384,10 @@ TCGA.pipe <- function(disease,
 #' @param mutant_variant_classification List of mutant_variant_classification that will be 
 #' consider a sample mutant or not.
 #' @examples
-#' \dontrun { 
+#' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
 #'  data <- addMutCol(data, "LUSC","TP53")
-#'}
+#' }
 addMutCol <- function(data, 
                       disease, 
                       genes, 
