@@ -18,6 +18,6 @@ The gene symbol for input genes.
 getSymbol to report gene symbol from id
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 getSymbol(data, geneID="ENSG00000143067")
 }

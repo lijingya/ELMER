@@ -37,7 +37,7 @@
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
 #' \dontrun{
-#'   data(elmer.data.example)
+#'   data <- ELMER:::getdata("elmer.data.example")
 #'   group.col <- "subtype_Expression.Subtype"
 #'   group1 <- "classical"
 #'   group2 <- "secretory"

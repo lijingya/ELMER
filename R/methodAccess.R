@@ -54,7 +54,7 @@ checkData <- function(data){
 #' @return The gene symbol for input genes.
 #' @export
 #' @examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' getSymbol(data, geneID="ENSG00000143067")
 getSymbol <- function(data,geneID){
   gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])
@@ -69,7 +69,7 @@ getSymbol <- function(data,geneID){
 #'@return The gene ID for these gene symbols
 #'@export
 #'@examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' getGeneID(data, symbol="ZNF697")
 getGeneID <- function(data,symbol){
   gene <- unique(values(getExp(data))[,c("ensembl_gene_id","external_gene_name")])

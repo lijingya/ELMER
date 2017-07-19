@@ -40,7 +40,7 @@
 #'@export
 #'@author Lijing Yao (maintainer: lijingya@usc.edu)
 #'@examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' scatter.plot(data,
 #'             byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
 #'             category="definition", save=FALSE)

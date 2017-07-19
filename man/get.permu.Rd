@@ -44,7 +44,7 @@ cores for this step. Default permutation time is 1000 which may need 12 hrs by 4
 However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 permu <-get.permu(data = data,
                   geneID=rownames(getExp(data)),
                   rm.probes=c("cg00329272","cg10097755"),

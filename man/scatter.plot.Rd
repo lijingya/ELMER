@@ -57,7 +57,7 @@ byTF The output will be scatter plot for the TFs and the average
 DNA methylation at the probes set specified in byTF list.
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 scatter.plot(data,
             byProbe=list(probe=c("cg19403323"),numFlankingGenes=20), 
             category="definition", save=FALSE)

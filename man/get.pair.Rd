@@ -82,7 +82,7 @@ DNA methylation at enhancer CpG sites and expression of 20 nearby genes of the C
 and getPair.XX.pairs.significant.csv (see detail).
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                          geneAnnot=getExp(data))
 Hypo.pair <- get.pair(data=data,

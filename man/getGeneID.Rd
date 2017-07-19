@@ -18,6 +18,6 @@ The gene ID for these gene symbols
 getGeneID to report gene id from symbol
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 getGeneID(data, symbol="ZNF697")
 }
