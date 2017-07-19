@@ -29,7 +29,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                   group2 = "NT",
                   label="hypo")
   })
-  sink();
+
   tf.family <- createMotifRelevantTfs()  
   expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
   expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
@@ -54,7 +54,7 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
                   group1 = "TP",
                   group2 = "NT")  
   })
-  sink();
+
   tf.family <- createMotifRelevantTfs()  
   human.tf <- getTF()
   # Check if top5 has 5% elements that TF from the object
@@ -113,7 +113,7 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   
   expect_true(TF$potential.TF.family == "TP73")
   expect_true(TF$top.potential.TF.family == "TP73")
@@ -137,7 +137,7 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   expect_true(TF$potential.TF.family == "TP73")
   expect_true(TF$top.potential.TF.family == "TP73")
   expect_true(TF$top_5percent == "TP73")
@@ -178,7 +178,7 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   expect_true(TF$potential.TF.family == "TP53")
   expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
@@ -201,7 +201,6 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
   expect_true(TF$potential.TF.family == "TP53")
   expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
