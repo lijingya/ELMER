@@ -2,7 +2,7 @@ context("Checking get pair function")
 
 test_that("Function uses correctly the permu.dir", {
   data(elmer.data.example, envir = environment())
-  sink("/dev/null");
+
   
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                             geneAnnot=getExp(data))
@@ -76,7 +76,7 @@ test_that("Function uses correctly the permu.dir", {
 
 test_that("Gene expression is calculated", {
   data(elmer.data.example, envir = environment())
-  sink("/dev/null");
+
   
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                             geneAnnot=getExp(data))

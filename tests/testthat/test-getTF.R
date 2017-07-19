@@ -9,7 +9,6 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                                                  "cg00329272", "cg09010107", 
                                                  "cg15386853", "cg10097755", 
                                                  "cg09247779", "cg09181054"))
-  sink("/dev/null");
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -49,7 +48,6 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
                                                  "cg00329272", "cg09010107", 
                                                  "cg15386853", "cg10097755", 
                                                  "cg09247779", "cg09181054"))
-  sink("/dev/null");
   suppressMessages({
     TF <- get.TFs(data, enriched.motif, label = "hypo",
                   group.col = "shortLetterCode",
@@ -100,7 +98,7 @@ test_that("Test if the results is right", {
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
   
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -123,7 +121,7 @@ test_that("Test if the results is right", {
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
   # Will give us the same result
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -165,7 +163,7 @@ test_that("Test if the results is right", {
   data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -187,7 +185,7 @@ test_that("Test if the results is right", {
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
   # Will give us the same result
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 

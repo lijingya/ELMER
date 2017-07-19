@@ -61,7 +61,7 @@ test_that("The directions should change if we change the groups", {
 
 test_that("The test argument can be changed", {
   data(elmer.data.example, envir = environment())
-  sink("/dev/null");
+
   suppressMessages({
     Hypo.probe.1 <- get.diff.meth(data, 
                                   minSubgroupFrac = 1,
@@ -91,7 +91,7 @@ test_that("The test argument can be changed", {
   mean.nt <- rowMeans(assay(getMet(data)[Hypo.probe.1$probe[1],colData(data)[sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"],"definition"] == "Solid Tissue Normal"]))
   expect_equal(Hypo.probe.1[1,3] < 0, (mean.tp - mean.nt )[[1]] < 0)
   
-  sink("/dev/null");
+
   suppressMessages({
     Hyper.probe.2 <- get.diff.meth(data, 
                                    minSubgroupFrac = 1,
@@ -124,7 +124,7 @@ test_that("The test argument can be changed", {
 
 test_that("It threats correclty NAs and thrseholds", {
   data(elmer.data.example, envir = environment())
-  sink("/dev/null");
+
   suppressMessages({
     diff.probes <- get.diff.meth(data, 
                                  minSubgroupFrac = 1,
