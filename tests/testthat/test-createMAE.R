@@ -195,11 +195,15 @@ test_that("Number of probes in MAE matches the distal probes", {
 })
 
 test_that("Adding mutation column is working", {
-  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
+  data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
+    message(e)
+    data(elmer.data.example, envir = environment())
+  })
   suppressMessages({
     data <- createMAE(exp = getExp(data), 
                      met =  getMet(data), 
-                     TCGA = TRUE, genome = "hg38")
+                     TCGA = TRUE, 
+                     genome = "hg38")
   })
   data <- addMutCol(data, "LUSC","LDHD")
   expect_true("LDHD" %in% colnames(colData(data)))
