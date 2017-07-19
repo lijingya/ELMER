@@ -1,7 +1,7 @@
 context("Testing get.diff.meth")
 
 test_that("The directions should change if we change the groups", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   Hypo.probe.1 <- get.diff.meth(data, 
                                 minSubgroupFrac = 1,
                                 diff.dir="hypo",
@@ -60,7 +60,7 @@ test_that("The directions should change if we change the groups", {
 })
 
 test_that("The test argument can be changed", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
 
   suppressMessages({
     Hypo.probe.1 <- get.diff.meth(data, 
@@ -123,7 +123,7 @@ test_that("The test argument can be changed", {
 })
 
 test_that("It threats correclty NAs and thrseholds", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
 
   suppressMessages({
     diff.probes <- get.diff.meth(data, 

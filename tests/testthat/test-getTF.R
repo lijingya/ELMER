@@ -1,7 +1,7 @@
 context("Get TF")
 
 test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
@@ -40,7 +40,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
 })  
 
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 

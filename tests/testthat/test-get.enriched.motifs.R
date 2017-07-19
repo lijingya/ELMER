@@ -1,7 +1,7 @@
 context("Check get enriched motif function")
 
 test_that("get enriched motif function returns the expected result", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   bg <- rownames(getMet(data))
   probes <- bg[1:20]
   
@@ -49,7 +49,7 @@ test_that("get enriched motif function returns the expected result", {
 })
 
 test_that("min.incidence works", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   bg <- rownames(getMet(data))
   probes <- bg[1:20]
   
