@@ -61,6 +61,7 @@ bioc_packages:
 
 r_github_packages:
   - tiagochst/ELMER.data
+  - hfang-bristol/dnet
 
 after_script:
   - ls -lah
