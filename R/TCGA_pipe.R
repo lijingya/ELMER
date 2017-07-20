@@ -129,8 +129,8 @@ TCGA.pipe <- function(disease,
       minSubgroupFrac <- 0.2
       message("=> ", mode, " was selected: using ", minSubgroupFrac, " samples")
     }
-    message("=> Analysis results wil be save in:  ", dir.out)
     dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
+    message("=> Analysis results wil be save in:  ", dir.out)
     if(!file.exists(dir.out)) dir.create(dir.out, recursive = TRUE, showWarnings = FALSE)
   }
   #-----------------------------------------------------
