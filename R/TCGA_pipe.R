@@ -192,7 +192,7 @@ TCGA.pipe <- function(disease,
     }
     save(mae,file = file)
     message("File saved as: ", file)
-    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
+    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out.root,disease,genome))
   }
   
   # get differential DNA methylation
