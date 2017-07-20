@@ -22,7 +22,7 @@ navbar:
         - text: "Motif enrichment analysis on the selected probes"
           href: analysis_motif_enrichment.html
         - text: "Identifying regulatory TFs"
-          href: analysis_TF_regulatory.html
+          href: analysis_regulatory_tf.html
         - text: "---------"
         - text: "Compact version with TCGA data"
         - text: "TCGA pipe"
