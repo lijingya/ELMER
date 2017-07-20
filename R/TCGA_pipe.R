@@ -140,7 +140,7 @@ TCGA.pipe <- function(disease,
     params <- args[names(args) %in% c("TSS", "TSS.range","rm.chr")]
     params <- c(params,list("genome" = genome, "feature"= NULL))
     probeInfo <- do.call(get.feature.probe,params)
-    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome))
+    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out.root,genome))
     if(length(analysis) == 1){
       return(probeInfo)
     } else {
@@ -161,7 +161,7 @@ TCGA.pipe <- function(disease,
       exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
       
       ## get distal probe info
-      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
+      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out.root,genome)
       if(!file.exists(distal.probe)){
         params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
         params <- c(params,list("genome" = genome, "feature"= NULL))
@@ -190,7 +190,6 @@ TCGA.pipe <- function(disease,
       mae <- get(load(file))
       if(!is.null(genes))  mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
     }
-    mae <- mae[,colData(mae)[,group.col] %in% sample.type]
     save(mae,file = file)
     message("File saved as: ", file)
     readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
@@ -269,49 +268,50 @@ TCGA.pipe <- function(disease,
                               label     = diff.dir),
                          params))
     
-    message("==== Promoter analysis ====")
-    message("calculate associations of gene expression with DNA methylation at promoter regions")
-    message("Fetching promoter regions")
-    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
+    # message("==== Promoter analysis ====")
+    # message("calculate associations of gene expression with DNA methylation at promoter regions")
+    # message("Fetching promoter regions")
+    # file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
+    # 
+    # if(!file.exists(file)) {    
+    #   ## promoter methylation correlation.
+    #   # get promoter 
+    #   suppressWarnings({
+    #     promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
+    #                                         TSS.range=list(upstream = 200, downstream = 2000))
+    #   })
+    #   
+    #   if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    #   meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
+    #   if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    #   exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
+    #   
+    #   mae.promoter <- createMAE(met           = meth.file, 
+    #                             exp           = exp.file, 
+    #                             filter.probes = promoter.probe,
+    #                             genome        = genome,
+    #                             met.platform  = "450K",
+    #                             linearize.exp = TRUE,
+    #                             save          = FALSE,
+    #                             TCGA          = TRUE)
+    #   if(!all(sample.type %in% colData(mae)[,group.col])){
+    #     message("There are no samples for both groups")
+    #     return(NULL)
+    #   }
+    #   mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
+    #   save(mae.promoter,file = file)
+    # } else {
+    #   mae.promoter <- get(load(file))
+    # }
+    # params <- args[names(args) %in% "percentage"]
+    # Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
+    #                                          params))
+    # write.csv(Promoter.meth, 
+    #           file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
+    #           row.names=FALSE)
+    # add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
+    # SigPair <- cbind(SigPair, GSbPM.pvalue = add)
     
-    if(!file.exists(file)){    
-      ## promoter methylation correlation.
-      # get promoter 
-      suppressWarnings({
-        promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
-                                            TSS.range=list(upstream = 200, downstream = 2000))
-      })
-      
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
-      
-      mae.promoter <- createMAE(met           = meth.file, 
-                                exp           = exp.file, 
-                                filter.probes = promoter.probe,
-                                genome        = genome,
-                                met.platform  = "450K",
-                                linearize.exp = TRUE,
-                                save          = FALSE,
-                                TCGA          = TRUE)
-      if(!all(sample.type %in% colData(mae)[,group.col])){
-        message("There are no samples for both groups")
-        return(NULL)
-      }
-      mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
-      save(mae.promoter,file = file)
-    } else {
-      mae.promoter <- get(load(file))
-    }
-    params <- args[names(args) %in% "percentage"]
-    Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
-                                             params))
-    write.csv(Promoter.meth, 
-              file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
-              row.names=FALSE)
-    add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
-    SigPair <- cbind(SigPair, GSbPM.pvalue = add)
     write.csv(SigPair, 
               file = sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir),
               row.names=FALSE)
