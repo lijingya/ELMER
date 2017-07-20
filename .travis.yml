@@ -75,3 +75,5 @@ r_check_args: --no-build-vignettes --no-manual
 notifications:
     slack: junkdnalab:KV8Dr7etoqqDQPsORdaZLOz2
     email: false
+    on_success: never # default: change
+    on_failure: always # default: always
