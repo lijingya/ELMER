@@ -86,16 +86,6 @@ TCGA.pipe <- function(disease,
                       group1 = "Tumor",
                       group2 = "Normal",
                       ...){
-  if(!mode  %in% c("supervised","unsupervised")){
-    stop("Set mode arugment to supervised or unsupervised")
-  }
-  if(mode %in% c("supervised")) {
-    minSubgroupFrac <- 1
-    message("=> ",mode, " was selected: using all samples")
-  } else {
-    minSubgroupFrac <- 0.2
-    message("=> ",mode, " was selected: using ", minSubgroupFrac, " samples")
-  }
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://gdc-portal.nci.nih.gov")
@@ -110,11 +100,6 @@ TCGA.pipe <- function(disease,
                 paste(c("",available.analysis), collapse = "\n=> ")))
   
   disease <- toupper(disease)
-  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
-  dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
-  message("=> Saving results to ", dir.out)
-  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
-  args <- list(...)
   
   # Download 
   if("download" %in% tolower(analysis)){
@@ -128,6 +113,27 @@ TCGA.pipe <- function(disease,
     analysis <- analysis[!analysis %in% "download"]
   }
   
+  #---------------------------------------------------------------
+  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
+  if(!file.exists(dir.out.root)) dir.create(dir.out.root, recursive = TRUE, showWarnings = FALSE)
+  args <- list(...)
+  
+  if(any(sapply(analysis, function(x) tolower(x) %in% tolower(c("diffMeth","pair","motif","TF.search"))))) {
+    if(!mode  %in% c("supervised","unsupervised")){
+      stop("Set mode arugment to supervised or unsupervised")
+    }
+    if(mode %in% c("supervised")) {
+      minSubgroupFrac <- 1
+      message("=> ", mode, " was selected: using all samples")
+    } else {
+      minSubgroupFrac <- 0.2
+      message("=> ", mode, " was selected: using ", minSubgroupFrac, " samples")
+    }
+    message("=> Analysis results wil be save in:  ", dir.out)
+    dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
+    if(!file.exists(dir.out)) dir.create(dir.out, recursive = TRUE, showWarnings = FALSE)
+  }
+  #-----------------------------------------------------
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
     print.header("Select distal probes")
@@ -172,18 +178,17 @@ TCGA.pipe <- function(disease,
                        TCGA          = TRUE)
       
       # if user set genes argument label Mutant WT will be added to mae
-      if(!is.null(genes)) data <- addMutCol(data, disease, genes, mutant_variant_classification)
+      if(!is.null(genes)) mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
       
       if(!all(sample.type %in% colData(mae)[,group.col])){
         print(table(colData(mae)[,group.col]))
-        print(mae)
         message("There are no samples for both groups")
         return(NULL)
       }
     } else {
       message("File already exists: ", file)
       mae <- get(load(file))
-      if(!is.null(genes))  data <- addMutCol(data, disease, genes, mutant_variant_classification)
+      if(!is.null(genes))  mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
     }
     mae <- mae[,colData(mae)[,group.col] %in% sample.type]
     save(mae,file = file)
@@ -407,7 +412,6 @@ addMutCol <- function(data,
       aux <- maf %>% filter(Hugo_Symbol == gene) # Select only mutation on that gene
       idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
       aux <- aux[idx,]
-      print(aux)
       mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
       colData(data)[,gene] <- "Normal"
       colData(data)[colData(data)$TN == "Tumor", gene] <- "WT"
