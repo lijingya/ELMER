@@ -70,7 +70,7 @@ byCoordinate:
  all genes and significantly linked probes in the range and the significant links.
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 pair <- data.frame(Probe = c("cg19403323","cg19403323", "cg26403223"),
                    GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
                    Symbol = c("TRAF3IP3","LAMB3","LAMB3"),

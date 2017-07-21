@@ -81,7 +81,7 @@ save:
  information with the second file.
 }
 \examples{
-data(elmer.data.example)
+data <- ELMER:::getdata("elmer.data.example")
 Hypo.probe <- get.diff.meth(data, 
                             diff.dir="hypo",
                             group.col = "definition", 

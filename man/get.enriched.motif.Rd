@@ -15,7 +15,7 @@ this other two arguments correctly. This argument is not require, you can set pr
 the backaground.probes manually.}
 
 \item{probes.motif}{A matrix contains motifs occurrence within probes regions. Probes.motif in 
-\pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif.hg19.450K}}).}
+\pkg{ELMER.data} will be used if probes.motif is missing (detail see Probes.motif.hg19.450K in ELMER.data).}
 
 \item{probes}{A vector lists the name of probes to define the set of probes in which motif enrichment
 OR and confidence interval will be calculated.}
@@ -79,7 +79,10 @@ background.probes:
 probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 "cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
 "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
-data(elmer.data.example)
+  data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
+  message(e)
+  data(elmer.data.example, envir = environment())
+  })
 bg <- rownames(getMet(data))
 enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
                                      probes=probes,
