@@ -79,7 +79,7 @@ enriched.motif <- get.enriched.motif(data = mae,
                                      min.incidence = 10,
                                      lower.OR = 1.1)
 names(enriched.motif) # enriched motifs
-head(enriched.motif["P73_HUMAN.H10MO.A"]) ## probes in the given set that have TP53 motif.
+head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that have the first motif.
 
 # get.enriched.motif automatically save output files. 
 # getMotif.hypo.enriched.motifs.rda contains enriched motifs and the probes with the motif. 
