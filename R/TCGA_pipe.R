@@ -86,16 +86,6 @@ TCGA.pipe <- function(disease,
                       group1 = "Tumor",
                       group2 = "Normal",
                       ...){
-  if(!mode  %in% c("supervised","unsupervised")){
-    stop("Set mode arugment to supervised or unsupervised")
-  }
-  if(mode %in% c("supervised")) {
-    minSubgroupFrac <- 1
-    message("=> ",mode, " was selected: using all samples")
-  } else {
-    minSubgroupFrac <- 0.2
-    message("=> ",mode, " was selected: using ", minSubgroupFrac, " samples")
-  }
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://gdc-portal.nci.nih.gov")
@@ -110,11 +100,6 @@ TCGA.pipe <- function(disease,
                 paste(c("",available.analysis), collapse = "\n=> ")))
   
   disease <- toupper(disease)
-  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
-  dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
-  message("=> Saving results to ", dir.out)
-  if(!file.exists(dir.out)) dir.create(dir.out,recursive = TRUE, showWarnings = FALSE)
-  args <- list(...)
   
   # Download 
   if("download" %in% tolower(analysis)){
@@ -128,13 +113,34 @@ TCGA.pipe <- function(disease,
     analysis <- analysis[!analysis %in% "download"]
   }
   
+  #---------------------------------------------------------------
+  dir.out.root <- sprintf("%s/Result/%s",wd,disease)
+  if(!file.exists(dir.out.root)) dir.create(dir.out.root, recursive = TRUE, showWarnings = FALSE)
+  args <- list(...)
+  
+  if(any(sapply(analysis, function(x) tolower(x) %in% tolower(c("diffMeth","pair","motif","TF.search"))))) {
+    if(!mode  %in% c("supervised","unsupervised")){
+      stop("Set mode arugment to supervised or unsupervised")
+    }
+    if(mode %in% c("supervised")) {
+      minSubgroupFrac <- 1
+      message("=> ", mode, " was selected: using all samples")
+    } else {
+      minSubgroupFrac <- 0.2
+      message("=> ", mode, " was selected: using ", minSubgroupFrac, " samples")
+    }
+    dir.out <- sprintf("%s/Result/%s/%s_%s_vs_%s/%s",wd,disease,group.col,group1,group2,diff.dir)
+    message("=> Analysis results wil be save in:  ", dir.out)
+    if(!file.exists(dir.out)) dir.create(dir.out, recursive = TRUE, showWarnings = FALSE)
+  }
+  #-----------------------------------------------------
   ## select distal enhancer probes
   if(tolower("distal.probes") %in% tolower(analysis)){
     print.header("Select distal probes")
     params <- args[names(args) %in% c("TSS", "TSS.range","rm.chr")]
     params <- c(params,list("genome" = genome, "feature"= NULL))
     probeInfo <- do.call(get.feature.probe,params)
-    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome))
+    save(probeInfo,file = sprintf("%s/probeInfo_distal_%s.rda",dir.out.root,genome))
     if(length(analysis) == 1){
       return(probeInfo)
     } else {
@@ -155,7 +161,7 @@ TCGA.pipe <- function(disease,
       exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease,genome)
       
       ## get distal probe info
-      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out,genome)
+      distal.probe <- sprintf("%s/probeInfo_distal_%s.rda",dir.out.root,genome)
       if(!file.exists(distal.probe)){
         params <- args[names(args) %in% c("TSS","TSS.range","rm.chr")]
         params <- c(params,list("genome" = genome, "feature"= NULL))
@@ -172,23 +178,21 @@ TCGA.pipe <- function(disease,
                        TCGA          = TRUE)
       
       # if user set genes argument label Mutant WT will be added to mae
-      if(!is.null(genes)) data <- addMutCol(data, disease, genes, mutant_variant_classification)
+      if(!is.null(genes)) mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
       
       if(!all(sample.type %in% colData(mae)[,group.col])){
         print(table(colData(mae)[,group.col]))
-        print(mae)
         message("There are no samples for both groups")
         return(NULL)
       }
     } else {
       message("File already exists: ", file)
       mae <- get(load(file))
-      if(!is.null(genes))  data <- addMutCol(data, disease, genes, mutant_variant_classification)
+      if(!is.null(genes))  mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
     }
-    mae <- mae[,colData(mae)[,group.col] %in% sample.type]
     save(mae,file = file)
     message("File saved as: ", file)
-    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out,disease,genome))
+    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out.root,disease,genome))
   }
   
   # get differential DNA methylation
@@ -225,7 +229,10 @@ TCGA.pipe <- function(disease,
     Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
                                    dir.out,diff.dir),
                            stringsAsFactors=FALSE)[,1]
-    if(length(Sig.probes) == 0) stop("No significant probes were found")
+    if(length(Sig.probes) == 0) {
+      message("No significant probes were found")
+      return(NULL)
+    }
     ## Get nearby genes-----------------------
     message("Get nearby genes")
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
@@ -264,49 +271,53 @@ TCGA.pipe <- function(disease,
                               label     = diff.dir),
                          params))
     
-    message("==== Promoter analysis ====")
-    message("calculate associations of gene expression with DNA methylation at promoter regions")
-    message("Fetching promoter regions")
-    file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
-    
-    if(!file.exists(file)){    
-      ## promoter methylation correlation.
-      # get promoter 
-      suppressWarnings({
-        promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
-                                            TSS.range=list(upstream = 200, downstream = 2000))
-      })
-      
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
-      if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
-      exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
-      
-      mae.promoter <- createMAE(met           = meth.file, 
-                                exp           = exp.file, 
-                                filter.probes = promoter.probe,
-                                genome        = genome,
-                                met.platform  = "450K",
-                                linearize.exp = TRUE,
-                                save          = FALSE,
-                                TCGA          = TRUE)
-      if(!all(sample.type %in% colData(mae)[,group.col])){
-        message("There are no samples for both groups")
-        return(NULL)
-      }
-      mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
-      save(mae.promoter,file = file)
-    } else {
-      mae.promoter <- get(load(file))
+    # message("==== Promoter analysis ====")
+    # message("calculate associations of gene expression with DNA methylation at promoter regions")
+    # message("Fetching promoter regions")
+    # file <- sprintf("%s/%s_mae_promoter_%s.rda",dir.out.root,disease, genome)
+    # 
+    # if(!file.exists(file)) {    
+    #   ## promoter methylation correlation.
+    #   # get promoter 
+    #   suppressWarnings({
+    #     promoter.probe <- get.feature.probe(promoter=TRUE, genome = genome,
+    #                                         TSS.range=list(upstream = 200, downstream = 2000))
+    #   })
+    #   
+    #   if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    #   meth.file <- sprintf("%s/%s_meth_%s.rda",Data,disease, genome)
+    #   if(is.null(Data)) Data <- sprintf("%s/Data/%s",wd,disease)
+    #   exp.file <- sprintf("%s/%s_RNA_%s.rda",Data,disease, genome)
+    #   
+    #   mae.promoter <- createMAE(met           = meth.file, 
+    #                             exp           = exp.file, 
+    #                             filter.probes = promoter.probe,
+    #                             genome        = genome,
+    #                             met.platform  = "450K",
+    #                             linearize.exp = TRUE,
+    #                             save          = FALSE,
+    #                             TCGA          = TRUE)
+    #   if(!all(sample.type %in% colData(mae)[,group.col])){
+    #     message("There are no samples for both groups")
+    #     return(NULL)
+    #   }
+    #   mae.promoter <- mae.promoter[,colData(mae.promoter)[,group.col] %in% sample.type]
+    #   save(mae.promoter,file = file)
+    # } else {
+    #   mae.promoter <- get(load(file))
+    # }
+    # params <- args[names(args) %in% "percentage"]
+    # Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
+    #                                          params))
+    # write.csv(Promoter.meth, 
+    #           file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
+    #           row.names=FALSE)
+    # add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
+    # SigPair <- cbind(SigPair, GSbPM.pvalue = add)
+    if(is.null(SigPair)) {
+      message("No significant pair probe genes found")
+      return(NULL)
     }
-    params <- args[names(args) %in% "percentage"]
-    Promoter.meth <- do.call(promoterMeth, c(list(data=mae.promoter, sig.pvalue=0.01, save=FALSE),
-                                             params))
-    write.csv(Promoter.meth, 
-              file = sprintf("%s/promoter.%s.analysis.csv", dir.out, diff.dir),
-              row.names=FALSE)
-    add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
-    SigPair <- cbind(SigPair, GSbPM.pvalue = add)
     write.csv(SigPair, 
               file = sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir),
               row.names=FALSE)
@@ -323,8 +334,12 @@ TCGA.pipe <- function(disease,
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
                                             dir.out, diff.dir), 
                                     stringsAsFactors=FALSE)$Probe)
+      if(length(Sig.probes) < 2) message ("No significants pairs were found in the previous step") 
+      return(NULL)
     } else {
-      stop(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
+      message(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
+      return(NULL)
+      
     }
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
     
@@ -407,7 +422,6 @@ addMutCol <- function(data,
       aux <- maf %>% filter(Hugo_Symbol == gene) # Select only mutation on that gene
       idx <- unique(unlist(sapply(mutant_variant_classification,function(x) grep(x,aux$Variant_Classification, ignore.case = TRUE))))
       aux <- aux[idx,]
-      print(aux)
       mutant.samples <- substr(aux$Tumor_Sample_Barcode,1,16)
       colData(data)[,gene] <- "Normal"
       colData(data)[colData(data)$TN == "Tumor", gene] <- "WT"
