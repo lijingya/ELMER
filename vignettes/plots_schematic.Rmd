@@ -37,7 +37,7 @@ Generate schematic plot for one probe with 20 nearby genes and label  the gene s
 
 ```{r results='hide', eval=TRUE,fig.height=5,  fig.cap="The schematic plot shows probe colored in blue and the location of nearby 20 genes. The genes significantly linked to the probe  were shown in red.", message=FALSE, warning=FALSE}
 schematic.plot(pair = pair, 
-               data = data,
+               data = mae,
                group.col = "definition",
                byProbe = "cg25312122",
                save = FALSE)
