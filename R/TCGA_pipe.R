@@ -314,7 +314,10 @@ TCGA.pipe <- function(disease,
     #           row.names=FALSE)
     # add <- SigPair[match(SigPair$GeneID, Promoter.meth$GeneID),"Raw.p"]
     # SigPair <- cbind(SigPair, GSbPM.pvalue = add)
-    
+    if(is.null(SigPair)) {
+      message("No significant pair probe genes found")
+      return(NULL)
+    }
     write.csv(SigPair, 
               file = sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir),
               row.names=FALSE)

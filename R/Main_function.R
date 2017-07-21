@@ -393,6 +393,11 @@ get.pair <- function(data,
   met <- assay(getMet(data))
   # Probes that were removed from the last steps cannot be verified
   nearGenes <- nearGenes[names(nearGenes) %in% rownames(met)] 
+  
+  if(length(nearGenes) == 0) {
+    message("No probes passed the preAssociationProbeFiltering filter")
+    return(NULL)
+  }
   exp <- assay(getExp(data))
   message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
@@ -404,6 +409,7 @@ get.pair <- function(data,
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
+  print(Probe.gene)
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
