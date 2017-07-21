@@ -26,6 +26,7 @@ vignette: >
 ```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
 # Load results from previous sections
 mae <- get(load("mae.rda"))
+pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
 ```
 
 # Schematic plot
@@ -47,7 +48,6 @@ Generate schematic plot for one gene with the probes which the gene is significa
 linked to.
 
 ```{r results='hide', eval=TRUE, fig.width=6, fig.height=10, fig.cap="The schematic plot shows the gene colored in red and all blue colored probes, which are significantly linked to the  expression of this gene."}
-pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
 schematic.plot(pair = pair, 
                data = mae,   
                group.col = "definition", 

@@ -61,9 +61,10 @@ Each scatter plot shows the average  methylation level of sites with the TP53 mo
 
 ```{r,eval=TRUE, warning=FALSE, fig.cap="Each scatter plot shows the average  methylation level of sites with the TP53 motif in all LUSC samples plotted against the expression of the transcription factor TP53, TP63, TP73 respectively."}
 load("result/getMotif.hypo.enriched.motifs.rda")
+names(enriched.motif)[1]
 scatter.plot(data = mae,
-             byTF = list(TF = c("TP53","TP63","TP73"),
-                         probe = enriched.motif[["P73_HUMAN.H10MO.A"]]), 
+             byTF = list(TF = c("SXO3","SOX2"),
+                         probe = enriched.motif[[names(enriched.motif)[1]]]), 
              category = "definition",
              save = TRUE, 
              lm_line = TRUE)
