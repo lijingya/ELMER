@@ -37,7 +37,7 @@ Imports:
     S4Vectors,
     data.table,
     GenomicFeatures,
-    TCGAbiolinks,
+    TCGAbiolinks (>= 2.5.5),
     plyr,
     Matrix,
     dplyr,
