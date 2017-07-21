@@ -32,9 +32,11 @@
 #'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 #' dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
 #'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-#' sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), sample.type = c("Normal", "Tumor"))
+#' sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
+#'                                     sample.type = c("Normal", "Tumor"))
 #' sampleMap <- S4Vectors::DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
-#'                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
+#'                                   colname = c("sample1.exp","sample1.met",
+#'                                               "sample2.exp","sample2.met"))
 #' mae <- createMAE(exp = gene.exp, 
 #'                  met = dna.met, 
 #'                  sampleMap = sampleMap, 
@@ -384,10 +386,17 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(get(data("hm450.manifest",package = "ELMER.data")))
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest",package = "ELMER.data")))
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(get(data("hm450.manifest.hg38",package = "ELMER.data")))
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(get(data("EPIC.manifest.hg38",package = "ELMER.data")))
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.manifest"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.manifest.hg38"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest.hg38"))
+}
+
+getdata <- function(...)
+{
+  e <- new.env()
+  name <- data(..., package = "ELMER.data",envir = e)[1]
+  e[[ls(envir = e)[1]]]
 }
 
 #' Create examples files for Sample mapping and information used in createMAE function
@@ -666,8 +675,7 @@ createMotifRelevantTfs <- function(classification = "family"){
 #'  met <- preAssociationProbeFiltering(data = met,  K = 0.3, percentage = 0.05)
 #'  met <- rbind(random.probe,random.probe,random.probe)
 #'  met <- preAssociationProbeFiltering(met,  K = 0.3, percentage = 0.05)
-#'  
-#'  data(elmer.data.example)
+#'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
 #'  data <- preAssociationProbeFiltering(data,  K = 0.3, percentage = 0.05)
 #'  
 #'  cg24741609 <- runif(100, 0, 1)

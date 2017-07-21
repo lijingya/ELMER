@@ -158,7 +158,7 @@ get.feature.probe <- function(feature = NULL,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' Hypo.probe <- get.diff.meth(data, 
 #'                             diff.dir="hypo",
 #'                             group.col = "definition", 
@@ -321,7 +321,7 @@ get.diff.meth <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 #'                          geneAnnot=getExp(data))
 #' Hypo.pair <- get.pair(data=data,
@@ -393,6 +393,11 @@ get.pair <- function(data,
   met <- assay(getMet(data))
   # Probes that were removed from the last steps cannot be verified
   nearGenes <- nearGenes[names(nearGenes) %in% rownames(met)] 
+  
+  if(length(nearGenes) == 0) {
+    message("No probes passed the preAssociationProbeFiltering filter")
+    return(NULL)
+  }
   exp <- assay(getExp(data))
   message("Calculating Pp (probe - gene) for all nearby genes")
   Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
@@ -404,6 +409,7 @@ get.pair <- function(data,
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
+
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
@@ -505,7 +511,7 @@ get.pair <- function(data,
 #' However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 #' @export 
 #' @examples
-#' data(elmer.data.example)
+#' data <- ELMER:::getdata("elmer.data.example")
 #' permu <-get.permu(data = data,
 #'                   geneID=rownames(getExp(data)),
 #'                   rm.probes=c("cg00329272","cg10097755"),
@@ -764,7 +770,7 @@ promoterMeth <- function(data,
 #' this other two arguments correctly. This argument is not require, you can set probes.motif and 
 #' the backaground.probes manually.
 #' @param probes.motif A matrix contains motifs occurrence within probes regions. Probes.motif in 
-#' \pkg{ELMER.data} will be used if probes.motif is missing (detail see \code{\link{Probes.motif.hg19.450K}}).
+#' \pkg{ELMER.data} will be used if probes.motif is missing (detail see Probes.motif.hg19.450K in ELMER.data).
 #' @param probes A vector lists the name of probes to define the set of probes in which motif enrichment
 #' OR and confidence interval will be calculated.
 #' @param background.probes A vector lists name of probes which are considered as 
@@ -822,7 +828,10 @@ promoterMeth <- function(data,
 #' probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
 #' "cg19749688","cg12590404","cg24517858","cg00329272","cg09010107",
 #' "cg15386853", "cg10097755", "cg09247779","cg09181054","cg19371916")
-#' data(elmer.data.example)
+#'   data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
+#'   message(e)
+#'   data(elmer.data.example, envir = environment())
+#'   })
 #' bg <- rownames(getMet(data))
 #' enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
 #'                                      probes=probes,
@@ -849,12 +858,10 @@ get.enriched.motif <- function(data,
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
     message("Loading object: ",file)
-    newenv <- new.env()
-    if(file == "Probes.motif.hg38.450K") data("Probes.motif.hg38.450K", package = "ELMER.data",envir=newenv)
-    if(file == "Probes.motif.hg19.450K") data("Probes.motif.hg19.450K", package = "ELMER.data",envir=newenv)
-    if(file == "Probes.motif.hg38.EPIC") data("Probes.motif.hg38.EPIC", package = "ELMER.data",envir=newenv)
-    if(file == "Probes.motif.hg19.EPIC") data("Probes.motif.hg19.EPIC", package = "ELMER.data",envir=newenv)
-    probes.motif <- get(ls(newenv)[1],envir=newenv)   
+    if(file == "Probes.motif.hg38.450K") probes.motif <- getdata("Probes.motif.hg38.450K")
+    if(file == "Probes.motif.hg19.450K") probes.motif <- getdata("Probes.motif.hg19.450K")
+    if(file == "Probes.motif.hg38.EPIC") probes.motif <- getdata("Probes.motif.hg38.EPIC")
+    if(file == "Probes.motif.hg19.EPIC") probes.motif <- getdata("Probes.motif.hg19.EPIC")
   }  
   all.probes.TF <- probes.motif
   ## here need to be add motif search part.
@@ -1059,7 +1066,10 @@ get.enriched.motif <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#' data(elmer.data.example)
+#'   data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
+#'   message(e)
+#'   data(elmer.data.example, envir = environment())
+#'   })
 #' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
