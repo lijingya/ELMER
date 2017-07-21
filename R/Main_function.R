@@ -409,7 +409,7 @@ get.pair <- function(data,
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
-  print(Probe.gene)
+
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
