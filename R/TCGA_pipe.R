@@ -334,12 +334,13 @@ TCGA.pipe <- function(disease,
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
                                             dir.out, diff.dir), 
                                     stringsAsFactors=FALSE)$Probe)
-      if(length(Sig.probes) < 2) message ("No significants pairs were found in the previous step") 
-      return(NULL)
+      if(length(Sig.probes) < 2) {
+        message ("No significants pairs were found in the previous step") 
+        return(NULL)
+      }
     } else {
       message(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
       return(NULL)
-      
     }
     params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
     
