@@ -375,6 +375,10 @@ TCGA.pipe <- function(disease,
     enriched.motif <- args[names(args) %in% "enriched.motif"]
     if(length(enriched.motif) == 0){
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
+      if(length(enriched.motif) == 0) {
+        messgae("No enriched motifs were found")
+        return(NULL)
+      }
     }
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
