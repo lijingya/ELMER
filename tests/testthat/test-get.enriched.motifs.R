@@ -1,7 +1,7 @@
 context("Check get enriched motif function")
 
 test_that("get enriched motif function returns the expected result", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   bg <- rownames(getMet(data))
   probes <- bg[1:20]
   
@@ -17,7 +17,7 @@ test_that("get enriched motif function returns the expected result", {
   rownames(Probes.motif) <- bg
   Probes.motif[probes,4] <- 1
   Probes.motif[1,] <- c(0,0,1,0) # The case before will give an execption
-  sink("/dev/null");
+
   suppressMessages({
     enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
                                          probes=probes,lower.OR = 0.1,
@@ -36,7 +36,7 @@ test_that("get enriched motif function returns the expected result", {
   rownames(Probes.motif) <- bg
   Probes.motif[1,] <- c(0,0,1) # The case before will give an execption
   
-  sink("/dev/null");
+
   suppressMessages({
     enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
                                          probes=probes,
@@ -49,7 +49,7 @@ test_that("get enriched motif function returns the expected result", {
 })
 
 test_that("min.incidence works", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   bg <- rownames(getMet(data))
   probes <- bg[1:20]
   
@@ -65,7 +65,7 @@ test_that("min.incidence works", {
   rownames(Probes.motif) <- bg
   Probes.motif[probes,4] <- 1
   Probes.motif[1,] <- c(0,0,1,0) # The case before will give an execption
-  sink("/dev/null");
+
   suppressMessages({
     
     enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
@@ -77,7 +77,7 @@ test_that("min.incidence works", {
                                          label="hypo")
   })
   expect_true(length(enriched.motif) == 0)
-  sink("/dev/null");
+
   suppressMessages({
     
     enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
@@ -89,7 +89,7 @@ test_that("min.incidence works", {
                                          label="hypo")
   })
   expect_true(length(enriched.motif) == ncol(Probes.motif))
-  sink("/dev/null");
+
   suppressMessages({
     enriched.motif <- get.enriched.motif(probes.motif=Probes.motif,
                                          probes=probes,

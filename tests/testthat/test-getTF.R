@@ -1,7 +1,7 @@
 context("Get TF")
 
 test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
@@ -9,7 +9,6 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                                                  "cg00329272", "cg09010107", 
                                                  "cg15386853", "cg10097755", 
                                                  "cg09247779", "cg09181054"))
-  sink("/dev/null");
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -30,7 +29,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                   group2 = "NT",
                   label="hypo")
   })
-  sink();
+
   tf.family <- createMotifRelevantTfs()  
   expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
   expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
@@ -41,7 +40,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
 })  
 
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {
-  data(elmer.data.example, envir = environment())
+  data <- ELMER:::getdata("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
@@ -49,14 +48,13 @@ test_that("Shows NA if top5 TFs does not include any member of the motif TF fami
                                                  "cg00329272", "cg09010107", 
                                                  "cg15386853", "cg10097755", 
                                                  "cg09247779", "cg09181054"))
-  sink("/dev/null");
   suppressMessages({
     TF <- get.TFs(data, enriched.motif, label = "hypo",
                   group.col = "shortLetterCode",
                   group1 = "TP",
                   group2 = "NT")  
   })
-  sink();
+
   tf.family <- createMotifRelevantTfs()  
   human.tf <- getTF()
   # Check if top5 has 5% elements that TF from the object
@@ -100,7 +98,7 @@ test_that("Test if the results is right", {
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
   
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -115,7 +113,7 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   
   expect_true(TF$potential.TF.family == "TP73")
   expect_true(TF$top.potential.TF.family == "TP73")
@@ -123,7 +121,7 @@ test_that("Test if the results is right", {
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
   # Will give us the same result
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -139,7 +137,7 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   expect_true(TF$potential.TF.family == "TP73")
   expect_true(TF$top.potential.TF.family == "TP73")
   expect_true(TF$top_5percent == "TP73")
@@ -165,7 +163,7 @@ test_that("Test if the results is right", {
   data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -180,14 +178,14 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
+
   expect_true(TF$potential.TF.family == "TP53")
   expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
   
   # Changing percentage to 50% (split in half: 3 samples as methylated and 3 as unmethylated)
   # Will give us the same result
-  sink("/dev/null");
+
   suppressMessages({
     TF <- get.TFs(data, 
                   enriched.motif, 
@@ -203,7 +201,6 @@ test_that("Test if the results is right", {
                                    stringsAsFactors = FALSE),
                   label = "hypo")
   })
-  sink();
   expect_true(TF$potential.TF.family == "TP53")
   expect_true(TF$top.potential.TF.family == "TP53")
   expect_true(TF$top_5percent == "TP53")
@@ -218,5 +215,6 @@ test_that("It creates a PDF with the TF ranking plot", {
   unlink("subfamily.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
   unlink("HumanTF.rda",recursive = TRUE, force = TRUE)
   unlink("family.motif.relevant.TFs.rda",recursive = TRUE, force = TRUE)
+  unlink("getTF.hypo.TFs.with.motif.pvalue.rda",recursive = TRUE, force = TRUE)
 })
   
