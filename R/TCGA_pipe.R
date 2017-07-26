@@ -209,10 +209,18 @@ TCGA.pipe <- function(disease,
                             dir.out = dir.out, 
                             cores = cores, 
                             minSubgroupFrac = minSubgroupFrac))
+    diff.meth <- tryCatch({
     diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
                                                      group.col = group.col, 
                                                      group1 = group1,
                                                      group2 = group2)))
+      diff.meth
+    }, error = function(e) {
+      message(e)
+      return(NULL)
+    })
+    if(is.null(diff.meth)) return(NULL)
+    
     if(length(analysis)==1) return(diff.meth)
   }
   
@@ -375,11 +383,8 @@ TCGA.pipe <- function(disease,
     enriched.motif <- args[names(args) %in% "enriched.motif"]
     if(length(enriched.motif) == 0){
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
-      if(length(enriched.motif) == 0) {
-        messgae("No enriched motifs were found")
-        return(NULL)
-      }
     }
+   
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
                    c(list(data           = mae, 
