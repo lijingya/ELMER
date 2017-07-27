@@ -616,6 +616,7 @@ createMotifRelevantTfs <- function(classification = "family"){
   message("Accessing hocomoco to get last version of TFs ", classification)
   file <- paste0(classification,".motif.relevant.TFs.rda")
   if(!file.exists(file)){
+    motif.relevant.TFs <- tryCatch({
     # Download from http://hocomoco.autosome.ru/human/mono
     tf.family <- "http://hocomoco.autosome.ru/human/mono" %>% read_html()  %>%  html_table()
     tf.family <- tf.family[[1]]
@@ -635,6 +636,14 @@ createMotifRelevantTfs <- function(classification = "family"){
     attr(motif.relevant.TFs,which="split_type") <- NULL
     attr(motif.relevant.TFs,which="split_labels") <- NULL
     save(motif.relevant.TFs, file = file)
+    motif.relevant.TFs
+    }, error = function(e) {
+      message("Retrieving from ELMER.data.")
+      if(classification == "family") motif.relevant.TFs <- getdata("TF.family")
+      if(classification == "subfamily") motif.relevant.TFs <- getdata("TF.subfamily")
+      save(motif.relevant.TFs, file = file)
+      motif.relevant.TFs
+    }, finally = closeAllConnections())
   } else {
     motif.relevant.TFs <- get(load(file))
   }
