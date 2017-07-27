@@ -1066,9 +1066,11 @@ get.enriched.motif <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#'   data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
-#'   message(e)
-#'   data(elmer.data.example, envir = environment())
+#'   data <- tryCatch(
+#'   ELMER:::getdata("elmer.data.example"), 
+#'   error = function(e) {
+#'     message(e)
+#'      data(elmer.data.example, envir = environment())
 #'   })
 #' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
