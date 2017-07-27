@@ -638,7 +638,7 @@ createMotifRelevantTfs <- function(classification = "family"){
     save(motif.relevant.TFs, file = file)
     motif.relevant.TFs
     }, error = function(e) {
-      message("Retrieving from ELMER.data.")
+      message("Retrieving TFClass classification from ELMER.data.")
       if(classification == "family") motif.relevant.TFs <- getdata("TF.family")
       if(classification == "subfamily") motif.relevant.TFs <- getdata("TF.subfamily")
       save(motif.relevant.TFs, file = file)
