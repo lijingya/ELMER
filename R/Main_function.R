@@ -1114,8 +1114,12 @@ get.TFs <- function(data,
     stop("enriched.motif is empty.")
   }else if(is.character(enriched.motif)){
     enriched.motif <- get(load(enriched.motif)) # The data is in the one and only variable
-  }else if(!is.list(enriched.motif)){
+  } else if(!is.list(enriched.motif)){
     stop("enriched.motif option should be a list object.")
+  }
+  if(length(enriched.motif) == 0) {
+    message("No enriched motifs were found in the last step")
+    return(NULL)
   }
   
   if(missing(group.col)) stop("Please set group.col argument")
