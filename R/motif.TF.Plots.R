@@ -132,6 +132,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' # Same as above
 #' TF.rank.plot(motif.pvalue=TF.meth.cor,  
 #'             motif="P53_HUMAN.H10MO.B", 
+#'             dir.out = "TFplots",
 #'             TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H10MO.B"],
 #'             save=TRUE)
 TF.rank.plot <- function(motif.pvalue, 
@@ -201,11 +202,12 @@ TF.rank.plot <- function(motif.pvalue,
     
 
     if(save){
+      dir.create(dir.out, showWarnings = FALSE,recursive = TRUE)
       file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
       message("Saving plot as: ", file)
       pdf(file, useDingbats=FALSE, width=10, height = 8)
       plot(P)
-      invisible(dev.off())
+      try(dev.off(),silent=TRUE)
     }
     Plots[[i]] <- P
   }

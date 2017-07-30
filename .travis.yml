@@ -69,8 +69,7 @@ after_script:
   - FILE=$(ls -1t *.tar.gz | head -n 1)
   - Rscript -e "library(BiocCheck); BiocCheck(\"${FILE}\")
 
-r_build_args: --no-build-vignettes --no-manual --no-resave-data
-r_check_args: --no-build-vignettes --no-manual
+r_build_args:  --no-resave-data
 
 notifications:
     slack: junkdnalab:KV8Dr7etoqqDQPsORdaZLOz2

@@ -1255,14 +1255,14 @@ get.TFs <- function(data,
   
   print.header("Creating plots", "subsection")
   message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot_family",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_family",dir.out),showWarnings = FALSE)
+  dir.create(sprintf("%s/TFrankPlot_family",dir.out),showWarnings = FALSE,recursive = TRUE)
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
                TF.label =  TF.family[colnames(TF.meth.cor)],
                dir.out=sprintf("%s/TFrankPlot_family",dir.out), 
                save=TRUE)
   message("TF rank plot highlighting TF in the same subfamily (folder: ", sprintf("%s/TFrankPlot_subfamily",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out),showWarnings = FALSE)
+  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out),showWarnings = FALSE,recursive = TRUE)
   TF.rank.plot(motif.pvalue=TF.meth.cor, 
                motif=colnames(TF.meth.cor), 
                TF.label =  TF.subfamily[colnames(TF.meth.cor)],

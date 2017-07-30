@@ -61,7 +61,9 @@ this ranking were considered candidate upstream regulators.
 # Load results from previous sections
 mae <- get(load("mae.rda"))
 load("result/getMotif.hypo.enriched.motifs.rda")
+```
 
+```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
 ## identify regulatory TF for the enriched motifs
 TF <- get.TFs(data = mae, 
               group.col = "definition",
