@@ -63,6 +63,7 @@ TF.rank.plot(motif.pvalue=TF.meth.cor,
 # Same as above
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
             motif="P53_HUMAN.H10MO.B", 
+            dir.out = "TFplots",
             TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H10MO.B"],
             save=TRUE)
 }
