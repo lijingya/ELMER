@@ -205,9 +205,7 @@ TF.rank.plot <- function(motif.pvalue,
       dir.create(dir.out, showWarnings = FALSE,recursive = TRUE)
       file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
       message("Saving plot as: ", file)
-      pdf(file, useDingbats=FALSE, width=10, height = 8)
-      plot(P)
-      try(dev.off(),silent=TRUE)
+      ggsave(P,filename = file, height = 8, width = 10)
     }
     Plots[[i]] <- P
   }
