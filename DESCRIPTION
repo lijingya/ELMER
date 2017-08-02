@@ -51,6 +51,7 @@ Imports:
     lattice, 
     magrittr, 
     readr, 
+    evaluate,
     rvest,
     xml2,
     plotly
