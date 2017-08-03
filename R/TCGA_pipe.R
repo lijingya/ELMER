@@ -179,12 +179,6 @@ TCGA.pipe <- function(disease,
       
       # if user set genes argument label Mutant WT will be added to mae
       if(!is.null(genes)) mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
-      
-      if(!all(sample.type %in% colData(mae)[,group.col])){
-        print(table(colData(mae)[,group.col]))
-        message("There are no samples for both groups")
-        return(NULL)
-      }
     } else {
       message("File already exists: ", file)
       mae <- get(load(file))
