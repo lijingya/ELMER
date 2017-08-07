@@ -18,6 +18,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+<br>
 
 # Loading required data for plot
 ```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}

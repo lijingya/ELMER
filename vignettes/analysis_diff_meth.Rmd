@@ -17,6 +17,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+<br>
+
 # Identifying differentially methylated probes
 
 This step is to identify DNA methylation changes at distal enhancer probes which is

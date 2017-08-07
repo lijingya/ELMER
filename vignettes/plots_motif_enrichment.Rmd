@@ -18,6 +18,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+<br>
+
 # Motif enrichment plot
 Motif  enrichment plot shows the enrichment levels for the selected motifs. 
 
