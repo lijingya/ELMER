@@ -1,7 +1,4 @@
 ---
-title: "3.2 - Identifying differentially methylated probes"
-author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -20,9 +17,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-# Analysis
-
-## Identifying differentially methylated probes
+# Identifying differentially methylated probes
 
 This step is to identify DNA methylation changes at distal enhancer probes which is
 carried out by function `get.diff.meth`.

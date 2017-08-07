@@ -1,7 +1,4 @@
 ---
-title: "3.3 - Identifying putative probe-gene pairs"
-author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -20,9 +17,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-# Analysis
-
-## Identifying putative probe-gene pairs
+# Identifying putative probe-gene pairs
 
 This step is to link enhancer probes with methylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out

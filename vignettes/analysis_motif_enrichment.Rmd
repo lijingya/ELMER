@@ -1,7 +1,4 @@
 ---
-title: "3.4 - Motif enrichment analysis on the selected probes"
-author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -20,9 +17,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-# Analysis
 
-## Motif enrichment analysis on the selected probes
+# Motif enrichment analysis on the selected probes
 
 This step is to identify enriched motif in a set of probes which is carried out by
 function `get.enriched.motif`.

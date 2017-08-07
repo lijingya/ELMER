@@ -13,15 +13,15 @@ navbar:
       icon: fa-flask
       menu:
         - text: "Analysis steps"
-        - text: "1.1 - Creating MAE with distal probes (data input)"
+        - text: "1 - Creating MAE with distal probes (data input)"
           href: analysis_data_input.html
-        - text: "1.2 - Identifying differentially methylated probes"
+        - text: "2 - Identifying differentially methylated probes"
           href: analysis_diff_meth.html
-        - text: "1.3 -Identifying putative probe-gene pairs"
+        - text: "3 - Identifying putative probe-gene pairs"
           href: analysis_get_pair.html
-        - text: "1.4 -Motif enrichment analysis on the selected probes"
+        - text: "4 - Motif enrichment analysis on the selected probes"
           href: analysis_motif_enrichment.html
-        - text: "1.5 - Identifying regulatory TFs"
+        - text: "5 - Identifying regulatory TFs"
           href: analysis_regulatory_tf.html
         - text: "---------"
         - text: "Compact version with TCGA data"
@@ -31,13 +31,14 @@ navbar:
     - text: "Plots"
       icon: fa-photo
       menu:
-        - text: "2.1 - Scatter plots"
+        - text: "Plot functions"
+        - text: "1 - Scatter plots"
           href: plots_scatter.html
-        - text: "2.2 - Schematic plots"
+        - text: "2 - Schematic plots"
           href: plots_schematic.html
-        - text: "2.3 - Motif enrichment plots"
+        - text: "3 - Motif enrichment plots"
           href: plots_motif_enrichment.html
-        - text: "2.4 - Regulatory TF plots"
+        - text: "4 - Regulatory TF plots"
           href: plots_TF.html
     - text: "Graphical User interface"
       icon: fa-hand-pointer-o

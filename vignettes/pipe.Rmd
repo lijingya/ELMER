@@ -1,7 +1,4 @@
 ---
-title: "3.6 - TCGA.pipe: Running ELMER for TCGA data in a compact way"
-author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -20,7 +17,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-# TCGA.pipe
+# TCGA.pipe: Running ELMER for TCGA data in a compact way
 
 `TCGA.pipe` is a function for easily downloading TCGA data from GDC using TCGAbiolinks package [@TCGAbiolinks]
 and performing all the analyses in ELMER. For illustration purpose, we skip the downloading step. 

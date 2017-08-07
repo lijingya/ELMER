@@ -1,7 +1,4 @@
 ---
-title: "4.3 - Motif enrichment plots"
-author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
