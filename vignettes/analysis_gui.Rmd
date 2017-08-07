@@ -1,7 +1,4 @@
 ---
-title: "5 - Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
-author: "Tiago Chedraoui Silva, Simon Coetzee, Dennis Hazelett, Ben Berman, Houtan Noushmehr"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
