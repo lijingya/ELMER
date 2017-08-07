@@ -35,7 +35,6 @@ Imports:
     IRanges,
     GenomeInfoDb,
     S4Vectors,
-    data.table,
     GenomicFeatures,
     TCGAbiolinks (>= 2.5.5),
     plyr,

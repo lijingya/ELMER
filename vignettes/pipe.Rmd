@@ -1,6 +1,6 @@
 ---
-title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
-author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
+title: "3.6 - TCGA.pipe: Running ELMER for TCGA data in a compact way"
+author: "Lijing Yao [aut], Tiago Chedraoui Silva [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -16,7 +16,7 @@ output:
   
 bibliography: bibliography.bib    
 vignette: >
-  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteIndexEntry{"3.6 - TCGA.pipe: Running ELMER for TCGA data in a compact way"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
