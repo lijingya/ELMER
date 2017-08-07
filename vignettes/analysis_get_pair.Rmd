@@ -17,6 +17,9 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+<br>
+
 # Identifying putative probe-gene pairs
 
 This step is to link enhancer probes with methylation changes to target genes with expression

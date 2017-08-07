@@ -21,6 +21,8 @@ vignette: >
 devtools::load_all(".")
 ```
 
+<br>
+
 # Introduction
 
 In this section, we will perform the same analysis performed using ELMER,

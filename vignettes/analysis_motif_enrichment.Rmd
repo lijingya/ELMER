@@ -18,6 +18,8 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+<br>
+
 # Motif enrichment analysis on the selected probes
 
 This step is to identify enriched motif in a set of probes which is carried out by
