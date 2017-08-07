@@ -190,7 +190,7 @@ schematic.plot <- function(data,
   })
 }
 
-#' @importFrom grDevices rainbow
+#' @importFrom grDevices rainbow pdf dev.off
 #' @importFrom GenomicRanges seqnames
 #' @importFrom MultiAssayExperiment metadata
 schematic <- function(data,

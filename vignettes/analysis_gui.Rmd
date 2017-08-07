@@ -1,5 +1,5 @@
 ---
-title: "Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
+title: "5 - Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
 author: "Tiago Chedraoui Silva, Simon Coetzee, Dennis Hazelett, Ben Berman, Houtan Noushmehr"
 date: "`r Sys.Date()`"
 output: 
@@ -15,7 +15,7 @@ output:
     css: style.css
 bibliography: bibliography.bib    
 vignette: >
-  %\VignetteIndexEntry{Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI}
+  %\VignetteIndexEntry{5 - Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
