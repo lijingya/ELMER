@@ -22,7 +22,8 @@ vignette: >
 ---
 # TCGA.pipe
 
-`TCGA.pipe` is a function for easily downloading TCGA data and performing all the analyses in ELMER. For illustration purpose, we skip the downloading step. 
+`TCGA.pipe` is a function for easily downloading TCGA data from GDC using TCGAbiolinks package [@TCGAbiolinks]
+and performing all the analyses in ELMER. For illustration purpose, we skip the downloading step. 
 The user can use the `getTCGA` function to download TCGA data or
 use `TCGA.pipe` by including "download" in the analysis option.
 
@@ -65,9 +66,10 @@ For more information please read the analysis section of the vignette.
 
 # Using mutation data to identify groups
 
-We add in `TCGA.pipe` function (download step) the option to identify mutant samples to perform WT vs Mutant analysis. It will download open MAF file from GDC database, select a gene and identify the which are the mutant samples based on the following cliassification:
-c("#008B00", "#FFFFFF", "#FFFFFF")
-The  classification below was used, but it can be changed using the atgument `mutant_variant_classification`.
+We add in `TCGA.pipe` function (download step) the option to identify mutant samples to perform WT vs Mutant analysis. 
+It will download open [MAF file](https://docs.gdc.cancer.gov/Data/File_Formats/MAF_Format/) 
+from GDC database [@grossman2016toward], select a gene and identify the which are the mutant samples based on the following classification:
+(it can be changed using the atgument `mutant_variant_classification`).
 
 <div class="panel panel-info">
 <div class="panel-heading"> Mutations classification  </div>
