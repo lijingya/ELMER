@@ -1,7 +1,4 @@
 ---
-title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
-author: "Lijing Yao, Tiago Chedraoui Silva [ctb], Simon Coetzee [ctb], Ben Berman [aut], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -16,12 +13,14 @@ output:
   
 bibliography: bibliography.bib    
 vignette: >
-  %\VignetteIndexEntry{"ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteIndexEntry{"3.5 - Identifying regulatory TFs"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-# Analysis
-## Identifying regulatory TFs
+
+<br>
+
+# Identifying regulatory TFs
 
 
 This step is to identify regulatory TF whose expression associates with TF binding motif 

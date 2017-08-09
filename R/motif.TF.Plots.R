@@ -98,8 +98,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'@export
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @importFrom graphics plot
-#' @importFrom grDevices dev.off pdf
-#' @importFrom evaluate evaluate 
+#' @importFrom ggplot2 ggsave
 #'@examples
 #' library(ELMER)
 #'   data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
@@ -206,7 +205,7 @@ TF.rank.plot <- function(motif.pvalue,
       dir.create(dir.out, showWarnings = FALSE,recursive = TRUE)
       file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
       message("Saving plot as: ", file)
-      evaluate::evaluate("ggsave(P,filename = file, height = 8, width = 10)")
+      ggsave(P,filename = file, height = 8, width = 10)
     }
     Plots[[i]] <- P
   }

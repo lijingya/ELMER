@@ -1,7 +1,4 @@
 ---
-title: "Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
-author: "Tiago Chedraoui Silva, Simon Coetzee, Dennis Hazelett, Ben Berman, Houtan Noushmehr"
-date: "`r Sys.Date()`"
 output: 
   html_document:
     self_contained: true
@@ -15,7 +12,7 @@ output:
     css: style.css
 bibliography: bibliography.bib    
 vignette: >
-  %\VignetteIndexEntry{Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI}
+  %\VignetteIndexEntry{5 - Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -23,6 +20,8 @@ vignette: >
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning = FALSE}
 devtools::load_all(".")
 ```
+
+<br>
 
 # Introduction
 
