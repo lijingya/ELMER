@@ -336,7 +336,12 @@ TCGA.pipe <- function(disease,
   # search enriched motif
   if("motif" %in% tolower(analysis)){
     print.header("Motif search")
-    
+    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+    if(!file.exists(mae.file)){
+      message("MAE not found, please run pipe with createMAE or all options")
+      return(NULL)
+    }
+    load(mae.file)
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
@@ -358,7 +363,8 @@ TCGA.pipe <- function(disease,
     probes.motif <- get(ls(newenv)[1],envir=newenv)   
     
     enriched.motif <- do.call(get.enriched.motif, 
-                              c(list(probes.motif = probes.motif,
+                              c(list(data         = mae,
+                                     probes.motif = probes.motif,
                                      probes       = Sig.probes,
                                      dir.out      = dir.out,
                                      label        = diff.dir),
