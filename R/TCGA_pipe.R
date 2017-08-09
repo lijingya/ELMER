@@ -338,13 +338,13 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
-      Sig.probes <- unique(read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",
-                                            dir.out, diff.dir), 
-                                    stringsAsFactors=FALSE)$Probe)
-      if(length(Sig.probes) < 2) {
+      Sig.probes <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), stringsAsFactors=FALSE)
+      if(nrow(Sig.probes) < 2) {
         message ("No significants pairs were found in the previous step") 
         return(NULL)
       }
+    Sig.probes <- unique(Sig.probes$Probe)
+      
     } else {
       message(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
       return(NULL)
