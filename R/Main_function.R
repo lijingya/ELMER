@@ -792,6 +792,7 @@ promoterMeth <- function(data,
 #' @param label A character. Labels the outputs such as "hypo", "hyper"
 #' @param save If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
 #' getMotif.XX.motif.enrichment.csv (see detail).
+#' @param plot.title Plot title. Default: no title.
 #' @return A list contains enriched motifs with the probes regions harboring the motif.
 #' @export 
 #' @details 
@@ -853,7 +854,8 @@ get.enriched.motif <- function(data,
                                min.incidence = 10, 
                                dir.out="./",
                                label=NULL,
-                               save=TRUE){
+                               save=TRUE,
+                               plot.title=NULL){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -954,17 +956,11 @@ get.enriched.motif <- function(data,
     
     ## make plot 
     suppressWarnings({
-      motif.enrichment.plot(motif.enrichment = Summary, 
-                            significant = list(OR = 1.3), 
-                            dir.out = dir.out,
-                            label=paste0(label,".all.quality"), 
-                            save=TRUE)
-    })
-    suppressWarnings({
       motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                             significant = list(OR = 1.3), 
                             dir.out = dir.out,
                             label=paste0(label,".quality.A-",toupper(min.motif.quality)),
+                            title = plot.title,
                             save=TRUE)
     })
     ## add information to siginificant pairs

@@ -45,6 +45,8 @@ are the significantly enriched motifs (detail see reference).}
 
 \item{save}{If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
 getMotif.XX.motif.enrichment.csv (see detail).}
+
+\item{plot.title}{Plot title. Default: no title.}
 }
 \value{
 A list contains enriched motifs with the probes regions harboring the motif.
