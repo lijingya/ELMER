@@ -19,6 +19,8 @@ Current directory is default.}
 \item{save}{A logic. If true (default), figure will be saved to dir.out.}
 
 \item{label}{A character. Labels the outputs figure.}
+
+\item{title}{Plot title. Default: no title}
 }
 \value{
 A figure shows the enrichment level for selected motifs.

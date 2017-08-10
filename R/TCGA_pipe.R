@@ -361,7 +361,10 @@ TCGA.pipe <- function(disease,
                                      probes.motif = probes.motif,
                                      probes       = Sig.probes,
                                      dir.out      = dir.out,
-                                     label        = diff.dir),
+                                     label        = diff.dir,
+                                     title = paste0("OR for paired probes ",
+                                                    diff.dir, " methylated in ",
+                                                    group1, " vs ",group2, "(group: ",group.col,")")),
                                 params))
     
     if(length(analysis) == 1) return(enriched.motif)

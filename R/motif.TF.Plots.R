@@ -11,6 +11,7 @@
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out.
 #'@param label A character. Labels the outputs figure.
+#'@param title Plot title. Default: no title
 #'@return A figure shows the enrichment level for selected motifs.
 #'@details motif.enrichment If input data.frame object, it should contain "motif",
 #' "OR", "lowerOR", "upperOR" columns. motif specifies name of motif; 
@@ -31,19 +32,25 @@
 #'@export
 #'@importFrom grid gpar
 #'@examples
-#'motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
-#'                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
-#'                               lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
-#'                               upperOR =c(23,5,3,7,6,5,5),
-#'                               stringsAsFactors=FALSE)
-#'motif.enrichment.plot(motif.enrichment=motif.enrichment,
-#'                      significant=list(OR=3),
-#'                      label="hypo", save=FALSE)
+#' motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
+#'                                OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+#'                                lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
+#'                                upperOR =c(23,5,3,7,6,5,5),
+#'                                stringsAsFactors=FALSE)
+#' motif.enrichment.plot(motif.enrichment=motif.enrichment,
+#'                       significant=list(OR=3),
+#'                       label="hypo", save=FALSE)
+#' motif.enrichment.plot(motif.enrichment = motif.enrichment,
+#'                       significant = list(OR = 3),
+#'                       label = "hypo", 
+#'                       title = "OR for paired probes hypomethylated in Mutant vs WT",
+#'                       save = FALSE)
 motif.enrichment.plot <- function(motif.enrichment, 
-                                  significant=NULL, 
+                                  significant = NULL, 
                                   dir.out ="./", 
-                                  save=TRUE,
-                                  label=NULL){
+                                  save = TRUE,
+                                  label = NULL,
+                                  title = NULL){
   if(missing(motif.enrichment)) stop("motif.enrichment is missing.")
   if(is.character(motif.enrichment)){
     motif.enrichment <- read.csv(motif.enrichment, stringsAsFactors=FALSE)
@@ -65,6 +72,7 @@ motif.enrichment.plot <- function(motif.enrichment,
     theme_bw() +
     theme(panel.grid.major = element_blank()) +
     xlab("Motifs") + ylab("Odds Ratio") +
+    ggtitle(label = title, subtitle = NULL) + 
     scale_y_continuous(breaks=c(1,pretty(motif.enrichment$OR, n = 5)))
   if(save) ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
                   useDingbats = FALSE, 
