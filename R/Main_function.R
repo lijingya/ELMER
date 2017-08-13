@@ -607,14 +607,16 @@ get.permu <- function(data,
       permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=FALSE]
       permu <- cbind(permu, permu.file)
     }
+  } else if(is.null(permu) & length(file) > 0) {
+    permu <- permu.file
   }
   
   # For the missing genes calculate for all probes
   if(length(missing.genes) > 0) {
     # Get all probes
-    permu.meth <- assay(getMet(data)[colnames(permu),] )
+    permu.meth <- assay(getMet(data)[probes.permu,] )
     exps <- exp.data[missing.genes,,drop=FALSE]
-    permu.genes <- alply(.data = colnames(permu), .margins = 1,
+    permu.genes <- alply(.data = probes.permu, .margins = 1,
                          .fun = function(x) {
                            Stat.nonpara.permu(
                              Probe = x,
@@ -633,7 +635,7 @@ get.permu <- function(data,
     
     permu.genes <- do.call(cbind,permu.genes)
     rownames(permu.genes) <- missing.genes
-    colnames(permu.genes) <- colnames(permu)
+    colnames(permu.genes) <- probes.permu
     # Adding new genes
     # Make sure probes are in the same order
     permu.genes <- permu.genes[,match(colnames(permu.genes),colnames(permu))]
@@ -646,9 +648,7 @@ get.permu <- function(data,
     dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
     save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
   }
-  if(is.null(permu)) {
-    permu <- permu.file[geneID,probes.permu, drop = FALSE]
-  }
+  permu <- permu[geneID,probes.permu, drop = FALSE]
   return(permu)
 }
 
