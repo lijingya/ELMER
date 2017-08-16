@@ -965,7 +965,6 @@ get.enriched.motif <- function(data,
                           dir.out = dir.out,
                           summary = TRUE,
                           label=paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
-                          label=paste0(label,".quality.A-",toupper(min.motif.quality)),
                           title = plot.title,
                           save=TRUE)
   })
