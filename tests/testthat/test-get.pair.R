@@ -52,6 +52,7 @@ test_that("Function uses correctly the permu.dir", {
                         pvalue =  0.001,
                         Pe = 0.001,
                         dir.out="./",
+                        permu.dir = "permu_test",
                         label= "hypo")
   # Pvalue filter is working
   expect_true(nrow(Hypo.pair) == 0)
@@ -66,6 +67,26 @@ test_that("Function uses correctly the permu.dir", {
                         nearGenes=nearGenes,
                         permu.size=7,
                         pvalue =  0.001,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label= "hypo")
+
+  # If we add new genes and new probes
+  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg19403323",
+                                                  "cg17468663",
+                                                  "cg00329272",
+                                                  "cg14036402",
+                                                  "cg10097755",
+                                                  "cg22396959"),],
+                            geneAnnot=getExp(data))
+  Hypo.pair <- get.pair(data=data,
+                        group.col = "definition", 
+                        group1 = "Primary solid Tumor", 
+                        group2 = "Solid Tissue Normal",
+                        nearGenes=nearGenes,
+                        permu.size=10,
+                        pvalue =  0.01,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",

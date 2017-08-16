@@ -607,6 +607,8 @@ get.permu <- function(data,
       permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=FALSE]
       permu <- cbind(permu, permu.file)
     }
+  } else if(is.null(permu) & length(file) > 0) {
+    permu <- permu.file
   }
   
   # For the missing genes calculate for all probes
@@ -638,17 +640,13 @@ get.permu <- function(data,
     # Make sure probes are in the same order
     permu.genes <- permu.genes[,match(colnames(permu.genes),colnames(permu))]
     permu <- rbind(permu,permu.genes)
-    permu <- permu[match(rownames(permu),geneID),
-                   match(colnames(permu),probes.permu)]
   }
   
   if(!is.null(permu.dir) & !is.null(permu)) {
     dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
     save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
   }
-  if(is.null(permu)) {
-    permu <- permu.file[geneID,probes.permu, drop = FALSE]
-  }
+  permu <- permu[geneID,probes.permu, drop = FALSE]
   return(permu)
 }
 
@@ -792,6 +790,7 @@ promoterMeth <- function(data,
 #' @param label A character. Labels the outputs such as "hypo", "hyper"
 #' @param save If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
 #' getMotif.XX.motif.enrichment.csv (see detail).
+#' @param plot.title Plot title. Default: no title.
 #' @return A list contains enriched motifs with the probes regions harboring the motif.
 #' @export 
 #' @details 
@@ -853,7 +852,8 @@ get.enriched.motif <- function(data,
                                min.incidence = 10, 
                                dir.out="./",
                                label=NULL,
-                               save=TRUE){
+                               save=TRUE,
+                               plot.title=NULL){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -965,6 +965,8 @@ get.enriched.motif <- function(data,
                           dir.out = dir.out,
                           summary = TRUE,
                           label=paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
+                          label=paste0(label,".quality.A-",toupper(min.motif.quality)),
+                          title = plot.title,
                           save=TRUE)
   })
   ## add information to siginificant pairs
@@ -990,6 +992,7 @@ get.enriched.motif <- function(data,
                 row.names=FALSE)
     }
   }
+  
   return(enriched.motif)
 }
 

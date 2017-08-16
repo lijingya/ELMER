@@ -204,10 +204,10 @@ TCGA.pipe <- function(disease,
                             cores = cores, 
                             minSubgroupFrac = minSubgroupFrac))
     diff.meth <- tryCatch({
-    diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
-                                                     group.col = group.col, 
-                                                     group1 = group1,
-                                                     group2 = group2)))
+      diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
+                                                       group.col = group.col, 
+                                                       group1 = group1,
+                                                       group2 = group2)))
       diff.meth
     }, error = function(e) {
       message(e)
@@ -242,15 +242,14 @@ TCGA.pipe <- function(disease,
     nearGenes.file <- args[names(args) %in% "nearGenes"]
     if(length(nearGenes.file)==0){
       nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
-      if(!file.exists(nearGenes.file)){
-        params <- args[names(args) %in% c("geneNum")]
-        nearGenes <- do.call(GetNearGenes,
-                             c(list(data = mae, 
-                                    probes = Sig.probes,
-                                    cores = cores),
-                               params))
-        save(nearGenes,file=nearGenes.file)
-      }
+      params <- args[names(args) %in% c("geneNum")]
+      nearGenes <- do.call(GetNearGenes,
+                           c(list(data = mae, 
+                                  probes = Sig.probes,
+                                  cores = cores),
+                             params))
+      save(nearGenes,file=nearGenes.file)
+      message("File saved: ", nearGenes.file)
     } else {
       nearGenes.file <- nearGenes.file[["nearGenes"]]
     }
@@ -338,12 +337,14 @@ TCGA.pipe <- function(disease,
     load(mae.file)
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
-      Sig.probes <- readr::read_csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), col_names = T,col_types = c("cccicdd"))
-      if(nrow(Sig.probes) < 2) {
+      Sig.probes <- readr::read_csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), 
+                                    col_names = TRUE,
+                                    col_types = c("cccicdd"))
+      if(length(unique(Sig.probes)) < 10) {
         message ("No significants pairs were found in the previous step") 
         return(NULL)
       }
-    Sig.probes <- unique(Sig.probes$Probe)
+      Sig.probes <- unique(Sig.probes$Probe)
       
     } else {
       message(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
@@ -362,9 +363,9 @@ TCGA.pipe <- function(disease,
                                      probes       = Sig.probes,
                                      dir.out      = dir.out,
                                      label        = diff.dir,
-                                     title = paste0("OR for paired probes ",
-                                                    diff.dir, " methylated in ",
-                                                    group1, " vs ",group2, "(group: ",group.col,")")),
+                                     plot.title   = paste0("OR for paired probes ",
+                                                           diff.dir, " methylated in ",
+                                                           group1, " vs ",group2, "(group: ",group.col,")")),
                                 params))
     
     if(length(analysis) == 1) return(enriched.motif)
@@ -387,7 +388,7 @@ TCGA.pipe <- function(disease,
     if(length(enriched.motif) == 0){
       enriched.motif <- sprintf("%s/getMotif.%s.enriched.motifs.rda", dir.out, diff.dir)
     }
-   
+    
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
                    c(list(data           = mae, 
