@@ -21,6 +21,9 @@ Current directory is default.}
 \item{label}{A character. Labels the outputs figure.}
 
 \item{title}{Plot title. Default: no title}
+
+\item{summary}{Create a summary table along with the plot, it is necessary 
+to add two new columns to object (NumOfProbes and PercentageOfProbes)}
 }
 \value{
 A figure shows the enrichment level for selected motifs.
@@ -43,13 +46,34 @@ can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4)
 }
 \examples{
 motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
-                              OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
-                              lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
-                              upperOR =c(23,5,3,7,6,5,5),
-                              stringsAsFactors=FALSE)
+                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+                               lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
+                               upperOR =c(23,5,3,7,6,5,5),
+                               stringsAsFactors=FALSE)
 motif.enrichment.plot(motif.enrichment=motif.enrichment,
-                     significant=list(OR=3),
-                     label="hypo", save=FALSE)
+                      significant=list(OR=3),
+                      label="hypo", save=FALSE)
+motif.enrichment.plot(motif.enrichment = motif.enrichment,
+                      significant = list(OR = 3),
+                      label = "hypo", 
+                      title = "OR for paired probes hypomethylated in Mutant vs WT",
+                      save = FALSE)
+motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
+                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+                               lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
+                               upperOR =c(23,5,3,7,6,5,5),
+                               NumOfProbes = c(23,5,3,7,6,5,5),
+                               PercentageOfProbes = c(0.23,0.05,0.03,0.07,0.06,0.05,0.05),
+                               stringsAsFactors=FALSE)
+motif.enrichment.plot(motif.enrichment=motif.enrichment,
+                      significant=list(OR=3),
+                      label="hypo", save=FALSE)
+motif.enrichment.plot(motif.enrichment = motif.enrichment,
+                      significant = list(OR = 3),
+                      label = "hypo", 
+                      summary = TRUE,
+                      title = "OR for paired probes hypomethylated in Mutant vs WT",
+                      save = FALSE)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
