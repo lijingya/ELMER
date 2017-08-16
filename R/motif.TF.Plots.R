@@ -63,7 +63,7 @@
 #'                       label = "hypo", 
 #'                       summary = TRUE,
 #'                       title = "OR for paired probes hypomethylated in Mutant vs WT",
-#'                       save = FALSE)
+#'                       save = TRUE)
 motif.enrichment.plot <- function(motif.enrichment, 
                                   significant = NULL, 
                                   dir.out ="./", 
@@ -98,8 +98,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                             probe.col)
     )
     
-    data_table <- 
-      ggplot(lab, aes(x = y, y = x, label = format(z, nsmall = 1))) +
+    data_table <-  ggplot(lab, aes(x = y, y = x, label = format(z, nsmall = 1))) +
       theme_minimal() + 
       geom_text(size = 2.5, hjust=0, vjust=0.5) +
       geom_hline(aes(yintercept=c(nrow(motif.enrichment) - 0.5))) + 
@@ -134,11 +133,11 @@ motif.enrichment.plot <- function(motif.enrichment,
             plot.margin = unit(c(0,0,0,0), "lines"))
     
     suppressWarnings({
-      P <- grid.arrange(
-        arrangeGrob(data_table, P, ncol=2,
+      grid.newpage()
+      P <-  arrangeGrob(data_table, P, ncol=2,
                     widths = c(1,2), 
-                    heights = c(0.95,0.05)), 
-        top = title)
+                    heights = c(0.95,0.05),top = title) 
+        
     })    
   } else {
     
@@ -165,6 +164,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                   height = 2 * round(nrow(motif.enrichment)/8))
     return()
   }
+  if(summary) grid.arrange(P)
   return(P)
 }
 
