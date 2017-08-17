@@ -134,7 +134,6 @@ motif.enrichment.plot <- function(motif.enrichment,
             plot.margin = unit(c(0,0,0,0), "lines"))
     
     suppressWarnings({
-      grid.newpage()
       P <-  arrangeGrob(data_table, P, ncol=2,
                     widths = c(1,2), 
                     heights = c(0.95,0.05),top = title) 

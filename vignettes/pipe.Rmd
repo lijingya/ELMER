@@ -17,6 +17,8 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+<br>
+
 # TCGA.pipe: Running ELMER for TCGA data in a compact way
 
 `TCGA.pipe` is a function for easily downloading TCGA data from GDC using TCGAbiolinks package [@TCGAbiolinks]
