@@ -80,6 +80,7 @@ motif.enrichment.plot <- function(motif.enrichment,
       motif.enrichment <- motif.enrichment[motif.enrichment[,i] > significant[[i]],]
     }
   } 
+  if(nrow(motif.enrichment) == 0) return(NULL)
   motif.enrichment <- motif.enrichment[order(motif.enrichment$OR,decreasing = TRUE),]
   
   if(summary){
