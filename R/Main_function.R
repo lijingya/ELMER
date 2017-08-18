@@ -204,8 +204,11 @@ get.diff.meth <- function(data,
       message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
     }
   }
-  
-  message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ", group1, " compared to ", group2))
+  counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
+  message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ",
+                 group1, " (n:",subset(counts,x == group1)$freq,")", 
+                 " compared to ", 
+                 group2, " (n:",subset(counts,x == group2)$freq,")"))
   message(paste0("Number of probes: ",nrow(getMet(data))))
   
   parallel <- FALSE
