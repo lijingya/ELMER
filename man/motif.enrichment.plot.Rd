@@ -5,7 +5,8 @@
 \title{motif.enrichment.plot to plot bar plots showing motif enrichment ORs and  95\% confidence interval for ORs}
 \usage{
 motif.enrichment.plot(motif.enrichment, significant = NULL, 
-                      dir.out = "./", save = TRUE, label = NULL)
+                      dir.out = "./", save = TRUE, label = NULL,
+                      title = NULL, summary = FALSE)
 }
 \arguments{
 \item{motif.enrichment}{A data frame or a file path of get.enriched.motif output
@@ -73,7 +74,7 @@ motif.enrichment.plot(motif.enrichment = motif.enrichment,
                       label = "hypo", 
                       summary = TRUE,
                       title = "OR for paired probes hypomethylated in Mutant vs WT",
-                      save = FALSE)
+                      save = TRUE)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 

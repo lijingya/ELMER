@@ -6,7 +6,7 @@
 \usage{
 get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
                    background.probes, lower.OR = 1.1, min.incidence = 10, 
-                   dir.out = "./", label = NULL, save = TRUE)
+                   dir.out = "./", label = NULL, save = TRUE, plot.title=NULL)
 }
 \arguments{
 \item{data}{A multi Assay Experiment from  \code{\link{createMAE}} function.

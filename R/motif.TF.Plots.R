@@ -25,7 +25,8 @@
 #'@importFrom ggplot2 aes ggplot geom_point geom_errorbar coord_flip geom_abline
 #' @usage 
 #' motif.enrichment.plot(motif.enrichment, significant = NULL, 
-#'                       dir.out = "./", save = TRUE, label = NULL)
+#'                       dir.out = "./", save = TRUE, label = NULL,
+#'                       title = NULL, summary = FALSE)
 #' @author 
 #' Lijing Yao (creator: lijingya@usc.edu) 
 #' @references 
