@@ -192,7 +192,7 @@ get.diff.meth <- function(data,
   } else if (!group.col %in% colnames(colData(data))){
     stop("Group column not found in phenotypic data and meta-data of the object. See values with colData(data)")
   } else if (missing(group1) | missing(group2)) {
-    if(length(unique(colData(data)[,group.col]))<2){
+    if(length(unique(colData(data)[,group.col])) < 2){
       stop("Group column should have at least 2 distinct group labels for comparison.")
     } else if (length(unique(colData(data)[,group.col])) > 2){
       stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
@@ -203,6 +203,10 @@ get.diff.meth <- function(data,
       group2 <- unique(groups)[2]
       message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
     }
+  } else if(!group1 %in% unique(colData(data)[,group.col])){
+    stop(group1," not found in ", group.col)
+  } else if(!group2 %in% unique(colData(data)[,group.col])){
+    stop(group2," not found in ", group.col)
   }
   counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
   message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ",
