@@ -613,7 +613,7 @@ get.GRCh <- function(genome = "hg38", genes) {
 #' @param classification Select if we will use Family classification or sub-family
 #' @return A list of TFs and its family members
 createMotifRelevantTfs <- function(classification = "family"){
-  message("Retrieving TFClass classification from ELMER.data.")
+  message("Retrieving TFClass ", classification," classification from ELMER.data.")
   if(classification == "family") motif.relevant.TFs <- getdata("TF.family")
   if(classification == "subfamily") motif.relevant.TFs <- getdata("TF.subfamily")
   return(motif.relevant.TFs)
