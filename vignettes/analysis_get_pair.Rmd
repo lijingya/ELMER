@@ -51,7 +51,7 @@ hypothesis using a permutation approach.
 | nearGenes         | Can be either a list containing output of GetNearGenes function or path of rda file containing output of `GetNearGenes` function.                                                                                                                                                                                                                                     |
 | minSubgroupFrac        | A number ranging from 0 to 1.0 specifying the percentage of samples used to create groups U (unmethylated) and M (methylated) used to link probes to genes. Default is 0.4 (lowest quintile samples will be in the U group and the highest quintile samples in the M group).                                                                                                                                                                                                                                             |
 | permu.size        | A number specify the times of permuation. Default is 10000.                                                                                                                                                                                                                                                                                                         |
-| pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
+| raw.pvalue            | A number specify the raw p-value cutoff for defining signficant pairs. Default is 0.05. It will select the significant P value cutoff before calculating the empirical p-values.                                                                                                                                                           |
 | Pe                | A number specify the empirical p-value cutoff for defining signficant pairs. Default is 0.001.                                                                                                                                                                                                                        |
 | group.col         | A column defining the groups of the sample. You can view the available columns using: `colnames(MultiAssayExperiment::colData(data))`.                                               |
 | group1 | A group from group.col. |
@@ -81,7 +81,7 @@ Hypo.pair <- get.pair(data = mae,
                       minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
                       permu.dir = "result/permu",
                       permu.size = 100, # Please set to 100000 to get significant results
-                      pvalue = 0.05,   
+                      raw.pvalue = 0.05,   
                       Pe = 0.01, # Please set to 0.001 to get significant results
                       filter.probes = TRUE, # See preAssociationProbeFiltering function
                       filter.percentage = 0.05,

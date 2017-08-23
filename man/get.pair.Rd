@@ -28,7 +28,7 @@ If you are using pre-defined group labels, such as treated replicates vs. untrea
 
 \item{permu.dir}{A path where the output of permutation will be.}
 
-\item{pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
+\item{raw.pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
 Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.}
 
 \item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
@@ -86,20 +86,20 @@ data <- ELMER:::getdata("elmer.data.example")
 nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                          geneAnnot=getExp(data))
 Hypo.pair <- get.pair(data=data,
-                     nearGenes=nearGenes,
-                     permu.size=5,
-                     group.col = "definition",
-                     group1 = "Primary solid Tumor", 
-                     group2 = "Solid Tissue Normal",
-                     pvalue = 0.2,
-                     Pe = 0.2,
-                     dir.out="./",
-                     label= "hypo")
+                       nearGenes=nearGenes,
+                       permu.size=5,
+                       group.col = "definition",
+                       group1 = "Primary solid Tumor", 
+                       group2 = "Solid Tissue Normal",
+                       raw.pvalue = 0.2,
+                       Pe = 0.2,
+                       dir.out="./",
+                       label= "hypo")
                      
 Hypo.pair <- get.pair(data = data,
                       nearGenes = nearGenes,
                       permu.size = 5,
-                      pvalue = 0.2,
+                      raw.pvalue = 0.2,
                       Pe = 0.2,
                       dir.out = "./",
                       diffExp = TRUE, 

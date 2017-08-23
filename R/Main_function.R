@@ -290,7 +290,7 @@ get.diff.meth <- function(data,
 #' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param pvalue A number specify the raw p-value cutoff for defining signficant pairs.
+#' @param raw.pvalue A number specify the raw p-value cutoff for defining signficant pairs.
 #'  Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.
 #' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
 #'  Default is 0.001
@@ -332,20 +332,20 @@ get.diff.meth <- function(data,
 #' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 #'                          geneAnnot=getExp(data))
 #' Hypo.pair <- get.pair(data=data,
-#'                      nearGenes=nearGenes,
-#'                      permu.size=5,
-#'                      group.col = "definition",
-#'                      group1 = "Primary solid Tumor", 
-#'                      group2 = "Solid Tissue Normal",
-#'                      pvalue = 0.2,
-#'                      Pe = 0.2,
-#'                      dir.out="./",
-#'                      label= "hypo")
+#'                        nearGenes=nearGenes,
+#'                        permu.size=5,
+#'                        group.col = "definition",
+#'                        group1 = "Primary solid Tumor", 
+#'                        group2 = "Solid Tissue Normal",
+#'                        raw.pvalue = 0.2,
+#'                        Pe = 0.2,
+#'                        dir.out="./",
+#'                        label= "hypo")
 #'                      
 #' Hypo.pair <- get.pair(data = data,
 #'                       nearGenes = nearGenes,
 #'                       permu.size = 5,
-#'                       pvalue = 0.2,
+#'                       raw.pvalue = 0.2,
 #'                       Pe = 0.2,
 #'                       dir.out = "./",
 #'                       diffExp = TRUE, 
@@ -358,7 +358,7 @@ get.pair <- function(data,
                      minSubgroupFrac = 0.2,
                      permu.size = 10000,
                      permu.dir = NULL, 
-                     pvalue = 0.001,
+                     raw.pvalue = 0.001,
                      Pe = 0.001,
                      dir.out = "./",
                      diffExp = FALSE,
@@ -427,11 +427,11 @@ get.pair <- function(data,
     message(paste("File created:", file))
   }
   
-  Probe.gene <- Probe.gene[Probe.gene$Raw.p < pvalue,]
+  Probe.gene <- Probe.gene[Probe.gene$Raw.p < raw.pvalue,]
   Probe.gene <- Probe.gene[order(Probe.gene$Raw.p),]
   selected <- Probe.gene
   if(nrow(selected) == 0) {
-    message(paste("No significant pairs were found for pvalue =", pvalue))
+    message(paste("No significant pairs were found for pvalue =", raw.pvalue))
     return(selected)
   }
   
@@ -973,7 +973,7 @@ get.enriched.motif <- function(data,
                           summary = TRUE,
                           label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
                           title = plot.title,
-                          save=TRUE)
+                          save = TRUE)
   })
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){

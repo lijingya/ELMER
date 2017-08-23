@@ -10,7 +10,7 @@ test_that("Function uses correctly the permu.dir", {
                         group2 = "Solid Tissue Normal",
                         nearGenes = nearGenes,
                         permu.size = 5,
-                        pvalue =  0.001,
+                        raw.pvalue =  0.001,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
@@ -33,7 +33,7 @@ test_that("Function uses correctly the permu.dir", {
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
-                        pvalue =  0.001,
+                        raw.pvalue =  0.001,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
@@ -49,12 +49,12 @@ test_that("Function uses correctly the permu.dir", {
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
                         permu.size=5,
-                        pvalue =  0.001,
+                        raw.pvalue =  0.001,
                         Pe = 0.001,
                         dir.out="./",
                         permu.dir = "permu_test",
                         label= "hypo")
-  # Pvalue filter is working
+  # raw.pvalue filter is working
   expect_true(nrow(Hypo.pair) == 0)
   
   # If we add new genes
@@ -66,7 +66,7 @@ test_that("Function uses correctly the permu.dir", {
                         group2 = "Solid Tissue Normal",
                         nearGenes=nearGenes,
                         permu.size=7,
-                        pvalue =  0.001,
+                        raw.pvalue =  0.001,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
@@ -86,7 +86,7 @@ test_that("Function uses correctly the permu.dir", {
                         group2 = "Solid Tissue Normal",
                         nearGenes=nearGenes,
                         permu.size=10,
-                        pvalue =  0.01,
+                        raw.pvalue =  0.01,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
@@ -100,7 +100,7 @@ test_that("Gene expression is calculated", {
   Hypo.pair <- get.pair(data = data,
                         nearGenes = nearGenes,
                         permu.size = 5,
-                        pvalue =  0.001,
+                        raw.pvalue =  0.001,
                         Pe = 0.2,
                         diffExp = TRUE,
                         group.col = "definition", 
@@ -114,10 +114,10 @@ test_that("Gene expression is calculated", {
 })
 
 
-test_that("Test calculation of Pe (empirical pvalue) from Raw-pvalue is working", {
+test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-raw.pvalue is working", {
   
-  # If my raw-pvalue is smaller than for other probes my Pe should be small
-  # If my raw-pvalue is higher than for other probes my Pe should be higher
+  # If my raw-raw.pvalue is smaller than for other probes my Pe should be small
+  # If my raw-raw.pvalue is higher than for other probes my Pe should be higher
   # Case 1 (ENSG00000157916):smaller
   # Case 2 (ENSG00000149527) intermediarie
   # Case 3 (ENSG00000116213) higher

@@ -218,7 +218,7 @@ TCGA.pipe <- function(disease,
     if(length(analysis)==1) return(diff.meth)
   }
   
-  #predict pair
+  # predict pair
   if("pair" %in% tolower(analysis)){
     print.header("Predict pairs")
     mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
@@ -235,7 +235,7 @@ TCGA.pipe <- function(disease,
       message("No significant probes were found")
       return(NULL)
     }
-    ## Get nearby genes-----------------------
+    
     message("Get nearby genes")
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
@@ -253,12 +253,13 @@ TCGA.pipe <- function(disease,
     } else {
       nearGenes.file <- nearGenes.file[["nearGenes"]]
     }
-    ## calculation
+    
+    # calculation
     message(sprintf("Identify putative probe-gene pair for %smethylated probes",diff.dir))
     
-    ## get pair
+    # get pair
     permu.dir <- paste0(dir.out,"/permu")
-    params <- args[names(args) %in% c("percentage","permu.size","Pe","pvalue","diffExp","group.col")]
+    params <- args[names(args) %in% c("percentage","permu.size","Pe","raw.pvalue","diffExp","group.col")]
     SigPair <- do.call(get.pair,
                        c(list(data      = mae,
                               nearGenes = nearGenes.file,
