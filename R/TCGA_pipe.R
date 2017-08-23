@@ -93,7 +93,8 @@ TCGA.pipe <- function(disease,
   available.analysis <- c("download","distal.probes",
                           "createMAE","diffMeth","pair",
                           "motif","TF.search","all")
-  if (analysis[1] == "all") analysis <- grep("all", available.analysis, value = TRUE, invert = TRUE)
+  # Replace all by all the other values
+  if("all" %in% analysis[1] ) analysis <- grep("all", available.analysis, value = TRUE, invert = TRUE)
   
   if(any(!tolower(analysis) %in% tolower(analysis))) 
     stop(paste0("Availbale options for analysis argument are: ",
@@ -189,6 +190,19 @@ TCGA.pipe <- function(disease,
     readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out.root,disease,genome))
   }
   
+  # Creates a record of the analysis and arguments called
+  if(any(tolower(c("diffMeth","pair",
+               "motif","TF.search")) %in% tolower(analysis))){
+    createSummaryDocument(analysis = analysis, 
+                          argument.values = args,
+                          mae.path = sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome),
+                          genome = genome,
+                          direction = diff.dir,
+                          group.col = group.col,
+                          group1 = group1,
+                          group2 = group2,
+                          results.path = dir.out)
+  }  
   # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
     print.header("Get differential DNA methylation loci")
@@ -449,4 +463,35 @@ addMutCol <- function(data,
     }
   }
   return(data)
+}
+
+#' @title Create summary document for TCGA.pipe function
+#' @description This function will create a text file with the 
+#' date of the last run, which aanalysis were performed, the values of
+#' the arguments so the user can keep track 
+createSummaryDocument <- function(analysis = "all", 
+                                  argument.values = "defaults",
+                                  genome = NULL,
+                                  mae.path = NULL,
+                                  direction = NULL,
+                                  group.col = NULL,
+                                  group1 = NULL,
+                                  group2 = NULL,
+                                  results.path = NULL){
+  print("Recording analysis information into TCGA.pipe_records.txt")
+  df <- paste0("oooooooooooooooooooooooooooooooooooo\n",
+               "o date: ",Sys.time(),"\n",
+               "o analysis: ", paste(analysis, collapse = ","), "\n",
+               "o genome: ",  ifelse(is.null(genome),"",genome), "\n",
+               "o mae.path: ",  ifelse(is.null(mae.path),"",mae.path), "\n",
+               "o direction: ", ifelse(is.null(direction),"",direction), "\n",
+               "o group.col: ",  ifelse(is.null(group.col),"",group.col), "\n",
+               "o group1: ",   ifelse(is.null(group1),"",group1), "\n",
+               "o group2: ",   ifelse(is.null(group2),"",group2), "\n",
+               "o results.path: ",  ifelse(is.null(results.path),"",results.path), "\n",
+               "o argument.values: ",paste(paste0(names(argument.values),"=",as.character(argument.values)), collapse = ",")
+  )
+  fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "a+")
+  write(df, fileConn, append=TRUE)
+  close(fileConn)
 }
