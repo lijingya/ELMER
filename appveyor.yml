@@ -63,4 +63,5 @@ notifications:
   - provider: Slack
     incoming_webhook:
       secure: 7UV/4W8G1XsjPOnS7evgJipqeUPQtfYnnKRov2i6hSKyMAyec8OCi0SGnI/vQxa7131I0tCwQL9mSKN9eJP4QLR6t2MOnNpuvKKFoMriyrE=
-    on_build_status_changed: true
+    on_build_success: false
+    on_build_failure: true
