@@ -886,6 +886,7 @@ get.enriched.motif <- function(data,
     }
   }
   probes <- unique(probes) # A probe should not be considered more than one time
+  if(length(probes) < min.incidence) stop("Number of unique prober is smaller than the min.incidence required")
   background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
   bg.probes.TF <- all.probes.TF[background.probes,]
   bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
