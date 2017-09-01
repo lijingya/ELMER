@@ -78,6 +78,29 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   expect_true(is.na(TF$top.potential.TF.subfamily))
   expect_true(TF$potential.TF.family %in% TF$top_5percent)
   
+  TF <- get.TFs(data, 
+                enriched.motif, 
+                TFs=data.frame(external_gene_name=c("TP53",
+                                                    "TP63",
+                                                    "TP73",
+                                                    "DLX6",
+                                                    "DMRT1"
+                ),
+                ensembl_gene_id= c("ENSG00000141510",
+                                   "ENSG00000073282",
+                                   "ENSG00000078900",
+                                   "ENSG00000006377",
+                                   "ENSG00000137090"),
+                stringsAsFactors = FALSE),
+                mode = "supervised",
+                diff.dir = "hyper",
+                group.col = "shortLetterCode",
+                group1 = "TP",
+                group2 = "NT",
+                label="hyper")
+  pval.sig <- get(load("getTF.hypo.TFs.with.motif.pvalue.rda"))
+  pval.insig <- get(load("getTF.hyper.TFs.with.motif.pvalue.rda"))
+  expect_true(all(-log10(pval.sig[,1]) > -log10(pval.insig[,1])))
 })  
 
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {
