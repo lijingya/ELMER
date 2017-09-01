@@ -1,5 +1,49 @@
 context("Checking get pair function")
+test_that("Supervised mode works", {
 
+  data <- ELMER:::getdata("elmer.data.example")
+  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+                            geneAnnot=getExp(data))
+  Hypo.pair <- get.pair(data = data,
+                        group.col = "definition", 
+                        group1 = "Primary solid Tumor", 
+                        group2 = "Solid Tissue Normal",
+                        mode = "supervised",
+                        diff.dir = "hypo",
+                        nearGenes = nearGenes,
+                        permu.size = 5,
+                        raw.pvalue =  0.001,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label = "hypo")
+  # Group 1 is the unmethylated group its expression has to be higher
+  exp.group1 <- rowMeans(assay(getExp(data)[Hypo.pair$GeneID,colData(data)$definition == "Primary solid Tumor"]))
+  exp.group2 <- rowMeans(assay(getExp(data)[Hypo.pair$GeneID,colData(data)$definition == "Solid Tissue Normal"]))
+  expect_true(all(exp.group1 > exp.group2))
+  
+  unlink("permu_test",recursive = TRUE, force = TRUE)  
+  Hyper.pair <- get.pair(data = data,
+                        group.col = "definition", 
+                        group1 = "Primary solid Tumor", 
+                        group2 = "Solid Tissue Normal",
+                        mode = "supervised",
+                        diff.dir = "hyper",
+                        nearGenes = nearGenes,
+                        permu.size = 5,
+                        raw.pvalue =  0.001,
+                        Pe = 0.2,
+                        dir.out="./",
+                        permu.dir = "permu_test",
+                        label = "hyper")
+  # Group 2 is the unmethylated group its expression has to be higher
+  exp.group1 <- rowMeans(assay(getExp(data)[Hyper.pair$GeneID,colData(data)$definition == "Primary solid Tumor"]))
+  exp.group2 <- rowMeans(assay(getExp(data)[Hyper.pair$GeneID,colData(data)$definition == "Solid Tissue Normal"]))
+  expect_true(all(exp.group1 < exp.group2))
+  
+  
+  unlink("permu_test",recursive = TRUE, force = TRUE)  
+})
 test_that("Function uses correctly the permu.dir", {
   data <- ELMER:::getdata("elmer.data.example")
   nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
@@ -114,7 +158,7 @@ test_that("Gene expression is calculated", {
 })
 
 
-test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-raw.pvalue is working", {
+test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-pvalue is working", {
   
   # If my raw-raw.pvalue is smaller than for other probes my Pe should be small
   # If my raw-raw.pvalue is higher than for other probes my Pe should be higher

@@ -18,6 +18,10 @@ get.permu(data,
 
 \item{geneID}{A vector lists the genes' ID.}
 
+\item{methy}{Index of M (methylated) group.}
+
+\item{unmethy}{Index of U (unmethylated) group.}
+
 \item{percentage}{A number ranges from 0 to 1 specifying the percentage of samples of group 1 and group 2
 groups used to link probes to genes. Default is 0.2.}
 

@@ -61,19 +61,25 @@ Stat.diff.meth <- function(meth,
 #' @param Probe A character of name of Probe in array.
 #' @param Gene A vector of gene ID.
 #' @param Top A number determines the percentage of top methylated/unmethylated samples.
+#' Only used if unmethy and methy are not set.
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
+#' @param methy Index of M (methylated) group.
+#' @param unmethy Index of U (unmethylated) group.
 #' @return U test results
 Stat.nonpara.permu <- function(Probe,
                                Gene,
                                Top = 0.2,
+                               unmethy = NULL,
+                               methy  = NULL,
                                Meths = Meths,
                                Exps = Exps){
-  idx <- order(Meths)
-  nb <- round(length(Meths) * Top)
-  unmethy <- head(idx, n = nb) 
-  methy <- tail(idx, n = nb) 
-  
+  if(is.null(methy) & is.null(unmethy)){
+    idx <- order(Meths)
+    nb <- round(length(Meths) * Top)
+    unmethy <- head(idx, n = nb) 
+    methy <- tail(idx, n = nb) 
+  }
   test.p <- unlist(lapply(splitmatrix(Exps),
                           function(x) {
                             wilcox.test(x[unmethy],x[methy],alternative = "greater",exact=FALSE)$p.value
@@ -89,14 +95,19 @@ Stat.nonpara.permu <- function(Probe,
 #' which is good for computing each probes for nearby genes.
 #' @param Probe A character of name of Probe in array.
 #' @param NearGenes A list of nearby gene for each probe which is output of GetNearGenes function.
-#' @param Top A number determines the percentage of top methylated/unmethylated samples.
+#' @param Top A number determines the percentage of top methylated/unmethylated samples. 
+#' Only used if unmethy and methy are not set.
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
+#' @param methy Index of M (methylated) group.
+#' @param unmethy Index of U (unmethylated) group.
 #' @importFrom stats wilcox.test
 #' @return U test results
 Stat.nonpara <- function(Probe,
                          NearGenes,
                          Top = NULL,
+                         unmethy = NULL,
+                         methy  = NULL,
                          Meths = Meths,
                          Exps = Exps){
   if(!length(Probe)==1) stop("Number of  Probe should be 1")
@@ -104,10 +115,12 @@ Stat.nonpara <- function(Probe,
   Gene <- NearGenes[[Probe]][,2]
   Exp <- Exps[Gene,,drop = FALSE]
   Meth <- Meths
-  idx <- order(Meth)
-  nb <- round(length(Meth) * Top)
-  unmethy <- head(idx, n = nb) 
-  methy <- tail(idx, n = nb) 
+  if(is.null(methy) & is.null(unmethy)){
+    idx <- order(Meth)
+    nb <- round(length(Meth) * Top)
+    unmethy <- head(idx, n = nb) 
+    methy <- tail(idx, n = nb) 
+  } 
   # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
   test.p <- unlist(lapply(splitmatrix(Exp),
                             function(x) {

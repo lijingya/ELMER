@@ -4,10 +4,22 @@
 \alias{get.pair}
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
-get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir = NULL, 
-         raw.pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
-         group.col, group1, group2, cores = 1, filter.probes = TRUE, 
-         filter.portion = 0.3,  filter.percentage = 0.05,
+get.pair(data, 
+         nearGenes, 
+         minSubgroupFrac = 0.4, 
+         permu.size = 10000, 
+         permu.dir = NULL, 
+         raw.pvalue = 0.001, 
+         Pe = 0.001, 
+         dir.out = "./",
+         diffExp = FALSE,
+         group.col, 
+         group1, 
+         group2, 
+         cores = 1, 
+         filter.probes = TRUE, 
+         filter.portion = 0.3,  
+         filter.percentage = 0.05,
          label = NULL, save = TRUE)
 }
 \arguments{
@@ -33,6 +45,19 @@ Default is 0.001. It will select the significant P value  cutoff before calculat
 
 \item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
 Default is 0.001}
+
+\item{mode}{A character. Can be "unsupervised" or "supervised". If unsupervised is set
+the U (unmethylated) and M (methylated) groups will be selected 
+among all samples based on methylation of each probe.
+Otherwise U group and M group will set as the samples of group1 or group2 as described below:
+If diff.dir is "hypo, U will be the group 1 and M the group2.
+If diff.dir is "hyper" M group will be the group1 and U the group2.}
+
+\item{diff.dir}{A character can be "hypo" or "hyper", showing differential 
+methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+"hyper" which means the probes are hypermethylated in group1; 
+This argument is used only when mode is supervised nad 
+it should be the same value from get.diff.meth function.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 

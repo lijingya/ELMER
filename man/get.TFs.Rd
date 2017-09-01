@@ -37,6 +37,19 @@ hypermethylated in group 1 compared to group 2.}
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
+\item{mode}{A character. Can be "unsupervised" or "supervised". If unsupervised is set
+the U (unmethylated) and M (methylated) groups will be selected 
+among all samples based on methylation of each probe.
+Otherwise U group and M group will set as the samples of group1 or group2 as described below:
+If diff.dir is "hypo, U will be the group 1 and M the group2.
+If diff.dir is "hyper" M group will be the group1 and U the group2.}
+
+\item{diff.dir}{A character can be "hypo" or "hyper", showing differential 
+methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+"hyper" which means the probes are hypermethylated in group1; 
+This argument is used only when mode is supervised nad 
+it should be the same value from get.diff.meth function.}
+
 \item{motif.relevant.TFs}{A list containing motif as names and relavent TFs as contents
  for each list element or a path of XX.rda file containing a list as above. 
 If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 

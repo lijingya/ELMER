@@ -271,10 +271,22 @@ get.diff.meth <- function(data,
 #' (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 #' and getPair.XX.pairs.significant.csv (see detail).
 #' @usage 
-#' get.pair(data, nearGenes, minSubgroupFrac = 0.2, permu.size = 10000, permu.dir = NULL, 
-#'          raw.pvalue = 0.001, Pe = 0.001, dir.out = "./",diffExp = FALSE,
-#'          group.col, group1, group2, cores = 1, filter.probes = TRUE, 
-#'          filter.portion = 0.3,  filter.percentage = 0.05,
+#' get.pair(data, 
+#'          nearGenes, 
+#'          minSubgroupFrac = 0.4, 
+#'          permu.size = 10000, 
+#'          permu.dir = NULL, 
+#'          raw.pvalue = 0.001, 
+#'          Pe = 0.001, 
+#'          dir.out = "./",
+#'          diffExp = FALSE,
+#'          group.col, 
+#'          group1, 
+#'          group2, 
+#'          cores = 1, 
+#'          filter.probes = TRUE, 
+#'          filter.portion = 0.3,  
+#'          filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
@@ -315,6 +327,17 @@ get.diff.meth <- function(data,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
+#' @param mode A character. Can be "unsupervised" or "supervised". If unsupervised is set
+#' the U (unmethylated) and M (methylated) groups will be selected 
+#' among all samples based on methylation of each probe.
+#' Otherwise U group and M group will set as the samples of group1 or group2 as described below:
+#' If diff.dir is "hypo, U will be the group 1 and M the group2.
+#' If diff.dir is "hyper" M group will be the group1 and U the group2.
+#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
+#' methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+#' "hyper" which means the probes are hypermethylated in group1; 
+#' This argument is used only when mode is supervised nad 
+#' it should be the same value from get.diff.meth function.
 #' @param dir.out A path specify the directory for outputs. Default is current directory
 #' @param label A character labels the outputs.
 #' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
@@ -355,16 +378,18 @@ get.diff.meth <- function(data,
 #'                       label = "hypo")                    
 get.pair <- function(data,
                      nearGenes,
-                     minSubgroupFrac = 0.2,
+                     minSubgroupFrac = 0.4,
                      permu.size = 10000,
                      permu.dir = NULL, 
                      raw.pvalue = 0.001,
                      Pe = 0.001,
+                     mode = "unsupervised",
+                     diff.dir = NULL,
                      dir.out = "./",
                      diffExp = FALSE,
                      group.col,
-                     group1,
-                     group2,
+                     group1 = NULL,
+                     group2 = NULL,
                      cores = 1,
                      filter.probes = TRUE,
                      filter.portion = 0.3, 
@@ -388,6 +413,23 @@ get.pair <- function(data,
   if(missing(group2)) stop("Please set group2 argument")
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   
+  # Supervised groups
+  unmethylated <- methylated <- NULL
+  if(mode == "supervised"){
+    if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
+    if(diff.dir == "hypo"){
+      message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
+      unmethylated <-  which(colData(data)[,group.col]  == group1)
+      methylated <-  which(colData(data)[,group.col]  == group2)
+    } else {
+      message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
+      unmethylated <-  which(colData(data)[,group.col]  == group2)
+      methylated <-  which(colData(data)[,group.col]  == group1)
+    }
+  } else {
+    message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+  }
+  # Paralellization code
   parallel <- FALSE
   if (cores > 1){
     if (cores > detectCores()) cores <- detectCores()
@@ -412,11 +454,13 @@ get.pair <- function(data,
                         Stat.nonpara(Probe = x,
                                      Meths = met[x,], 
                                      NearGenes = nearGenes,
+                                     methy = methylated,
+                                     unmethy = unmethylated,
                                      Top = minSubgroupFrac/2, # Each group will have half of the samples
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
-  
+
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
@@ -441,8 +485,10 @@ get.pair <- function(data,
   # get permutation
   permu <- get.permu(data,
                      geneID     = GeneID, 
-                     percentage = minSubgroupFrac/2,
+                     percentage = minSubgroupFrac / 2,
                      rm.probes  = names(nearGenes), 
+                     methy      = methylated,
+                     unmethy    = unmethylated,
                      permu.size = permu.size, 
                      permu.dir  = permu.dir,
                      cores      = cores)
@@ -503,6 +549,8 @@ get.pair <- function(data,
 #' groups used to link probes to genes. Default is 0.2.
 #' @param permu.size A number specify the times of permuation. Default is 10000.
 #' @param permu.dir A path where the output of permuation will be. 
+#' @param methy Index of M (methylated) group.
+#' @param unmethy Index of U (unmethylated) group.
 #' @return Permutations
 #' @importFrom plyr alply
 #' @importFrom doParallel registerDoParallel
@@ -525,6 +573,8 @@ get.pair <- function(data,
 #'                   permu.size=5)
 get.permu <- function(data, 
                       geneID, 
+                      methy = NULL,
+                      unmethy = NULL,
                       percentage = 0.2, 
                       rm.probes = NULL,
                       permu.size = 10000, 
@@ -592,6 +642,8 @@ get.permu <- function(data,
                        Probe = x,
                        Meths = permu.meth[x,],
                        Gene  = tmp.genes,
+                       methy = methy,
+                       unmethy = unmethy,
                        Top   = percentage,
                        Exps  = exps)},
                    .progress = "text", .parallel = parallel
@@ -630,6 +682,8 @@ get.permu <- function(data,
                              Meths = permu.meth[x,],
                              Gene  = missing.genes,
                              Top   = percentage,
+                             methy = methy,
+                             unmethy = unmethy,
                              Exps  = exps)},
                          .progress = "text", .parallel = parallel
     )
@@ -1048,6 +1102,17 @@ get.enriched.motif <- function(data,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
+#' @param mode A character. Can be "unsupervised" or "supervised". If unsupervised is set
+#' the U (unmethylated) and M (methylated) groups will be selected 
+#' among all samples based on methylation of each probe.
+#' Otherwise U group and M group will set as the samples of group1 or group2 as described below:
+#' If diff.dir is "hypo, U will be the group 1 and M the group2.
+#' If diff.dir is "hyper" M group will be the group1 and U the group2.
+#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
+#' methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+#' "hyper" which means the probes are hypermethylated in group1; 
+#' This argument is used only when mode is supervised nad 
+#' it should be the same value from get.diff.meth function.
 #' @export 
 #' @details 
 #' save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
@@ -1111,6 +1176,8 @@ get.TFs <- function(data,
                     group.col,
                     group1,
                     group2,
+                    mode = "unsupervised",
+                    diff.dir = NULL,
                     motif.relevant.TFs,
                     minSubgroupFrac = 0.4,
                     dir.out = "./",
@@ -1136,6 +1203,24 @@ get.TFs <- function(data,
   if(missing(group1)) stop("Please set group1 argument")
   if(missing(group2)) stop("Please set group2 argument")
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  
+  # Supervised groups
+  unmethylated <- methylated <- NULL
+  if(mode == "supervised"){
+    if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
+    if(diff.dir == "hypo"){
+      message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
+      unmethylated <-  which(colData(data)[,group.col]  == group1)
+      methylated <-  which(colData(data)[,group.col]  == group2)
+    } else {
+      message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
+      unmethylated <-  which(colData(data)[,group.col]  == group2)
+      methylated <-  which(colData(data)[,group.col]  == group1)
+    }
+  } else {
+    message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+  }
+  
   
   if(missing(TFs)){
     # Here we will make some assumptions:
@@ -1205,10 +1290,12 @@ get.TFs <- function(data,
                        .fun = function(x) {
                          Stat.nonpara.permu( 
                            Probe = x,
-                           Meths=motif.meth[x,],
-                           Gene=gene,
-                           Top=minSubgroupFrac/2,
-                           Exps=exps)},
+                           Meths = motif.meth[x,],
+                           Gene  = gene,
+                           unmethy = unmethylated,
+                           methy = methylated,
+                           Top   = minSubgroupFrac/2,
+                           Exps  = exps)},
                        .progress = "text", .parallel = parallel
   )
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
@@ -1230,8 +1317,8 @@ get.TFs <- function(data,
   # For each motif evaluate TF
   cor.summary <- adply(colnames(TF.meth.cor), 
                        function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){ 
-                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return=TRUE)$ix]
-                         top <- cor[1:floor(0.05*nrow(TF.meth.cor))]
+                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
+                         top <- cor[1:floor(0.05 * nrow(TF.meth.cor))]
                          if (any(top %in% motif.relavent.TFs.family[[x]])) {
                            potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
                          } else {
@@ -1260,24 +1347,25 @@ get.TFs <- function(data,
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
     write.csv(cor.summary, 
               file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                           dir.out=dir.out, label=label), row.names=TRUE)
+                           dir.out=dir.out, label=label), row.names = TRUE)
   } 
   
   print.header("Creating plots", "subsection")
   message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot_family",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_family",dir.out),showWarnings = FALSE,recursive = TRUE)
-  TF.rank.plot(motif.pvalue=TF.meth.cor, 
-               motif=colnames(TF.meth.cor), 
-               TF.label =  TF.family[colnames(TF.meth.cor)],
-               dir.out=sprintf("%s/TFrankPlot_family",dir.out), 
-               save=TRUE)
+  dir.create(sprintf("%s/TFrankPlot_family",dir.out), showWarnings = FALSE, recursive = TRUE)
+  TF.rank.plot(motif.pvalue = TF.meth.cor, 
+               motif        = colnames(TF.meth.cor), 
+               TF.label     =  TF.family[colnames(TF.meth.cor)],
+               dir.out      = sprintf("%s/TFrankPlot_family",dir.out), 
+               save         = TRUE)
+
   message("TF rank plot highlighting TF in the same subfamily (folder: ", sprintf("%s/TFrankPlot_subfamily",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out),showWarnings = FALSE,recursive = TRUE)
-  TF.rank.plot(motif.pvalue=TF.meth.cor, 
-               motif=colnames(TF.meth.cor), 
-               TF.label =  TF.subfamily[colnames(TF.meth.cor)],
-               dir.out=sprintf("%s/TFrankPlot_subfamily",dir.out), 
-               save=TRUE)
+  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out), showWarnings = FALSE, recursive = TRUE)
+  TF.rank.plot(motif.pvalue = TF.meth.cor, 
+               motif        = colnames(TF.meth.cor), 
+               TF.label     =  TF.subfamily[colnames(TF.meth.cor)],
+               dir.out      = sprintf("%s/TFrankPlot_subfamily",dir.out), 
+               save         = TRUE)
   
   return(cor.summary)
 }

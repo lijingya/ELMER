@@ -39,6 +39,47 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   
 })  
 
+test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
+  data <- ELMER:::getdata("elmer.data.example")
+  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
+                                                 "cg08928189", "cg17153775",
+                                                 "cg21156590", "cg19749688", 
+                                                 "cg12590404", "cg24517858", 
+                                                 "cg00329272", "cg09010107", 
+                                                 "cg15386853", "cg10097755", 
+                                                 "cg09247779", "cg09181054"))
+  suppressMessages({
+    TF <- get.TFs(data, 
+                  enriched.motif, 
+                  TFs=data.frame(external_gene_name=c("TP53",
+                                                      "TP63",
+                                                      "TP73",
+                                                      "DLX6",
+                                                      "DMRT1"
+                  ),
+                  ensembl_gene_id= c("ENSG00000141510",
+                                     "ENSG00000073282",
+                                     "ENSG00000078900",
+                                     "ENSG00000006377",
+                                     "ENSG00000137090"),
+                  stringsAsFactors = FALSE),
+                  mode = "supervised",
+                  diff.dir = "hypo",
+                  group.col = "shortLetterCode",
+                  group1 = "TP",
+                  group2 = "NT",
+                  label="hypo")
+  })
+  
+  tf.family <- createMotifRelevantTfs()  
+  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
+  expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
+  expect_true(TF$top.potential.TF.family %in% TF$potential.TF.family)
+  expect_true(is.na(TF$top.potential.TF.subfamily))
+  expect_true(TF$potential.TF.family %in% TF$top_5percent)
+  
+})  
+
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {
   data <- ELMER:::getdata("elmer.data.example")
   enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
