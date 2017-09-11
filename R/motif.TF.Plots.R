@@ -187,7 +187,8 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'the motif relevant TF and top3 TF will be labeled.
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
-#'@param save A logic. If true (default), figure will be saved to dir.out.
+#'@param save A logic. If true (default), figure will be saved to dir.out
+#'@param title Tite title (the motif will still be added to the title)
 #'@return A plot shows the score (-log(P value)) of association between TF
 #'expression and DNA methylation at sites of a certain motif.
 #'@export
@@ -232,6 +233,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'             save=TRUE)
 TF.rank.plot <- function(motif.pvalue, 
                          motif, 
+                         title = NULL,
                          TF.label, 
                          dir.out = "./", 
                          save = TRUE){
@@ -277,7 +279,9 @@ TF.rank.plot <- function(motif.pvalue,
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
       theme(legend.position="none")+
-      labs(x = "Rank", y ="-log10 P value", title=i) + 
+      labs(x = "Rank", 
+           y ="-log10 P value", 
+           title=ifelse(is.null(title),i,paste0(title, " (", i,")"))) + 
       geom_point(data=highlight, aes(x=rank, y=pvalue))
     
     df$Gene <- as.character(df$Gene)

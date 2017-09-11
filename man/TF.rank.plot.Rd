@@ -5,7 +5,8 @@
 \title{TF.rank.plot to plot the scores (-log10(P value)) which assess the correlation between 
 TF expression and average DNA methylation at motif sites.}
 \usage{
-TF.rank.plot(motif.pvalue, motif, TF.label, dir.out = "./", save = TRUE)
+TF.rank.plot(motif.pvalue, motif, title, TF.label, dir.out = "./",
+  save = TRUE)
 }
 \arguments{
 \item{motif.pvalue}{A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"
@@ -13,13 +14,15 @@ which is output of getTF.}
 
 \item{motif}{A vector of characters specify the motif to plot}
 
+\item{title}{Tite title (the motif will still be added to the title)}
+
 \item{TF.label}{A list shows the label for each motif. If TF.label is not specified, 
 the motif relevant TF and top3 TF will be labeled.}
 
 \item{dir.out}{A path specify the directory to which the figures will be saved. 
 Current directory is default.}
 
-\item{save}{A logic. If true (default), figure will be saved to dir.out.}
+\item{save}{A logic. If true (default), figure will be saved to dir.out}
 }
 \value{
 A plot shows the score (-log(P value)) of association between TF
