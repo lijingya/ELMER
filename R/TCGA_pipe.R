@@ -352,7 +352,6 @@ TCGA.pipe <- function(disease,
       return(NULL)
     }
     load(mae.file)
-    print(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- readr::read_csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), 
