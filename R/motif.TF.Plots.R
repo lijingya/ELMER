@@ -102,8 +102,8 @@ motif.enrichment.plot <- function(motif.enrichment,
     
     data_table <-  ggplot(lab, aes(x = y, y = x, label = format(z, nsmall = 1))) +
       theme_minimal() + 
-      geom_text(size = 2.5, hjust=0, vjust=0.5) +
-      geom_hline(aes(yintercept=c(nrow(motif.enrichment) - 0.5))) + 
+      geom_text(size = 3.5, hjust=0, vjust=0.5) +
+      geom_hline(aes(yintercept=c(nrow(motif.enrichment) - 0.65))) + 
       labs(x="",y="") +
       coord_cartesian(xlim=c(1,3.8)) +
       theme(panel.grid.major = element_blank(), 
@@ -119,7 +119,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                                      levels=as.character(motif.enrichment$motif[nrow(motif.enrichment):1]))
     limits <- aes(ymax = upperOR, ymin=lowerOR)
     motif.enrichment$probes <- NULL
-    motif.enrichment <- rbind(motif.enrichment,c(NA,NA,NA,NA))
+    motif.enrichment <- rbind(motif.enrichment,NA)
     P <- ggplot(motif.enrichment, aes(x=motif, y=OR)) +
       geom_point() +
       geom_errorbar(limits, width=0.3) +
@@ -136,9 +136,9 @@ motif.enrichment.plot <- function(motif.enrichment,
     
     suppressWarnings({
       P <-  arrangeGrob(data_table, P, ncol=2,
-                    widths = c(1,2), 
-                    heights = c(0.95,0.05),top = title) 
-        
+                        widths = c(2,2), 
+                        heights = c(0.95,0.05),top = title) 
+      
     })    
   } else {
     
@@ -158,11 +158,12 @@ motif.enrichment.plot <- function(motif.enrichment,
   }
   if(save) {
     ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
-                  useDingbats = FALSE, 
-                  plot = P,
-                  width = 10, 
-                  limitsize = FALSE,
-                  height = 2 * round(nrow(motif.enrichment)/8))
+           useDingbats = FALSE, 
+           plot = P,
+           dpi = 320,
+           width = 10, 
+           limitsize = FALSE,
+           height = 3 * round(nrow(motif.enrichment)/8))
     return()
   }
   if(summary) grid.arrange(P)
