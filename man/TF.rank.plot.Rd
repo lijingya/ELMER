@@ -5,7 +5,7 @@
 \title{TF.rank.plot to plot the scores (-log10(P value)) which assess the correlation between 
 TF expression and average DNA methylation at motif sites.}
 \usage{
-TF.rank.plot(motif.pvalue, motif, title, TF.label, dir.out = "./",
+TF.rank.plot(motif.pvalue, motif, title = NULL, TF.label, dir.out = "./",
   save = TRUE)
 }
 \arguments{
