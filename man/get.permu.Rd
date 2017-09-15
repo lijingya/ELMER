@@ -7,6 +7,8 @@ each enhancer-gene linkage.}
 \usage{
 get.permu(data, 
           geneID, 
+          methy = NULL,
+          unmethy = NULL,
           percentage = 0.2, 
           rm.probes = NULL, 
           permu.size = 10000, 
