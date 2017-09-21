@@ -2,7 +2,7 @@ context("Get TF")
 
 test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
   data <- ELMER:::getdata("elmer.data.example")
-  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
+  enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
                                                  "cg12590404", "cg24517858", 
@@ -31,7 +31,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   })
 
   tf.family <- createMotifRelevantTfs()  
-  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
+  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H11MO.0.A)
   expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
   expect_true(TF$top.potential.TF.family %in% TF$potential.TF.family)
   expect_true(is.na(TF$top.potential.TF.subfamily))
@@ -41,7 +41,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
 
 test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF family", {
   data <- ELMER:::getdata("elmer.data.example")
-  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
+  enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
                                                  "cg12590404", "cg24517858", 
@@ -105,7 +105,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
 
 test_that("Shows NA if top5 TFs does not include any member of the motif TF family", {
   data <- ELMER:::getdata("elmer.data.example")
-  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272", "cg10097755", 
+  enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272", "cg10097755", 
                                                  "cg08928189", "cg17153775",
                                                  "cg21156590", "cg19749688", 
                                                  "cg12590404", "cg24517858", 
@@ -160,7 +160,7 @@ test_that("Test if the results is right", {
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData =  colData)
   
-  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
+  enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272"))
   
 
   suppressMessages({
@@ -226,7 +226,7 @@ test_that("Test if the results is right", {
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
-  enriched.motif <- list("P53_HUMAN.H10MO.B" = c("cg00329272"))
+  enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272"))
 
   suppressMessages({
     TF <- get.TFs(data, 
