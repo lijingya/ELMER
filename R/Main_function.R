@@ -1003,10 +1003,10 @@ get.enriched.motif <- function(data,
   print.header("Filtering motifs based on quality", "subsection")
   message("Number of enriched motifs with quality:")
   message("-----------")
-  for(q in c("A","B","C","D","S")) message(paste0(" => ",q,": ", length(grep(paste0("H10MO.",q),names(en.motifs)))))
+  for(q in c("A","B","C","D","S"))  message(paste0(" => ",q,": ", length(grep(paste0("\\.",q),names(en.motifs)))))
   message("-----------")
   
-  en.motifs <- names(en.motifs[grep(paste0("H10MO.[A-",toupper(min.motif.quality),"]"),
+  en.motifs <- names(en.motifs[grep(paste0("\\.[A-",toupper(min.motif.quality),"]"),
                                     names(en.motifs), value = T)])
   message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
   enriched.motif <- alply(en.motifs, 
@@ -1021,12 +1021,12 @@ get.enriched.motif <- function(data,
   
   ## make plot 
   suppressWarnings({
-    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                           significant = list(NumOfProbes = 10, lowerOR = 1.1, OR = 1.3), 
                           dir.out = dir.out,
                           label=paste0(label,".quality.A-",toupper(min.motif.quality)),
                           save=TRUE)
-    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("H10MO.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                           significant = list(OR = 1.3), 
                           dir.out = dir.out,
                           summary = TRUE,
