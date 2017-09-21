@@ -39,7 +39,7 @@ library(ELMER)
   message(e)
   data(elmer.data.example, envir = environment())
   })
-enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
+enriched.motif <- list("P53_HUMAN.H11MO.0.A"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
@@ -57,17 +57,17 @@ TF <- get.TFs(data,
              label="hypo")
 TF.meth.cor <- get(load("getTF.hypo.TFs.with.motif.pvalue.rda"))            
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
-            motif="P53_HUMAN.H10MO.B", 
-            TF.label=createMotifRelevantTfs("subfamily")["P53_HUMAN.H10MO.B"],
+            motif="P53_HUMAN.H11MO.0.A", 
+            TF.label=createMotifRelevantTfs("subfamily")["P53_HUMAN.H11MO.0.A"],
             save=TRUE)
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
-            motif="P53_HUMAN.H10MO.B", 
+            motif="P53_HUMAN.H11MO.0.A", 
             save=TRUE)
 # Same as above
 TF.rank.plot(motif.pvalue=TF.meth.cor,  
-            motif="P53_HUMAN.H10MO.B", 
+            motif="P53_HUMAN.H11MO.0.A", 
             dir.out = "TFplots",
-            TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H10MO.B"],
+            TF.label=createMotifRelevantTfs("family")["P53_HUMAN.H11MO.0.A"],
             save=TRUE)
 }
 \author{
