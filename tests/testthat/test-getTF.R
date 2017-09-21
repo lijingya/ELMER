@@ -72,7 +72,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
   })
   
   tf.family <- createMotifRelevantTfs()  
-  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H10MO.B)
+  expect_true(TF$potential.TF.family %in% tf.family$P53_HUMAN.H11MO.0.A)
   expect_true(TF$top.potential.TF.family %in% TF$top_5percent)
   expect_true(TF$top.potential.TF.family %in% TF$potential.TF.family)
   expect_true(is.na(TF$top.potential.TF.subfamily))
@@ -271,8 +271,8 @@ test_that("Test if the results is right", {
 })
 
 test_that("It creates a PDF with the TF ranking plot", {
-  expect_true(file.exists("TFrankPlot_family/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
-  expect_true(file.exists("TFrankPlot_subfamily/P53_HUMAN.H10MO.B.TFrankPlot.pdf"))
+  expect_true(file.exists("TFrankPlot_family/P53_HUMAN.H11MO.0.A.TFrankPlot.pdf"))
+  expect_true(file.exists("TFrankPlot_subfamily/P53_HUMAN.H11MO.0.A.TFrankPlot.pdf"))
   unlink("TFrankPlot_family",recursive = TRUE, force = TRUE)
   unlink("TFrankPlot_subfamily",recursive = TRUE, force = TRUE)
   unlink("getTF.hypo.significant.TFs.with.motif.summary.csv",recursive = TRUE, force = TRUE)
