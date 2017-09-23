@@ -52,6 +52,8 @@ this ranking were considered candidate upstream regulators.
 | group1 | A group from group.col. |
 | group2 | A group from group.col. |
 | minSubgroupFrac |  A number ranging from 0 to 1 specifying the percentage of samples used to create the groups U (unmethylated)  and M (methylated) used to link probes to TF expression.  Default is 0.4 (lowest quintile of all samples will be in the  U group and the highest quintile of all samples in the M group). |
+| mode	 | A character. Can be "unsupervised" or "supervised". If unsupervised is set the U (unmethylated) and M (methylated) groups will be selected among all samples based on methylation of each probe. Otherwise U group and M group will set as the samples of group1 or group2 as described below: If diff.dir is "hypo, U will be the group 1 and M the group2. If diff.dir is "hyper" M group will be the group1 and U the group2. |
+| diff.dir	 | A character can be "hypo" or "hyper", showing differential methylation dirction in group 1. It can be "hypo" which means the probes are hypomethylated in group1; "hyper" which means the probes are hypermethylated in group1; This argument is used only when mode is supervised nad it should be the same value from get.diff.meth function. | 
 </div>
 </div>
 

@@ -53,7 +53,7 @@ Modes available:
     * Use 20% of each group to identify differently methylated regions (`minSubgroupFrac` = 0.2 in `get.diff.meth`)
     * Use 40% of all samples to create Unmethytlated (U) and Methylated (M) groups in the other steps  (the lowest quintile of samples is the U group and the highest quintile samples is the M group) (`minSubgroupFrac` = 0.4 in `get.pairs` and `get.TFs` functions)
 - `supervised`:
-    * Use all samples in all functions.
+    * Use all samples in all functions and set  Unmethytlated (U) and Methylated (M) one of the group selected in the analysis.
 
 The `unsupervised` mode should be used when want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
 these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power.
