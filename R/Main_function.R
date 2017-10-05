@@ -988,7 +988,9 @@ get.enriched.motif <- function(data,
                         OR = sub.enrich.TF, 
                         lowerOR = sub.enrich.TF.lower, 
                         upperOR = sub.enrich.TF.upper)
-  
+  hocomoco <- getHocomocoTable()
+  family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
+  Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   if(save) write.csv(Summary, 
                      file = sprintf("%s/getMotif.%s.motif.enrichment.csv",

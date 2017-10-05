@@ -693,3 +693,11 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   }
   return(data)
 }
+
+#' @importFrom xml2 read_html
+#' @importFrom rvest html_table
+getHocomocoTable <- function(){
+  tf.family <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
+  tf.family <- tf.family[[1]]
+  return(tf.family)
+}
