@@ -697,7 +697,19 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_table
 getHocomocoTable <- function(){
-  tf.family <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
-  tf.family <- tf.family[[1]]
-  return(tf.family)
+  hocomoco <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
+  hocomoco <- hocomoco[[1]]
+  
+  TF.family <-  createMotifRelevantTfs()
+  TF.subfamily <-  createMotifRelevantTfs("subfamily")
+  
+  x <- do.call(rbind.data.frame,lapply(TF.family, function(x) paste(x,collapse = ";")))
+  x$Model <- names(TF.family)
+  colnames(x) <- c("TF.family.member","Model")
+  hocomoco <- merge(hocomoco,x, by = "Model")
+  x <- do.call(rbind.data.frame,lapply(TF.subfamily, function(x) paste(x,collapse = ";")))
+  x$Model <- names(TF.subfamily)
+  colnames(x) <-  c("TF.subfamily.member","Model")
+  hocomoco <- merge(hocomoco,x, by = "Model")
+  return(hocomoco)
 }
