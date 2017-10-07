@@ -192,11 +192,6 @@ heatmapPairs <- function(data,
   if(missing(group2)) stop("Please set group2 argument")
   if(missing(pairs)) stop("Please set probe argument")
   
-  if(is.null(filename)){
-    if(is.null(legend.col)) filename <- paste0(group.col,"_",probe)
-    if(!is.null(legend.col)) filename <- paste0(group.col,"_",probe,"_",legend.col)
-    filename <- paste0(gsub("\\.","_",filename),".png")
-  }
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[pairs$GeneID,]
