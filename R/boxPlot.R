@@ -117,19 +117,19 @@ metBoxPlot <- function(data,
                  type = "box", boxpoints = "all", jitter = 0.3,
                  pointpos = -1.8) %>% 
       plotly::add_annotations( text=legend.title, xref="paper", yref="paper",
-                       x=1.02, xanchor="left",
-                       y=0.8, yanchor="bottom",    # Same y as legend below
-                       legendtitle=TRUE, showarrow=FALSE ) %>% 
+                               x=1.02, xanchor="left",
+                               y=0.8, yanchor="bottom",    # Same y as legend below
+                               legendtitle=TRUE, showarrow=FALSE ) %>% 
       layout(title = title, boxmode = "group", xaxis = list(title = ""), 
              legend=list(y=0.8, yanchor="top" ), 
-                                             font = list(size = 24), showlegend = showlegend,
-                                             margin = list(
-                                               l = 100,
-                                               r = 300,
-                                               b = 100,
-                                               t = 100,
-                                               pad = 4
-                                             ))
+             font = list(size = 24), showlegend = showlegend,
+             margin = list(
+               l = 100,
+               r = 300,
+               b = 100,
+               t = 100,
+               pad = 4
+             ))
     if(save){
       if (!requireNamespace("webshot", quietly = TRUE)) {
         stop("webshot package is needed for this function to work. Please install it and run webshot::install_phantomjs()",
@@ -141,4 +141,106 @@ metBoxPlot <- function(data,
       return(p)
     }
   })
+}
+
+
+
+#' Heatmp  of pairs gene and probes anti-correlated
+#' @description 
+#' Heatmp plot of pairs gene and probes anti-correlated
+#' @param data A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param pairs List of probe and pair genes
+#' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
+#' @return A heatmap
+#' @importFrom plotly plot_ly layout
+#' @importFrom dplyr top_n filter select %>%
+#' @export
+#' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
+#' @examples
+#' \dontrun{
+#'   data <- ELMER:::getdata("elmer.data.example")
+#'   group.col <- "subtype_Expression.Subtype"
+#'   group1 <- "classical"
+#'   group2 <- "secretory"
+#'   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
+#'   GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+#'   Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'   Raw.p =c(0.001,0.00001,0.001),
+#'   Pe = c(0.001,0.00001,0.001))
+#'   heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
+#'   }
+heatmapPairs <- function(data, 
+                         group.col, 
+                         group1, 
+                         group2, 
+                         pairs, 
+                         filename = NULL) {
+  
+  if (!requireNamespace("ComplexHeatmap", quietly = TRUE)) {
+    stop("ComplexHeatmap package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  if(missing(data)) stop("Please set data argument")
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  if(missing(pairs)) stop("Please set probe argument")
+  
+  if(is.null(filename)){
+    if(is.null(legend.col)) filename <- paste0(group.col,"_",probe)
+    if(!is.null(legend.col)) filename <- paste0(group.col,"_",probe,"_",legend.col)
+    filename <- paste0(gsub("\\.","_",filename),".png")
+  }
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  meth <- assay(getMet(data))[pairs$Probe,]
+  exp <- assay(getExp(data))[pairs$GeneID,]
+  order <- c(which(colData(data)[,group.col] == group1),which(colData(data)[,group.col] == group2))
+  
+  # Create color
+  col <- rainbow(length(unique(colData(data)[,c(group.col)])))
+  names(col) <- unique(colData(data)[,c(group.col)]) 
+  col.list <- list()
+  col.list[[group.col]] <- col
+  
+  # Annotation track
+  ha = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], annotation_legend_param = list(nrow = 2),col = col.list)
+  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], show_legend = F,col = col.list)
+  ht_list = 
+    Heatmap(meth, name = "methylation", 
+            col = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
+            column_names_gp = gpar(fontsize = 8),
+            show_column_names = F,
+            column_order = order, 
+            show_row_names = F,
+            cluster_columns = F,
+            top_annotation = ha,
+            column_title = "Methylation", column_title_gp = gpar(fontsize = 10), 
+            row_title_gp = gpar(fontsize = 10)) +
+    Heatmap(t(apply(exp, 1, scale)), 
+            name = "expression (z-score)", 
+            col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
+            top_annotation = ha2,
+            show_row_names = F,
+            column_order = order, 
+            cluster_columns = F,
+            column_names_gp = gpar(fontsize = 8), 
+            show_column_names = F,
+            column_title = "Expression", 
+            column_title_gp = gpar(fontsize = 10)) +
+    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
+                  heatmap_legend_labels_gp = gpar(fontsize = 8))
+  if(is.null(filename)) return(ht_list)
+  pdf(filename, width = 8, height = 8)
+  
+  draw(ht_list, newpage = TRUE, 
+       column_title = "Correspondence between methylation and distal gene expression", 
+       column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
+       annotation_legend_side = "bottom")
+  dev.off()
 }
