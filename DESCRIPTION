@@ -60,6 +60,7 @@ Suggests:
     testthat,
     DT,
     ComplexHeatmap,
+    circlize,
     GenomicInteractions,
     webshot,
     rtracklayer,

@@ -204,11 +204,15 @@ heatmapPairs <- function(data,
   col.list[[group.col]] <- col
   
   # Annotation track
-  ha = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], annotation_legend_param = list(nrow = 2),col = col.list)
-  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], show_legend = F,col = col.list)
+  ha = ComplexHeatmap::HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
+                                         annotation_legend_param = list(nrow = 2),
+                                         col = col.list)
+  ha2 =  ComplexHeatmap::HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
+                                           show_legend = F,
+                                           col = col.list)
   ht_list = 
-    Heatmap(meth, name = "methylation", 
-            col = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
+    ComplexHeatmap::Heatmap(meth, name = "methylation", 
+            col = circlize::colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
             column_names_gp = gpar(fontsize = 8),
             show_column_names = F,
             column_order = order, 
@@ -217,9 +221,9 @@ heatmapPairs <- function(data,
             top_annotation = ha,
             column_title = "Methylation", column_title_gp = gpar(fontsize = 10), 
             row_title_gp = gpar(fontsize = 10)) +
-    Heatmap(t(apply(exp, 1, scale)), 
+    ComplexHeatmap::Heatmap(t(apply(exp, 1, scale)), 
             name = "expression (z-score)", 
-            col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
+            col = circlize::colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
             top_annotation = ha2,
             show_row_names = F,
             column_order = order, 
@@ -228,12 +232,12 @@ heatmapPairs <- function(data,
             show_column_names = F,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) +
-    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
+    ComplexHeatmap::ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 8))
   if(is.null(filename)) return(ht_list)
   pdf(filename, width = 8, height = 8)
   
-  draw(ht_list, newpage = TRUE, 
+  ComplexHeatmap::draw(ht_list, newpage = TRUE, 
        column_title = "Correspondence between methylation and distal gene expression", 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
        annotation_legend_side = "bottom")
