@@ -59,6 +59,7 @@ Suggests:
     knitr,
     testthat,
     DT,
+    ComplexHeatmap,
     GenomicInteractions,
     webshot,
     rtracklayer,
