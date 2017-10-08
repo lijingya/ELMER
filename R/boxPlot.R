@@ -161,7 +161,7 @@ metBoxPlot <- function(data,
 #' @import ComplexHeatmap circlize
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
-#' #' @examples
+#' @examples
 #' \dontrun{
 #'   data <- ELMER:::getdata("elmer.data.example")
 #'   group.col <- "subtype_Expression.Subtype"

@@ -27,9 +27,7 @@ A heatmap
 \description{
 Heatmp plot of pairs gene and probes anti-correlated
 }
-\author{
-Tiago Chedraoui Silva (tiagochst at gmail.com)
-#' @examples
+\examples{
 \dontrun{
   data <- ELMER:::getdata("elmer.data.example")
   group.col <- "subtype_Expression.Subtype"
@@ -42,4 +40,7 @@ Tiago Chedraoui Silva (tiagochst at gmail.com)
   Pe = c(0.001,0.00001,0.001))
   heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
   }
+}
+\author{
+Tiago Chedraoui Silva (tiagochst at gmail.com)
 }
