@@ -28,6 +28,8 @@ Imports:
     grid, 
     grDevices, 
     graphics, 
+    ComplexHeatmap,
+    circlize,
     methods,
     parallel, 
     stats, 

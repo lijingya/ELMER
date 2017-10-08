@@ -170,6 +170,7 @@ metBoxPlot <- function(data,
 #'   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
 #'   GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
 #'   Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'   Distance = c(6017,168499,0),
 #'   Raw.p =c(0.001,0.00001,0.001),
 #'   Pe = c(0.001,0.00001,0.001))
 #'   heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
@@ -200,34 +201,38 @@ heatmapPairs <- function(data,
   
   # Annotation track
   ha = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
-                                         col = col.list)
+                         col = col.list)
   ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
-                                          show_legend = F,
-                                          col = col.list)
+                          show_legend = F,
+                          col = col.list)
   ht_list = 
-   Heatmap(meth, name = "methylation", 
-                            col = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
-                            column_names_gp = gpar(fontsize = 8),
-                            show_column_names = F,
-                            column_order = order, 
-                            show_row_names = F,
-                            cluster_columns = F,
-                            top_annotation = ha,
-                            column_title = "Methylation", column_title_gp = gpar(fontsize = 10), 
-                            row_title_gp = gpar(fontsize = 10)) +
-   Heatmap(t(apply(exp, 1, scale)), 
-                            name = "expression (z-score)", 
-                            col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
-                            top_annotation = ha2,
-                            show_row_names = F,
-                            column_order = order, 
-                            cluster_columns = F,
-                            column_names_gp = gpar(fontsize = 8), 
-                            show_column_names = F,
-                            column_title = "Expression", 
-                            column_title_gp = gpar(fontsize = 10)) +
-   ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
-                                  heatmap_legend_labels_gp = gpar(fontsize = 8))
+    Heatmap(meth, name = "methylation", 
+            col = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
+            column_names_gp = gpar(fontsize = 8),
+            show_column_names = F,
+            column_order = order, 
+            show_row_names = F,
+            cluster_columns = F,
+            top_annotation = ha,
+            column_title = "Methylation", column_title_gp = gpar(fontsize = 10), 
+            row_title_gp = gpar(fontsize = 10)) +
+    Heatmap(t(apply(exp, 1, scale)), 
+            name = "expression (z-score)", 
+            col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
+            top_annotation = ha2,
+            show_row_names = F,
+            column_order = order, 
+            cluster_columns = F,
+            column_names_gp = gpar(fontsize = 8), 
+            show_column_names = F,
+            column_title = "Expression", 
+            column_title_gp = gpar(fontsize = 10)) +
+    
+    Heatmap(pairs$Distance,name = "dist_TSS", col = colorRamp2(c(0, 1000000), c("white", "orange")),
+            heatmap_legend_param = list(at = c(0, 200000, 400000, 60000, 800000, 1000000), 
+                                        labels = c("0kb", "200kb", "400kb", "600kb", "800kb", "1mb"))) +
+    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
+                  heatmap_legend_labels_gp = gpar(fontsize = 8))
   if(is.null(filename)) return(draw(ht_list, newpage = TRUE, 
                                     column_title = "Correspondence between  probe DNA methylation and distal gene expression", 
                                     column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
@@ -235,8 +240,8 @@ heatmapPairs <- function(data,
   pdf(filename, width = 8, height = 8)
   
   draw(ht_list, newpage = TRUE, 
-                       column_title = "Correspondence between probe DNA methylation and distal gene expression", 
-                       column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
-                       annotation_legend_side = "bottom")
+       column_title = "Correspondence between probe DNA methylation and distal gene expression", 
+       column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
+       annotation_legend_side = "bottom")
   dev.off()
 }
