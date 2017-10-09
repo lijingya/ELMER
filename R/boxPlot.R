@@ -191,7 +191,16 @@ heatmapPairs <- function(data,
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[pairs$GeneID,]
-  order <- c(which(colData(data)[,group.col] == group1),which(colData(data)[,group.col] == group2))
+  
+  idx1 <- which(colData(data)[,group.col] == group1)
+  aux <- meth[,idx1]
+  dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
+  
+  idx2 <- which(colData(data)[,group.col] == group2)
+  aux <- meth[,idx2]
+  dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
+  
+  order <- c(idx1[dist1$order],idx2[dist2$order])
   
   # Create color
   col <- rainbow(length(unique(colData(data)[,c(group.col)])))
@@ -228,7 +237,9 @@ heatmapPairs <- function(data,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) +
     
-    Heatmap(pairs$Distance,name = "dist_TSS", col = colorRamp2(c(0, 1000000), c("white", "orange")),
+    Heatmap(pairs$Distance,name = "dist_TSS", 
+            width = unit(10, "mm"),
+            col = colorRamp2(c(0, 1000000), c("white", "orange")),
             heatmap_legend_param = list(at = c(0, 200000, 400000, 60000, 800000, 1000000), 
                                         labels = c("0kb", "200kb", "400kb", "600kb", "800kb", "1mb"))) +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
