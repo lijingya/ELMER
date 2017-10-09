@@ -193,11 +193,11 @@ heatmapPairs <- function(data,
   exp <- assay(getExp(data))[pairs$GeneID,]
   
   idx1 <- which(colData(data)[,group.col] == group1)
-  aux <- meth[,idx1]
+  aux <- na.omit(meth[,idx1])
   dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
   
   idx2 <- which(colData(data)[,group.col] == group2)
-  aux <- meth[,idx2]
+  aux <- na.omit(meth[,idx2])
   dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
   
   order <- c(idx1[dist1$order],idx2[dist2$order])
