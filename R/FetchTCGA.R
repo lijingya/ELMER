@@ -106,9 +106,9 @@ getRNAseq <- function(disease,
                         legacy = TRUE)
     }
     tryCatch({
-      GDCdownload(query, directory = dir.rna, chunks.per.download = 200)
+      GDCdownload(query, directory = dir.rna, files.per.chunk =  200)
     }, error = function(e) {
-      GDCdownload(query, directory = dir.rna, chunks.per.download = 50)
+      GDCdownload(query, directory = dir.rna, files.per.chunk = 50)
     })
     
     # Preparing to save output if it does not exists
@@ -167,7 +167,7 @@ get450K <- function(disease,
                         platform = "Illumina Human Methylation 450")
     }  
     tryCatch({
-      GDCdownload(query,directory = dir.meth,chunks.per.download = 5)
+      GDCdownload(query,directory = dir.meth, files.per.chunk = 5)
     }, error = function(e) {
       GDCdownload(query,directory = dir.meth,  method = "client")
     })
