@@ -162,6 +162,7 @@ metBoxPlot <- function(data,
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
+#' @importFrom stats hclust dist
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
