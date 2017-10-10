@@ -156,6 +156,8 @@ metBoxPlot <- function(data,
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
 #' @param pairs List of probe and pair genes
+#' @param width Figure width
+#' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
@@ -180,6 +182,8 @@ heatmapPairs <- function(data,
                          group1, 
                          group2, 
                          pairs, 
+                         width = 10,
+                         height = 10,
                          filename = NULL) {
   
   if(missing(data)) stop("Please set data argument")
@@ -245,7 +249,7 @@ heatmapPairs <- function(data,
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 8))
   if(is.null(filename)) return(ht_list)
-  pdf(filename, width = 38, height = 8)
+  pdf(filename, width = width, height = height)
   draw(ht_list, newpage = TRUE, 
        column_title = "Correspondence between probe DNA methylation and distal gene expression", 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 

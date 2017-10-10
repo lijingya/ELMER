@@ -4,7 +4,8 @@
 \alias{heatmapPairs}
 \title{Heatmp  of pairs gene and probes anti-correlated}
 \usage{
-heatmapPairs(data, group.col, group1, group2, pairs, filename = NULL)
+heatmapPairs(data, group.col, group1, group2, pairs, width = 10,
+  height = 10, filename = NULL)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix}
@@ -18,6 +19,10 @@ That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{pairs}{List of probe and pair genes}
+
+\item{width}{Figure width}
+
+\item{height}{Figure height}
 
 \item{filename}{File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.}
 }
@@ -36,6 +41,7 @@ Heatmp plot of pairs gene and probes anti-correlated
   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
   GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
   Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+  Distance = c(6017,168499,0),
   Raw.p =c(0.001,0.00001,0.001),
   Pe = c(0.001,0.00001,0.001))
   heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
