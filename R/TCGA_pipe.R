@@ -473,6 +473,15 @@ addMutCol <- function(data,
 #' @description This function will create a text file with the 
 #' date of the last run, which aanalysis were performed, the values of
 #' the arguments so the user can keep track 
+#' @param analysis Which analysis were performed
+#' @param argument.values Other argument values changed
+#' @param genome Genome of reference hg38 and hg19
+#' @param mae.path Where mae is stored
+#' @param direction Hypo or hyper direction
+#' @param group.col Group col
+#' @param group1 Group 1 
+#' @param group2 Group 2 
+#' @param results.path Path where the results were saved
 createSummaryDocument <- function(analysis = "all", 
                                   argument.values = "defaults",
                                   genome = NULL,

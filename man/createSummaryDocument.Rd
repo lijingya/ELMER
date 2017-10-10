@@ -8,6 +8,25 @@ createSummaryDocument(analysis = "all", argument.values = "defaults",
   genome = NULL, mae.path = NULL, direction = NULL, group.col = NULL,
   group1 = NULL, group2 = NULL, results.path = NULL)
 }
+\arguments{
+\item{analysis}{Which analysis were performed}
+
+\item{argument.values}{Other argument values changed}
+
+\item{genome}{Genome of reference hg38 and hg19}
+
+\item{mae.path}{Where mae is stored}
+
+\item{direction}{Hypo or hyper direction}
+
+\item{group.col}{Group col}
+
+\item{group1}{Group 1}
+
+\item{group2}{Group 2}
+
+\item{results.path}{Path where the results were saved}
+}
 \description{
 This function will create a text file with the 
 date of the last run, which aanalysis were performed, the values of
