@@ -10,6 +10,8 @@ heatmapPairs(data, group.col, group1, group2, pairs, width = 10,
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix}
 
+\item{group.col}{A column from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae)}
+
 \item{group1}{A group from group.col. ELMER will run group1 vs group2. 
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}

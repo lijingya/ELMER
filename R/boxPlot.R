@@ -149,6 +149,7 @@ metBoxPlot <- function(data,
 #' @description 
 #' Heatmp plot of pairs gene and probes anti-correlated
 #' @param data A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix
+#' @param group.col A column from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae)  
 #' @param group1 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
