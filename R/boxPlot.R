@@ -157,6 +157,8 @@ metBoxPlot <- function(data,
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
 #' @param pairs List of probe and pair genes
+#' @param annotation.col A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
+#' to be added as annotation to the heatmap
 #' @param width Figure width
 #' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
@@ -172,18 +174,22 @@ metBoxPlot <- function(data,
 #'   group1 <- "classical"
 #'   group2 <- "secretory"
 #'   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
-#'   GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
-#'   Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
-#'   Distance = c(6017,168499,0),
-#'   Raw.p =c(0.001,0.00001,0.001),
-#'   Pe = c(0.001,0.00001,0.001))
-#'   heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
+#'                       GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+#'                       Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'                       Distance = c(6017,168499,0),
+#'                       Raw.p = c(0.001,0.00001,0.001),
+#'                       Pe = c(0.001,0.00001,0.001))
+#'  heatmapPairs(data = data, group.col = group.col,
+#'               group1 = group1, group2 = group2,
+#'               annotation.col = c("ethnicity","vital_status"),
+#'               pairs, filename = "heatmap.pdf")
 #'   }
 heatmapPairs <- function(data, 
                          group.col, 
                          group1, 
                          group2, 
                          pairs, 
+                         annotation.col = NULL, 
                          width = 10,
                          height = 10,
                          filename = NULL) {
@@ -209,20 +215,44 @@ heatmapPairs <- function(data,
   order <- c(idx1[dist1$order],idx2[dist2$order])
   
   # Create color
-  col <- rainbow(length(unique(colData(data)[,c(group.col)])))
+  colors <- c("#6495ED", "#8B2323", "#458B74", "#7AC5CD",  
+              "#4F4F4F", "#473C8B", "#00F5FF", "#CD6889", 
+              "#B3EE3A", "#7B68EE", "#CDAF95", "#0F0F0F", "#FF7F00", 
+              "#00008B", "#5F9EA0", "#F0FFFF", "#8B6969", "#9FB6CD", "#D02090",
+              "#FFFF00", "#104E8B", "#B22222", "#B3EE3A", "#FF4500", "#4F94CD", 
+              "#40E0D0", "#F5FFFA", "#8B3A62", "#FF3030", "#FFFFFF")
+  l <- length(unique(colData(data)[,c(group.col)]))
+  l.all <-  l
+  col <- colors[1:l]
   names(col) <- unique(colData(data)[,c(group.col)]) 
   col.list <- list()
   col.list[[group.col]] <- col
   
+  for(i in annotation.col){
+    l <- length(unique(colData(data)[,c(i)]))
+    if(l.all + l <= 10) {
+      col <- colors[(l.all+1):(l.all + l)]
+      l.all <- l.all + l
+    } else {
+      col <- colors[c((l.all+1):30,1 + (l.all + l)%%30)]
+      l.all <- (l.all + l)%%30
+    }
+    names(col) <- unique(colData(data)[,c(i)]) 
+    col.list[[i]] <- col
+  }
+  
   # Annotation track
-  ha = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
-                         col = col.list)
-  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col),drop = F], 
+  ha = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
+                         col = col.list,
+                         show_annotation_name = TRUE,
+                         annotation_name_side = "left",
+                         annotation_name_gp = gpar(fontsize = 6))
+  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
                           show_legend = F,
                           col = col.list)
   ht_list = 
     Heatmap(meth, name = "methylation", 
-            col = colorRamp2(c(0, 0.5, 1), c("blue", "white", "red")),
+            col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
             column_names_gp = gpar(fontsize = 8),
             show_column_names = F,
             column_order = order, 
@@ -233,7 +263,7 @@ heatmapPairs <- function(data,
             row_title_gp = gpar(fontsize = 10)) +
     Heatmap(t(apply(exp, 1, scale)), 
             name = "expression (z-score)", 
-            col = colorRamp2(c(-2, 0, 2), c("green", "white", "red")),
+            col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
             top_annotation = ha2,
             show_row_names = F,
             column_order = order, 
@@ -251,8 +281,10 @@ heatmapPairs <- function(data,
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 8))
   if(is.null(filename)) return(ht_list)
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/2), collapse = ""))) - unit(1, "cm"),
+                   unit(c(2, 2), "mm"))
   pdf(filename, width = width, height = height)
-  draw(ht_list, newpage = TRUE, 
+  draw(ht_list, padding = padding, newpage = TRUE, 
        column_title = "Correspondence between probe DNA methylation and distal gene expression", 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
        annotation_legend_side = "bottom")

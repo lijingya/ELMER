@@ -4,8 +4,8 @@
 \alias{heatmapPairs}
 \title{Heatmp  of pairs gene and probes anti-correlated}
 \usage{
-heatmapPairs(data, group.col, group1, group2, pairs, width = 10,
-  height = 10, filename = NULL)
+heatmapPairs(data, group.col, group1, group2, pairs, annotation.col = NULL,
+  width = 10, height = 10, filename = NULL)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix}
@@ -21,6 +21,9 @@ That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{pairs}{List of probe and pair genes}
+
+\item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
+to be added as annotation to the heatmap}
 
 \item{width}{Figure width}
 
@@ -41,12 +44,15 @@ Heatmp plot of pairs gene and probes anti-correlated
   group1 <- "classical"
   group2 <- "secretory"
   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
-  GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
-  Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
-  Distance = c(6017,168499,0),
-  Raw.p =c(0.001,0.00001,0.001),
-  Pe = c(0.001,0.00001,0.001))
-  heatmapPairs(data, group.col,group1,group2,pairs,filename = "heatmap.pdf")
+                      GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+                      Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+                      Distance = c(6017,168499,0),
+                      Raw.p = c(0.001,0.00001,0.001),
+                      Pe = c(0.001,0.00001,0.001))
+ heatmapPairs(data = data, group.col = group.col,
+              group1 = group1, group2 = group2,
+              annotation.col = c("ethnicity","vital_status"),
+              pairs, filename = "heatmap.pdf")
   }
 }
 \author{
