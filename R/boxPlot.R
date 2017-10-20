@@ -165,6 +165,7 @@ metBoxPlot <- function(data,
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
 #' @importFrom stats hclust dist
+#' @importFrom grid unit.c
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
@@ -230,17 +231,20 @@ heatmapPairs <- function(data,
   
   for(i in annotation.col){
     l <- length(unique(colData(data)[,c(i)]))
-    if(l.all + l <= 10) {
-      col <- colors[(l.all+1):(l.all + l)]
-      l.all <- l.all + l
-    } else {
-      col <- colors[c((l.all+1):30,1 + (l.all + l)%%30)]
-      l.all <- (l.all + l)%%30
+    if(l < 10){
+      if(l.all + l <= 10) {
+        col <- colors[(l.all+1):(l.all + l)]
+        l.all <- l.all + l
+      } else {
+        col <- colors[c((l.all+1):30,1 + (l.all + l)%%30)]
+        l.all <- (l.all + l)%%30
+      }
+      n <- unique(colData(data)[,c(i)]) 
+      n[is.na(n)] <- "NA"
+      names(col) <- n
+      col.list[[i]] <- col
     }
-    names(col) <- unique(colData(data)[,c(i)]) 
-    col.list[[i]] <- col
   }
-  
   # Annotation track
   ha = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
                          col = col.list,
