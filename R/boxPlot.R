@@ -182,7 +182,7 @@ metBoxPlot <- function(data,
 #'                       Pe = c(0.001,0.00001,0.001))
 #'  heatmapPairs(data = data, group.col = group.col,
 #'               group1 = group1, group2 = group2,
-#'               annotation.col = c("ethnicity","vital_status"),
+#'               annotation.col = c("ethnicity","vital_status","age_at_diagnosis"),
 #'               pairs, filename = "heatmap.pdf")
 #'   }
 heatmapPairs <- function(data, 
@@ -246,7 +246,18 @@ heatmapPairs <- function(data,
     } else {
       message("Considering variable ", i, " as numeric")
       suppressWarnings({
-        colData(data)[,c(i)] <- as.numeric(colData(data)[,c(i)])
+        nb <- as.numeric(colData(data)[,c(i)])
+        colData(data)[,c(i)] <- nb
+        if(!all(na.omit(nb) >=0)){
+          col <- circlize::colorRamp2(c(min(nb,na.rm = T),(max(nb,na.rm = T) + min(nb))/2,max(nb)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
+          l.all <- l.all + 2
+        } else {
+          col.list[[i]] <- col
+          col <- circlize::colorRamp2(c(min(nb,na.rm = T),max(nb,na.rm = T)), c("white", colors[(l.all+1):(l.all + 1)]))
+          l.all <- l.all + 1
+        }
+        col.list[[i]] <- col
+        
       })
     }
   }
