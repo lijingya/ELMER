@@ -243,6 +243,11 @@ heatmapPairs <- function(data,
       n[is.na(n)] <- "NA"
       names(col) <- n
       col.list[[i]] <- col
+    } else {
+      message("Considering variable ", i, " as numeric")
+      suppressWarnings({
+        colData(data)[,c(i)] <- as.numeric(colData(data)[,c(i)])
+      })
     }
   }
   # Annotation track
@@ -282,12 +287,19 @@ heatmapPairs <- function(data,
             col = colorRamp2(c(0, 1000000), c("white", "orange")),
             heatmap_legend_param = list(at = c(0, 200000, 400000, 600000, 800000, 1000000), 
                                         labels = c("0kb", "200kb", "400kb", "600kb", "800kb", "1mb"))) +
-    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 8, fontface = "bold"), 
-                  heatmap_legend_labels_gp = gpar(fontsize = 8))
+    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
+                  heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
-  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/2), collapse = ""))) - unit(1, "cm"),
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(2 + nchar(c(group.col,annotation.col)))/2), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))
-  pdf(filename, width = width, height = height)
+  if(grepl("\\.pdf",filename)) {
+    message("Saving as PDF")
+    pdf(filename, width = width, height = height)
+  }
+  if(grepl("\\.png",filename)) { 
+    message("Saving as PNG")
+    png(filename, width = width, height = height)
+  }
   draw(ht_list, padding = padding, newpage = TRUE, 
        column_title = "Correspondence between probe DNA methylation and distal gene expression", 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
