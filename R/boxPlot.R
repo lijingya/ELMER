@@ -232,11 +232,11 @@ heatmapPairs <- function(data,
   for(i in annotation.col){
     l <- length(unique(colData(data)[,c(i)]))
     if(l < 10){
-      if(l.all + l <= 10) {
+      if(l.all + l <= length(colors)) {
         col <- colors[(l.all+1):(l.all + l)]
         l.all <- l.all + l
       } else {
-        col <- colors[c((l.all+1):30,1 + (l.all + l)%%30)]
+        col <- colors[c((l.all+1):length(colors),1 + (l.all + l)%%length(colors))]
         l.all <- (l.all + l)%%30
       }
       n <- unique(colData(data)[,c(i)]) 
