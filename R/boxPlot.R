@@ -165,7 +165,7 @@ metBoxPlot <- function(data,
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
 #' @importFrom stats hclust dist
-#' @importFrom grid unit.c grobWidth
+#' @importFrom grid unit.c grobWidth textGrob
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
