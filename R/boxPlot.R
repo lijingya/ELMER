@@ -249,7 +249,10 @@ heatmapPairs <- function(data,
         nb <- as.numeric(colData(data)[,c(i)])
         colData(data)[,c(i)] <- nb
         if(!all(na.omit(nb) >=0)){
-          col <- circlize::colorRamp2(c(min(nb,na.rm = T),(max(nb,na.rm = T) + min(nb))/2,max(nb)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
+          col <- circlize::colorRamp2(c(min(nb,na.rm = T),
+                                        (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
+                                        max(nb,na.rm = T)), 
+                                      c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
           l.all <- l.all + 2
         } else {
           col.list[[i]] <- col
@@ -301,7 +304,7 @@ heatmapPairs <- function(data,
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
-  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(2 + nchar(c(group.col,annotation.col)))/2), collapse = ""))) - unit(1, "cm"),
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.5), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))
   if(grepl("\\.pdf",filename)) {
     message("Saving as PDF")
