@@ -40,6 +40,8 @@ navbar:
           href: plots_motif_enrichment.html
         - text: "4 - Regulatory TF plots"
           href: plots_TF.html
+        - text: "5 - Heatmap plots"
+          href: plots_heatmap.html
     - text: "Graphical User interface"
       icon: fa-hand-pointer-o
       href: analysis_gui.html

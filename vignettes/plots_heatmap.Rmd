@@ -1,0 +1,48 @@
+---
+output: 
+  html_document:
+    self_contained: true
+    number_sections: no
+    theme: flatly
+    highlight: tango
+    mathjax: null
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    css: style.css
+  
+bibliography: bibliography.bib    
+vignette: >
+  %\VignetteIndexEntry{"4.5 - Heatmap plots"}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+<br>
+
+# Loading required data for plot
+```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
+# Load results from previous sections
+mae <- get(load("mae.rda"))
+```
+
+# Heatmap 
+
+Generate a heatmap of paired probes.
+
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=5, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+
+pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
+
+heatmapPairs(data = mae, 
+             group.col = "definition",
+             group1 = "Primary solid Tumor", 
+             annotation.col = c("years_smoked","gender"),
+             group2 = "Solid Tissue Normal",
+             pairs = pair,
+             filename =  NULL)
+
+```
+
+
+
