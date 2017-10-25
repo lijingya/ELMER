@@ -30,7 +30,7 @@ mae <- get(load("mae.rda"))
 
 Generate a heatmap of paired probes.
 
-```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.height=5, fig.cap="Each scatter plot shows the methylation level of an example  probe cg19403323 in all LUSC samples plotted against the expression of one of  20 adjacent genes."}
+```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5, fig.cap="Heatmap of paired pairs."}
 
 pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
 
