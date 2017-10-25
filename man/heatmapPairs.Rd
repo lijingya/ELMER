@@ -51,7 +51,7 @@ Heatmp plot of pairs gene and probes anti-correlated
                       Pe = c(0.001,0.00001,0.001))
  heatmapPairs(data = data, group.col = group.col,
               group1 = group1, group2 = group2,
-              annotation.col = c("ethnicity","vital_status"),
+              annotation.col = c("ethnicity","vital_status","age_at_diagnosis"),
               pairs, filename = "heatmap.pdf")
   }
 }
