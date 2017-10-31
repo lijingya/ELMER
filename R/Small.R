@@ -545,7 +545,7 @@ getTSS <- function(genome="hg38",TSS=list(upstream=NULL, downstream=NULL)){
   
   if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
     tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
-
+  
   return(tss)
 }
 
@@ -697,8 +697,12 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #' @importFrom xml2 read_html
 #' @importFrom rvest html_table
 getHocomocoTable <- function(){
-  hocomoco <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
-  hocomoco <- hocomoco[[1]]
+  hocomoco <- tryCatch({
+    hocomoco <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
+    hocomoco <- hocomoco[[1]]
+  }, error = function(e) {
+    getdata("hocomoco.table")
+  })
   
   TF.family <-  createMotifRelevantTfs()
   TF.subfamily <-  createMotifRelevantTfs("subfamily")
