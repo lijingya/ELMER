@@ -145,7 +145,7 @@ metBoxPlot <- function(data,
 
 
 
-#' Heatmp  of pairs gene and probes anti-correlated
+#' Heatmap of pairs gene and probes anti-correlated
 #' @description 
 #' Heatmp plot of pairs gene and probes anti-correlated
 #' @param data A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix
@@ -201,6 +201,16 @@ heatmapPairs <- function(data,
   if(missing(group2)) stop("Please set group2 argument")
   if(missing(pairs)) stop("Please set probe argument")
   
+  # For a given probe and gene find nearest TSS
+  tss <- getTSS(metadata(mae)$genome)
+  pairs[,"distanceTSS"] <- NA
+  for(i in 1:nrow(pairs)){
+    aux <- pairs[i,]
+    aux.tss <- tss[tss$ensembl_gene_id == aux$GeneID,]
+    probe <- rowRanges(getMet(data))[aux$Probe,]
+    pairs[i,"distanceTSS"] <- values(distanceToNearest(probe,aux.tss))$distance
+  }
+  
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[pairs$GeneID,]
@@ -251,8 +261,7 @@ heatmapPairs <- function(data,
         if(!all(na.omit(nb) >=0)){
           col <- circlize::colorRamp2(c(min(nb,na.rm = T),
                                         (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
-                                        max(nb,na.rm = T)), 
-                                      c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
+                                        max(nb,na.rm = T)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
           l.all <- l.all + 2
         } else {
           col.list[[i]] <- col
@@ -296,15 +305,16 @@ heatmapPairs <- function(data,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) +
     
-    Heatmap(pairs$Distance,name = "dist_TSS", 
+    Heatmap(log10(pairs$distanceTSS + 1),
+            name = "log10(distanceTSS + 1)", 
             width = unit(10, "mm"),
-            col = colorRamp2(c(0, 1000000), c("white", "orange")),
-            heatmap_legend_param = list(at = c(0, 200000, 400000, 600000, 800000, 1000000), 
-                                        labels = c("0kb", "200kb", "400kb", "600kb", "800kb", "1mb"))) +
+            col = colorRamp2(c(0, 6), c("white", "orange")),
+            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000)), 
+                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb"))) +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
-  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.5), collapse = ""))) - unit(1, "cm"),
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/2), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))
   if(grepl("\\.pdf",filename)) {
     message("Saving as PDF")
@@ -320,3 +330,4 @@ heatmapPairs <- function(data,
        annotation_legend_side = "bottom")
   dev.off()
 }
+
