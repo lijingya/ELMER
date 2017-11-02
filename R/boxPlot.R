@@ -206,6 +206,7 @@ heatmapPairs <- function(data,
   pairs[,"distanceTSS"] <- NA
   for(i in 1:nrow(pairs)){
     aux <- pairs[i,]
+    if(!aux$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
     aux.tss <- tss[tss$ensembl_gene_id == aux$GeneID,]
     probe <- rowRanges(getMet(data))[aux$Probe,]
     pairs[i,"distanceTSS"] <- values(distanceToNearest(probe,aux.tss))$distance
