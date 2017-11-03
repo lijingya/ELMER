@@ -627,7 +627,7 @@ get.permu <- function(data,
       permu.file <- get(load(file, temp.space), temp.space)
       rm(temp.space)
       # Does the probe really exists ?
-      permu.file <- permu.file[,colnames(permu.file) %in% rownames(getMet(mae))]
+      permu.file <- permu.file[,colnames(permu.file) %in% rownames(getMet(data))]
       tmp.probes <- probes.permu[!probes.permu %in%  colnames(permu.file)]
       if(!all(geneID %in% rownames(permu.file))) { 
         tmp.genes <- rownames(permu.file)
