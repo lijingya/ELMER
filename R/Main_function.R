@@ -501,6 +501,7 @@ get.pair <- function(data,
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   
   # Change distance from gene to nearest TSS
+  selected$Distance <- NULL
   selected <- addDistNearestTSS(data, NearGenes = selected)
   
   if(diffExp){
