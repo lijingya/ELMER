@@ -2,7 +2,7 @@
 % Please edit documentation in R/boxPlot.R
 \name{heatmapPairs}
 \alias{heatmapPairs}
-\title{Heatmp  of pairs gene and probes anti-correlated}
+\title{Heatmap of pairs gene and probes anti-correlated}
 \usage{
 heatmapPairs(data, group.col, group1, group2, pairs, annotation.col = NULL,
   width = 10, height = 10, filename = NULL)

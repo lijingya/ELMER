@@ -166,6 +166,7 @@ metBoxPlot <- function(data,
 #' @import ComplexHeatmap circlize
 #' @importFrom stats hclust dist
 #' @importFrom grid unit.c grobWidth textGrob
+#' @importFrom plyr ddply .
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
@@ -203,14 +204,18 @@ heatmapPairs <- function(data,
   
   # For a given probe and gene find nearest TSS
   tss <- getTSS(metadata(mae)$genome)
-  pairs[,"distanceTSS"] <- NA
-  for(i in 1:nrow(pairs)){
-    aux <- pairs[i,]
-    if(!aux$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
-    aux.tss <- tss[tss$ensembl_gene_id == aux$GeneID,]
-    probe <- rowRanges(getMet(data))[aux$Probe,]
-    pairs[i,"distanceTSS"] <- values(distanceToNearest(probe,aux.tss))$distance
-  }
+  # To calculate the distance we will get the transcript list
+  # Consider only the TSS  (start of the transcript single base)
+  tss <- promoters(tss, upstream = 1, downstream = 1)
+  message("Update the distance to gene to distance to the nearest TSS")
+  distance <-   plyr::ddply(pairs,.(Probe,GeneID), function(x) {
+    if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+    x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
+    probe <- rowRanges(getMet(data))[x$Probe,]
+    return(values(distanceToNearest(probe,x.tss))$distance)
+  },.progress = "text")
+  colnames(distance) <- c("Probe","GeneID","distanceTSS")
+  pairs <- merge(pairs,distance, by = c("Probe","GeneID"))
   
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
