@@ -168,6 +168,7 @@ metBoxPlot <- function(data,
 #' @importFrom grid unit.c grobWidth textGrob
 #' @importFrom plyr ddply .
 #' @importFrom GenomicRanges distanceToNearest
+#' @importFrom grDevices png
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
