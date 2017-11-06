@@ -167,6 +167,7 @@ metBoxPlot <- function(data,
 #' @importFrom stats hclust dist
 #' @importFrom grid unit.c grobWidth textGrob
 #' @importFrom plyr ddply .
+#' @importFrom GenomicRanges distanceToNearest
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
@@ -203,7 +204,7 @@ heatmapPairs <- function(data,
   if(missing(pairs)) stop("Please set probe argument")
   
   # For a given probe and gene find nearest TSS
-  tss <- getTSS(metadata(mae)$genome)
+  tss <- getTSS(metadata(data)$genome)
   # To calculate the distance we will get the transcript list
   # Consider only the TSS  (start of the transcript single base)
   tss <- promoters(tss, upstream = 1, downstream = 1)
