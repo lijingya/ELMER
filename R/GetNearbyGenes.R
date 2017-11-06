@@ -218,14 +218,42 @@ GetNearGenes <- function(data = NULL,
   if("split_labels" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_labels"] <- NULL 
   if("split_type" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_type"] <- NULL 
   
-  if(!is.null(data)) {
-    NearGenes$Distance <- NULL
-    # For a given probe and gene find nearest TSS
-    tss <- getTSS(metadata(data)$genome)
-    # To calculate the distance we will get the transcript list
-    # Consider only the TSS  (start of the transcript single base)
-    tss <- promoters(tss, upstream = 0, downstream = 0)
-    message("Update the distance to gene to distance to the nearest TSS of the gene")
+  return(NearGenes)
+}
+
+
+#' @title Calculate the distance between probe and gene TSS
+#' @description Calculate the distance between probe and gene TSS
+#' @param data A multi Assay Experiment with both DNA methylation and gene Expression objects
+#' @param NearGenes A list or a data frame with the pairs gene probes
+#' @export
+#' @examples 
+#' \dontrun{
+#'  data <- ELMER:::getdata("elmer.data.example")
+#'   NearbyGenes <- GetNearGenes(data = data, probes = c("cg15924102", "cg24741609"),  numFlankingGenes = 20)
+#'   NearbyGenes <- addDistNearestTSS(data,NearbyGenes)
+#'   NearbyGenes <- addDistNearestTSS(data,NearbyGenes[[1]])
+#' }
+addDistNearestTSS <- function(data,
+                              NearGenes,
+                              cores = 1) {
+  if(missing(data)) stop("Please set data argument")
+  if(missing(NearGenes)) stop("Please set NearGenes argument")
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > parallel::detectCores()) cores <- parallel::detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
+  # For a given probe and gene find nearest TSS
+  tss <- getTSS(metadata(data)$genome)
+  # To calculate the distance we will get the transcript list
+  # Consider only the TSS  (start of the transcript single base)
+  tss <- promoters(tss, upstream = 0, downstream = 0)
+  message("Update the distance to gene to distance to the nearest TSS of the gene")
+  if(!is.data.frame(NearGenes)){
     for(probe in names(NearGenes)){
       aux <- NearGenes[[probe]]
       distance <-   plyr::ddply(aux,.(Target,GeneID), function(x) {
@@ -233,15 +261,23 @@ GetNearGenes <- function(data = NULL,
         x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
         probe <- rowRanges(getMet(data))[x$Target,]
         return(values(distanceToNearest(probe,x.tss))$distance)
-      },.progress = "text",  .parallel = parallel)
+      },.parallel = parallel)
       colnames(distance) <- c("Target","GeneID","distNearestTSS")
       aux <- merge(aux,distance, by = c("Target","GeneID"))
-      aux$Distance <- NULL # Remove the distance to the gene
       NearGenes[[probe]] <- aux
     }
+  } else {
+    # For a given probe and gene find nearest TSS
+    if("Target" %in% colnames(NearGenes)) colnames(NearGenes)[grep("Target",colnames(NearGenes))] <- "Probe"
+    distance <-   plyr::ddply(NearGenes,.(Probe,GeneID), function(x) {
+      if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+      x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
+      probe <- rowRanges(getMet(data))[x$Probe,]
+      return(values(distanceToNearest(probe,x.tss))$distance)
+    },.parallel = parallel)
+    colnames(distance) <- c("Probe","GeneID","distNearestTSS")
+    NearGenes <- merge(NearGenes,distance, by = c("Probe","GeneID"))
   }
+  
   return(NearGenes)
 }
-
-
-

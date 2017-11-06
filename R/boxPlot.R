@@ -206,19 +206,7 @@ heatmapPairs <- function(data,
   
   if(!"distNearestTSS" %in% colnames(pairs)) {
     # For a given probe and gene find nearest TSS
-    tss <- getTSS(metadata(data)$genome)
-    # To calculate the distance we will get the transcript list
-    # Consider only the TSS  (start of the transcript single base)
-    tss <- promoters(tss, upstream = 0, downstream = 0)
-    message("Update the distance to gene to distance to the nearest TSS")
-    distance <-   plyr::ddply(pairs,.(Probe,GeneID), function(x) {
-      if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
-      x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
-      probe <- rowRanges(getMet(data))[x$Probe,]
-      return(values(distanceToNearest(probe,x.tss))$distance)
-    })
-    colnames(distance) <- c("Probe","GeneID","distNearestTSS")
-    pairs <- merge(pairs,distance, by = c("Probe","GeneID"))
+    pairs <- addDistNearestTSS(data, pairs)
   }
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
