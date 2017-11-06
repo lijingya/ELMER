@@ -236,6 +236,7 @@ GetNearGenes <- function(data = NULL,
       },.progress = "text",  .parallel = parallel)
       colnames(distance) <- c("Target","GeneID","distNearestTSS")
       aux <- merge(aux,distance, by = c("Target","GeneID"))
+      aux$Distance <- NULL # Remove the distance to the gene
       NearGenes[[probe]] <- aux
     }
   }
