@@ -93,11 +93,15 @@ Hypo.pair <- get.pair(data = mae,
                       label = "hypo")
 ```
 
+Observation: The distance column in the nearGenes object and in thable getPair.hypo.all.pairs.statistic.csv  are the distance to the gene. 
+To update, to the distance to the nearest TSS please use the function `addDistNearestTSS`.
+This function was not used default  due to time requirements to run for all probes and all their 20 nearest genes, but it is ran for the significant pairs.
+
 ```{r, eval = TRUE, message = FALSE, warning = FALSE}
 Hypo.pair %>% datatable(options = list(scrollX = TRUE))
 # get.pair automatically save output files. 
-#getPair.hypo.all.pairs.statistic.csv contains statistics for all the probe-gene pairs.
-#getPair.hypo.pairs.significant.csv contains only the significant probes which is 
+# getPair.hypo.all.pairs.statistic.csv contains statistics for all the probe-gene pairs.
+# getPair.hypo.pairs.significant.csv contains only the significant probes which is 
 # same with Hypo.pair.
 dir(path = "result", pattern = "getPair") 
 ```

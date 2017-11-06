@@ -500,6 +500,9 @@ get.pair <- function(data,
   if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   
+  # Change distance from gene to nearest TSS
+  selected <- addDistNearestTSS(data, NearGenes = selected)
+  
   if(diffExp){
     message("Calculating differential expression between two groups")
     Exp <- assay(getExp(data)[unique(selected$GeneID),])
