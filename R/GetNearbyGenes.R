@@ -26,7 +26,7 @@ NearGenes <- function (Target=NULL,
   # Where 10 is genum/2
   Gene$GENEID <- Gene$ensembl_gene_id
   if("external_gene_name" %in% colnames(S4Vectors::mcols(Gene))){
-  Gene$SYMBOL <- Gene$external_gene_name
+    Gene$SYMBOL <- Gene$external_gene_name
   } else  if("external_gene_id" %in% colnames(S4Vectors::mcols(Gene))){
     Gene$SYMBOL <- Gene$external_gene_id
   } else {
@@ -200,12 +200,12 @@ GetNearGenes <- function(data = NULL,
     registerDoParallel(cores)
     parallel = TRUE
   }
-
+  
   if(is.null(names(TRange))) {
     if(is.null(TRange$name)) stop("No probe names found in TRange")
-        names(TRange) <- TRange$name
+    names(TRange) <- TRange$name
   }
-    
+  
   NearGenes <- alply(.data = as.data.frame(TRange), .margins = 1,
                      .fun = function(x) {
                        NearGenes( Target = rownames(x),
@@ -217,6 +217,28 @@ GetNearGenes <- function(data = NULL,
   names(NearGenes) <- names(TRange)
   if("split_labels" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_labels"] <- NULL 
   if("split_type" %in% names(attributes(NearGenes))) attributes(NearGenes)["split_type"] <- NULL 
+  
+  if(!is.null(data)) {
+    NearGenes$Distance <- NULL
+    # For a given probe and gene find nearest TSS
+    tss <- getTSS(metadata(data)$genome)
+    # To calculate the distance we will get the transcript list
+    # Consider only the TSS  (start of the transcript single base)
+    tss <- promoters(tss, upstream = 0, downstream = 0)
+    message("Update the distance to gene to distance to the nearest TSS of the gene")
+    for(probe in names(NearGenes)){
+      aux <- NearGenes[[probe]]
+      distance <-   plyr::ddply(aux,.(Target,GeneID), function(x) {
+        if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+        x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
+        probe <- rowRanges(getMet(data))[x$Target,]
+        return(values(distanceToNearest(probe,x.tss))$distance)
+      },.progress = "text",  .parallel = parallel)
+      colnames(distance) <- c("Target","GeneID","distNearestTSS")
+      aux <- merge(aux,distance, by = c("Target","GeneID"))
+      NearGenes[[probe]] <- aux
+    }
+  }
   return(NearGenes)
 }
 

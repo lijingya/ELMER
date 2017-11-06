@@ -204,21 +204,22 @@ heatmapPairs <- function(data,
   if(missing(group2)) stop("Please set group2 argument")
   if(missing(pairs)) stop("Please set probe argument")
   
-  # For a given probe and gene find nearest TSS
-  tss <- getTSS(metadata(data)$genome)
-  # To calculate the distance we will get the transcript list
-  # Consider only the TSS  (start of the transcript single base)
-  tss <- promoters(tss, upstream = 1, downstream = 1)
-  message("Update the distance to gene to distance to the nearest TSS")
-  distance <-   plyr::ddply(pairs,.(Probe,GeneID), function(x) {
-    if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
-    x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
-    probe <- rowRanges(getMet(data))[x$Probe,]
-    return(values(distanceToNearest(probe,x.tss))$distance)
-  },.progress = "text")
-  colnames(distance) <- c("Probe","GeneID","distanceTSS")
-  pairs <- merge(pairs,distance, by = c("Probe","GeneID"))
-  
+  if(!"distNearestTSS" %in% colnames(pairs)) {
+    # For a given probe and gene find nearest TSS
+    tss <- getTSS(metadata(data)$genome)
+    # To calculate the distance we will get the transcript list
+    # Consider only the TSS  (start of the transcript single base)
+    tss <- promoters(tss, upstream = 0, downstream = 0)
+    message("Update the distance to gene to distance to the nearest TSS")
+    distance <-   plyr::ddply(pairs,.(Probe,GeneID), function(x) {
+      if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+      x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
+      probe <- rowRanges(getMet(data))[x$Probe,]
+      return(values(distanceToNearest(probe,x.tss))$distance)
+    })
+    colnames(distance) <- c("Probe","GeneID","distNearestTSS")
+    pairs <- merge(pairs,distance, by = c("Probe","GeneID"))
+  }
   data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[pairs$GeneID,]
@@ -313,8 +314,8 @@ heatmapPairs <- function(data,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) +
     
-    Heatmap(log10(pairs$distanceTSS + 1),
-            name = "log10(distanceTSS + 1)", 
+    Heatmap(log10(pairs$distNearestTSS + 1),
+            name = "log10(distNearestTSS + 1)", 
             width = unit(10, "mm"),
             col = colorRamp2(c(0, 6), c("white", "orange")),
             heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000)), 
