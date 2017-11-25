@@ -305,9 +305,9 @@ heatmapPairs <- function(data,
     Heatmap(log10(pairs$distNearestTSS + 1),
             name = "log10(distNearestTSS + 1)", 
             width = unit(10, "mm"),
-            col = colorRamp2(c(0, 6), c("white", "orange")),
-            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000)), 
-                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb"))) +
+            col = colorRamp2(c(0, 8), c("white", "orange")),
+            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
+                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
