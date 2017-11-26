@@ -226,6 +226,7 @@ GetNearGenes <- function(data = NULL,
 #' @description Calculate the distance between probe and gene TSS
 #' @param data A multi Assay Experiment with both DNA methylation and gene Expression objects
 #' @param NearGenes A list or a data frame with the pairs gene probes
+#' @param cores Number fo cores to be used. Deafult: 1
 #' @export
 #' @examples 
 #' \dontrun{

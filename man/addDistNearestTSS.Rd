@@ -10,6 +10,8 @@ addDistNearestTSS(data, NearGenes, cores = 1)
 \item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
 
 \item{NearGenes}{A list or a data frame with the pairs gene probes}
+
+\item{cores}{Number fo cores to be used. Deafult: 1}
 }
 \description{
 Calculate the distance between probe and gene TSS
