@@ -19,7 +19,9 @@ Calculate the distance between probe and gene TSS
 \examples{
 \dontrun{
  data <- ELMER:::getdata("elmer.data.example")
-  NearbyGenes <- GetNearGenes(data = data, probes = c("cg15924102", "cg24741609"),  numFlankingGenes = 20)
+  NearbyGenes <- GetNearGenes(data = data, 
+                              probes = c("cg15924102", "cg24741609"),  
+                              numFlankingGenes = 20)
   NearbyGenes <- addDistNearestTSS(data,NearbyGenes)
   NearbyGenes <- addDistNearestTSS(data,NearbyGenes[[1]])
 }

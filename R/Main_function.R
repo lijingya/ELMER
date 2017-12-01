@@ -290,7 +290,8 @@ get.diff.meth <- function(data,
 #'          filter.portion = 0.3,  
 #'          filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
+#' See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
