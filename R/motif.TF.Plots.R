@@ -266,38 +266,39 @@ TF.rank.plot <- function(motif.pvalue,
     df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
     
-    df$label <- "TF"
+    df$label <- "None"
     df$label[df$rank %in% 1:3] <- "Top 3"
+    
     
     # TF in the family
     if(!missing(TF.label)){
       TF.family <- TF.label[[i]]
-      df$label[df$Gene %in% TF.family] <- "Family TF"
+      df$label[df$Gene %in% TF.family] <- "Same family"
     }    
     if(!is.null(TF.sublabel)){
       # TF in the subfamily
       TF.subfamily <- TF.sublabel[[i]]
-      df$label[df$Gene %in% TF.subfamily] <- "Subfamily TF"
+      df$label[df$Gene %in% TF.subfamily] <- "Same subfamily"
     }
-    df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Family TF","Subfamily TF","Top 3")], 
-                           text = as.character(df$Gene[df$label %in% c("Family TF","Subfamily TF","Top 3")]), 
-                           x = which(df$label %in% c("Family TF","Subfamily TF","Top 3")), stringsAsFactors = FALSE)
-    highlight <- df[df$label %in% c("Family TF","Subfamily TF","Top 3"),]
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Family TF","Subfamily TF","TF","Top 3"))))+
-      scale_color_manual(values = c("orange","red","black","lightblue"))+
+    df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Same family","Same subfamily","Top 3")], 
+                           text = as.character(df$Gene[df$label %in% c("Same family","Same subfamily","Top 3")]), 
+                           x = which(df$label %in% c("Same family","Same subfamily","Top 3")), stringsAsFactors = FALSE)
+    highlight <- df[df$label %in% c("Same family","Same subfamily","Top 3"),]
+    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Same family","Same subfamily","None","Top 3"))))+
+      scale_color_manual(name = "TF classification",values = c("orange","red","black","lightblue"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point() +
       theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
-      theme(legend.position="top",legend.title = element_blank())+
+      theme(legend.position="top") +
       labs(x = "Rank", 
            y ="-log10 P value", 
-           title=ifelse(is.null(title),i,paste0(title, " (", i,")"))) + 
+           title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", i,")"))) + 
       geom_point(data=highlight, aes(x=rank, y=pvalue))
     
     df$Gene <- as.character(df$Gene)
-    df$Gene[df$label %in% "TF"] <- "" 
+    df$Gene[df$label %in% "None"] <- "" 
     P <- P + geom_text_repel(
       data = df,
       aes(label = Gene),
