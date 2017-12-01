@@ -1368,7 +1368,7 @@ get.TFs <- function(data,
   dir.create(sprintf("%s/TFrankPlot_family",dir.out), showWarnings = FALSE, recursive = TRUE)
   TF.rank.plot(motif.pvalue = TF.meth.cor, 
                motif        = colnames(TF.meth.cor), 
-               dir.out      = sprintf("%s/TFrankPlot_family",dir.out), 
+               dir.out      = sprintf("%s/TFrankPlot",dir.out), 
                save         = TRUE)
   return(cor.summary)
 }
