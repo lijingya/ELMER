@@ -284,9 +284,9 @@ TF.rank.plot <- function(motif.pvalue,
                            text = as.character(df$Gene[df$label %in% c("Same family","Same subfamily","Top 3")]), 
                            x = which(df$label %in% c("Same family","Same subfamily","Top 3")), stringsAsFactors = FALSE)
     highlight <- df[df$label %in% c("Same family","Same subfamily","Top 3"),]
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Same family","Same subfamily","None","Top 3"))))+
-      scale_color_manual(name = "TF classification",values = c("orange","red","black","lightblue"))+
-      geom_vline(xintercept=significant, linetype = "3313")+
+    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("None","Same family","Same subfamily","Top 3"))))+
+      scale_color_manual(name = "TF classification",values = c("black","red","orange","lightblue"))+
+      geom_vline(xintercept=significant, linetype = "3313") +
       geom_point() +
       theme_bw() +
       theme(panel.grid.major = element_blank(),
