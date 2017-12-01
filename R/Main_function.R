@@ -999,7 +999,7 @@ get.enriched.motif <- function(data,
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   if(save) write_csv(Summary, 
-                     file = sprintf("%s/getMotif.%s.motif.enrichment.csv",
+                     path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
                                     dir.out,label))
   
   ## enriched motif and probes
@@ -1061,7 +1061,7 @@ get.enriched.motif <- function(data,
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
       write_csv(sig.Pairs, 
-                file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label))
+                path=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label))
     }
   }
   
@@ -1359,7 +1359,7 @@ get.TFs <- function(data,
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
     write_csv(cor.summary, 
-              file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+              path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
                            dir.out=dir.out, label=label))
   } 
   
