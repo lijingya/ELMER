@@ -198,10 +198,10 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' @importFrom ggplot2 ggsave
 #'@examples
 #' library(ELMER)
-#'   data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
+#' data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
 #'   message(e)
 #'   data(elmer.data.example, envir = environment())
-#'   })
+#' })
 #' enriched.motif <- list("P53_HUMAN.H11MO.0.A"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
@@ -244,12 +244,15 @@ TF.rank.plot <- function(motif.pvalue,
     print(knitr::kable(sort(colnames(motif.pvalue)), col.names = "motifs"))
     stop("One of the motifs does not match. Select from the list above")
   }
+  TF.sublabel <- NULL
   if(is.character(motif.pvalue)) {
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
   if(missing(TF.label)){
     motif.relavent.TFs <- createMotifRelevantTfs()
     TF.label <- motif.relavent.TFs[motif]
+    motif.relavent.TFs <- createMotifRelevantTfs("subfamily")
+    TF.sublabel <- motif.relavent.TFs[motif]
     specify <- "No"
   } else {
     specify <- "Yes"
@@ -262,24 +265,32 @@ TF.rank.plot <- function(motif.pvalue,
     df <- data.frame(pvalue = motif.pvalue[,i], Gene = rownames(motif.pvalue), stringAsFactors = FALSE)
     df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
-    TF.sub <- TF.label[[i]]
-    #if(specify %in% "No"){
-    #  TF.sub <- TF.sub[TF.sub %in% df$Gene[1:floor(0.05 * nrow(df))]]
-    #}
-    df$label <- "No"
-    df$label[df$Gene %in% TF.sub|df$rank %in% 1:3] <- "Yes"
-    df.label <- data.frame(pvalue = df$pvalue[df$label %in% "Yes"], 
-                           text = as.character(df$Gene[df$label %in% "Yes"]), 
-                           x = which(df$label %in% "Yes"), stringsAsFactors = FALSE)
-    highlight <- df[df$label=="Yes",]
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Yes","No"))))+
-      scale_color_manual(values = c("red","black","purple"))+
+    
+    df$label <- "TF"
+    df$label[df$rank %in% 1:3] <- "Top"
+    
+    # TF in the family
+    if(!missing(TF.label)){
+      TF.family <- TF.label[[i]]
+      df$label[df$Gene %in% TF.family] <- "Family TF"
+    }    
+    if(!is.null(TF.sublabel)){
+      # TF in the subfamily
+      TF.subfamily <- TF.sublabel[[i]]
+      df$TF.sublabel[df$Gene %in% TF.subfamily] <- "Subfamily TF"
+    }
+    df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Family TF","Subfamily TF","Top")], 
+                           text = as.character(df$Gene[df$label %in% c("Family TF","Subfamily TF","Top")]), 
+                           x = which(df$label %in% c("Family TF","Subfamily TF","Top")), stringsAsFactors = FALSE)
+    highlight <- df[df$label %in% c("Family TF","Subfamily TF","Top"),]
+    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Family TF","Subfamily TF","TF","Top"))))+
+      scale_color_manual(values = c("orange","blue","black","red"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point() +
       theme_bw() +
       theme(panel.grid.major = element_blank(),
             panel.grid.minor = element_blank())+
-      theme(legend.position="none")+
+      theme(legend.position="top",legend.title = element_blank())+
       labs(x = "Rank", 
            y ="-log10 P value", 
            title=ifelse(is.null(title),i,paste0(title, " (", i,")"))) + 

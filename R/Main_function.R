@@ -998,7 +998,7 @@ get.enriched.motif <- function(data,
   family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
-  if(save) write.csv(Summary, 
+  if(save) write_csv(Summary, 
                      file = sprintf("%s/getMotif.%s.motif.enrichment.csv",
                                     dir.out,label))
   
@@ -1060,9 +1060,8 @@ get.enriched.motif <- function(data,
                            probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
-      write.csv(sig.Pairs, 
-                file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label),
-                row.names=FALSE)
+      write_csv(sig.Pairs, 
+                file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label))
     }
   }
   
@@ -1359,9 +1358,9 @@ get.TFs <- function(data,
   if(save){
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
-    write.csv(cor.summary, 
+    write_csv(cor.summary, 
               file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                           dir.out=dir.out, label=label), row.names = TRUE)
+                           dir.out=dir.out, label=label))
   } 
   
   print.header("Creating plots", "subsection")
