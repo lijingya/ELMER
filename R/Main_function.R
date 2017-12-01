@@ -1154,13 +1154,13 @@ get.enriched.motif <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#'   data <- tryCatch(
+#' data <- tryCatch(
 #'   ELMER:::getdata("elmer.data.example"), 
 #'   error = function(e) {
 #'     message(e)
 #'      data(elmer.data.example, envir = environment())
 #'   })
-#' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
+#' enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
@@ -1364,8 +1364,8 @@ get.TFs <- function(data,
   } 
   
   print.header("Creating plots", "subsection")
-  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot_family",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_family",dir.out), showWarnings = FALSE, recursive = TRUE)
+  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
+  dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
   TF.rank.plot(motif.pvalue = TF.meth.cor, 
                motif        = colnames(TF.meth.cor), 
                dir.out      = sprintf("%s/TFrankPlot",dir.out), 
