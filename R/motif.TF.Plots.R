@@ -267,7 +267,7 @@ TF.rank.plot <- function(motif.pvalue,
     df$rank <- 1:nrow(df)
     
     df$label <- "TF"
-    df$label[df$rank %in% 1:3] <- "Top"
+    df$label[df$rank %in% 1:3] <- "Top 3"
     
     # TF in the family
     if(!missing(TF.label)){
@@ -277,14 +277,14 @@ TF.rank.plot <- function(motif.pvalue,
     if(!is.null(TF.sublabel)){
       # TF in the subfamily
       TF.subfamily <- TF.sublabel[[i]]
-      df$TF.sublabel[df$Gene %in% TF.subfamily] <- "Subfamily TF"
+      df$label[df$Gene %in% TF.subfamily] <- "Subfamily TF"
     }
-    df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Family TF","Subfamily TF","Top")], 
-                           text = as.character(df$Gene[df$label %in% c("Family TF","Subfamily TF","Top")]), 
-                           x = which(df$label %in% c("Family TF","Subfamily TF","Top")), stringsAsFactors = FALSE)
-    highlight <- df[df$label %in% c("Family TF","Subfamily TF","Top"),]
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Family TF","Subfamily TF","TF","Top"))))+
-      scale_color_manual(values = c("orange","blue","black","red"))+
+    df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Family TF","Subfamily TF","Top 3")], 
+                           text = as.character(df$Gene[df$label %in% c("Family TF","Subfamily TF","Top 3")]), 
+                           x = which(df$label %in% c("Family TF","Subfamily TF","Top 3")), stringsAsFactors = FALSE)
+    highlight <- df[df$label %in% c("Family TF","Subfamily TF","Top 3"),]
+    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("Family TF","Subfamily TF","TF","Top 3"))))+
+      scale_color_manual(values = c("orange","red","black","lightblue"))+
       geom_vline(xintercept=significant, linetype = "3313")+
       geom_point() +
       theme_bw() +
@@ -297,7 +297,7 @@ TF.rank.plot <- function(motif.pvalue,
       geom_point(data=highlight, aes(x=rank, y=pvalue))
     
     df$Gene <- as.character(df$Gene)
-    df$Gene[df$label %in% "No"] <- "" 
+    df$Gene[df$label %in% "TF"] <- "" 
     P <- P + geom_text_repel(
       data = df,
       aes(label = Gene),
