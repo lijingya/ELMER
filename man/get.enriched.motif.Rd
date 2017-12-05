@@ -86,10 +86,11 @@ probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
   data(elmer.data.example, envir = environment())
   })
 bg <- rownames(getMet(data))
-enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
-                                     probes=probes,
+enriched.motif <- get.enriched.motif(probes.motif = ELMER.data::Probes.motif.hg38.450K,
+                                     probes = probes,
                                      background.probes = bg,
-                                     min.incidence=2, label="hypo")
+                                     min.incidence = 2, 
+                                     label = "hypo")
 # If the MAE is set, the background and the probes.motif will 
 # be automatically set                                     
 enriched.motif <- get.enriched.motif(data = data,

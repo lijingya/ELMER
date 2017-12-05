@@ -903,10 +903,11 @@ promoterMeth <- function(data,
 #'   data(elmer.data.example, envir = environment())
 #'   })
 #' bg <- rownames(getMet(data))
-#' enriched.motif <- get.enriched.motif(probes.motif=Probes.motif.hg38.450K,
-#'                                      probes=probes,
+#' enriched.motif <- get.enriched.motif(probes.motif = ELMER.data::Probes.motif.hg38.450K,
+#'                                      probes = probes,
 #'                                      background.probes = bg,
-#'                                      min.incidence=2, label="hypo")
+#'                                      min.incidence = 2, 
+#'                                      label = "hypo")
 #' # If the MAE is set, the background and the probes.motif will 
 #' # be automatically set                                     
 #' enriched.motif <- get.enriched.motif(data = data,
