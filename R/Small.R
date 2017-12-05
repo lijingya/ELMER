@@ -374,7 +374,7 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
   rowRanges <- annotation[rownames(met),,drop=FALSE]
   
   # Remove masked probes, besed on the annotation
-  rowRanges <- rowRanges[!rowRanges$MASK.mapping]
+  rowRanges <- rowRanges[!rowRanges$MASK.general]
   
   colData <-  DataFrame(samples = colnames(met))
   met <- met[rownames(met) %in% names(rowRanges),,drop = FALSE]
