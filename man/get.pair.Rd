@@ -25,7 +25,8 @@ get.pair(data,
          label = NULL, save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.}
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
+See \code{\link{createMAE}} function.}
 
 \item{nearGenes}{Can be either a list containing output of GetNearGenes 
 function or path of rda file containing output of GetNearGenes function.}

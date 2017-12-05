@@ -290,7 +290,8 @@ get.diff.meth <- function(data,
 #'          filter.portion = 0.3,  
 #'          filter.percentage = 0.05,
 #'          label = NULL, save = TRUE)
-#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
+#' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
+#' See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 
 #' function or path of rda file containing output of GetNearGenes function.
 #' @param cores A interger which defines number of core to be used in parallel process.
@@ -999,8 +1000,8 @@ get.enriched.motif <- function(data,
   family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
-  if(save) write.csv(Summary, 
-                     file = sprintf("%s/getMotif.%s.motif.enrichment.csv",
+  if(save) write_csv(Summary, 
+                     path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
                                     dir.out,label))
   
   ## enriched motif and probes
@@ -1061,9 +1062,8 @@ get.enriched.motif <- function(data,
                            probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
-      write.csv(sig.Pairs, 
-                file=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label),
-                row.names=FALSE)
+      write_csv(sig.Pairs, 
+                path=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label))
     }
   }
   
@@ -1156,13 +1156,13 @@ get.enriched.motif <- function(data,
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
-#'   data <- tryCatch(
+#' data <- tryCatch(
 #'   ELMER:::getdata("elmer.data.example"), 
 #'   error = function(e) {
 #'     message(e)
 #'      data(elmer.data.example, envir = environment())
 #'   })
-#' enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
+#' enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
 #'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
 #'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
 #'                                  "cg10097755", "cg09247779", "cg09181054"))
@@ -1360,27 +1360,17 @@ get.TFs <- function(data,
   if(save){
     save(TF.meth.cor, 
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
-    write.csv(cor.summary, 
-              file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                           dir.out=dir.out, label=label), row.names = TRUE)
+    write_csv(cor.summary, 
+              path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+                           dir.out=dir.out, label=label))
   } 
   
   print.header("Creating plots", "subsection")
-  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot_family",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_family",dir.out), showWarnings = FALSE, recursive = TRUE)
+  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
+  dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
   TF.rank.plot(motif.pvalue = TF.meth.cor, 
                motif        = colnames(TF.meth.cor), 
-               TF.label     =  TF.family[colnames(TF.meth.cor)],
-               dir.out      = sprintf("%s/TFrankPlot_family",dir.out), 
+               dir.out      = sprintf("%s/TFrankPlot",dir.out), 
                save         = TRUE)
-
-  message("TF rank plot highlighting TF in the same subfamily (folder: ", sprintf("%s/TFrankPlot_subfamily",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot_subfamily",dir.out), showWarnings = FALSE, recursive = TRUE)
-  TF.rank.plot(motif.pvalue = TF.meth.cor, 
-               motif        = colnames(TF.meth.cor), 
-               TF.label     =  TF.subfamily[colnames(TF.meth.cor)],
-               dir.out      = sprintf("%s/TFrankPlot_subfamily",dir.out), 
-               save         = TRUE)
-  
   return(cor.summary)
 }

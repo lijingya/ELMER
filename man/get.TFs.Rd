@@ -96,13 +96,13 @@ This file contains a matrix storing the statistic results for significant associ
 If save is false, a data frame which contains the same content with the first file will be reported.
 }
 \examples{
-  data <- tryCatch(
+data <- tryCatch(
   ELMER:::getdata("elmer.data.example"), 
   error = function(e) {
     message(e)
      data(elmer.data.example, envir = environment())
   })
-enriched.motif <- list("P53_HUMAN.H10MO.B"= c("cg00329272", "cg10097755", "cg08928189",
+enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
