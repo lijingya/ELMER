@@ -904,7 +904,8 @@ promoterMeth <- function(data,
 #'   data(elmer.data.example, envir = environment())
 #'   })
 #' bg <- rownames(getMet(data))
-#' enriched.motif <- get.enriched.motif(probes.motif = ELMER.data::Probes.motif.hg38.450K,
+#' data(Probes.motif.hg19.450K)
+#' enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
 #'                                      probes = probes,
 #'                                      background.probes = bg,
 #'                                      min.incidence = 2, 
