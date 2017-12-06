@@ -294,7 +294,7 @@ TF.rank.plot <- function(motif.pvalue,
       theme(legend.position="top") +
       labs(x = "Rank", 
            y ="-log10 P value", 
-           title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", i,")"))) + 
+           title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", gsub("_HUMAN.H11MO.*","",i),")"))) + 
       geom_point(data=highlight, aes(x=rank, y=pvalue))
     
     df$Gene <- as.character(df$Gene)
