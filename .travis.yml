@@ -9,6 +9,8 @@ bioc_required: true
 bioc_use_devel: true
 warnings_are_errors: false
 
+r_check_args: '--ignore-vignettes --no-examples'
+
 os:
   - linux
   - osx
