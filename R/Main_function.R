@@ -750,8 +750,10 @@ get.permu <- function(data,
 #' @return A data frame contains genes whose expression significantly anti-correlated
 #' with promoter methylation.
 #' @examples 
-#' data(elmer.data.example.promoter)
-#' Gene.promoter <- promoterMeth(data) 
+#' \dontrun{
+#'   data(elmer.data.example.promoter)
+#'   Gene.promoter <- promoterMeth(mae.promoter) 
+#' }
 #' @export
 promoterMeth <- function(data,
                          sig.pvalue = 0.01,

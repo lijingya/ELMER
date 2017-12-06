@@ -41,6 +41,8 @@ at promoter regions.
 promoterMeth
 }
 \examples{
-data(elmer.data.example.promoter)
-Gene.promoter <- promoterMeth(data) 
+\dontrun{
+  data(elmer.data.example.promoter)
+  Gene.promoter <- promoterMeth(mae.promoter) 
+}
 }
