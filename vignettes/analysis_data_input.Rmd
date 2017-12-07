@@ -59,6 +59,7 @@ distal.probes <- get.feature.probe(genome = "hg19",
 ## Creating MAE
 ```{r,eval=TRUE, message=FALSE}
 library(MultiAssayExperiment)
+library(ELMER.data)
 data(LUSC_RNA_refined,package = "ELMER.data")
 data(LUSC_meth_refined,package = "ELMER.data")
 GeneExp[1:5,1:5]
