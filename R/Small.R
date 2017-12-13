@@ -574,26 +574,56 @@ getTF <- function(genome.build = "hg38"){
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets
-get.GRCh <- function(genome = "hg38", genes) {
-  if (genome == "hg19"){
-    # for hg19
-    ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                       host = "feb2014.archive.ensembl.org",
-                       path = "/biomart/martservice" ,
-                       dataset = "hsapiens_gene_ensembl")
-    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
-  } else {
-    # for hg38
-    ensembl <- useMart("ensembl", dataset = "hsapiens_gene_ensembl")
-    attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
+get.GRCh <- function(genome = "hg19", genes, as.granges = FALSE) {
+  tries <- 0L
+  msg <- character()
+  while (tries < 3L) {
+    gene.location <- tryCatch({
+      if (genome == "hg19"){
+        # for hg19
+        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
+                           host = "feb2014.archive.ensembl.org",
+                           path = "/biomart/martservice" ,
+                           dataset = "hsapiens_gene_ensembl")
+        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
+      } else {
+        # for hg38
+        ensembl <- tryCatch({
+          useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl")
+        },  error = function(e) {
+          useEnsembl("ensembl",
+                     dataset = "hsapiens_gene_ensembl",
+                     mirror = "uswest")
+        })
+        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
+      }
+      gene.location <- getBM(attributes = attributes,
+                             filters = c("entrezgene"),
+                             values = list(genes), mart = ensembl)
+      colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
+      gene.location <- gene.location[match(genes,gene.location$entrezgene),]
+      gene.location
+    }, error = function(e) {
+      msg <<- conditionMessage(e)
+      tries <<- tries + 1L
+    })
+    if(!is.null(gene.location)) break
   }
-  gene.location <- getBM(attributes = attributes,
-                         filters = c("entrezgene"),
-                         values = list(genes), mart = ensembl)
-  colnames(gene.location) <-  c("ensembl_gene_id", "entrezgene","external_gene_name")
-  gene.location <- gene.location[match(genes,gene.location$entrezgene),]
+  if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
+  
+  if(as.granges) {
+    gene.location$strand[gene.location$strand == 1] <- "+"
+    gene.location$strand[gene.location$strand == -1] <- "-"
+    gene.location$chromosome_name <- paste0("chr",gene.location$chromosome_name)
+    gene.location <- makeGRangesFromDataFrame(gene.location, seqnames.field = "chromosome_name",
+                                              start.field = "start_position",
+                                              end.field = "end_position",
+                                              keep.extra.columns = TRUE) # considering the whole gene no their promoters
+  }
   return(gene.location)
 }
+
+
 
 #' @title Get family of transcription factors
 #' @description 
