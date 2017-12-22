@@ -1039,12 +1039,12 @@ get.enriched.motif <- function(data,
   ## make plot 
   suppressWarnings({
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                          significant = list(NumOfProbes = 10, lowerOR = 1.1, OR = 1.3), 
+                          significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
                           dir.out = dir.out,
                           label=paste0(label,".quality.A-",toupper(min.motif.quality)),
                           save=TRUE)
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                          significant = list(OR = 1.3), 
+                          significant = list(lowerOR = lower.OR), 
                           dir.out = dir.out,
                           summary = TRUE,
                           label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
