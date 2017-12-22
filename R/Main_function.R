@@ -831,7 +831,9 @@ promoterMeth <- function(data,
 #' @description 
 #' get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
 #' package to calculate the motif enrichment Odds Ratio and  95\% confidence interval for
-#' a given set of probes. If save is TURE, two output files will be saved: 
+#' a given set of probes using fisher test function, after performing the Fisher’s exact test, 
+#' the results for all transcription factors are corrected for multiple testing with the Benjamini-Hochberg procedure. 
+#' If save is TURE, two output files will be saved: 
 #' getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 #' @usage 
 #' get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
@@ -852,6 +854,7 @@ promoterMeth <- function(data,
 #' are the significantly enriched motifs (detail see reference).
 #' @param min.incidence A non-negative integer specifies the minimum incidence of motif in the given probes set. 
 #' 10 is default.
+#' @param pvalue FDR P-value cut off (default 0.05)
 #' @param min.motif.quality Minimum motif quality score to consider. 
 #' Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default) 
 #' Description: Each PWM has a quality rating from A to D where 
@@ -910,6 +913,7 @@ promoterMeth <- function(data,
 #' enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
 #'                                      probes = probes,
 #'                                      background.probes = bg,
+#'                                      pvalue = 1, 
 #'                                      min.incidence = 2, 
 #'                                      label = "hypo")
 #' # If the MAE is set, the background and the probes.motif will 
@@ -917,6 +921,7 @@ promoterMeth <- function(data,
 #' enriched.motif <- get.enriched.motif(data = data,
 #'                                      min.motif.quality = "DS",
 #'                                      probes=probes,
+#'                                      pvalue = 1,
 #'                                      min.incidence=2, 
 #'                                      label="hypo")
 get.enriched.motif <- function(data,
@@ -924,12 +929,13 @@ get.enriched.motif <- function(data,
                                probes,
                                min.motif.quality = "DS",
                                background.probes,
+                               pvalue = 0.05,
                                lower.OR = 1.1,
                                min.incidence = 10, 
                                dir.out="./",
-                               label=NULL,
-                               save=TRUE,
-                               plot.title=NULL){
+                               label = NULL,
+                               save = TRUE,
+                               plot.title = NULL){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -987,18 +993,19 @@ get.enriched.motif <- function(data,
   b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
   c <- Matrix::colSums(bg.probes.TF )
   d <- nrow(bg.probes.TF) - Matrix::colSums(bg.probes.TF)
-  SD <- add(1/a,1/b) %>% add(1/c) %>% add(1/d) %>% sqrt
-  sub.enrich.TF.lower <- exp(log(sub.enrich.TF) - 1.96 * SD)
-  sub.enrich.TF.upper <- exp(log(sub.enrich.TF) + 1.96 * SD)
-  # If sub.enrich.TF is 0 my SD is Inf we will remove those cases
-  sub.enrich.TF.upper[is.nan(sub.enrich.TF.upper)] <- 0
-  ## summary
-  Summary <- data.frame(motif = colnames(probes.TF), 
+  fisher <- plyr::adply(seq_along(1:length(a)),.margins = 1, .fun = function(i)  { 
+    x <- fisher.test(matrix(c(a[i],b[i],c[i],d[i]),nrow = 2,ncol = 2))
+    ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
+    colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
+    ret
+  },.id = NULL,.progress = "text")
+  rownames(fisher) <- names(a)
+  Summary <- data.frame(motif  =  names(a),
                         NumOfProbes = probes.TF.num,
                         PercentageOfProbes = probes.TF.num/length(probes),
-                        OR = sub.enrich.TF, 
-                        lowerOR = sub.enrich.TF.lower, 
-                        upperOR = sub.enrich.TF.upper)
+                        fisher,
+                        FDR = p.adjust(fisher$p.value,method = "BH"),
+                        stringsAsFactors = FALSE)
   hocomoco <- getHocomocoTable()
   family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
@@ -1008,19 +1015,16 @@ get.enriched.motif <- function(data,
                                     dir.out,label))
   
   ## enriched motif and probes
-  en.motifs <- sub.enrich.TF.lower[sub.enrich.TF.lower > lower.OR &
-                                     !sub.enrich.TF.lower %in% "Inf" & 
-                                     probes.TF.num > min.incidence]
+  en.motifs <- as.character(Summary[Summary$lowerOR > lower.OR & Summary$NumOfProbes > min.incidence & Summary$FDR <= pvalue,"motif"])
   
   # Subset by quality
   print.header("Filtering motifs based on quality", "subsection")
   message("Number of enriched motifs with quality:")
   message("-----------")
-  for(q in c("A","B","C","D","S"))  message(paste0(" => ",q,": ", length(grep(paste0("\\.",q),names(en.motifs)))))
+  for(q in c("A","B","C","D","S"))  message(paste0(" => ",q,": ", length(grep(paste0("\\.",q),en.motifs))))
   message("-----------")
   
-  en.motifs <- names(en.motifs[grep(paste0("\\.[A-",toupper(min.motif.quality),"]"),
-                                    names(en.motifs), value = T)])
+  en.motifs <- grep(paste0("\\.[A-",toupper(min.motif.quality),"]"), en.motifs, value = T)
   message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
   enriched.motif <- alply(en.motifs, 
                           function(x, probes.TF) {
@@ -1030,7 +1034,7 @@ get.enriched.motif <- function(data,
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
   
-  if(save) save(enriched.motif, file= sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
+  if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
   
   ## make plot 
   suppressWarnings({
