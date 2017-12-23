@@ -993,7 +993,7 @@ get.enriched.motif <- function(data,
   b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
   c <- Matrix::colSums(bg.probes.TF )
   d <- nrow(bg.probes.TF) - Matrix::colSums(bg.probes.TF)
-  fisher <- plyr::adply(seq_along(1:length(a)),.margins = 1, .fun = function(i)  { 
+  fisher <- plyr::adply(seq_len(length(a)),.margins = 1, .fun = function(i)  { 
     x <- fisher.test(matrix(c(a[i],b[i],c[i],d[i]),nrow = 2,ncol = 2))
     ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
     colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
