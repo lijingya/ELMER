@@ -260,7 +260,10 @@ addDistNearestTSS <- function(data,
     for(probe in names(NearGenes)){
       aux <- NearGenes[[probe]]
       distance <-   plyr::ddply(aux,.(Target,GeneID), function(x) {
-        if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+        if(!x$GeneID %in% tss$ensembl_gene_id) {
+          return(NULL)
+        }
+        # If gene symbol not in the TSS list
         x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
         probe <- rowRanges(getMet(data))[x$Target,]
         return(values(distanceToNearest(probe,x.tss))$distance)
@@ -273,7 +276,9 @@ addDistNearestTSS <- function(data,
     # For a given probe and gene find nearest TSS
     if("Target" %in% colnames(NearGenes)) colnames(NearGenes)[grep("Target",colnames(NearGenes))] <- "Probe"
     distance <-   plyr::ddply(NearGenes,.(Probe,GeneID), function(x) {
-      if(!x$GeneID %in% tss$ensembl_gene_id) next # If gene symbol not in the TSS list
+      if(!x$GeneID %in% tss$ensembl_gene_id) {
+        return(NULL)
+      }
       x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
       probe <- rowRanges(getMet(data))[x$Probe,]
       return(values(distanceToNearest(probe,x.tss))$distance)
