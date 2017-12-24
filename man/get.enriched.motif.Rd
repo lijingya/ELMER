@@ -32,6 +32,8 @@ More information: \url{http://nar.oxfordjournals.org/content/44/D1/D116.full#sec
 \item{background.probes}{A vector lists name of probes which are considered as 
 background for motif.enrichment  calculation (see detail).}
 
+\item{pvalue}{FDR P-value cut off (default 0.05)}
+
 \item{lower.OR}{A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
 The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
 are the significantly enriched motifs (detail see reference).}
@@ -57,7 +59,9 @@ A list (R object) with enriched motifs as name and probes containing the enriche
 \description{
 get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
 package to calculate the motif enrichment Odds Ratio and  95\% confidence interval for
-a given set of probes. If save is TURE, two output files will be saved: 
+a given set of probes using fisher test function, after performing the Fisher’s exact test, 
+the results for all transcription factors are corrected for multiple testing with the Benjamini-Hochberg procedure. 
+If save is TURE, two output files will be saved: 
 getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 }
 \details{
@@ -90,6 +94,7 @@ data(Probes.motif.hg38.450K,package = "ELMER.data")
 enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
                                      probes = probes,
                                      background.probes = bg,
+                                     pvalue = 1, 
                                      min.incidence = 2, 
                                      label = "hypo")
 # If the MAE is set, the background and the probes.motif will 
@@ -97,6 +102,7 @@ enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
 enriched.motif <- get.enriched.motif(data = data,
                                      min.motif.quality = "DS",
                                      probes=probes,
+                                     pvalue = 1,
                                      min.incidence=2, 
                                      label="hypo")
 }
