@@ -28,11 +28,11 @@ But there is also a option show highlight only TF sub-family members (TCClass da
 
 ## TF ranking plot: family classification
 
-Shown are TF ranking plots based on the score ($-log_{10}(P value))$ of association between TF expression and DNA methylation of the P73 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot
+Shown are TF ranking plots based on the score ($-log_{10}(P value))$ of association between TF expression and DNA methylation of an enriched motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot
 
-```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the SOX2 motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
+```{r,eval=TRUE,fig.cap="Shown are TF ranking plots based on the score (-log(P value)) of association between TF expression and DNA methylation of the enriched motif in the LUSC cancer type. The dashed line indicates the boundary of the top 5% association score. The top 3 associated TFs and the TF family members=(dots in red) that are associated with that specific motif are labeled in the plot"}
 load("result/getTF.hypo.TFs.with.motif.pvalue.rda")
-motif <- "SOX2_HUMAN.H11MO.1.A"
+motif <- colnames(TF.meth.cor)[1]
 TF.rank.plot(motif.pvalue = TF.meth.cor, 
              motif = motif,
              save = FALSE) 
