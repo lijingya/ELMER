@@ -59,7 +59,7 @@ A list (R object) with enriched motifs as name and probes containing the enriche
 \description{
 get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
 package to calculate the motif enrichment Odds Ratio and  95\% confidence interval for
-a given set of probes using fisher test function, after performing the Fisher’s exact test, 
+a given set of probes using fisher test function, after performing the Fisher's exact test, 
 the results for all transcription factors are corrected for multiple testing with the Benjamini-Hochberg procedure. 
 If save is TURE, two output files will be saved: 
 getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
