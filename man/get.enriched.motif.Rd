@@ -5,7 +5,7 @@
 \title{get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.}
 \usage{
 get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
-                   background.probes, lower.OR = 1.1, min.incidence = 10, 
+                   background.probes,  pvalue = 0.05, lower.OR = 1.1, min.incidence = 10, 
                    dir.out = "./", label = NULL, save = TRUE, plot.title=NULL)
 }
 \arguments{
