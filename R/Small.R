@@ -386,10 +386,10 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.manifest"))
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.manifest.hg38"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.manifest.hg38"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.hg19.manifest"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg19.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.hg38.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg38.manifest"))
 }
 
 getdata <- function(...)
