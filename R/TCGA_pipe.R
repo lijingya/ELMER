@@ -177,6 +177,8 @@ TCGA.pipe <- function(disease,
                        save          = FALSE,
                        linearize.exp = TRUE,
                        TCGA          = TRUE)
+      # Remove FFPE samples
+      if("is_ffpe" %in% colnames(colData(mae))) mae <- mae[,!mae$is_ffpe]
       
       # if user set genes argument label Mutant WT will be added to mae
       if(!is.null(genes)) mae <- addMutCol(mae, disease, genes, mutant_variant_classification)
