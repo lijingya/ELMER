@@ -266,7 +266,7 @@ addDistNearestTSS <- function(data,
         # If gene symbol not in the TSS list
         x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
         probe <- rowRanges(getMet(data))[x$Target,]
-        return(values(distanceToNearest(probe,x.tss))$distance)
+        return(values(distanceToNearest(probe,x.tss, ignore.strand=TRUE))$distance)
       },.parallel = parallel)
       colnames(distance) <- c("Target","GeneID","distNearestTSS")
       aux <- merge(aux,distance, by = c("Target","GeneID"))
@@ -281,7 +281,7 @@ addDistNearestTSS <- function(data,
       }
       x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
       probe <- rowRanges(getMet(data))[x$Probe,]
-      return(values(distanceToNearest(probe,x.tss))$distance)
+      return(values(distanceToNearest(probe,x.tss, ignore.strand=TRUE))$distance)
     },.parallel = parallel)
     colnames(distance) <- c("Probe","GeneID","distNearestTSS")
     NearGenes <- merge(NearGenes,distance, by = c("Probe","GeneID"))
