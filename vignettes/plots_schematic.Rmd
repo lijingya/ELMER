@@ -37,7 +37,7 @@ Generate schematic plot for one probe with 20 nearby genes and label  the gene s
 schematic.plot(pair = pair, 
                data = mae,
                group.col = "definition",
-               byProbe = "cg25312122",
+               byProbe = pair$Probe[1],
                save = FALSE)
 ```
 
@@ -49,6 +49,6 @@ linked to.
 schematic.plot(pair = pair, 
                data = mae,   
                group.col = "definition", 
-               byGene = "ENSG00000143469", 
+               byGene = pair$GeneID[1],
                save = FALSE)
 ```
