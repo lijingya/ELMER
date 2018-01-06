@@ -57,7 +57,7 @@ get.feature.probe <- function(feature = NULL,
   probe <- getInfiniumAnnotation(toupper(met.platform),genome)
   # We will rmeove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
-  probe <- probe[!probe$MASK.general,] # remove masked probes
+  probe <- probe[!probe$MASK_general,] # remove masked probes
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
   
   if(missing(TSS)){
