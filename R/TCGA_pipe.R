@@ -438,6 +438,7 @@ TCGA.pipe <- function(disease,
     mae.path <- trimws(unlist(stringr::str_split(lines[grep("mae.path",lines)[1]], ":"))[2])    
     render_report(genome = genome, 
                   mode = mode, 
+                  title = paste0(disease, " report"),
                   minSubgroupFrac = ifelse(mode =="supervised",1,0.2),
                   mae = mae.path,
                   direction = direction,
