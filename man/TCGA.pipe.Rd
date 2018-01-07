@@ -4,7 +4,7 @@
 \alias{TCGA.pipe}
 \title{ELMER analysis pipeline for TCGA data.}
 \usage{
-TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = "./",
+TCGA.pipe(disease, genome = "hg38", analysis = "all", wd = getwd(),
   cores = 1, mode = "unsupervised", Data = NULL, diff.dir = "hypo",
   genes = NULL, mutant_variant_classification = c("Frame_Shift_Del",
   "Frame_Shift_Ins", "Missense_Mutation", "Nonsense_Mutation", "Splice_Site",

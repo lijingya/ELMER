@@ -67,7 +67,7 @@
 TCGA.pipe <- function(disease,
                       genome = "hg38",
                       analysis = "all",
-                      wd = "./",
+                      wd = getwd(),
                       cores = 1,
                       mode = "unsupervised",
                       Data = NULL, 
@@ -532,7 +532,7 @@ createSummaryDocument <- function(analysis = "all",
                "o results.path: ",  ifelse(is.null(results.path),"",results.path), "\n",
                "o argument.values: ",paste(paste0(names(argument.values),"=",as.character(argument.values)), collapse = ",")
   )
-  fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "a+")
+  fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "w")
   write(df, fileConn, append=TRUE)
   close(fileConn)
 }
@@ -541,12 +541,12 @@ createSummaryDocument <- function(analysis = "all",
 #' @title Build report for TCGA.pipe function
 #' @description Build HTML report 
 #' @param title HTML report title
-#' @param mae mae used in the analysis
+#' @param mae  Absolute path to the mae used in the analysis
 #' @param group.col Group col
 #' @param group1 Group 1 
 #' @param group2 Group 2 
 #' @param direction direction used in the analysis
-#' @param dir.out Folder with results. dir.out used in the analysis
+#' @param dir.out Absolute path to folder with results. dir.out used in the analysis
 #' @param genome Genome of reference used in the analysis
 #' @param mode mode used in the analysis
 #' @param minSubgroupFrac  minSubgroupFrac used in the analysis
@@ -558,8 +558,8 @@ createSummaryDocument <- function(analysis = "all",
 #' @param pe pe used in the analysis
 #' @param nprobes nprobes used in the analysis
 #' @param lower.OR lower.OR used in the analysis
-#' @param out_file out_file
-#' @param results.path Path where the results were saved
+#' @param out_file Output file name (i.e report.html)
+#' @param results.path Absolute path where the results were saved
 #' @export
 #' @examples 
 #' \dontrun{

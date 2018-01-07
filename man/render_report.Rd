@@ -13,7 +13,7 @@ render_report(title = "Report", mae, group.col, group1, group2, direction,
 \arguments{
 \item{title}{HTML report title}
 
-\item{mae}{mae used in the analysis}
+\item{mae}{Absolute path to the mae used in the analysis}
 
 \item{group.col}{Group col}
 
@@ -23,7 +23,7 @@ render_report(title = "Report", mae, group.col, group1, group2, direction,
 
 \item{direction}{direction used in the analysis}
 
-\item{dir.out}{Folder with results. dir.out used in the analysis}
+\item{dir.out}{Absolute path to folder with results. dir.out used in the analysis}
 
 \item{genome}{Genome of reference used in the analysis}
 
@@ -45,11 +45,11 @@ render_report(title = "Report", mae, group.col, group1, group2, direction,
 
 \item{lower.OR}{lower.OR used in the analysis}
 
-\item{out_file}{out_file}
+\item{out_file}{Output file name (i.e report.html)}
 
 \item{minMetdiff}{minMetdiff used in the analysis}
 
-\item{results.path}{Path where the results were saved}
+\item{results.path}{Absolute path where the results were saved}
 }
 \description{
 Build HTML report
