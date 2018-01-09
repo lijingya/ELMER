@@ -38,6 +38,11 @@ editor_options:
 ```{r, warning=FALSE,message=FALSE, echo=FALSE}
 library(DT)
 library(ELMER)
+library(knitr)
+library(ComplexHeatmap)
+library(ggplot2)
+library(funciVar)
+library(GenomicRanges)
 library(dplyr)
 ```
 
@@ -48,8 +53,6 @@ mae <- get(load(file))
 
 
 ```{r, include=FALSE}
-library(knitr)
-library(ComplexHeatmap)
 opts_knit$set(progress = FALSE, verbose = FALSE, fig.align='center')
 opts_chunk$set(warning=FALSE, message=FALSE, echo=FALSE)
 ## this function is basically creating chunks within chunks, and then
@@ -87,7 +90,6 @@ kexpand.plotHeatmap <- function(ht = 10, cap, width = 10) {
                                     column_title_gp = gpar(fontsize = 12, fontface = 'bold'), 
                                     annotation_legend_side = 'bottom')\n```", cap, ht, width, cap,cap)
   )))}
-library(ggplot2)
 ```
 
 ```{r, include=FALSE}
@@ -114,10 +116,6 @@ text_funcivar <- function(){
 
 
 ```{r, include=FALSE}
-library(ggplot2)
-library(funciVar)
-library(GenomicRanges)
-library(dplyr)
 # Load DNA methylation platform 450K manifest (hg38) and select only probes paired
 distal.probes <- ELMER::get.feature.probe(feature = NULL,genome = "hg38", met.platform = "450K") 
 
@@ -195,12 +193,13 @@ group1 <- params$group1
 group2 <- params$group2
 group.col <- params$groupCol
 
-summary <- data.frame(
-  nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv"))),
-  nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv"))),
-  length(get(load(paste0(root, "/getMotif.",direction,".enriched.motifs.rda"))))
-)
-
+suppressWarnings({
+  summary <- data.frame(
+    nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv"))),
+    nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv"))),
+    length(get(load(paste0(root, "/getMotif.",direction,".enriched.motifs.rda"))))
+  )
+})
 colnames(summary) <- c("Sig. diff probes","Sig. pairs","Enriched motifs")
 summary$Analysis <-  
   paste0("Probes ",direction, "methylated in ", 
@@ -222,7 +221,9 @@ if(params$title == "ELMER") {
   cat("\n#",params$title,"\n")
 }
 cat("\n## Probes",   paste0(dir,"methylated in ", g1, " vs ", g2,"\n"))
-p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"))
+suppressWarnings({
+  p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"))
+})
 .pl <- TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(p)[,grep("Minus",colnames(p),value = T)],
                                             y = p$adjust.p, 
                                             title =  paste0("Volcano plot - Probes ",
@@ -244,7 +245,9 @@ kexpand.plot(5, paste0("Volcano plot - Probes ",dir,"methylated in ", g1, " vs "
 file <- paste0(root,"/getPair.",dir, ".pairs.significant.csv")
 if(file.exists(file)) {
   cat("\n### Significant anti-correlated pairs of gene-probes\n")
-  .df <- readr::read_csv(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
+  suppressWarnings({
+    .df <- readr::read_csv(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
+  })
   kexpand.df(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
   .pl <- heatmapPairs(data = mae, 
                       group.col = group.col,
@@ -306,7 +309,9 @@ if(file.exists(file)) {
       kexpand(round(sum(motifs$lowerOR > 1.3)/5), paste0("Probes ",dir,"methylated in ", g1, " vs ", g2))
       
       cat("\n### TF analysis\n")
-      TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"))
+      suppressWarnings({
+        TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"))
+      })
       load(paste0(root,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
       #.df <- TF[na.omit(match(motifs$motif,TF$motif)),]
       #kexpand.dt(paste0(root,g,"/",dir,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
