@@ -21,6 +21,7 @@ before_install:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then brew update ; fi
   - if [[ "$TRAVIS_R_VERSION_STRING" = 'bioc-devel' ]]; then mkdir ~/.R && echo 'CXX1X=g++ -std=c++0x -g -O2 -fPIC' > ~/.R/Makevars; fi
 
+
 r_binary_packages:
   - withr
   - knitr
@@ -42,6 +43,8 @@ r_binary_packages:
   - rsqlite
   - base64enc
   - fastmatch
+  - xml
+  - igraph
 
 bioc_packages:
   - BiocStyle
