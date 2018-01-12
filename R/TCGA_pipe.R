@@ -67,7 +67,7 @@
 TCGA.pipe <- function(disease,
                       genome = "hg38",
                       analysis = "all",
-                      wd = "./",
+                      wd = getwd(),
                       cores = 1,
                       mode = "unsupervised",
                       Data = NULL, 
@@ -92,7 +92,7 @@ TCGA.pipe <- function(disease,
   
   available.analysis <- c("download","distal.probes",
                           "createMAE","diffMeth","pair",
-                          "motif","TF.search","all")
+                          "motif","TF.search","report","all")
   # Replace all by all the other values
   if("all" %in% analysis[1] ) analysis <- grep("all", available.analysis, value = TRUE, invert = TRUE)
   
@@ -119,7 +119,7 @@ TCGA.pipe <- function(disease,
   if(!file.exists(dir.out.root)) dir.create(dir.out.root, recursive = TRUE, showWarnings = FALSE)
   args <- list(...)
   
-  if(any(sapply(analysis, function(x) tolower(x) %in% tolower(c("diffMeth","pair","motif","TF.search"))))) {
+  if(any(sapply(analysis, function(x) tolower(x) %in% tolower(c("diffMeth","pair","motif","TF.search","report"))))) {
     if(!mode  %in% c("supervised","unsupervised")){
       stop("Set mode arugment to supervised or unsupervised")
     }
@@ -194,11 +194,12 @@ TCGA.pipe <- function(disease,
   
   # Creates a record of the analysis and arguments called
   if(any(tolower(c("diffMeth","pair",
-               "motif","TF.search")) %in% tolower(analysis))){
+                   "motif","TF.search")) %in% tolower(analysis))){
     createSummaryDocument(analysis = analysis, 
                           argument.values = args,
                           mae.path = sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome),
                           genome = genome,
+                          mode = mode,
                           direction = diff.dir,
                           group.col = group.col,
                           group1 = group1,
@@ -425,6 +426,29 @@ TCGA.pipe <- function(disease,
     if(length(analysis) == 1) return(TFs)
   }
   
+  if(tolower("report") %in% tolower(analysis)){
+    summary.file <- file.path(dir.out,"TCGA.pipe_records.txt")
+    lines <- readLines(summary.file)
+    genome <- trimws(unlist(stringr::str_split(lines[grep("genome",lines)[1]], ":"))[2])
+    group1 <- trimws(unlist(stringr::str_split(lines[grep("group1",lines)[1]], ":"))[2])
+    group2 <- trimws(unlist(stringr::str_split(lines[grep("group2",lines)[1]], ":"))[2]) 
+    group.col <- trimws(unlist(stringr::str_split(lines[grep("group.col",lines)[1]], ":"))[2])    
+    results.path <- trimws(unlist(stringr::str_split(lines[grep("results.path",lines)[1]], ":"))[2])    
+    direction <- trimws(unlist(stringr::str_split(lines[grep("direction",lines)[1]], ":"))[2])    
+    mae.path <- trimws(unlist(stringr::str_split(lines[grep("mae.path",lines)[1]], ":"))[2])    
+    render_report(genome = genome, 
+                  mode = mode, 
+                  title = paste0(disease, " report"),
+                  minSubgroupFrac = ifelse(mode =="supervised",1,0.2),
+                  mae = mae.path,
+                  direction = direction,
+                  group.col = group.col, 
+                  group1 = group1, 
+                  group2 = group2, 
+                  dir.out = results.path,
+                  out_file = file.path(results.path,paste0(disease,"_report.html")))
+  }
+  
 }
 
 #' Adds mutation information to MAE
@@ -488,25 +512,112 @@ createSummaryDocument <- function(analysis = "all",
                                   argument.values = "defaults",
                                   genome = NULL,
                                   mae.path = NULL,
+                                  mode = NULL,
                                   direction = NULL,
                                   group.col = NULL,
                                   group1 = NULL,
                                   group2 = NULL,
                                   results.path = NULL){
-  print("Recording analysis information into TCGA.pipe_records.txt")
+  message("Recording analysis information into: ",file.path(results.path,"TCGA.pipe_records.txt"))
   df <- paste0("oooooooooooooooooooooooooooooooooooo\n",
                "o date: ",Sys.time(),"\n",
                "o analysis: ", paste(analysis, collapse = ","), "\n",
                "o genome: ",  ifelse(is.null(genome),"",genome), "\n",
                "o mae.path: ",  ifelse(is.null(mae.path),"",mae.path), "\n",
                "o direction: ", ifelse(is.null(direction),"",direction), "\n",
+               "o mode: ",  ifelse(is.null(mode),"",mode), "\n",
                "o group.col: ",  ifelse(is.null(group.col),"",group.col), "\n",
                "o group1: ",   ifelse(is.null(group1),"",group1), "\n",
                "o group2: ",   ifelse(is.null(group2),"",group2), "\n",
                "o results.path: ",  ifelse(is.null(results.path),"",results.path), "\n",
                "o argument.values: ",paste(paste0(names(argument.values),"=",as.character(argument.values)), collapse = ",")
   )
-  fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "a+")
+  fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "w")
   write(df, fileConn, append=TRUE)
   close(fileConn)
+}
+
+
+#' @title Build report for TCGA.pipe function
+#' @description Build HTML report 
+#' @param title HTML report title
+#' @param mae  Absolute path to the mae used in the analysis
+#' @param group.col Group col
+#' @param group1 Group 1 
+#' @param group2 Group 2 
+#' @param direction direction used in the analysis
+#' @param dir.out Absolute path to folder with results. dir.out used in the analysis
+#' @param genome Genome of reference used in the analysis
+#' @param mode mode used in the analysis
+#' @param minSubgroupFrac  minSubgroupFrac used in the analysis
+#' @param minMetdiff minMetdiff used in the analysis
+#' @param metfdr metfdr used in the analysis
+#' @param minMetdiff minMetdiff used in the analysis
+#' @param permu permu used in the analysis
+#' @param rawpval rawpval used in the analysis
+#' @param pe pe used in the analysis
+#' @param nprobes nprobes used in the analysis
+#' @param lower.OR lower.OR used in the analysis
+#' @param out_file Output file name (i.e report.html)
+#' @param results.path Absolute path where the results were saved
+#' @export
+#' @examples 
+#' \dontrun{
+#' render_report(group.col = "TN",
+#'               group1 = "Tumor",
+#'               group2 = "Normal",
+#'               dir.out = "~/paper_elmer/Result/BRCA/TN_Tumor_vs_Normal/hypo/",
+#'               direction = "hypo",
+#'               mae = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda")
+#' }
+render_report <- function(title = "Report",
+                          mae,
+                          group.col,
+                          group1,
+                          group2,
+                          direction,
+                          dir.out,
+                          genome = "hg38",
+                          mode = "supervised",
+                          minSubgroupFrac = "20%",
+                          minMetdiff = "0.3",
+                          metfdr = "0.01",
+                          permu = "10000",
+                          rawpval = "0.01",
+                          pe = "0.01",
+                          nprobes = "10",
+                          lower.OR = "1.1",
+                          out_file = file.path(getwd(),"report.html")
+) {
+  if(missing(dir.out)) stop("Please, set dir.out value")
+  if(missing(mae)) stop("Please, set mae value")
+  if(missing(group.col)) stop("Please, set mae value")
+  if(missing(group1)) stop("Please, set mae value")
+  if(missing(group2)) stop("Please, set mae value")
+  template <- system.file("rmd", "template.Rmd", package="ELMER")
+  
+  message("Saving report: ", out_file)
+  parameters <- list(title = title,
+                     genome = genome,
+                     mode = mae,
+                     minSubgroupFrac = minSubgroupFrac,
+                     minMetdiff = minMetdiff,
+                     metfdr = metfdr,
+                     permu = permu,
+                     rawpval = rawpval,
+                     pe = pe,
+                     nprobes = nprobes,
+                     lower.OR = lower.OR,
+                     groupCol =  group.col,
+                     mae = mae,
+                     group1 = group1,
+                     group2 = group2,
+                     direction = direction,
+                     dir.out = dir.out)
+  
+  rmarkdown::render(template,
+                    intermediates_dir = dirname(out_file),
+                    output_file = out_file,
+                    params = parameters)
+  invisible(TRUE)
 }
