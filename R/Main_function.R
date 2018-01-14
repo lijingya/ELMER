@@ -55,7 +55,7 @@ get.feature.probe <- function(feature = NULL,
                               promoter = FALSE,
                               rm.chr = NULL){
   probe <- getInfiniumAnnotation(toupper(met.platform),genome)
-  # We will rmeove the rs probes, as they should not be used in the analysis
+  # We will remove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
   probe <- probe[!probe$MASK_general,] # remove masked probes
   if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
@@ -71,7 +71,7 @@ get.feature.probe <- function(feature = NULL,
   })
   
   if(!promoter){
-    probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters))))]
+    probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE))))]
     
     
     if(is.null(feature)) {
@@ -86,7 +86,8 @@ get.feature.probe <- function(feature = NULL,
       stop("feature is not GRanges object.")
     }
   } else {
-    probe <- probe[unique(queryHits(findOverlaps(probe,promoters)))]
+    probe <- probe[unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE)))]
+    message("Returning promoter probes: ", length(probe))
   }
   return(probe)
 }
