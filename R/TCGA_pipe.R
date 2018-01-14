@@ -37,6 +37,7 @@
 #' @return Different analysis results.
 #' @export 
 #' @importFrom SummarizedExperiment colData<-
+#' @importFrom stringr str_split
 #' @examples
 #' \dontrun{
 #'   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
@@ -501,6 +502,7 @@ addMutCol <- function(data,
 #' the arguments so the user can keep track 
 #' @param analysis Which analysis were performed
 #' @param argument.values Other argument values changed
+#' @param mode Mode "supervised" or "unsupervised" used in the analysis
 #' @param genome Genome of reference hg38 and hg19
 #' @param mae.path Where mae is stored
 #' @param direction Hypo or hyper direction
@@ -552,15 +554,14 @@ createSummaryDocument <- function(analysis = "all",
 #' @param minSubgroupFrac  minSubgroupFrac used in the analysis
 #' @param minMetdiff minMetdiff used in the analysis
 #' @param metfdr metfdr used in the analysis
-#' @param minMetdiff minMetdiff used in the analysis
 #' @param permu permu used in the analysis
 #' @param rawpval rawpval used in the analysis
 #' @param pe pe used in the analysis
 #' @param nprobes nprobes used in the analysis
 #' @param lower.OR lower.OR used in the analysis
 #' @param out_file Output file name (i.e report.html)
-#' @param results.path Absolute path where the results were saved
 #' @export
+#' @importFrom rmarkdown render
 #' @examples 
 #' \dontrun{
 #' render_report(group.col = "TN",

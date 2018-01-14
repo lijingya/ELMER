@@ -17,6 +17,8 @@ createSummaryDocument(analysis = "all", argument.values = "defaults",
 
 \item{mae.path}{Where mae is stored}
 
+\item{mode}{Mode "supervised" or "unsupervised" used in the analysis}
+
 \item{direction}{Hypo or hyper direction}
 
 \item{group.col}{Group col}

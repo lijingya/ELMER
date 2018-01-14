@@ -46,10 +46,6 @@ render_report(title = "Report", mae, group.col, group1, group2, direction,
 \item{lower.OR}{lower.OR used in the analysis}
 
 \item{out_file}{Output file name (i.e report.html)}
-
-\item{minMetdiff}{minMetdiff used in the analysis}
-
-\item{results.path}{Absolute path where the results were saved}
 }
 \description{
 Build HTML report
