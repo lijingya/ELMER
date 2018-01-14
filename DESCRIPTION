@@ -55,7 +55,9 @@ Imports:
     rvest,
     xml2,
     plotly,
-    gridExtra
+    gridExtra,
+    rmarkdown,
+    stringr
 Suggests:
     BiocStyle,
     knitr,
