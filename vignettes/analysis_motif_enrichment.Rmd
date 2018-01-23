@@ -61,7 +61,7 @@ candidate motifs.
 </div>
 </div>
 
-```{r,eval=TRUE, message=FALSE, warning = FALSE}
+```{r,eval=TRUE, message=FALSE, warning = FALSE,results = "hide"}
 # Load results from previous sections
 mae <- get(load("mae.rda"))
 sig.diff <- read.csv("result/getMethdiff.hypo.probes.significant.csv")
@@ -76,6 +76,9 @@ enriched.motif <- get.enriched.motif(data = mae,
                                      label = "hypo",
                                      min.incidence = 10,
                                      lower.OR = 1.1)
+```
+
+```{r,eval=TRUE, message=FALSE, warning = FALSE}
 names(enriched.motif) # enriched motifs
 head(enriched.motif[names(enriched.motif)[1]]) ## probes in the given set that have the first motif.
 
