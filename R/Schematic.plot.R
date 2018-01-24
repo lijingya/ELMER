@@ -228,7 +228,8 @@ schematic <- function(data,
     print( 
       bwplot(signal~group,
              data=d,
-             xlab=group.col, ylab='DNA methylation levels',
+             xlab=identifier, 
+             ylab='DNA methylation levels',
              horizontal=FALSE,
              panel = function(..., box.ratio) {
                panel.violin(..., col = "lightblue",
@@ -324,7 +325,7 @@ schematic <- function(data,
                                name = "Probe details",
                                stacking = "squish",
                                fun = details)
-    plotTracks(c(list(idxTrack,  axTrack, deTrack), interactions.track,list(genetrack),extra.tracks,state.tracks),
+    plotTracks(c(list(idxTrack,  axTrack,deTrack), interactions.track,list(genetrack),extra.tracks,state.tracks),
                background.title = "darkblue",
                detailsBorder.col = "white",
                from = min(start(gene.gr) , start(probe.gr), end(gene.gr) , end(probe.gr)),
