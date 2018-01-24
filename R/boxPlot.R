@@ -122,7 +122,8 @@ metBoxPlot <- function(data,
                                legendtitle=TRUE, showarrow=FALSE ) %>% 
       layout(title = title, boxmode = "group", xaxis = list(title = ""), 
              legend=list(y=0.8, yanchor="top" ), 
-             font = list(size = 24), showlegend = showlegend,
+             font = list(size = 12), 
+             showlegend = showlegend,
              margin = list(
                l = 100,
                r = 300,
@@ -135,7 +136,7 @@ metBoxPlot <- function(data,
         stop("webshot package is needed for this function to work. Please install it and run webshot::install_phantomjs()",
              call. = FALSE)
       }
-      plotly::export(p, file = filename, vwidth = 992 * 2, vheight = 744 * 2)
+      plotly::export(p, file = filename, vwidth = 992 , vheight = 744 )
       message("Saved as ", filename)
     } else {
       return(p)
