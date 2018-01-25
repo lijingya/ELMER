@@ -196,7 +196,7 @@ heatmapPairs <- function(data,
                          pairs, 
                          annotation.col = NULL, 
                          width = 10,
-                         height = 10,
+                         height = 7,
                          filename = NULL) {
   
   if(missing(data)) stop("Please set data argument")
@@ -281,7 +281,8 @@ heatmapPairs <- function(data,
                           show_legend = F,
                           col = col.list)
   ht_list = 
-    Heatmap(meth, name = "methylation", 
+    Heatmap(meth, 
+            name = "DNA methylation level", 
             col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
             column_names_gp = gpar(fontsize = 8),
             show_column_names = F,
@@ -289,23 +290,26 @@ heatmapPairs <- function(data,
             show_row_names = F,
             cluster_columns = F,
             top_annotation = ha,
-            column_title = "Methylation", column_title_gp = gpar(fontsize = 10), 
+            column_title = "DNA methylation", 
+            column_title_gp = gpar(fontsize = 10), 
             row_title_gp = gpar(fontsize = 10)) +
     Heatmap(t(apply(exp, 1, scale)), 
-            name = "expression (z-score)", 
+            name = "Expression (z-score)", 
             col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
             top_annotation = ha2,
             show_row_names = F,
             column_order = order, 
             cluster_columns = F,
             column_names_gp = gpar(fontsize = 8), 
-            show_column_names = T,
+            show_column_names = F,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) +
     
     Heatmap(log10(pairs$distNearestTSS + 1),
             name = "log10(distNearestTSS + 1)", 
             width = unit(10, "mm"),
+            column_title = "", 
+            show_column_names = F,
             col = colorRamp2(c(0, 8), c("white", "orange")),
             heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
                                         labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) +
@@ -320,6 +324,8 @@ heatmapPairs <- function(data,
   }
   if(grepl("\\.png",filename)) { 
     message("Saving as PNG")
+    if(width < 100) width <- 1000
+    if(height < 100) height <- 1000
     png(filename, width = width, height = height)
   }
   draw(ht_list, padding = padding, newpage = TRUE, 
