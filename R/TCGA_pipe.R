@@ -597,7 +597,7 @@ render_report <- function(title = "Report",
   if(missing(group2)) stop("Please, set mae value")
   template <- system.file("rmd", "template.Rmd", package="ELMER")
   
-  message("Saving report: ", out_file)
+  message("Compiling report")
   parameters <- list(title = title,
                      genome = genome,
                      mode = mae,
@@ -615,7 +615,7 @@ render_report <- function(title = "Report",
                      group2 = group2,
                      direction = direction,
                      dir.out = dir.out)
-  
+  message("Saving report: ", out_file)
   rmarkdown::render(template,
                     intermediates_dir = dirname(out_file),
                     output_file = out_file,

@@ -114,9 +114,10 @@ get.feature.probe <- function(feature = NULL,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
-#' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes; 
-#' "hyper" which is only selecting hypermethylated probes; 
+#' @param diff.dir A character can be "hypo", "hyper" or NA, showing differential 
+#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
+#' "hyper" which is only selecting hypermethylated probes (one tailed test); 
+#' or NA which are probes differenly methylated (two tailed test).
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
 #' @param minSubgroupFrac A number ranging from 0 to 1, 
@@ -223,6 +224,11 @@ get.diff.meth <- function(data,
     parallel = TRUE
   }
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
+  if(is.na(Top.m) & minSubgroupFrac < 1) {
+    message("Two tailed test should be performed with all samples")
+    minSubgroupFrac <- 1
+  }
+  
   groups.info <- colData(data)[getMetSamples(data),group.col]
   met <- assay(getMet(data))
   probes <- rownames(met)
@@ -441,7 +447,7 @@ get.pair <- function(data,
     parallel = TRUE
   }
   
-  data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
+  if(filter.probes) data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
   
   met <- assay(getMet(data))
   # Probes that were removed from the last steps cannot be verified

@@ -5,7 +5,8 @@
 \title{Heatmap of pairs gene and probes anti-correlated}
 \usage{
 heatmapPairs(data, group.col, group1, group2, pairs, annotation.col = NULL,
-  width = 10, height = 7, filename = NULL)
+  met.metadata = NULL, exp.metadata = NULL, width = 10, height = 7,
+  filename = NULL)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix}

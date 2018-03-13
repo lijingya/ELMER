@@ -28,6 +28,8 @@ output:
     css: style.css
     number_sections: yes
     toc: yes
+    toc_float:
+      collapsed: yes
     toc_depth: 3
     includes:
       after_body: tabset-dropdown.html

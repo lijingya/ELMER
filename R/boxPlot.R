@@ -195,6 +195,8 @@ heatmapPairs <- function(data,
                          group2, 
                          pairs, 
                          annotation.col = NULL, 
+                         met.metadata = NULL,
+                         exp.metadata = NULL,
                          width = 10,
                          height = 7,
                          filename = NULL) {
@@ -287,8 +289,10 @@ heatmapPairs <- function(data,
             column_names_gp = gpar(fontsize = 8),
             show_column_names = F,
             column_order = order, 
-            show_row_names = F,
+            show_row_names = TRUE,
             cluster_columns = F,
+            cluster_rows = F,
+            row_names_gp = gpar(fontsize = 6),
             top_annotation = ha,
             column_title = "DNA methylation", 
             column_title_gp = gpar(fontsize = 10), 
@@ -307,12 +311,51 @@ heatmapPairs <- function(data,
     
     Heatmap(log10(pairs$distNearestTSS + 1),
             name = "log10(distNearestTSS + 1)", 
-            width = unit(10, "mm"),
+            width = unit(5, "mm"),
             column_title = "", 
             show_column_names = F,
             col = colorRamp2(c(0, 8), c("white", "orange")),
             heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
-                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) +
+                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
+  
+  if(!is.null(met.metadata)) {
+    for(i in met.metadata)
+      ht_list <- ht_list + 
+    Heatmap(values(getMet(data)[pairs$Probe,])[i],
+            name = i, 
+            width = unit(5, "mm"),
+            column_title = "", 
+            show_column_names = F
+           ) 
+  }
+  if(!is.null(exp.metadata)) {
+    for(i in exp.metadata)
+      ht_list <- ht_list + 
+        Heatmap(values(getExp(data)[pairs$Probe,])[i],
+                name = i, 
+                width = unit(5, "mm"),
+                column_title = "", 
+                show_column_names = F
+        ) 
+  }
+  ht_list <- ht_list + 
+  Heatmap(values(getMet(data)[pairs$Probe,])$Feature_Type,
+          name = "Feature_Type", 
+          width = unit(5, "mm"),
+          column_title = "", 
+          col = c( "N_Shore"="purple", "S_Shore" = "red", "." = "black",       "Island" = "blue",  "S_Shelf" = "orange", "N_Shelf" = "green"),
+          show_column_names = F
+  ) +
+    Heatmap( values(getMet(data)[pairs$Probe,])$State,
+             name = "ENCODE_MCF7_State", 
+             width = unit(5, "mm"),
+             col = c( "EWR"="purple", "EAR" = "red", "CTCF" = "black",       "PAR" = "blue",  "EWR" = "orange", "EAR" = "green"),
+             column_title = "", 
+             show_column_names = F
+    ) 
+  
+  
+  ht_list <- ht_list +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)

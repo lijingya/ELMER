@@ -22,17 +22,23 @@ Stat.diff.meth <- function(meth,
                            min.samples = 5,
                            percentage = 0.2,
                            Top.m = NULL){
-  g1 <- meth[groups %in% group1]
-  g2 <- meth[groups %in% group2]
-  group1.nb <- ifelse(round(length(g1) * percentage) < min.samples, min(min.samples,length(g1)), round(length(g1) * percentage))
-  group2.nb <- ifelse(round(length(g2) * percentage) < min.samples, min(min.samples,length(g2)), round(length(g2) * percentage))
   
-  group1.tmp <- sort(g1, decreasing = Top.m)
-  group2.tmp <- sort(g2, decreasing = Top.m)
+  if(percentage < 1){
+    g1 <- meth[groups %in% group1]
+    g2 <- meth[groups %in% group2]
+    group1.nb <- ifelse(round(length(g1) * percentage) < min.samples, min(min.samples,length(g1)), round(length(g1) * percentage))
+    group2.nb <- ifelse(round(length(g2) * percentage) < min.samples, min(min.samples,length(g2)), round(length(g2) * percentage))
+    
+    group1.tmp <- sort(g1, decreasing = Top.m)
+    group2.tmp <- sort(g2, decreasing = Top.m)
+    
+    group1.tmp <- group1.tmp[1:group1.nb]
+    group2.tmp <- group2.tmp[1:group2.nb]
+  } else {
+    group1.tmp <- meth[groups %in% group1]
+    group2.tmp <- meth[groups %in% group2]
+  }
   
-  group1.tmp <- group1.tmp[1:group1.nb]
-  group2.tmp <- group2.tmp[1:group2.nb]
-
   
   if(sd(meth,na.rm=TRUE) > 0 & !all(is.na(group1.tmp)) & !all(is.na(group2.tmp))){
     if(!is.na(Top.m)){
@@ -123,11 +129,11 @@ Stat.nonpara <- function(Probe,
   } 
   # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
   test.p <- unlist(lapply(splitmatrix(Exp),
-                            function(x) {
-                              wilcox.test(x[unmethy],
-                                          x[methy],
-                                          alternative = "greater",
-                                          exact = FALSE)$p.value}))
+                          function(x) {
+                            wilcox.test(x[unmethy],
+                                        x[methy],
+                                        alternative = "greater",
+                                        exact = FALSE)$p.value}))
   
   if(length(Gene)==1){
     out <- data.frame(Probe    = rep(Probe,length(Gene)),
