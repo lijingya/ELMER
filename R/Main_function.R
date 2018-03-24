@@ -255,10 +255,27 @@ get.diff.meth <- function(data,
   
   if(save){
     message("Saving results")
+    TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
+                                         y = out$adjust.p, 
+                                         title =  paste0("Volcano plot - Probes ",
+                                                         dir.out, "methylated in ", group1, " vs ", group2,"\n"),
+                                         filename = sprintf("%s/volcanoPlot.probes.%s.pdf",dir.out,diff.dir),
+                                         label =  c("Not Significant",
+                                                    paste0("Hypermethylated in ",group1),
+                                                    paste0("Hypomethylated in ",group1)),
+                                         ylab =  expression(paste(-Log[10],
+                                                                  " (FDR corrected P-values) [one tailed test]")),
+                                         xlab =  expression(paste(
+                                           "DNA Methylation difference (",beta,"-values)")
+                                         ),
+                                         x.cut = sig.dif, 
+                                         y.cut = pvalue)
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
     write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
               path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir))
+    
+    
   }
   
   result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]
@@ -470,7 +487,7 @@ get.pair <- function(data,
                                      Exps = exp)},
                       .progress = "text", .parallel = parallel, .id = NULL
   )
-
+  
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
   Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
   
@@ -601,8 +618,8 @@ get.permu <- function(data,
   usable.probes <- names(getMet(data))
   usable.probes <- usable.probes[!usable.probes %in% rm.probes]
   if(length(usable.probes) < permu.size) 
-    stop(sprintf("There is no enough usable probes to perform %s time permutation, 
-                 set a smaller permu.size.",permu.size))
+    stop(sprintf("There is no enough usable probes (%s) to perform %s time permutation, 
+                 set a smaller permu.size.",length(usable.probes),permu.size))
   if(!is.numeric(permu.size)) permu.size <- length(usable.probes) 
   
   # Desire for reproducible results
@@ -1046,17 +1063,17 @@ get.enriched.motif <- function(data,
   ## make plot 
   suppressWarnings({
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                          significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
-                          dir.out = dir.out,
-                          label=paste0(label,".quality.A-",toupper(min.motif.quality)),
-                          save=TRUE)
+                               significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
+                               dir.out = dir.out,
+                               label=paste0(label,".quality.A-",toupper(min.motif.quality)),
+                               save=TRUE)
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                          significant = list(lowerOR = lower.OR), 
-                          dir.out = dir.out,
-                          summary = TRUE,
-                          label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
-                          title = plot.title,
-                          save = TRUE)
+                               significant = list(lowerOR = lower.OR), 
+                               dir.out = dir.out,
+                               summary = TRUE,
+                               label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
+                               title = plot.title,
+                               save = TRUE)
   })
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
