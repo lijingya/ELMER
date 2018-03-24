@@ -43,6 +43,11 @@ groups: the M group, which consisted of the upper methylation quintile (the 20\%
 of samples with the highest methylation at the enhancer probe), and the U group, 
 which consisted of the lowest methylation quintile (the 20\% of samples with the 
 lowest methylation.)
+Then, the Mann-Whitney U test is used to test the null hypothesis that overall gene 
+expression in group M is greater than or equal than that in group U. 
+This non-parametric test was used in order to minimize the effects 
+of expression outliers, which can  occur across a very wide dynamic range. 
+
 For each probe-gene pair tested, the raw p-value `Pr` was corrected for multiple 
 hypothesis using a permutation approach.
 
