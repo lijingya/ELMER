@@ -1,6 +1,6 @@
 ---
 title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
-author: "Tiago Chedraoui Silva [aut], Lijing Yao [aut], Simon Coetzee [aut], Ben Berman [aut], Houtan Noushmehr [ctb], De-Chen Lin[ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb]"
+author: "Tiago Chedraoui Silva [aut], Lijing Yao [aut], Simon Coetzee [aut], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb], De-Chen Lin[ctb], Ben Berman [aut]"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -20,56 +20,80 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
-  # Introduction
+
+# Introduction
   
-  This document provides an introduction of the R/Biocondcutor  `r BiocStyle::Biocpkg("ELMER")` package, which is designed 
-  to combine DNA methylation and gene expression data from human tissues to infer 
-  multi-level cis-regulatory networks. `r BiocStyle::Biocpkg("ELMER")` uses DNA methylation to 
-  identify enhancers, and correlates enhancer state with expression of nearby genes 
-  to identify one or more transcriptional targets. Transcription factor (TF) binding 
-  site analysis of enhancers is coupled with expression analysis of all TFs to 
-  infer upstream regulators. This package can be easily applied to TCGA public 
-  available cancer data sets and custom DNA methylation and gene expression data sets.
+DNA methylation can be used to identify functional changes at transcriptional enhancers and other cis-regulatory modules (CRMs) in tumors and other primary disease tissues. Our R/Bioconductor package  `r BiocStyle::Biocpkg("ELMER")` (Enhancer Linking by Methylation/Expression Relationships) provides a systematic approach that reconstructs gene regulatory networks (GRNs) by combining methylation and gene expression data derived from the same set of samples.  `r BiocStyle::Biocpkg("ELMER")` uses methylation changes at CRMs as the central hub of these networks, using correlation analysis to associate them with both upstream master regulator  (MR) transcription factors and downstream target genes.  
   
-  ELMER analyses have 5 main steps: 
+This package can be easily applied to TCGA public available cancer data sets and custom DNA methylation and gene expression data sets.
   
-  1. Identify distal probes on HM450K.
-  2. Identify distal enhancer probes with significantly different DNA methylation level
-  in experiment group (group 1) and control group (group 2).
-  3. Identify putative target genes for differentially methylated distal enhancer probes.
-  4. Identify enriched motifs for the distal enhancer probes which are significantly 
+ELMER analyses have 5 main steps: 
+  
+  1. Identify distal probes on HM450K or EPIC arrays.
+  2. Identify distal probes with significantly different DNA methylation level
+  between two groups
+  3. Identify putative target genes for differentially methylated distal probes.
+  4. Identify enriched motifs for the distalprobes which are significantly 
   differentially methylated and linked to putative target gene.
-  5. Identify regulatory TFs whose expression associate with DNA methylation at motifs.
+  5. Identify regulatory TFs whose expression associate with DNA methylation at enriched motifs.
   
-  ## Package workflow
+## Package workflow
   
-  The package workflow is showed in the figure below:
+The package workflow is showed in the figure below:
   
-  ![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as filter which can be retrieved using the `get.feature.probe` function. The function createMAE  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlate with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represents user input data, blue boxes represents output object, orange boxes represents auxiliary pre-computed data and gray boxes are functions. ](figures/workflow.png)
+![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as filter which can be retrieved using the `get.feature.probe` function. The function createMAE  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlate with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represents user input data, blue boxes represents output object, orange boxes represents auxiliary pre-computed data and gray boxes are functions. ](figures/workflow.png)
   
-  ## Installing and loading ELMER
+# Main differences between ELMER v2 vs ELMER v1
+
+## Summary table
+
+|                                |                 ELMER Version 1                |                            ELMER Version 2                           |
+|--------------------------------|:----------------------------------------------:|:--------------------------------------------------------------------:|
+| Primary data structure         | mee object (custom data structure)             | MAE object (Bioconductor data structure)                             |
+| Auxiliary data                 | Manually created                               | Programmatically created                                             |
+| Number of human TFs            | 1,982                                          | 2,014 (UniProt database)                                             |
+| Number of TF motifs            | 91                                             | 771  (HOCOMOCO v11 database)                                         |
+| TF classification              | 78 families                                    | 82 families and 331 subfamilies \newline(TFClass database, HOCOMOCO) |
+| Analysis performed             | Normal vs tumor samples                        | Group 1 vs group 2                                                   |
+| Statistical grouping           | **Unsupervised** only                              | **Unsupervised** or **supervised** using labeled groups                      |
+| TCGA data source               | The Cancer Genome Atlas (TCGA) (not available) | The NCI's Genomic Data Commons (GDC)                                 |
+| Genome of reference            | GRCh37 (hg19)                                  | GRCh37 (hg19)/GRCh38 (hg38)                                          |
+| DNA methylation platforms      | HM450                                          | EPIC and HM450                                                       |
+| Graphical User Interface (GUI) | None                                           | TCGAbiolinksGUI                                                      |
+| Automatic report               | None                                           | HTML summarizing results                                             |
+| Annotations                    | None                                           | StateHub                                                             |
+
+## Supervised vs Unsupervised mode
+
+In ELMER v2 we introduce a new concept, the algorithm `mode` that can be either `supervised` or `unsupervised`. The `unsupervised` algorithm mode, which is the described in ELMER v1, assumes that for at least one of the groups the samples belong to more than one molecular subtypes. As consequce, every step of the algorithm takes into account that the groups are heterogenous and statistical tests are performed on only a subset of the original samples.
+
+On the other hand, the `supervised` algorithm version assumes that both groups have samples belonging to only one molecular subtype.  As consequce, every step of the algorithm  will use all samples from both groups for comparison.
+
+Importantly, this final feature allows application of ELMER to arbitrary disease datasets, rather than the tumor/normal comparisons supported by ELMER version 1.
+
+# Installing and loading ELMER
   
-  To install this package from github (development version), start R and enter:
+To install this package from github (development version), start R and enter:
   
-  ```{r, eval = FALSE}
-  devtools::install_github(repo = "tiagochst/ELMER.data")
-  devtools::install_github(repo = "tiagochst/ELMER")
-  ```
+```{r, eval = FALSE}
+devtools::install_github(repo = "tiagochst/ELMER.data")
+devtools::install_github(repo = "tiagochst/ELMER")
+```
   
-  To install this package from Bioconductor start R and enter:
+To install this package from Bioconductor start R and enter:
   
-  ```{r, eval = FALSE}
-  source("https://bioconductor.org/biocLite.R")
-  biocLite("ELMER")
-  ```
+```{r, eval = FALSE}
+source("https://bioconductor.org/biocLite.R")
+biocLite("ELMER")
+```
   
-  Then, to load ELMER enter:
+Then, to load ELMER enter:
   
-  ```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
-  library(ELMER, quietly = TRUE)
+```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+library(ELMER, quietly = TRUE)
 ```
 
-## Citing this work
+# Citing this work
 
 If you used ELMER package or its results, please cite:
 
@@ -92,7 +116,7 @@ If you get use the Graphical user interface, please cite `TCGAbiolinksGUI` packa
 
 Below is the complete code that is explained in the next sections.
 
-```{r sessioninfo, eval=FALSE}
+```{r, eval=FALSE}
 library(MultiAssayExperiment)
 library(ELMER.data)
 library(ELMER)

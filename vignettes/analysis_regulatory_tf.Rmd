@@ -20,12 +20,12 @@ vignette: >
 
 <br>
 
-# Identifying regulatory TFs
+# Identification of master regulator TFs
 
 
 ## Introduction
-This step is to identify regulatory TF whose expression associates with TF binding motif 
-DNA methylation which is carried out by function `get.TFs`.
+This step identifies regulatory TF whose expression associates with TF binding motif 
+DNA methylation and it is carried out by function `get.TFs`.
 
 ## Description
 
@@ -101,7 +101,7 @@ TF <- get.TFs(data = mae,
 dir(path = "result", pattern = "getTF")  
 
 # TF ranking plot based on statistics will be automatically generated.
-dir(path = "result/TFrankPlot_family/", pattern = "pdf") 
+dir(path = "result/TFrankPlot/", pattern = "pdf") 
 ```
 
 # Bibliography

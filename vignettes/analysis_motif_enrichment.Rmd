@@ -22,17 +22,12 @@ vignette: >
 
 # Motif enrichment analysis on the selected probes
 
+## Introduction
+
 This step is to identify enriched motif in a set of probes which is carried out by
 function `get.enriched.motif`.
 
-This function uses a pre-calculated data `Probes.motif` which was generated using HOMER with a $p-value \le 10^{–4}$ 
-to scan a $\pm250bp$  region around each probe using HOmo sapiens 
-COmprehensive MOdel COllection [http://hocomoco.autosome.ru/](HOCOMOCO) v10 [@kulakovskiy2016hocomoco] position
-weight matrices (PWMs). 
-For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given 
-group), a motif enrichment Odds Ratio and a 95% confidence interval were 
-calculated using following formulas:
-
+## Description
 
 In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco]. Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads. HOCOMOCO is the most comprehensive TFBS database and is consistently updated, marking an improvement over ELMER version 1.
 

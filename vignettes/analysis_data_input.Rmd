@@ -36,7 +36,7 @@ library(BiocStyle)
 ELMER analysis have 5 main steps which are shown in the next sections individually. 
 And later the function `TCGA.pipe`, which is a pipeline combining all 5 steps and producing all results and figures, is presented. 
 
-# Creating MAE object
+# Preparing data input
 
 ## Selection of probes within biofeatures
 
@@ -56,7 +56,7 @@ distal.probes <- get.feature.probe(genome = "hg19",
                                    rm.chr = paste0("chr",c(2:22,"X","Y")))
 ```
 
-## Creating MAE
+## Creation of a MAE objec
 ```{r,eval=TRUE, message=FALSE}
 library(MultiAssayExperiment)
 library(ELMER.data)

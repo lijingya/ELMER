@@ -36,7 +36,7 @@ by function `get.pair`.
 
 
 ## Description
-For each differentially methylated distal probe (DMC), the closest 10 upstream genes and the closest 10 downstream genes are tested for inverse correlation between methylation of the probe and expression of the gene, which is the same basic strategy employed in ELMER version 1. However, we now import all gene annotations programmatically using the Biomart [@durinck2005biomart,@durinck2009mapping] package. This allows easy extensibility to use any annotations desired (our default uses Ensembl annotations).
+For each differentially methylated distal probe (DMC), the closest 10 upstream genes and the closest 10 downstream genes are tested for inverse correlation between methylation of the probe and expression of the gene, which is the same basic strategy employed in ELMER version 1. However, we now import all gene annotations programmatically using the Biomart [@durinck2005biomart] package. This allows easy extensibility to use any annotations desired (our default uses Ensembl annotations).
 
 This step also differs between the `Supervised` and `Unsupervised` modes. In the `Unsupervised` mode, as in ELMER 1.0, for each probe-gene pair, the samples (all samples from both groups) are divided into two groups: the $M$ group, which consist of the upper methylation quintile (the 20\%of samples with the highest methylation at the enhancer probe), and the $U$ group, 
 which consists of the lowest methylation quintile (the 20\% of samples with the 
@@ -73,7 +73,7 @@ P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
 Notice that in the `Supervised` mode, no additional filtering is necessary to ensure that the $M$ and $U$ group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
 
 
-![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.png) [@yao2015inferring,@yao2015demystifying]
+![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.png) [@yao2015inferring]
 
 
 # Function arguments
