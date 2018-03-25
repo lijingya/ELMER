@@ -32,21 +32,17 @@ weight matrices (PWMs).
 For each probe set tested (i.e. the list of gene-linked hypomethylated probes in a given 
 group), a motif enrichment Odds Ratio and a 95% confidence interval were 
 calculated using following formulas:
-$$ p= \frac{a}{a+b} $$
-$$ P= \frac{c}{c+d} $$
-$$ Odds\quad  Ratio = \frac{\frac{p}{1-p}}{\frac{P}{1-P}} $$
-$$ SD = \sqrt{\frac{1}{a}+\frac{1}{b}+\frac{1}{c}+\frac{1}{d}} $$
-$$ lower\quad boundary\quad of\quad  95\%\quad  confidence\quad  interval = \exp{(\ln{OR}-SD)} $$
 
-where `a` is the number of probes within the selected probe set that contain one 
-or more motif occurrences; `b` is the number of probes within the selected probe 
-set that do not contain a motif occurrence; `c` and `d` are the same counts within 
-the entire enhancer probe set. A probe set was considered significantly enriched 
-for a particular motif if the 95% confidence interval of the Odds Ratio was 
-greater than 1.1 (specified by option `lower.OR`, 1.1 is default), and the motif 
-occurred at least 10 times (specified by option `min.incidence`. 10 is default) in 
-the probe set. As described in the text, Odds Ratios were also used for ranking 
-candidate motifs. 
+
+In order to identify enriched motifs and potential upstream regulatory TFs, all probes with occurring in significant probe-gene pairs are combined for motif enrichment analysis. HOMER (Hypergeometric Optimization of Motif EnRichment) [@heinz2010simple] is used to find motif occurrences in a $\pm 250bp$ region around each probe, using HOCOMOCO (HOmo sapiens COmprehensive MOdel COllection) v11 [@kulakovskiy2016hocomoco]. Transcription factor (TF) binding models are available at http://hocomoco.autosome.ru/downloads. HOCOMOCO is the most comprehensive TFBS database and is consistently updated, marking an improvement over ELMER version 1.
+
+For each probe set tested (i.e. the set of all probes occurring in significant probe-gene pairs), we quantify enrichments using Fisher's exact test (where $a$ is the number of probes within the selected probe set that contains one or more motif occurrences; $b$ is the number of probes within the selected probe set that do not contain a motif occurrence; $c$ and $d$ are the same counts within 
+the entire array probe set drawn from the same set of distal-only probes using the same definition as the primary analysis) and multiple testing correction with the Benjamini-Hochberg procedure [@fisher].  
+
+A probe set was considered significantly enriched 
+for a particular motif if the 95\% confidence interval of the Odds Ratio was greater than $1.1$ (specified by option `lower.OR`, $1.1$ is default),  the motif 
+occurred at least 10 times (specified by option `min.incidence`, $10$ is default) in 
+the probe set and $FDR < 0.05$.
 
 
 <div class="panel panel-info">
