@@ -13,13 +13,15 @@ output:
     toc_float: true
     toc_depth: 2
     css: style.css
-  
+fontsize: 11pt
 bibliography: bibliography.bib    
 vignette: >
   %\VignetteIndexEntry{"1 - ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
+
+<style> body {text-align: justify} </style>
 
 # Introduction
   
@@ -37,18 +39,18 @@ ELMER analyses have 5 main steps:
   differentially methylated and linked to putative target gene.
   5. Identify regulatory TFs whose expression associate with DNA methylation at enriched motifs.
   
-## Package workflow
+# Package workflow
   
 The package workflow is showed in the figure below:
   
-![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as filter which can be retrieved using the `get.feature.probe` function. The function createMAE  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlate with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represents user input data, blue boxes represents output object, orange boxes represents auxiliary pre-computed data and gray boxes are functions. ](figures/workflow.png)
+![ELMER workflow: ELMER receives as input a DNA methylation object, a gene expression object (both can be either a matrix or a SummarizedExperiment object) and a Genomic Ranges (GRanges) object with distal probes to be used as a filter which can be retrieved using the `get.feature.probe` function. The function `createMAE`  will create a Multi Assay Experiment object keeping only samples that have both DNA methylation and gene expression data. Genes will be mapped to genomic position and annotated using ENSEMBL database, while for probes it will add annotation from (http://zwdzwd.github.io/InfiniumAnnotation). This MAE object will be used as input to the next analysis functions. First, it identifies differentially methylated probes followed by the identification of their nearest genes (10 upstream and 10 downstream) through the  `get.diff.meth` and  `GetNearGenes` functions respectively. For each probe, it will verify if any of the nearby genes were affected by its change in the DNA methylation level and a list of  gene and probes pairs will be outputted from `get.pair` function. For the probes in those pairs, it will search for enriched regulatory Transcription Factors motifs with the  `get.enriched.motif` function. Finally, the  enriched motifs will be correlated with the level of the transcription factor through the `get.TFs` function. In the figure green Boxes represent user input data, blue boxes represent output object, orange boxes represent auxiliary pre-computed data and gray boxes are functions. ](figures/workflow.png)
   
 # Main differences between ELMER v2 vs ELMER v1
 
 ## Summary table
 
 |                                |                 ELMER Version 1                |                            ELMER Version 2                           |
-|--------------------------------|:----------------------------------------------:|:--------------------------------------------------------------------:|
+|--------------------------------|:----------------------------------------------|:--------------------------------------------------------------------|
 | Primary data structure         | mee object (custom data structure)             | MAE object (Bioconductor data structure)                             |
 | Auxiliary data                 | Manually created                               | Programmatically created                                             |
 | Number of human TFs            | 1,982                                          | 2,014 (UniProt database)                                             |
@@ -112,99 +114,8 @@ If you get use the Graphical user interface, please cite `TCGAbiolinksGUI` packa
 
 * Silva, Tiago C. and Colaprico, Antonio and Olsen, Catharina and Bontempi, Gianluca and Ceccarelli, Michele and Berman, Benjamin P. and Noushmehr, Houtan. "TCGAbiolinksGUI: A graphical user interface to analyze cancer molecular and clinical data" (bioRxiv 147496; doi: https://doi.org/10.1101/147496)
 
-# Use case: complete code
-
-Below is the complete code that is explained in the next sections.
-
-```{r, eval=FALSE}
-library(MultiAssayExperiment)
-library(ELMER.data)
-library(ELMER)
-# get distal probes that are 2kb away from TSS on chromosome 1
-distal.probes <- get.feature.probe(genome = "hg19", 
-                                   met.platform = "450K", 
-                                   rm.chr = paste0("chr",c(2:22,"X","Y")))
-data(LUSC_RNA_refined,package = "ELMER.data") # GeneExp
-data(LUSC_meth_refined,package = "ELMER.data") # Meth
-
-mae <- createMAE(exp = GeneExp, 
-                 met = Meth,
-                 save = TRUE,
-                 linearize.exp = TRUE,
-                 save.filename = "mae.rda",
-                 filter.probes = distal.probes,
-                 met.platform = "450K",
-                 genome = "hg19",
-                 TCGA = TRUE)
-
-group.col <- "definition"
-group1 <-  "Primary solid Tumor"
-group2 <- "Solid Tissue Normal"
-dir.out <- "result"
-diff.dir <-  "hypo" # Search for hypomethylated probes in group 1
-
-sig.diff <- get.diff.meth(data = mae, 
-                          group.col = group.col,
-                          group1 = group1,
-                          group2 = group2,
-                          minSubgroupFrac = 0.2,
-                          sig.dif = 0.3,
-                          diff.dir = diff.dir,
-                          cores = 1, 
-                          dir.out = dir.out,
-                          pvalue = 0.01)
-
-
-nearGenes <- GetNearGenes(data = mae, 
-                          probes = sig.diff$probe, 
-                          numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
-                          cores = 1)
-
-pair <- get.pair(data = mae,
-                 group.col = group.col,
-                 group1 = group1,
-                 mode = "unsupervised",
-                 group2 = group2,
-                 nearGenes = nearGenes,
-                 diff.dir = diff.dir,
-                 minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
-                 permu.dir = file.path(dir.out,"permu"),
-                 permu.size = 100, # Please set to 100000 to get significant results
-                 raw.pvalue = 0.05,   
-                 Pe = 0.01, # Please set to 0.001 to get significant results
-                 filter.probes = TRUE, # See preAssociationProbeFiltering function
-                 filter.percentage = 0.05,
-                 filter.portion = 0.3,
-                 dir.out = dir.out,
-                 cores = 1,
-                 label = diff.dir)
-
-# Identify enriched motif for significantly hypomethylated probes which 
-# have putative target genes.
-enriched.motif <- get.enriched.motif(data = mae,
-                                     probes = pair$Probe, 
-                                     dir.out = dir.out, 
-                                     label = diff.dir,
-                                     min.incidence = 10,
-                                     lower.OR = 1.1)
-
-TF <- get.TFs(data = mae, 
-              mode = "unsupervised",
-              group.col = group.col,
-              group1 = group1,
-              group2 = group2,
-              enriched.motif = enriched.motif,
-              dir.out = dir.out,
-              cores = 1, 
-              label = diff.dir)
-
-
-```
-
 # Session Info
 
 ```{r sessioninfo, eval=TRUE}
 sessionInfo()
 ```
-
-# Bibliography

@@ -45,19 +45,12 @@ navbar:
     - text: "Graphical User interface"
       icon: fa-hand-pointer-o
       href: analysis_gui.html
+    - text: "Use case"
+      icon: fa-code
+      href: usecase.html
   right:
     - icon: fa-book fa-lg
       menu:
-        - text: "Bioc2017 workshop"
-        - text: "Github ELMER/TCGAbiolinks"
-          href: https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER
-        - text: "---------"
-        - text: "TCGAbiolinks package"
-        - text: "Github"
-          href: https://github.com/BioinformaticsFMRP/TCGAbiolinks
-        - text: "Bioconductor"
-          href: http://bioconductor.org/packages/devel/bioc/html/TCGAbiolinks.html
-        - text: "---------"
         - text: "ELMER package"
         - text: "Github"
           href: https://github.com/tiagochst/ELMER
@@ -69,6 +62,16 @@ navbar:
           href: https://github.com/tiagochst/ELMER
         - text: "Bioconductor"
           href: http://bioconductor.org/packages/devel/bioc/html/ELMER.html
+        - text: "---------"
+        - text: "Bioc2017 workshop"
+        - text: "Github ELMER/TCGAbiolinks"
+          href: https://github.com/BioinformaticsFMRP/Bioc2017.TCGAbiolinks.ELMER
+        - text: "---------"
+        - text: "TCGAbiolinks package"
+        - text: "Github"
+          href: https://github.com/BioinformaticsFMRP/TCGAbiolinks
+        - text: "Bioconductor"
+          href: http://bioconductor.org/packages/devel/bioc/html/TCGAbiolinks.html
     - icon: fa-info-circle fa-lg
       menu:
         - text: "Cedars-sinai"

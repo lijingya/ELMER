@@ -1,4 +1,22 @@
+h1.title {
+    font-size: 28px;
+}
+body{
+  font-family: Helvetica;
+  font-size: 10pt;
+  text-align: justify
+}
+/* Headers */
+h1,h2,h3,h4,h5,h6{
+  font-size: 20pt;
+}
 
+h4.author{
+    font-size: 10pt;
+}
+h4.date{
+    font-size: 10pt;
+}
 .html-widget {
   margin-bottom: 1em;
 }
