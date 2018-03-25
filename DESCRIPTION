@@ -2,13 +2,14 @@ Package: ELMER
 Title:
     Inferring Regulatory Element Landscapes and Transcription Factor
     Networks Using Cancer Methylomes
-Version: 2.3.13
+Version: 2.3.14
 Authors@R: c( person("Tiago","Chedraoui Silva", role = c("aut")),
            person("Lijing", "Yao", role = "aut", email = "lijingya@usc.edu"),
-		       person("Ben", "Berman", role = "aut"),
 		       person("Peggy", "Farnham", role = "aut"),
 		       person("Hui", "Shen", role = "ctb"),
 		       person("Peter", "Laird", role = "ctb"),
+		       person("Ben", "Berman", role = "aut"),
+		       person("Dechen", "Li", role = "ctb"),
 		       person("Simon","Coetzee", role = c("cre","ctb"), email = "Simon.Coetzee@cshs.org")
 		       )
 Maintainer:
