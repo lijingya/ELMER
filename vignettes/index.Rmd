@@ -16,10 +16,10 @@ output:
   
 bibliography: bibliography.bib    
 vignette: >
-%\VignetteIndexEntry{"1 - ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteIndexEntry{"1 - ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
-  ---
+---
   # Introduction
   
   This document provides an introduction of the R/Biocondcutor  `r BiocStyle::Biocpkg("ELMER")` package, which is designed 
