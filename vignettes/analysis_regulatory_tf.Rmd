@@ -23,24 +23,39 @@ vignette: >
 # Identifying regulatory TFs
 
 
+## Introduction
 This step is to identify regulatory TF whose expression associates with TF binding motif 
 DNA methylation which is carried out by function `get.TFs`.
 
-For each motif considered to be enriched within a particular probe set, it will
-compare the average DNA methylation at all distal enhancer probes within $\pm250bp$  
-of a motif occurrence, to the expression of human TFs. A statistical test 
-was performed for each motif-TF pair, as follows. The samples (all groups samples) 
-were divided into two groups: the M group, which consisted 
-of the 20\% of samples with the highest average methylation at all motif-adjacent 
-probes, and the U group, which consisted of the 20\% of samples with the lowest 
-methylation. For each candidate motif-TF pair, the Mann-Whitney U test was used to test 
-the null hypothesis that overall gene expression in group M was greater or equal 
-than that in group U.
-All TFs were ranked by the $-log_{10}(P_{r})$, and those falling within the top 5% of 
+## Description
+
+When a group of enhancers is coordinately altered in a specific sample subset, this is often the result of an altered upstream **master regulator** transcription factor in the gene regulatory network. ELMER identifies master regulator TFs corresponding to each of the TF binding motifs enriched from the previous analysis step.
+For each enriched motif, ELMER takes the mean DNA methylation of all distal probes (in significant probe-gene pairs) that contain that motif occurrence (within a $\pm 250bp$ region) and compares this mean DNA methylation to the expression of each gene annotated as a human TF. 
+
+
+In the `Unsupervised` mode, a statistical test is performed for each motif-TF pair, as follows. All samples 
+are divided into two groups: the $M$ group, which consists 
+of the 20\% of samples with the highest average methylation at all motif-adjacent
+probes, and the $U$ group, which consisted of the 20\%  of samples with the lowest 
+methylation. This step is performed by the `get.TFs` function, which takes `minSubgroupFrac` as an input parameter, again with a default of 20\%.
+For each candidate motif-TF pair, the Mann-Whitney U test is used to test 
+the null hypothesis that overall gene expression in group $M$ is greater or equal 
+than that in group $U$. This non-parametric test was used in order to minimize the 
+effects of expression outliers, which can occur across a very wide dynamic range. 
+For each motif tested, this results in a raw p-value ($P_r$) for each of the human TFs.
+
+The new `Supervised`  mode uses the same approach as described for the identification of putative target gene(s) step. The $U$ and $M$ groups are one of the the label group of samples and the `minSubgroupFrac` parameter is set to 100\% to use all samples from both groups in the statistical test. This also can result in greater statistical power when using the `Supervised` mode.
+
+
+Finally, all TFs were ranked by the $-log_{10}(P_{r})$, and those falling within the top 5\% of 
 this ranking were considered candidate upstream regulators. 
+By default, the top 3 most anti-correlated TFs, and all TF classified by TFClass database in the same (sub)family are highlighted.
+
 
 ![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get_pairs.png) [@yao2015inferring,@yao2015demystifying]
 
+
+# Function arguments
 <div class="panel panel-info">
 <div class="panel-heading">Main get.pair arguments </div>
 <div class="panel-body">
@@ -58,6 +73,7 @@ this ranking were considered candidate upstream regulators.
 </div>
 
 
+# Example of use
 ```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
 # Load results from previous sections
 mae <- get(load("mae.rda"))

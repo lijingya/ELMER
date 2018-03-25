@@ -29,30 +29,54 @@ library(BiocStyle)
 
 # Identifying putative probe-gene pairs
 
-This step is to link enhancer probes with methylation changes to target genes with expression
+## Introduction
+This step is links distal probes with methylation changes to target genes with expression
 changes and report the putative target gene for selected probes. This is carried out
 by function `get.pair`. 
 
-For each distal probe with differential methylation the closest 10 upstream 
-genes and the closest 10 downstream genes were tested for correlation between 
-methylation of the probe and expression of the gene.
-Thus, exactly 20 statistical 
-tests were performed for each probe, as follows. For each probe-gene pair, 
-the samples (all experiment samples and control samples) were divided into two 
-groups: the M group, which consisted of the upper methylation quintile (the 20\%
-of samples with the highest methylation at the enhancer probe), and the U group, 
-which consisted of the lowest methylation quintile (the 20\% of samples with the 
-lowest methylation.)
-Then, the Mann-Whitney U test is used to test the null hypothesis that overall gene 
-expression in group M is greater than or equal than that in group U. 
+
+## Description
+For each differentially methylated distal probe (DMC), the closest 10 upstream genes and the closest 10 downstream genes are tested for inverse correlation between methylation of the probe and expression of the gene, which is the same basic strategy employed in ELMER version 1. However, we now import all gene annotations programmatically using the Biomart [@durinck2005biomart,@durinck2009mapping] package. This allows easy extensibility to use any annotations desired (our default uses Ensembl annotations).
+
+This step also differs between the `Supervised` and `Unsupervised` modes. In the `Unsupervised` mode, as in ELMER 1.0, for each probe-gene pair, the samples (all samples from both groups) are divided into two groups: the $M$ group, which consist of the upper methylation quintile (the 20\%of samples with the highest methylation at the enhancer probe), and the $U$ group, 
+which consists of the lowest methylation quintile (the 20\% of samples with the 
+lowest methylation). In the new `Supervised` mode, the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used. The `Supervised` mode can greatly increase statistical power.
+
+For each differentially methylated distal probe (DMC), the closest 10 upstream 
+genes and the closest 10 downstream genes are tested for inverse correlation between 
+methylation of the probe and expression of the gene (the number 10 can be changed using the `numFlankingGenes` parameter). To select these genes, 
+the probe-gene distance is defined as the distance from the probe to the transcription 
+start site specified by the ENSEMBL gene level annotations [@yates2015ensembl] accessed via
+the R/Bioconductor package biomaRt [@durinck2009mapping,@durinck2005biomart]. By choosing a constant number of genes to test for each probe, our goal is to avoid systematic false positives for probes in gene rich regions. This is especially important given the highly non-uniform gene density of mammalian genomes.
+
+Thus, exactly 20 statistical tests were performed for each probe, as follows. 
+
+For each candidate probe-gene pair, 
+the Mann-Whitney U test is used to test the null hypothesis that overall gene 
+expression in group $M$ is greater than or equal than that in group $U$. 
 This non-parametric test was used in order to minimize the effects 
 of expression outliers, which can  occur across a very wide dynamic range. 
+For each probe-gene pair tested, the raw p-value $P_r$ is corrected for multiple 
+hypothesis using a permutation approach as follows.
+The gene in the pair is held constant, and `x` random methylation probes are 
+chosen to perform the same one-tailed U test, generating a set of `x` permutation
+p-values $P_p$. We chose the x random probes only from among those that were 
+"distal" (farther than $2kb$ from an annotated transcription start site), in order 
+to draw these null-model probes from the same set as the probe being tested [@sham2014statistical]. 
+An empirical p-value $P_e$ value was calculated using the following formula 
+(which introduces a pseudo-count of 1):
 
-For each probe-gene pair tested, the raw p-value `Pr` was corrected for multiple 
-hypothesis using a permutation approach.
+\begin{equation}
+P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
+\end{equation}
+
+Notice that in the `Supervised` mode, no additional filtering is necessary to ensure that the $M$ and $U$ group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
+
 
 ![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.png) [@yao2015inferring,@yao2015demystifying]
 
+
+# Function arguments
 
 <div class="panel panel-info">
 <div class="panel-heading">Main get.pair arguments </div>
@@ -76,7 +100,7 @@ hypothesis using a permutation approach.
 </div>
 </div>
 
-
+# Example of use
 ```{r, eval = TRUE, message = FALSE, warning = FALSE, results = "hide"}
 # Load results from previous sections
 mae <- get(load("mae.rda"))

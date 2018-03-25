@@ -35,7 +35,8 @@ To identify hypomethylated DMCs, a one-tailed t-test is used to rule out the nul
 
 ![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_diff_meth.png) [@yao2015inferring,@yao2015demystifying]
 
-# Arguments
+
+# Function arguments
 
 <div class="panel panel-info">
 <div class="panel-heading">Main get.diff.meth arguments </div>

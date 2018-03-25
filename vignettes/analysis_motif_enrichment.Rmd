@@ -45,6 +45,7 @@ occurred at least 10 times (specified by option `min.incidence`, $10$ is default
 the probe set and $FDR < 0.05$.
 
 
+# Function arguments
 <div class="panel panel-info">
 <div class="panel-heading">Main get.pair arguments </div>
 <div class="panel-body">
@@ -57,6 +58,7 @@ the probe set and $FDR < 0.05$.
 </div>
 </div>
 
+# Example of use
 ```{r,eval=TRUE, message=FALSE, warning = FALSE,results = "hide"}
 # Load results from previous sections
 mae <- get(load("mae.rda"))
