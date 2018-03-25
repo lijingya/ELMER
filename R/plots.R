@@ -338,23 +338,7 @@ heatmapPairs <- function(data,
                 show_column_names = F
         ) 
   }
-  ht_list <- ht_list + 
-  Heatmap(values(getMet(data)[pairs$Probe,])$Feature_Type,
-          name = "Feature_Type", 
-          width = unit(5, "mm"),
-          column_title = "", 
-          col = c( "N_Shore"="purple", "S_Shore" = "red", "." = "black",       "Island" = "blue",  "S_Shelf" = "orange", "N_Shelf" = "green"),
-          show_column_names = F
-  ) +
-    Heatmap( values(getMet(data)[pairs$Probe,])$State,
-             name = "ENCODE_MCF7_State", 
-             width = unit(5, "mm"),
-             col = c( "EWR"="purple", "EAR" = "red", "CTCF" = "black",       "PAR" = "blue",  "EWR" = "orange", "EAR" = "green"),
-             column_title = "", 
-             show_column_names = F
-    ) 
-  
-  
+
   ht_list <- ht_list +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
