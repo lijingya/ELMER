@@ -78,3 +78,5 @@ as.data.frame(sampleMap(mae)[1:5,])  %>% datatable(options = list(scrollX = TRUE
 as.data.frame(assay(getMet(mae)[1:5,1:5]))  %>% datatable(options = list(scrollX = TRUE))
 as.data.frame(assay(getMet(mae)[1:5,1:5])) %>% datatable(options = list(scrollX = TRUE))
 ```
+
+# Bibliography

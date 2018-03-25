@@ -206,7 +206,7 @@ function.
 rowRanges(getExp(data))
 ```
 
-##  Multi Assay Experiment object 
+# Multi Assay Experiment object 
 
 A Multi Assay Experiment object from the `r BiocStyle::Biocpkg("MultiAssayExperiment")` 
 package is the input for multiple main functions of `r BiocStyle::Biocpkg("ELMER")`. 
@@ -268,3 +268,4 @@ mae <- createMAE(exp = gene.exp,
                  genome = "hg38") 
 ```
 
+# Bibliography
