@@ -149,7 +149,7 @@ metBoxPlot <- function(data,
 #' Heatmap of pairs gene and probes anti-correlated
 #' @description 
 #' Heatmp plot of pairs gene and probes anti-correlated
-#' @param data A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix
+#' @param data A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.
 #' @param group.col A column from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae)  
 #' @param group1 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
@@ -159,7 +159,9 @@ metBoxPlot <- function(data,
 #' hypermethylated in group 1 compared to group 2.
 #' @param pairs List of probe and pair genes
 #' @param annotation.col A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
-#' to be added as annotation to the heatmap
+#' to be added as annotation to the heatmap.
+#' @param met.metadata A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap. 
+#' @param exp.metadata A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.
 #' @param width Figure width
 #' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
@@ -282,7 +284,7 @@ heatmapPairs <- function(data,
   ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
                           show_legend = F,
                           col = col.list)
-  ht_list = 
+  ht_list <- 
     Heatmap(meth, 
             name = "DNA methylation level", 
             col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
@@ -296,7 +298,20 @@ heatmapPairs <- function(data,
             top_annotation = ha,
             column_title = "DNA methylation", 
             column_title_gp = gpar(fontsize = 10), 
-            row_title_gp = gpar(fontsize = 10)) +
+            row_title_gp = gpar(fontsize = 10)) 
+  
+  if(!is.null(met.metadata)) {
+    for(i in met.metadata)
+      ht_list <- ht_list + 
+        Heatmap(values(getMet(data)[pairs$Probe,])[i],
+                name = i, 
+                width = unit(5, "mm"),
+                column_title = "", 
+                show_column_names = F
+        ) 
+  }
+  
+  ht_list <-  ht_list +
     Heatmap(t(apply(exp, 1, scale)), 
             name = "Expression (z-score)", 
             col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
@@ -307,27 +322,8 @@ heatmapPairs <- function(data,
             column_names_gp = gpar(fontsize = 8), 
             show_column_names = F,
             column_title = "Expression", 
-            column_title_gp = gpar(fontsize = 10)) +
-    
-    Heatmap(log10(pairs$distNearestTSS + 1),
-            name = "log10(distNearestTSS + 1)", 
-            width = unit(5, "mm"),
-            column_title = "", 
-            show_column_names = F,
-            col = colorRamp2(c(0, 8), c("white", "orange")),
-            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
-                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
+            column_title_gp = gpar(fontsize = 10)) 
   
-  if(!is.null(met.metadata)) {
-    for(i in met.metadata)
-      ht_list <- ht_list + 
-    Heatmap(values(getMet(data)[pairs$Probe,])[i],
-            name = i, 
-            width = unit(5, "mm"),
-            column_title = "", 
-            show_column_names = F
-           ) 
-  }
   if(!is.null(exp.metadata)) {
     for(i in exp.metadata)
       ht_list <- ht_list + 
@@ -338,7 +334,17 @@ heatmapPairs <- function(data,
                 show_column_names = F
         ) 
   }
-
+  
+  ht_list <-  ht_list +
+    Heatmap(log10(pairs$distNearestTSS + 1),
+            name = "log10(distNearestTSS + 1)", 
+            width = unit(5, "mm"),
+            column_title = "", 
+            show_column_names = F,
+            col = colorRamp2(c(0, 8), c("white", "orange")),
+            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
+                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
+  
   ht_list <- ht_list +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
@@ -362,3 +368,273 @@ heatmapPairs <- function(data,
   dev.off()
 }
 
+
+
+#' @title Heatmap for correlation between probes DNA methylation and a single gene expression.
+#' @description 
+#' This heatmap will sort samples by their gene expression and show the DNA methylation levels of the paired probes to that gene.
+#' If no pairs are given, nearest probes will be selected. 
+#' To use this function you MAE object (input data) will need all probes and not only the distal ones.
+#' This plot can be used to evaluate promoter, and intro, exons regions and closer distal probes of a gene to verify if their
+#' DNA methylation level is affecting the gene expression
+#' @param data A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.
+#' @param group.col A column from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae)  
+#' @param group1 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param group2 A group from group.col. ELMER will run group1 vs group2. 
+#' That means, if direction is hyper, get probes
+#' hypermethylated in group 1 compared to group 2.
+#' @param pairs List of probe and pair genes
+#' @param GeneSymbol Gene Symbol
+#' @param annotation.col A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
+#' to be added as annotation to the heatmap
+#' @param met.metadata A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap. 
+#' @param exp.metadata A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.
+#' @param width Figure width
+#' @param height Figure height
+#' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
+#' @return A heatmap
+#' @import ComplexHeatmap circlize
+#' @importFrom stats hclust dist
+#' @importFrom grid unit.c grobWidth textGrob
+#' @importFrom plyr ddply .
+#' @importFrom GenomicRanges distanceToNearest
+#' @importFrom grDevices png
+#' @export
+#' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
+#' @examples
+#' \dontrun{
+#'   data <- ELMER:::getdata("elmer.data.example")
+#'   group.col <- "subtype_Expression.Subtype"
+#'   group1 <- "classical"
+#'   group2 <- "secretory"
+#'   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
+#'                       GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
+#'                       Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'                       Distance = c(6017,168499,0),
+#'                       Raw.p = c(0.001,0.00001,0.001),
+#'                       Pe = c(0.001,0.00001,0.001))
+#'  heatmapGene(data = data, 
+#'              group.col = group.col,
+#'              group1 = group1, 
+#'              group2 = group2,
+#'              pairs = pairs, 
+#'              GeneSymbol = "LAMB3",
+#'              annotation.col = c("ethnicity","vital_status"),
+#'              filename = "heatmap.pdf")
+#'  \dontrun{            
+#'      heatmapGene(data = data, 
+#'                  group.col = group.col,
+#'                  group1 = group1, 
+#'                  group2 = group2,
+#'                  GeneSymbol = "LAMB3",
+#'                  annotation.col = c("ethnicity","vital_status"),
+#'                  filename = "heatmap_closer_probes.pdf")
+#'  }
+#'}
+heatmapGene <- function(data, 
+                        group.col, 
+                        group1, 
+                        group2, 
+                        pairs, 
+                        GeneSymbol,
+                        annotation.col = NULL, 
+                        met.metadata = NULL,
+                        exp.metadata = NULL,
+                        width = 10,
+                        height = 7,
+                        filename = NULL) {
+  
+  if(missing(data)) stop("Please set data argument")
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  if(missing(GeneSymbol)) stop("Please set GeneSymbol argument")
+  
+  # If pairs are missing we will select the probes that are closer to the gene
+  if(missing(pairs)) {
+    
+    # Probe and gene info
+    probes.info <- rowRanges(getMet(data)) # 450K and hg38
+    gene.info <- rowRanges(getExp(data))
+    
+    gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
+    
+    # Get closer genes
+    gene.follow <- gene.info[follow(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
+    gene.precede <- gene.info[precede(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
+    gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
+    # Get the regions of the 2 nearest genes, we will get all probes on those regions
+    regions <- range(gene.gr)
+    p <- names(sort(subsetByOverlaps(probes.info,regions)))
+    p <- names(sort(subsetByOverlaps(probes.info,resize(regions))))
+    if(length(p) == 0) stop("No probes close to the gene were found")
+    neargenes <- ELMER::GetNearGenes(probes = p,
+                                     data = data,
+                                     numFlankingGenes = 4)
+    pairs <-  get.pair(data = data,
+                      permu.dir = "elmer_trash/permu",
+                      diff.dir = "hyper",
+                      dir.out = "elmer_trash",
+                      label = "hyper",
+                      raw.pvalue = 2,
+                      Pe = 2,
+                      filter.probes = FALSE,
+                      permu.size = 10,
+                      minSubgroupFrac = 1,
+                      nearGenes = neargenes, 
+                      group.col = group.col,
+                      group1 = group1,
+                      group2 = group2,
+                      mode = "unsupervised")
+    unlink("elmer_trash",force = T,recursive = T)
+    pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
+    pairs <- pairs[na.omit(match(rev(p),pairs$Probe)),]
+  }
+  if(!GeneSymbol %in%  unique(pairs$Symbol)) stop("GeneID not in the pairs")
+  pairs <- pairs[pairs$Symbol == GeneSymbol,]
+
+  if(!"distNearestTSS" %in% colnames(pairs)) {
+    # For a given probe and gene find nearest TSS
+    pairs <- addDistNearestTSS(data, pairs)
+  }
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  meth <- assay(getMet(data))[pairs$Probe,]
+  exp <- assay(getExp(data))[unique(pairs$GeneID),,drop = FALSE]
+  
+  # Ordering the heatmap
+  # Split data into the two groups and sort samples by the expression of the gene  
+  idx1 <- which(colData(data)[,group.col] == group1)
+  aux <- na.omit(exp[,idx1])
+  dist1 <- sort(aux, index.return = T)$ix
+  
+  idx2 <- which(colData(data)[,group.col] == group2)
+  aux <- na.omit(exp[,idx2])
+  dist2 <- sort(aux, index.return = T)$ix
+  
+  order <- c(idx1[dist1],idx2[dist2])
+  
+  # Create color
+  colors <- c("#6495ED", "#22b315", "#458B74", "#ffe300",  
+              "#ff0000", "#473C8B", "#00F5FF", "#CD6889", 
+              "#B3EE3A", "#7B68EE", "#CDAF95", "#0F0F0F", "#FF7F00", 
+              "#00008B", "#5F9EA0", "#F0FFFF", "#8B6969", "#9FB6CD", "#D02090",
+              "#FFFF00", "#104E8B", "#B22222", "#B3EE3A", "#FF4500", "#4F94CD", 
+              "#40E0D0", "#F5FFFA", "#8B3A62", "#FF3030", "#FFFFFF")
+  l <- length(unique(colData(data)[,c(group.col)]))
+  l.all <-  l
+  col <- colors[1:l]
+  names(col) <- unique(colData(data)[,c(group.col)]) 
+  col.list <- list()
+  col.list[[group.col]] <- col
+  
+  for(i in annotation.col){
+    l <- length(unique(colData(data)[,c(i)]))
+    if(l < 10){
+      if(l.all + l <= length(colors)) {
+        col <- colors[(l.all+1):(l.all + l)]
+        l.all <- l.all + l
+      } else {
+        col <- colors[c((l.all+1):length(colors),1 + (l.all + l)%%length(colors))]
+        l.all <- (l.all + l)%%30
+      }
+      n <- unique(colData(data)[,c(i)]) 
+      n[is.na(n)] <- "NA"
+      names(col) <- n
+      col.list[[i]] <- col
+    } else {
+      message("Considering variable ", i, " as numeric")
+      suppressWarnings({
+        nb <- as.numeric(colData(data)[,c(i)])
+        colData(data)[,c(i)] <- nb
+        if(!all(na.omit(nb) >=0)){
+          col <- circlize::colorRamp2(c(min(nb,na.rm = T),
+                                        (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
+                                        max(nb,na.rm = T)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
+          l.all <- l.all + 2
+        } else {
+          col.list[[i]] <- col
+          col <- circlize::colorRamp2(c(min(nb,na.rm = T),max(nb,na.rm = T)), c("white", colors[(l.all+1):(l.all + 1)]))
+          l.all <- l.all + 1
+        }
+        col.list[[i]] <- col
+        
+      })
+    }
+  }
+  
+  # Annotation track
+  ha = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
+                         col = col.list,
+                         show_annotation_name = TRUE,
+                         annotation_name_side = "left",
+                         annotation_height = unit(c(rep(0.5,length(annotation.col) + 1), 3), "cm"),
+                         GeneExpression = anno_points(exp, size = unit(0.5, "mm"),axis = T, axis_side ="right"),
+                         annotation_name_gp = gpar(fontsize = 6))
+  
+  bottom_annotation_height = unit(3, "cm")
+  
+  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
+                          show_legend = F,
+                          col = col.list)
+  ht_list = 
+    Heatmap(meth, 
+            name = "DNA methylation level", 
+            col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
+            column_names_gp = gpar(fontsize = 5),
+            show_column_names = F,
+            column_order = order, 
+            show_row_names = TRUE,
+            cluster_columns = F,
+            row_names_side = "left",
+            cluster_rows = F,
+            row_names_gp = gpar(fontsize = 5),
+            top_annotation = ha,
+            column_title_gp = gpar(fontsize = 10), 
+            row_title_gp = gpar(fontsize = 10)) 
+  
+  if(!is.null(met.metadata)) {
+    for(i in met.metadata)
+      ht_list <- ht_list + 
+        Heatmap(values(getMet(data)[pairs$Probe,])[i],
+                name = i, 
+                width = unit(5, "mm"),
+                column_title = "", 
+                show_column_names = F
+        ) 
+  }
+  if(!is.null(exp.metadata)) {
+    for(i in exp.metadata)
+      ht_list <- ht_list + 
+        Heatmap(values(getExp(data)[pairs$Probe,])[i],
+                name = i, 
+                width = unit(5, "mm"),
+                column_title = "", 
+                show_column_names = F
+        ) 
+  }
+  
+  ht_list <- ht_list +
+    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
+                  heatmap_legend_labels_gp = gpar(fontsize = 10))
+  if(is.null(filename)) return(ht_list)
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))), collapse = ""))) - unit(1, "cm"),
+                   unit(c(2, 2), "mm"))
+  if(grepl("\\.pdf",filename)) {
+    message("Saving as PDF")
+    pdf(filename, width = width, height = height)
+  }
+  if(grepl("\\.png",filename)) { 
+    message("Saving as PNG")
+    if(width < 100) width <- 1000
+    if(height < 100) height <- 1000
+    png(filename, width = width, height = height)
+  }
+  draw(ht_list, padding = padding, newpage = TRUE, 
+       column_title = paste0("Correspondence between probe DNA methylation and ",  GeneSymbol," expression"), 
+       column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
+       annotation_legend_side = "right", 
+       heatmap_legend_side = "bottom")
+  dev.off()
+}

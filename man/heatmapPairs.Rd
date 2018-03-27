@@ -9,7 +9,7 @@ heatmapPairs(data, group.col, group1, group2, pairs, annotation.col = NULL,
   filename = NULL)
 }
 \arguments{
-\item{data}{A MultiAssayExperiment with a DNA methylation martrix or a DNA methylation matrix}
+\item{data}{A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.}
 
 \item{group.col}{A column from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae)}
 
@@ -24,7 +24,11 @@ hypermethylated in group 1 compared to group 2.}
 \item{pairs}{List of probe and pair genes}
 
 \item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
-to be added as annotation to the heatmap}
+to be added as annotation to the heatmap.}
+
+\item{met.metadata}{A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap.}
+
+\item{exp.metadata}{A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.}
 
 \item{width}{Figure width}
 
