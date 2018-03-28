@@ -30,6 +30,9 @@
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
 #'@param save A logic. If true, figure will be saved to dir.out.
+#'@param height PDF height
+#'@param width PDF width
+#'@param correlation Add pearson correlation values to the plot
 #'@param ... color.value, lm_line in scatter function
 #'@details byPair The output will be scatter plot for individual pairs.
 #'@details byProbe The output will be scatter plot for the probe and nearby genes.
@@ -50,12 +53,19 @@
 #' scatter.plot(data,byPair=list(probe=c("cg19403323"),gene=c("ENSG00000143322")),
 #'              category="definition", save=FALSE,lm_line=TRUE) 
 scatter.plot <- function(data,
-                         byPair=list(probe=c(),gene=c()),
-                         byProbe=list(probe=c(),numFlankingGenes=20),
-                         byTF=list(TF=c(),probe=c()), 
+                         byPair = list(probe = c(),
+                                       gene = c()),
+                         byProbe = list(probe = c(),
+                                        numFlankingGenes = 20),
+                         byTF = list(TF = c(),
+                                     probe = c()), 
                          category=NULL, 
-                         dir.out ="./", 
-                         save=TRUE, ...){
+                         correlation = FALSE,
+                         width = 7,
+                         height = 6,
+                         dir.out = "./", 
+                         save = TRUE, 
+                         ...){
   simpleCap <- function(x) {
     s <- x
     paste(toupper(substring(s, first = 1, last = 1)), tolower(substring(s, 2)),
@@ -79,7 +89,8 @@ scatter.plot <- function(data,
     if(length(byPair$probe) != length(byPair$gene))
       stop("In pairs, the length of probes should be the same with the length of genes.")
 
-    pb <-  txtProgressBar(min = 0, max = length(byPair$gene), title = "creating images", 
+    pb <-  txtProgressBar(min = 0, max = length(byPair$gene), 
+                          title = "creating images", 
                           style = 3, initial = 0, char = "=")
     
     for(i in 1:length(byPair$probe)){
@@ -91,12 +102,13 @@ scatter.plot <- function(data,
                    exp      = assay(getExp(data)[gene,] ),
                    category = category, 
                    legend.title = legend.title,
+                   correlation = correlation,
                    xlab     = sprintf("DNA methyation at %s",probe), 
                    ylab     = sprintf("%s gene expression",symbol), 
                    title    = sprintf("%s_%s",probe,symbol),
                    ...)
       if(save) ggsave(filename = sprintf("%s/%s_%s_bypair.pdf",dir.out,probe,symbol),
-                      plot = P,useDingbats=FALSE, width=7, height = 6)
+                      plot = P,useDingbats=FALSE, width=width, height = height)
     }
     close(pb)  
     
@@ -110,8 +122,9 @@ scatter.plot <- function(data,
       gene <- nearGenes[[i]]$GeneID
       symbol <- getSymbol(data,geneID=gene)
       exp <- assay(getExp(data)[gene,])
+      meth <- assay(getMet(data)[byProbe$probe,])
       rownames(exp) <- symbol
-      P <- scatter(meth     = assay(getMet(data)[byProbe$probe,]), 
+      P <- scatter(meth     = meth, 
                    exp      = exp,
                    category = category,
                    legend.title = legend.title,
@@ -120,7 +133,7 @@ scatter.plot <- function(data,
                    title    = sprintf("%s nearby %s genes", probe, byProbe$numFlankingGenes),
                    ...)
       if(save) ggsave(filename = sprintf("%s/%s_byprobe.pdf", dir.out, probe),
-                      plot = P, useDingbats=FALSE)
+                      plot = P, useDingbats=FALSE, width=width, height = height)
     }
   }
   
@@ -174,6 +187,7 @@ scatter.plot <- function(data,
 #'@param xlab A character specify the title of x axis.
 #'@param ylab A character specify the title of y axis.
 #'@param title A character specify the figure title.
+#'@param correlation Show person correlation values 
 #'@param color.value A vector specify the color of each category, such as 
 #color.value=c("Experiment"="red","Control"="darkgreen")
 #'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
@@ -185,6 +199,7 @@ scatter <- function(meth,
                     xlab=NULL, 
                     ylab=NULL,
                     title=NULL,
+                    correlation = FALSE,
                     color.value=NULL,
                     lm_line=FALSE){
   
@@ -202,7 +217,7 @@ scatter <- function(meth,
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1)) +
       theme_bw() +
       theme(panel.grid.major = element_blank(),  
-            # legend.position="top",
+            legend.position="bottom",
             legend.key = element_rect(colour = 'white'), 
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5)) +
       labs(x=xlab,y=ylab,title=title) + scale_colour_discrete(name=legend.title) + 
@@ -211,7 +226,14 @@ scatter <- function(meth,
                                     title.hjust =0.5)) 
     if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
     if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
-    
+    if(correlation){
+      cor <- cor.test(x = as.numeric(meth), 
+                      y = as.numeric(exp[,GeneID]),
+                      method=c("pearson"))
+      corval <- round(cor$estimate,digits = 2)
+      pvalue <- round(cor$p.value,digits = 4)
+      P <- P + annotate("text",x=0,y=0,hjust=.2,label=paste0("PCC: ",corval," / P-value: ",pvalue))
+    }
   } else {
     df <- data.frame(meth=meth,exp=exp,category=category)
     if(length(unique(df$category))==1){
@@ -224,18 +246,22 @@ scatter <- function(meth,
       theme_bw()+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
+            legend.position="bottom",
             legend.key = element_rect(colour = 'white'),
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
       labs(x=xlab,y=ylab,title=title) +  
       scale_colour_discrete(name=legend.title) + 
       guides(colour = guide_legend(override.aes = list(size=4),
                                    title.position="top", 
-                                   title.hjust =0.5)) 
+                                   title.hjust =0.5))  +
+      scale_fill_discrete(guide=FALSE)  + guides(fill=FALSE) 
     if(lm_line){
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
       P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     }
+
+    
   }
   return(P)
 }

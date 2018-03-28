@@ -493,7 +493,7 @@ get.pair <- function(data,
   
   if(save) {
     dir.create(dir.out, showWarnings = FALSE)
-    file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, label)
+    file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, ifelse(is.null(label),"",label))
     write_csv(Probe.gene,path=file)
     message(paste("File created:", file))
   }
@@ -522,7 +522,7 @@ get.pair <- function(data,
   # Get empirical p-value
   Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   
-  if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, label))
+  if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
   selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   
   # Change distance from gene to nearest TSS
@@ -550,7 +550,7 @@ get.pair <- function(data,
     colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)                                                         
   }
-  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))
+  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))
   invisible(gc())
   return(selected)
 }
@@ -1034,9 +1034,10 @@ get.enriched.motif <- function(data,
   family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
+  
   if(save) write_csv(Summary, 
                      path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                                    dir.out,label))
+                                    dir.out,ifelse(is.null(label),"",label)))
   
   ## enriched motif and probes
   en.motifs <- as.character(Summary[Summary$lowerOR > lower.OR & Summary$NumOfProbes > min.incidence & Summary$FDR <= pvalue,"motif"])
@@ -1058,14 +1059,14 @@ get.enriched.motif <- function(data,
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
   
-  if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,label))
+  if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,ifelse(is.null(label),"",label)))
   
   ## make plot 
   suppressWarnings({
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                                significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
                                dir.out = dir.out,
-                               label=paste0(label,".quality.A-",toupper(min.motif.quality)),
+                               label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
                                save=TRUE)
     P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
                                significant = list(lowerOR = lower.OR), 
@@ -1076,8 +1077,8 @@ get.enriched.motif <- function(data,
                                save = TRUE)
   })
   ## add information to siginificant pairs
-  if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label))){
-    sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, label), 
+  if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))){
+    sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)), 
                           stringsAsFactors=FALSE)
     if(all(sig.Pairs$Probe %in% rownames(probes.TF))){
       motif.Info <- sapply(sig.Pairs$Probe,
@@ -1094,7 +1095,7 @@ get.enriched.motif <- function(data,
       motif.Info <- do.call(rbind,motif.Info)
       sig.Pairs <- cbind(sig.Pairs, motif.Info)
       write_csv(sig.Pairs, 
-                path=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, label))
+                path=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, ifelse(is.null(label),"",label)))
     }
   }
   
@@ -1390,10 +1391,10 @@ get.TFs <- function(data,
   
   if(save){
     save(TF.meth.cor, 
-         file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=label))
+         file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label)))
     write_csv(cor.summary, 
               path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                           dir.out=dir.out, label=label))
+                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   } 
   
   print.header("Creating plots", "subsection")

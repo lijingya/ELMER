@@ -5,7 +5,8 @@
 \title{scatter}
 \usage{
 scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
-  ylab = NULL, title = NULL, color.value = NULL, lm_line = FALSE)
+  ylab = NULL, title = NULL, correlation = FALSE, color.value = NULL,
+  lm_line = FALSE)
 }
 \arguments{
 \item{meth}{A vector of number.}
@@ -21,6 +22,8 @@ scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
 \item{ylab}{A character specify the title of y axis.}
 
 \item{title}{A character specify the figure title.}
+
+\item{correlation}{Show person correlation values}
 
 \item{color.value}{A vector specify the color of each category, such as}
 

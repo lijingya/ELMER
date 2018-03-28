@@ -144,8 +144,6 @@ metBoxPlot <- function(data,
   })
 }
 
-
-
 #' Heatmap of pairs gene and probes anti-correlated
 #' @description 
 #' Heatmp plot of pairs gene and probes anti-correlated
