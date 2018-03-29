@@ -13,10 +13,10 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1, minSubgroupFrac = 0.2,
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
 See \code{\link{createMAE}} function.}
 
-\item{diff.dir}{A character can be "hypo", "hyper" or NA, showing differential 
+\item{diff.dir}{A character can be "hypo", "hyper" or "both", showing differential 
 methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
 "hyper" which is only selecting hypermethylated probes (one tailed test); 
-or NA which are probes differenly methylated (two tailed test).}
+or "both" which are probes differenly methylated (two tailed test).}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel 
 process. Default is 1: no parallel process.}

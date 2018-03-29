@@ -114,10 +114,10 @@ get.feature.probe <- function(feature = NULL,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
-#' @param diff.dir A character can be "hypo", "hyper" or NA, showing differential 
+#' @param diff.dir A character can be "hypo", "hyper" or "both", showing differential 
 #' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
 #' "hyper" which is only selecting hypermethylated probes (one tailed test); 
-#' or NA which are probes differenly methylated (two tailed test).
+#' or "both" which are probes differenly methylated (two tailed test).
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
 #' @param minSubgroupFrac A number ranging from 0 to 1, 
@@ -210,8 +210,12 @@ get.diff.meth <- function(data,
   } else if(!group2 %in% unique(colData(data)[,group.col])){
     stop(group2," not found in ", group.col)
   }
+  if(!diff.dir %in% c("hypo","hyper","both")) stop("diff.dir optiosn are hypo, hyper or both")
+  if(diff.dir %in% c("both")) diff.dir <- NA
+  
+  
   counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
-  message(paste0("ELMER will search for probes ", diff.dir,"methylated in group ",
+  message(paste0("ELMER will search for probes ", ifelse(is.na(diff.dir),"differently ",diff.dir),"methylated in group ",
                  group1, " (n:",subset(counts,x == group1)$freq,")", 
                  " compared to ", 
                  group2, " (n:",subset(counts,x == group2)$freq,")"))
@@ -255,25 +259,28 @@ get.diff.meth <- function(data,
   
   if(save){
     message("Saving results")
+    ylab <- ifelse(is.na(diff.dir),
+           " (FDR corrected P-values) [two tailed test]",
+           " (FDR corrected P-values) [one tailed test]")
     TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
                                          y = out$adjust.p, 
                                          title =  paste0("Volcano plot - Probes ",
-                                                         dir.out, "methylated in ", group1, " vs ", group2,"\n"),
-                                         filename = sprintf("%s/volcanoPlot.probes.%s.pdf",dir.out,diff.dir),
+                                                         ifelse(is.na(diff.dir),"differently ",diff.dir),
+                                                         "methylated in ", group1, " vs ", group2,"\n"),
+                                         filename = sprintf("%s/volcanoPlot.probes.%s.pdf",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
                                          label =  c("Not Significant",
                                                     paste0("Hypermethylated in ",group1),
                                                     paste0("Hypomethylated in ",group1)),
-                                         ylab =  expression(paste(-Log[10],
-                                                                  " (FDR corrected P-values) [one tailed test]")),
+                                         ylab =  bquote(-Log[10] ~ .(ylab)),
                                          xlab =  expression(paste(
                                            "DNA Methylation difference (",beta,"-values)")
                                          ),
                                          x.cut = sig.dif, 
                                          y.cut = pvalue)
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
-    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,diff.dir))
+    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
-              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,diff.dir))
+              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
     
     
   }
