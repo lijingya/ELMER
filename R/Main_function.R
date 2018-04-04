@@ -259,6 +259,7 @@ get.diff.meth <- function(data,
   
   if(save){
     message("Saving results")
+    dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
     ylab <- ifelse(is.na(diff.dir),
            " (FDR corrected P-values) [two tailed test]",
            " (FDR corrected P-values) [one tailed test]")
@@ -277,7 +278,6 @@ get.diff.meth <- function(data,
                                          ),
                                          x.cut = sig.dif, 
                                          y.cut = pvalue)
-    dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
     write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
               path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
