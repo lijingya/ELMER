@@ -1413,3 +1413,60 @@ get.TFs <- function(data,
                save         = TRUE)
   return(cor.summary)
 }
+
+#' @title Get TF target genes
+#' @description This function uses ELMER analysis 
+#' results and summarizes the possible  genes targets for each TF
+#' @param pairs Output of get.pairs function: dataframe or file path
+#' @param TF.result Output get.TF function: dataframe or file path
+#' @param enriched.motif List of probes for each enriched motif: list of file path.
+#' The file created by ELMER is getMotif...enriched.motifs.rda
+#' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
+#' @param label A character labels the outputs.
+#' @param save A logic. If save is true, a files will be saved: getTFtarget.XX..csv  
+#'  If save is false, only a data frame contains the same content with the first file.
+#' @export
+#' @examples 
+#' pairs <- data.frame(Probe = c("cg26992600","cg26992800","cg26992900"),
+#'                     Symbol = c("KEAP1","DSP","ATP86"))
+#' enriched.motif <- list("FOXD3_HUMAN.H11MO.0.D"= c("cg26992800","cg26992900"))
+#' TF.result <- tibble::tibble(motif = c("FOXD3_HUMAN.H11MO.0.D"),
+#'                         potential.TF.family = c("TP63;TP73"))
+#' getTFtargets(pairs,enriched.motif,TF.result)
+#'  
+#' \dontrun{
+#' getTFtargets("../LUAD_LUSC_analysis_hg38/hyper/getPair.hyper.pairs.significant.csv",
+#' enriched.motif = "../LUAD_analysis_hg38/hyper/getMotif.hyper.enriched.motifs.rda",
+#' TF.result = "../LUAD_analysis_hg38/hyper/getTF.hyper.significant.TFs.with.motif.summary.csv")
+#' }
+getTFtargets <- function(pairs,
+                         enriched.motif,
+                         TF.result,
+                         save = TRUE,
+                         dir.out = "./",
+                         label = NULL) 
+{
+  if(is.character(pairs)) pairs <- readr::read_csv(pairs)
+  if(is.character(enriched.motif)) load(enriched.motif)
+  if(is.character(TF.result)) TF.result <-readr::read_csv(TF.result)
+  # 1 - For each enriched motif we will select the known TF that binds 
+  #     to the region (using TF.table input)
+  # 2 - For each enriched region get the probes (using motif.probes input) 
+  # 3 - the associates target genes (using the pairs input)
+  df.all <- NULL
+  for(m in TF.result$motif){
+    targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
+    x <- TF.result[TF.result$motif ==m,]$potential.TF.family
+    if(is.na(x)) next
+   
+    x <- strsplit(as.character(x),";") %>% unlist
+    df <- expand.grid(x,targets)
+    colnames(df) <- c("TF","Target")
+    df.all <- rbind(df.all,df)
+  }
+  df.all <- df.all[!duplicated(df.all),]
+  if(save) readr::write_csv(df.all,
+                              path=sprintf("%s/getTFtargets.%s.csv",
+                                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+  return(df.all)
+}
