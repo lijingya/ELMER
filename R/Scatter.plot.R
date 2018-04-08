@@ -12,6 +12,9 @@
 #'              byProbe = list(probe = c(), numFlankingGenes = 20), 
 #'              byTF = list(TF = c(), probe = c()),
 #'              category = NULL,
+#'              correlation = FALSE,
+#'              width = 7,
+#'              height = 6,
 #'              dir.out = "./",
 #'              save = TRUE, ...)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
