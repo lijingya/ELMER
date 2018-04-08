@@ -1465,6 +1465,7 @@ getTFtargets <- function(pairs,
     df.all <- rbind(df.all,df)
   }
   df.all <- df.all[!duplicated(df.all),]
+  df.all <- df.all[order(df.all$TF),]
   if(save) readr::write_csv(df.all,
                               path=sprintf("%s/getTFtargets.%s.csv",
                                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
