@@ -1446,9 +1446,9 @@ getTFtargets <- function(pairs,
                          dir.out = "./",
                          label = NULL) 
 {
-  if(is.character(pairs)) pairs <- readr::read_csv(pairs)
+  if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
   if(is.character(enriched.motif)) load(enriched.motif)
-  if(is.character(TF.result)) TF.result <-readr::read_csv(TF.result)
+  if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
   # 1 - For each enriched motif we will select the known TF that binds 
   #     to the region (using TF.table input)
   # 2 - For each enriched region get the probes (using motif.probes input) 
@@ -1456,7 +1456,7 @@ getTFtargets <- function(pairs,
   df.all <- NULL
   for(m in TF.result$motif){
     targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
-    x <- TF.result[TF.result$motif ==m,]$potential.TF.family
+    x <- TF.result[TF.result$motif == m,]$potential.TF.family
     if(is.na(x)) next
    
     x <- strsplit(as.character(x),";") %>% unlist
@@ -1464,8 +1464,8 @@ getTFtargets <- function(pairs,
     colnames(df) <- c("TF","Target")
     df.all <- rbind(df.all,df)
   }
-  df.all <- df.all[!duplicated(df.all),]
-  df.all <- df.all[order(df.all$TF),]
+  df.all <- df.all[!duplicated(df.all),,drop = FALSE]
+  df.all <- df.all[order(df.all$TF),,drop = FALSE]
   if(save) readr::write_csv(df.all,
                               path=sprintf("%s/getTFtargets.%s.csv",
                                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
