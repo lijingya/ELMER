@@ -1464,6 +1464,8 @@ getTFtargets <- function(pairs,
     colnames(df) <- c("TF","Target")
     df.all <- rbind(df.all,df)
   }
+  if(is.null(df.all)) return(NULL)
+  print(df.all)
   df.all <- df.all[!duplicated(df.all),,drop = FALSE]
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
   if(save) readr::write_csv(df.all,
