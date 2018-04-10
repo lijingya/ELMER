@@ -93,10 +93,8 @@ get.feature.probe <- function(feature = NULL,
 }
 
 
-## get differential methylated probes-------------------------
-## TCGA pipe don't specify dir.out
-#' get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental 
-#' groups such as normal verus tumor samples.
+
+#' @title Identify hypo/hyper-methylated CpG sites between two groups (i.e. normal vs tumor samples, treated vs untreated).
 #' @description 
 #' get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
 #' hypo/hyper-methyalated using proportional samples (defined by minSubgroupFrac option) from group 1 
@@ -120,6 +118,12 @@ get.feature.probe <- function(feature = NULL,
 #' or "both" which are probes differenly methylated (two tailed test).
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
+#' @param mode A character. Can be "unsupervised" or "supervised". If "supervised", the
+#' minSubgroupFrac argument will be set to 1 to use all samples from both groups to find the
+#' differently methylated regions. The supervised mode should be used when all samples from both 
+#' groups are considered homogenous (i.e. treated vs untreated, molecular subtype A vs molecular subtype B), 
+#' while unsupervised mode should be used when there is at least one group with heterogenous samples
+#' (i.e tumor samples).
 #' @param minSubgroupFrac A number ranging from 0 to 1, 
 #' specifying the fraction of extreme samples from group 1 and group 2 
 #' that are used to identify the differential DNA methylation. 
@@ -174,6 +178,7 @@ get.feature.probe <- function(feature = NULL,
 get.diff.meth <- function(data,
                           diff.dir = "hypo",
                           cores = 1,
+                          mode = "unsupervised",
                           minSubgroupFrac = 0.2,
                           pvalue = 0.01,
                           group.col,
@@ -230,6 +235,10 @@ get.diff.meth <- function(data,
   Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
   if(is.na(Top.m) & minSubgroupFrac < 1) {
     message("Two tailed test should be performed with all samples")
+    minSubgroupFrac <- 1
+  }
+  if(mode == "supervised" & minSubgroupFrac < 1) {
+    message("Supervised mode will use all samples from boths groups. Setting argument minSubgroupFrac to 1")
     minSubgroupFrac <- 1
   }
   

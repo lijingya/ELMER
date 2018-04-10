@@ -2,12 +2,12 @@
 % Please edit documentation in R/Main_function.R
 \name{get.diff.meth}
 \alias{get.diff.meth}
-\title{get.diff.meth to identify hypo/hyper-methylated CpG sites on HM450K between control and experimental 
-groups such as normal verus tumor samples.}
+\title{Identify hypo/hyper-methylated CpG sites between two groups (i.e. normal vs tumor samples, treated vs untreated).}
 \usage{
-get.diff.meth(data, diff.dir = "hypo", cores = 1, minSubgroupFrac = 0.2,
-  pvalue = 0.01, group.col, min.samples = 5, group1, group2,
-  test = t.test, sig.dif = 0.3, dir.out = "./", save = TRUE)
+get.diff.meth(data, diff.dir = "hypo", cores = 1, mode = "unsupervised",
+  minSubgroupFrac = 0.2, pvalue = 0.01, group.col, min.samples = 5,
+  group1, group2, test = t.test, sig.dif = 0.3, dir.out = "./",
+  save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
@@ -20,6 +20,13 @@ or "both" which are probes differenly methylated (two tailed test).}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel 
 process. Default is 1: no parallel process.}
+
+\item{mode}{A character. Can be "unsupervised" or "supervised". If "supervised", the
+minSubgroupFrac argument will be set to 1 to use all samples from both groups to find the
+differently methylated regions. The supervised mode should be used when all samples from both 
+groups are considered homogenous (i.e. treated vs untreated, molecular subtype A vs molecular subtype B), 
+while unsupervised mode should be used when there is at least one group with heterogenous samples
+(i.e tumor samples).}
 
 \item{minSubgroupFrac}{A number ranging from 0 to 1, 
 specifying the fraction of extreme samples from group 1 and group 2 
