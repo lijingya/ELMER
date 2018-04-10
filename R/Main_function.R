@@ -261,8 +261,8 @@ get.diff.meth <- function(data,
     message("Saving results")
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
     ylab <- ifelse(is.na(diff.dir),
-           " (FDR corrected P-values) [two tailed test]",
-           " (FDR corrected P-values) [one tailed test]")
+                   " (FDR corrected P-values) [two tailed test]",
+                   " (FDR corrected P-values) [one tailed test]")
     TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
                                          y = out$adjust.p, 
                                          title =  paste0("Volcano plot - Probes ",
@@ -513,24 +513,32 @@ get.pair <- function(data,
     return(selected)
   }
   
-  #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
-  GeneID <- unique(Probe.gene[,"GeneID"])
-  message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
-  # get permutation
-  permu <- get.permu(data,
-                     geneID     = GeneID, 
-                     percentage = minSubgroupFrac / 2,
-                     rm.probes  = names(nearGenes), 
-                     methy      = methylated,
-                     unmethy    = unmethylated,
-                     permu.size = permu.size, 
-                     permu.dir  = permu.dir,
-                     cores      = cores)
-  # Get empirical p-value
-  Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
   
-  if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
-  selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
+  if(mode == "unsupervised"){
+    GeneID <- unique(Probe.gene[,"GeneID"])
+    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
+    # get permutation
+    permu <- get.permu(data,
+                       geneID     = GeneID, 
+                       percentage = minSubgroupFrac / 2,
+                       rm.probes  = names(nearGenes), 
+                       methy      = methylated,
+                       unmethy    = unmethylated,
+                       permu.size = permu.size, 
+                       permu.dir  = permu.dir,
+                       cores      = cores)
+    # Get empirical p-value
+    Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
+    
+    if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
+    # Pe will always be 1 for the supervised mode. As the test exp(U) > exp(M) will always be doing the same comparison.
+    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  } else {
+    Probe.gene$FDR <- p.adjust(Probe.gene$Raw.p,method = "BH")
+    if(save) write_csv(Probe.gene, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
+    selected <-  Probe.gene[Probe.gene$FDR < Pe,] 
+  }
   
   # Change distance from gene to nearest TSS
   selected$Distance <- NULL
@@ -1456,9 +1464,9 @@ getTFtargets <- function(pairs,
   df.all <- NULL
   for(m in TF.result$motif){
     targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
-    x <- TF.result[TF.result$motif == m,]$potential.TF.family
+    x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
     if(is.na(x)) next
-   
+    
     x <- strsplit(as.character(x),";") %>% unlist
     df <- expand.grid(x,targets)
     colnames(df) <- c("TF","Target")
@@ -1467,7 +1475,7 @@ getTFtargets <- function(pairs,
   df.all <- df.all[!duplicated(df.all),,drop = FALSE]
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
   if(save) readr::write_csv(df.all,
-                              path=sprintf("%s/getTFtargets.%s.csv",
-                                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+                            path=sprintf("%s/getTFtargets.%s.csv",
+                                         dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   return(df.all)
 }

@@ -173,7 +173,8 @@ Get.Pvalue.p <- function(U.matrix,permu){
       #            x + 1
       # Pp = pvalue probe (Raw.p)
       # Pr = pvalue random probe (permu matrix)
-      out <- (sum(permu[as.character(Gene),]  <= Raw.p, na.rm=TRUE) + 1) / (sum(!is.na(permu[Gene,])) + 1)
+      # We have to consider that floating Point Numbers are Inaccurate
+      out <- (sum(permu[as.character(Gene),] - Raw.p < 0.00001, na.rm=TRUE) + 1) / (sum(!is.na(permu[Gene,])) + 1)
     } 
     return(out)
   }
