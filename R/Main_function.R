@@ -1369,17 +1369,18 @@ get.TFs <- function(data,
                            Exps  = exps)},
                        .progress = "text", .parallel = parallel
   )
-  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(x$Raw.p)})
+  # We are going to make a multiple hypothesis correction
+  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)
   ## check row and col names
   rownames(TF.meth.cor) <- gene.name
   colnames(TF.meth.cor) <- names(enriched.motif)
   TF.meth.cor <- na.omit(TF.meth.cor)
   
-  # TF.meth.cor matrix with raw p-value (Pr)
+  # TF.meth.cor matrix with corrected p-value (Pr)
   # - rows: TFs
   # - cols: motifs
-  # lower Raw p-values means that TF expression in M group is lower than in 
+  # lower corrected p-value means that TF expression in M group is lower than in 
   # U group. That means, the Unmethylated with more TF expression
   # have a higher correlation.
   

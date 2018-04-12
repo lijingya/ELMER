@@ -293,7 +293,7 @@ TF.rank.plot <- function(motif.pvalue,
             panel.grid.minor = element_blank())+
       theme(legend.position="top") +
       labs(x = "Rank", 
-           y ="-log10 P value", 
+           y ="-log10 corrected P-value", 
            title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", gsub("_HUMAN.H11MO.*","",i),")"))) + 
       geom_point(data=highlight, aes(x=rank, y=pvalue))
     

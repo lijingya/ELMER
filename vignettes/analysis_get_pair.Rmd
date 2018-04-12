@@ -40,8 +40,7 @@ For each differentially methylated distal probe (DMC), the closest 10 upstream g
 
 This step also differs between the `Supervised` and `Unsupervised` modes. In the `Unsupervised` mode, as in ELMER 1.0, for each probe-gene pair, the samples (all samples from both groups) are divided into two groups: the $M$ group, which consist of the upper methylation quintile (the 20\%of samples with the highest methylation at the enhancer probe), and the $U$ group, 
 which consists of the lowest methylation quintile (the 20\% of samples with the 
-lowest methylation). In the new `Supervised` mode, the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used. The `Supervised` mode can greatly increase statistical power.
-
+lowest methylation). In the new `Supervised` mode, the $U$ and $M$ groups are defined strictly by sample group labels, and all samples in each group are used. 
 For each differentially methylated distal probe (DMC), the closest 10 upstream 
 genes and the closest 10 downstream genes are tested for inverse correlation between 
 methylation of the probe and expression of the gene (the number 10 can be changed using the `numFlankingGenes` parameter). To select these genes, 
@@ -56,7 +55,7 @@ the Mann-Whitney U test is used to test the null hypothesis that overall gene
 expression in group $M$ is greater than or equal than that in group $U$. 
 This non-parametric test was used in order to minimize the effects 
 of expression outliers, which can  occur across a very wide dynamic range. 
-For each probe-gene pair tested, the raw p-value $P_r$ is corrected for multiple 
+In the `unsupervised mode` for each probe-gene pair tested, the raw p-value $P_r$ is corrected for multiple 
 hypothesis using a permutation approach as follows.
 The gene in the pair is held constant, and `x` random methylation probes are 
 chosen to perform the same one-tailed U test, generating a set of `x` permutation
@@ -69,6 +68,9 @@ An empirical p-value $P_e$ value was calculated using the following formula
 \begin{equation}
 P_e = \frac{num(P_p \leq P_r)+ 1}{x+1}
 \end{equation}
+
+In the `unsupervised mode` for each probe-gene pair tested, the raw p-value $P_r$ is corrected for multiple 
+hypothesis using Benjamini-Hochberg Procedure.
 
 Notice that in the `Supervised` mode, no additional filtering is necessary to ensure that the $M$ and $U$ group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
 
