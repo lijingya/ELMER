@@ -155,7 +155,7 @@ test_that("Test if the results is right", {
   met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
   
   colData <- data.frame(sample = as.character(1:6), 
-                        group = c(rep("g2",3),rep("g1",3)),
+                        group = c(rep("g1",3),rep("g2",3)),
                         row.names =  as.character(1:6))
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData =  colData)
@@ -169,6 +169,8 @@ test_that("Test if the results is right", {
                   group.col = "group",
                   group1 = "g1",
                   group2 = "g2",  
+                  mode = "supervised",
+                  diff.dir = "hypo",
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
