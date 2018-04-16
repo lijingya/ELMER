@@ -1448,7 +1448,7 @@ get.TFs <- function(data,
 #' pairs <- data.frame(Probe = c("cg26992600","cg26992800","cg26992900"),
 #'                     Symbol = c("KEAP1","DSP","ATP86"))
 #' enriched.motif <- list("FOXD3_HUMAN.H11MO.0.D"= c("cg26992800","cg26992900"))
-#' TF.result <- tibble::tibble(motif = c("FOXD3_HUMAN.H11MO.0.D"),
+#' TF.result <- data.frame(motif = c("FOXD3_HUMAN.H11MO.0.D"),
 #'                         potential.TF.family = c("TP63;TP73"))
 #' getTFtargets(pairs,enriched.motif,TF.result)
 #'  
