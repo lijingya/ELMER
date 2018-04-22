@@ -155,7 +155,7 @@ scatter.plot <- function(data,
     
     exp <- assay(getExp(data)[gene,])
     
-    if(nrow(exp) > 1){
+    if(nrow(exp) > 0){
       if(!is.null(found)) {
         rownames(exp) <- byTF$TF[found]
       } else {
@@ -223,7 +223,8 @@ scatter <- function(meth,
             legend.position="bottom",
             legend.key = element_rect(colour = 'white'), 
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5)) +
-      labs(x=xlab,y=ylab,title=title) + scale_colour_discrete(name=legend.title) + 
+      labs(x=xlab,y=ylab,title=title) + 
+      scale_colour_discrete(name=legend.title) + 
        guides(colour = guide_legend(override.aes = list(size=4),
                                     title.position="top", 
                                     title.hjust =0.5)) 
@@ -252,7 +253,9 @@ scatter <- function(meth,
             legend.position="bottom",
             legend.key = element_rect(colour = 'white'),
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
-      labs(x=xlab,y=ylab,title=title) +  
+      labs(x=xlab,
+           y=ylab,
+           title=title) +  
       scale_colour_discrete(name=legend.title) + 
       guides(colour = guide_legend(override.aes = list(size=4),
                                    title.position="top", 
