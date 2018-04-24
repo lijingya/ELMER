@@ -197,8 +197,8 @@ group.col <- params$groupCol
 
 suppressWarnings({
   summary <- data.frame(
-    nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv"))),
-    nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv"))),
+    nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv")),col_types = readr::cols()),
+    nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv")),col_types = readr::cols()),
     length(get(load(paste0(root, "/getMotif.",direction,".enriched.motifs.rda"))))
   )
 })
@@ -223,9 +223,7 @@ if(params$title == "ELMER") {
   cat("\n#",params$title,"\n")
 }
 cat("\n## Probes",   paste0(dir,"methylated in ", g1, " vs ", g2,"\n"))
-suppressWarnings({
-  p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"))
-})
+p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"),col_types = readr::cols())
 .pl <- TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(p)[,grep("Minus",colnames(p),value = T)],
                                             y = p$adjust.p, 
                                             title =  paste0("Volcano plot - Probes ",
@@ -248,7 +246,8 @@ file <- paste0(root,"/getPair.",dir, ".pairs.significant.csv")
 if(file.exists(file)) {
   cat("\n### Significant anti-correlated pairs of gene-probes\n")
   suppressWarnings({
-    .df <- readr::read_csv(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
+    .df <- readr::read_csv(paste0(root,"/getPair.",dir, ".pairs.significant.csv"),col_types = readr::cols())
+    .df <- .df[order(.df$Raw.p),]
   })
   kexpand.df(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
   .pl <- heatmapPairs(data = mae, 
@@ -259,7 +258,7 @@ if(file.exists(file)) {
                       filename = NULL)
   
   cap <- paste0("Heatmap: hypomethylated paired probes")
-  kexpand.plotHeatmap(12,cap, 10)
+  kexpand.plotHeatmap(8,cap, 10)
   
   cat("\n#### Statehub: Chromatin state evaluation\n")
   text_funcivar()
@@ -297,7 +296,7 @@ if(file.exists(file)) {
   file <- paste0(root,"/getMotif.",dir,".motif.enrichment.csv")
   if(file.exists(file)) {
     cat("\n### Motif enrichment analysis\n")
-    motifs <- readr::read_csv(file)
+    motifs <- readr::read_csv(file,col_types = readr::cols())
     .df <- motifs
     kexpand.dt(paste0(root,"/getMotif.",dir,".motif.enrichment.csv"))
     
@@ -311,9 +310,7 @@ if(file.exists(file)) {
       kexpand(round(sum(motifs$lowerOR > 1.3)/5), paste0("Probes ",dir,"methylated in ", g1, " vs ", g2))
       
       cat("\n### TF analysis\n")
-      suppressWarnings({
-        TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"))
-      })
+        TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"),col_types = readr::cols())
       load(paste0(root,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
       #.df <- TF[na.omit(match(motifs$motif,TF$motif)),]
       #kexpand.dt(paste0(root,g,"/",dir,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
@@ -331,7 +328,8 @@ if(file.exists(file)) {
       colnames(pval) <- c("top.potential.TF.subfamily","motif","pvalue.TF.subfamily")
       top.subfamily  <- merge(.df,pval)[,c("motif","OR","top.potential.TF.subfamily","pvalue.TF.subfamily")]
       .df <- merge(top.family,top.subfamily,all = TRUE)
-      .df <- .df[order(-.df$OR),]
+      .df <- .df[order(-.df$pvalue.TF.subfamily),]
+
       kexpand.dt(paste0(root,"/getTF.",dir,"aux"),c("pvalue.TF.subfamily",'pvalue.TF.family',"OR"))
       
       .df.aux <- merge(TF,motifs, by = "motif")
@@ -347,7 +345,7 @@ if(file.exists(file)) {
         }
         colnames(pval) <- c(i,"motif","pvalue")
         .df  <- merge(aux,pval)[,c("motif","OR",i,"pvalue")]
-        .df <- .df[order(-.df$OR),]
+        .df <- .df[order(-.df$pvalue),]
         kexpand.dt(paste0(root,"/",dir,"getTF.",dir,"aux",i),c('pvalue',"OR"))
       }
       
