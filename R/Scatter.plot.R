@@ -74,7 +74,7 @@ scatter.plot <- function(data,
     paste(toupper(substring(s, first = 1, last = 1)), tolower(substring(s, 2)),
           sep = "", collapse = " ")
   }
-    if(missing(data)) stop("A data object should be included.")
+  if(missing(data)) stop("A data object should be included.")
   
   if(!is.null(category) && length(category)==1) { 
     
@@ -91,7 +91,7 @@ scatter.plot <- function(data,
     
     if(length(byPair$probe) != length(byPair$gene))
       stop("In pairs, the length of probes should be the same with the length of genes.")
-
+    
     pb <-  txtProgressBar(min = 0, max = length(byPair$gene), 
                           title = "creating images", 
                           style = 3, initial = 0, char = "=")
@@ -144,7 +144,7 @@ scatter.plot <- function(data,
     
     meth <- colMeans(assay(getMet(data)[byTF$probe,]),na.rm = TRUE)
     gene <- getGeneID(data,symbol = byTF$TF)
-
+    
     # Our input might not be mapped, we need to verify it    
     found <- NULL
     if(any(is.na(gene))){
@@ -225,9 +225,10 @@ scatter <- function(meth,
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5)) +
       labs(x=xlab,y=ylab,title=title) + 
       scale_colour_discrete(name=legend.title) + 
-       guides(colour = guide_legend(override.aes = list(size=4),
-                                    title.position="top", 
-                                    title.hjust =0.5)) 
+      guides(colour = guide_legend(override.aes = list(size=4),
+                                   title.position="top", 
+                                   nrow = ceiling(sum(stringr::str_length(unique(mae$group)))/100),
+                                   title.hjust = 0.5)) 
     if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
     if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     if(correlation){
@@ -256,17 +257,23 @@ scatter <- function(meth,
       labs(x=xlab,
            y=ylab,
            title=title) +  
-      scale_colour_discrete(name=legend.title) + 
+      scale_colour_discrete(name=legend.title)+ 
       guides(colour = guide_legend(override.aes = list(size=4),
                                    title.position="top", 
+                                   nrow = ceiling(sum(stringr::str_length(unique(mae$group)))/100),
                                    title.hjust =0.5))  +
-      scale_fill_discrete(guide=FALSE)  + guides(fill=FALSE) 
+      scale_fill_discrete(guide=FALSE) + 
+      guides(fill=FALSE) 
     if(lm_line){
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
-      P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+      P <- P + geom_smooth(method = "lm", 
+                           se=FALSE, 
+                           color="black", 
+                           formula = y ~ x,
+                           data = df)
     }
-
+    
     
   }
   return(P)
