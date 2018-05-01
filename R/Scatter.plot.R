@@ -227,7 +227,7 @@ scatter <- function(meth,
       scale_colour_discrete(name=legend.title) + 
       guides(colour = guide_legend(override.aes = list(size=4),
                                    title.position="top", 
-                                   nrow = ceiling(sum(stringr::str_length(unique(mae$group)))/100),
+                                   nrow = ceiling(sum(stringr::str_length(unique(category)))/100),
                                    title.hjust = 0.5)) 
     if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
     if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
