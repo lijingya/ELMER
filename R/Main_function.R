@@ -1441,6 +1441,7 @@ get.TFs <- function(data,
 #' The file created by ELMER is getMotif...enriched.motifs.rda
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
+#' @param mae A multiAssayExperiment outputed from createMAE function
 #' @param save A logic. If save is true, a files will be saved: getTFtarget.XX..csv  
 #'  If save is false, only a data frame contains the same content with the first file.
 #' @export
@@ -1460,6 +1461,7 @@ get.TFs <- function(data,
 getTFtargets <- function(pairs,
                          enriched.motif,
                          TF.result,
+                         mae,
                          save = TRUE,
                          dir.out = "./",
                          label = NULL) 
@@ -1467,6 +1469,7 @@ getTFtargets <- function(pairs,
   if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
   if(is.character(enriched.motif)) load(enriched.motif)
   if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
+  
   # 1 - For each enriched motif we will select the known TF that binds 
   #     to the region (using TF.table input)
   # 2 - For each enriched region get the probes (using motif.probes input) 
@@ -1485,8 +1488,56 @@ getTFtargets <- function(pairs,
   if(is.null(df.all)) return(NULL)
   df.all <- df.all[!duplicated(df.all),,drop = FALSE]
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
+  
   if(save) readr::write_csv(df.all,
                             path=sprintf("%s/getTFtargets.%s.csv",
                                          dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+  
+  
+  if(!missing(mae)){
+    if(is.character(mae)) mae <- get(load(mae))
+    # add genomic info to pairs
+    metadata <- as.data.frame(rowRanges(getMet(mae)[unique(pairs$Probe),]))[, c("Composite.Element.REF","seqnames","start" ,"end", "Feature_Type")]
+    colnames(metadata) <- c("Probe","probe_seqnames","probe_start" ,"probe_end", "probe_Feature_Type")
+    pairs <- merge(pairs, metadata, by = "Probe")
+    metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
+    pairs <- merge(pairs, metadata, by.x = "Symbol", by.y = "external_gene_name")
+    
+    pairs$TF <- NA
+    aux <- plyr::alply(pair$Probe,1, function(x) {
+      names(enriched.motif)[grep(x,enriched.motif)]
+    },.progress = "text")
+    TF[,"TF"] <- plyr::ldply(m, function(x) {
+      paste(na.omit(TF[TF$motif %in% x,]$potential.TF.family),collapse = ";")
+    },
+    .progress = "text")$V1
+    if(save) readr::write_csv(TF,
+                              path=sprintf("%s/getTFtargets_genomic_coordinates.%s.csv",
+                                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+  }
   return(df.all)
+}
+
+summarizeTF <- function(files = NULL, path = NULL){
+  
+  if(!is.null(path)) {
+    files <- dir(path = ".",pattern = "TF.*with.motif.summary.csv",recursive = T)
+  }
+  
+  aux <- list()
+  for(f in files){
+    TF <- readr::read_csv(f,col_types = readr::cols())
+    aux[[f]] <- sort(na.omit(unique(unlist(stringr::str_split(TF$potential.TF.family,";")))))
+  }
+  TF <- sort(unique(unlist(unique(aux))))
+  df <- data.frame(TF)
+  
+  for(f in files){
+    TF <- readr::read_csv(f,col_types = readr::cols())
+    df$analysis <- NA
+    df$analysis[df$TF %in% sort(na.omit(unique(unlist(stringr::str_split(TF$potential.TF.family,";")))))] <- "x"
+    colnames(df)[which(colnames(df) == "analysis")] <- dirname(f)
+  }
+  
+  return(df)
 }
