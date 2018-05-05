@@ -1497,21 +1497,37 @@ getTFtargets <- function(pairs,
   if(!missing(mae)){
     if(is.character(mae)) mae <- get(load(mae))
     # add genomic info to pairs
-    metadata <- as.data.frame(rowRanges(getMet(mae)[unique(pairs$Probe),]))[, c("Composite.Element.REF","seqnames","start" ,"end", "Feature_Type")]
-    colnames(metadata) <- c("Probe","probe_seqnames","probe_start" ,"probe_end", "probe_Feature_Type")
+    metadata <- as.data.frame(rowRanges(getMet(mae)[unique(pairs$Probe),]))
+    colnames(metadata) <- paste0("probe_", colnames(metadata))
+    metadata$Probe <- rownames(metadata)
     pairs <- merge(pairs, metadata, by = "Probe")
     metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
     pairs <- merge(pairs, metadata, by.x = "Symbol", by.y = "external_gene_name")
     
+    
     pairs$TF <- NA
-    aux <- plyr::alply(pair$Probe,1, function(x) {
-      names(enriched.motif)[grep(x,enriched.motif)]
+    
+    # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
+    names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
+    
+    # remove enriched motifs without any MR TFs
+    enriched.motif <- enriched.motif[!is.na(names(enriched.motif))]
+    
+    # For each paired probe get the enriched motifs in which it appears
+    aux <- plyr::alply(pairs$Probe,1, function(x) {
+      unique(names(enriched.motif)[grep(x,enriched.motif)])
     },.progress = "text")
-    TF[,"TF"] <- plyr::ldply(m, function(x) {
-      paste(na.omit(TF[TF$motif %in% x,]$potential.TF.family),collapse = ";")
+    
+    # For each enriched motif the the potencial TF family members 
+    pairs[,"TF"] <- plyr::ldply(aux, function(x) {
+      paste(
+        sort(unique(na.omit(unlist(
+          stringr::str_split(x,";")
+        )))),
+        collapse = ";")
     },
     .progress = "text")$V1
-    if(save) readr::write_csv(TF,
+    if(save) readr::write_csv(pairs,
                               path=sprintf("%s/getTFtargets_genomic_coordinates.%s.csv",
                                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   }
