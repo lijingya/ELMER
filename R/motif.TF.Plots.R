@@ -262,7 +262,9 @@ TF.rank.plot <- function(motif.pvalue,
   
   Plots <- list()
   for(i in motif){
-    df <- data.frame(pvalue = motif.pvalue[,i], Gene = rownames(motif.pvalue), stringAsFactors = FALSE)
+    df <- data.frame(pvalue = motif.pvalue[,i], 
+                     Gene = rownames(motif.pvalue), 
+                     stringAsFactors = FALSE)
     df <- df[order(df$pvalue, decreasing = TRUE),]
     df$rank <- 1:nrow(df)
     

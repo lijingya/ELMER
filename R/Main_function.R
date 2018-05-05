@@ -1341,9 +1341,9 @@ get.TFs <- function(data,
   # - cols: each patient
   
   # rownames are ensemble gene id
-  TFs <- TFs[TFs$`Ensembl ID` %in% rownames(getExp(data)),]
-  gene <- TFs$`Ensembl ID`
-  gene.name <- TFs$`HGNC symbol` # For plotting purposes 
+  TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
+  gene <- TFs$ensembl_gene_id
+  gene.name <- TFs$external_gene_name # For plotting purposes 
   
   # Definition:
   # M group: 20% of samples with the highest average methylation at all motif-adjacent probes
