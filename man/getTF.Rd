@@ -4,13 +4,10 @@
 \alias{getTF}
 \title{Get human TF list from the UNiprot database}
 \usage{
-getTF(genome.build = "hg38")
-}
-\arguments{
-\item{genome.build}{Genome reference version "hg38" or "hg19"}
+getTF()
 }
 \value{
-A data frame with the ensemble gene id and entrezgene and gene symbol.
+A data frame with the ensemble gene id.
 }
 \description{
 This function gets the last version of human TF list from the UNiprot database

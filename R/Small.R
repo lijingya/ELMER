@@ -564,25 +564,13 @@ getTSS <- function(genome = "hg38",
 #' @title  Get human TF list from the UNiprot database
 #' @description This function gets the last version of human TF list from the UNiprot database
 #' @importFrom readr read_tsv
-#' @param genome.build Genome reference version "hg38" or "hg19"
-#' @return A data frame with the ensemble gene id and entrezgene and gene symbol.
-getTF <- function(genome.build = "hg38"){
-  print.header("Accessing Uniprot to get last version of Human TFs","subsection")
-  if(!file.exists("HumanTF.rda")){
-    uniprotURL <- "http://www.uniprot.org/uniprot/?"
-    query <- "query=reviewed:yes+AND+organism:9606+AND+%22transcription+factor%22&sort=score"
-    fields <- "columns=id,entry%20name,protein%20names,genes,database(GeneWiki),database(Ensembl),database(GeneID)"
-    format <- "format=tab"
-    human.TF <- readr::read_tsv(paste0(uniprotURL,
-                                       paste(query, fields,format, sep = "&")),
-                                col_types = "ccccccc") 
-    gene <- get.GRCh(genome.build, gsub(";","",human.TF$`Cross-reference (GeneID)`))
-    gene  <- gene[!duplicated(gene),]
-    save(gene, file = "HumanTF.rda")
-  } else {
-    gene <- get(load("HumanTF.rda"))
-  }
-  return(gene)
+#' @return A data frame with the ensemble gene id.
+getTF <- function(){
+  print.header("Downloading TF list from Lambert, Samuel A., et al. The human transcription factors. Cell 172.4 (2018): 650-665.","subsection")
+  # human.TF <- readr::read_table("http://humantfs.ccbr.utoronto.ca/download/v_1.01/TFs_Ensembl_v_1.01.txt",col_names = F)
+  # colnames(human.TF) <- "ensembl_gene_id"
+  human.TF <- getdata("human.TF")
+  return(human.TF)
 }
 
 #' @importFrom biomaRt getBM useMart listDatasets

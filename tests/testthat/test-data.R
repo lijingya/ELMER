@@ -12,10 +12,9 @@ test_that("Family of TF is correctly created from HOCOMOCO (TFClass database)", 
   expect_equal(length(family$P73_HUMAN.H11MO.0.A), 3)
 })
 
-test_that("Get list of TF from uniprot database", {
+test_that("Get list of human TF from ELMER.data", {
   tf <- getTF()
-  expect_true(all(c("TP53", "TP63", "TP73") %in% tf$external_gene_name))
-  expect_true(all(c("ensembl_gene_id", "external_gene_name") %in% colnames(tf)))
+  expect_true(all(c("TP53", "TP63", "TP73") %in% tf$`HGNC symbol`))
 })
 
 test_that("Mapping from entrez gene ID to emsemble gene ID is right", {

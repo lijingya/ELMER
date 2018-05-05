@@ -4,8 +4,8 @@
 \alias{getTFtargets}
 \title{Get TF target genes}
 \usage{
-getTFtargets(pairs, enriched.motif, TF.result, save = TRUE, dir.out = "./",
-  label = NULL)
+getTFtargets(pairs, enriched.motif, TF.result, mae, save = TRUE,
+  dir.out = "./", label = NULL)
 }
 \arguments{
 \item{pairs}{Output of get.pairs function: dataframe or file path}
@@ -14,6 +14,8 @@ getTFtargets(pairs, enriched.motif, TF.result, save = TRUE, dir.out = "./",
 The file created by ELMER is getMotif...enriched.motifs.rda}
 
 \item{TF.result}{Output get.TF function: dataframe or file path}
+
+\item{mae}{A multiAssayExperiment outputed from createMAE function}
 
 \item{save}{A logic. If save is true, a files will be saved: getTFtarget.XX..csv
 If save is false, only a data frame contains the same content with the first file.}
