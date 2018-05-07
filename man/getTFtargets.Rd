@@ -4,7 +4,7 @@
 \alias{getTFtargets}
 \title{Get TF target genes}
 \usage{
-getTFtargets(pairs, enriched.motif, TF.result, mae, save = TRUE,
+getTFtargets(pairs, enriched.motif, TF.result, dmc.analysis, mae, save = TRUE,
   dir.out = "./", label = NULL)
 }
 \arguments{
@@ -14,6 +14,8 @@ getTFtargets(pairs, enriched.motif, TF.result, mae, save = TRUE,
 The file created by ELMER is getMotif...enriched.motifs.rda}
 
 \item{TF.result}{Output get.TF function: dataframe or file path}
+
+\item{dmc.analysis}{DMC results file or data frame}
 
 \item{mae}{A multiAssayExperiment outputed from createMAE function}
 

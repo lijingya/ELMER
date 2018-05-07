@@ -310,7 +310,7 @@ TF.rank.plot <- function(motif.pvalue,
       nudge_x = 10,
       show.legend = FALSE,
       fontface = 'bold', color = 'black',
-      box.padding = unit(0.5, "lines"),
+      box.padding = unit(0.8, "lines"),
       point.padding = unit(1.0, "lines")
     ) 
     

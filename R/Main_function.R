@@ -1439,6 +1439,7 @@ get.TFs <- function(data,
 #' @param TF.result Output get.TF function: dataframe or file path
 #' @param enriched.motif List of probes for each enriched motif: list of file path.
 #' The file created by ELMER is getMotif...enriched.motifs.rda
+#' @param dmc.analysis DMC results file or data frame
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
 #' @param mae A multiAssayExperiment outputed from createMAE function
@@ -1461,12 +1462,14 @@ get.TFs <- function(data,
 getTFtargets <- function(pairs,
                          enriched.motif,
                          TF.result,
+                         dmc.analysis,
                          mae,
                          save = TRUE,
                          dir.out = "./",
                          label = NULL) 
 {
   if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
+  if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
   if(is.character(enriched.motif)) load(enriched.motif)
   if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
   
@@ -1493,7 +1496,11 @@ getTFtargets <- function(pairs,
                             path=sprintf("%s/getTFtargets.%s.csv",
                                          dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   
-  
+  if(!missing(dmc.analysis)) {
+    colnames(dmc.analysis) <- paste0("DMC_analysis_",colnames(dmc.analysis))
+    colnames(dmc.analysis) <- "Probe"
+    pairs <- merge(pairs,dmc.analysis,by = "Probe")
+  }
   if(!missing(mae)){
     if(is.character(mae)) mae <- get(load(mae))
     # add genomic info to pairs
@@ -1534,12 +1541,16 @@ getTFtargets <- function(pairs,
   return(df.all)
 }
 
-summarizeTF <- function(files = NULL, path = NULL){
+
+# Make a table of MR tf 
+summarizeTF <- function(files = NULL, 
+                        path = NULL){
   
   if(!is.null(path)) {
-    files <- dir(path = ".",pattern = "TF.*with.motif.summary.csv",recursive = T)
+    files <- dir(path = ".",
+                 pattern = "TF.*with.motif.summary.csv",
+                 recursive = T)
   }
-  
   aux <- list()
   for(f in files){
     TF <- readr::read_csv(f,col_types = readr::cols())
@@ -1556,4 +1567,16 @@ summarizeTF <- function(files = NULL, path = NULL){
   }
   
   return(df)
+}
+
+getTopFamily <- function(motif,
+                         TF.meth.cor,
+                         n = 3){
+  TF.family <-  createMotifRelevantTfs()
+  TF <-  stringr::str_trim(unlist(stringr::str_split(TF.family[[motif]],";")))
+  TF <- TF[TF %in% rownames(TF.meth.cor)]
+  message(motif)
+  message(TF)
+  topfamily <- names(sort(TF.meth.cor[TF,motif]))[1:n]
+  return(topfamily)
 }
