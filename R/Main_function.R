@@ -1498,7 +1498,7 @@ getTFtargets <- function(pairs,
   
   if(!missing(dmc.analysis)) {
     colnames(dmc.analysis) <- paste0("DMC_analysis_",colnames(dmc.analysis))
-    colnames(dmc.analysis) <- "Probe"
+    colnames(dmc.analysis)[1] <- "Probe"
     pairs <- merge(pairs,dmc.analysis,by = "Probe")
   }
   if(!missing(mae)){
@@ -1539,6 +1539,46 @@ getTFtargets <- function(pairs,
                                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   }
   return(df.all)
+}
+
+maphg38tohg19 <- function(file,
+                          dir.out = "./",
+                          label = NULL){
+  chain.file <- "http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver/hg38ToHg19.over.chain.gz"
+  if(!file.exists(gsub(".gz","",basename(chain.file)))){
+    downloader::download(chain.file,basename(chain.file))
+    R.utils::gunzip(basename(chain.file))
+  }
+  ch <- rtracklayer::import.chain(gsub(".gz","",basename(chain.file)))
+  
+  ret <- readr::read_csv(file)
+  gr <- makeGRangesFromDataFrame(ret, seqnames.field = "probe_seqnames",
+                                 start.field = "probe_start",
+                                 end.field = "probe_end",
+                                 strand.field = "probe_strand")
+  gr$Probe  <- ret$Probe
+  gr <- unique(gr)
+  x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
+  colnames(x) <- paste0("probe_hg19_",colnames(x))
+  ret[,grep("probe_",colnames(ret))] <- NULL
+  ret.hg19 <- merge(ret,x, by.x = "Probe",by.y = "probe_hg19_Probe")
+  
+  # remap gene
+  gr <- makeGRangesFromDataFrame(ret, 
+                                 seqnames.field = "seqnames",
+                                 start.field = "start",
+                                 end.field =  "end",
+                                 strand.field = "strand")
+  gr$GeneID  <- ret$GeneID
+  gr <- unique(gr)
+  x <-data.frame(unlist(liftOver(gr,ch)))
+  colnames(x) <- paste0("gene_hg19_",colnames(x))
+  ret.hg19[,c("seqnames","start","end","strand")] <- NULL
+  ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
+  readr::write_csv(ret.hg19,
+                   path=sprintf("%s/getTFtargets_genomic_coordinates_mapped_to_hg19.%s.csv",
+                                dir.out=dir.out, 
+                                label=ifelse(is.null(label),"",label)))
 }
 
 
