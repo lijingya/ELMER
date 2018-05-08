@@ -1469,7 +1469,6 @@ getTFtargets <- function(pairs,
                          label = NULL) 
 {
   if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
-  if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
   if(is.character(enriched.motif)) load(enriched.motif)
   if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
   
@@ -1497,6 +1496,7 @@ getTFtargets <- function(pairs,
                                          dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   
   if(!missing(dmc.analysis)) {
+    if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
     colnames(dmc.analysis) <- paste0("DMC_analysis_",colnames(dmc.analysis))
     colnames(dmc.analysis)[1] <- "Probe"
     pairs <- merge(pairs,dmc.analysis,by = "Probe")
@@ -1528,9 +1528,9 @@ getTFtargets <- function(pairs,
     # For each enriched motif the the potencial TF family members 
     pairs[,"TF"] <- plyr::ldply(aux, function(x) {
       paste(
-        sort(unique(na.omit(unlist(
+        unique(na.omit(unlist(
           stringr::str_split(x,";")
-        )))),
+        ))),
         collapse = ";")
     },
     .progress = "text")$V1
@@ -1542,6 +1542,7 @@ getTFtargets <- function(pairs,
 }
 
 maphg38tohg19 <- function(file,
+                          TF,
                           dir.out = "./",
                           label = NULL){
   chain.file <- "http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver/hg38ToHg19.over.chain.gz"
@@ -1552,6 +1553,15 @@ maphg38tohg19 <- function(file,
   ch <- rtracklayer::import.chain(gsub(".gz","",basename(chain.file)))
   
   ret <- readr::read_csv(file)
+  if(!missing(TF)){
+    ret <- ret[grep(TF,ret$TF),]
+    if(nrow(ret) == 0) {
+      message("No targets for that TF")
+      return(NULL)
+    }
+    label <- paste0(label,"_",TF)
+  }
+  
   gr <- makeGRangesFromDataFrame(ret, seqnames.field = "probe_seqnames",
                                  start.field = "probe_start",
                                  end.field = "probe_end",
