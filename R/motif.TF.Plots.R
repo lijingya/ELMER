@@ -285,7 +285,9 @@ TF.rank.plot <- function(motif.pvalue,
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Same family","Same subfamily","Top 3")], 
                            text = as.character(df$Gene[df$label %in% c("Same family","Same subfamily","Top 3")]), 
                            x = which(df$label %in% c("Same family","Same subfamily","Top 3")), stringsAsFactors = FALSE)
-    highlight <- df[df$label %in% c("Same family","Same subfamily","Top 3"),]
+    highlight.top3 <- df[df$label %in% c("Top 3"),]
+    highlight.family <- df[df$label %in% c("Same family"),]
+    highlight.subfamily <- df[df$label %in% c("Same subfamily"),]
     P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("None","Same family","Same subfamily","Top 3"))))+
       scale_color_manual(name = "TF classification",values = c("black","red","orange","lightblue"))+
       geom_vline(xintercept=significant, linetype = "3313") +
@@ -295,9 +297,11 @@ TF.rank.plot <- function(motif.pvalue,
             panel.grid.minor = element_blank())+
       theme(legend.position="top") +
       labs(x = "Rank", 
-           y ="-log10 corrected P-value", 
+           y ="-log10(corrected P-value)", 
            title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", gsub("_HUMAN.H11MO.*","",i),")"))) + 
-      geom_point(data=highlight, aes(x=rank, y=pvalue))
+      geom_point(data=highlight.top3, aes(x=rank, y=pvalue)) +
+      geom_point(data=highlight.family, aes(x=rank, y=pvalue)) +
+      geom_point(data=highlight.subfamily, aes(x=rank, y=pvalue))
     
     df$Gene <- as.character(df$Gene)
     df$Gene[df$label %in% "None"] <- "" 

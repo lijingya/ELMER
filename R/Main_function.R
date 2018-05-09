@@ -343,7 +343,7 @@ get.diff.meth <- function(data,
 #' because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
 #' these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
 #' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).
-#' @param permu.size A number specify the times of permuation. Default is 10000.
+#' @param permu.size A number specify the times of permuation used in the unsupervised mode. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
 #' @param raw.pvalue A number specify the raw p-value cutoff for defining signficant pairs.
 #'  Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.

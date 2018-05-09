@@ -39,7 +39,7 @@ because we typically want to be able to detect a specific (possibly unknown) mol
 these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
 If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).}
 
-\item{permu.size}{A number specify the times of permuation. Default is 10000.}
+\item{permu.size}{A number specify the times of permuation used in the unsupervised mode. Default is 10000.}
 
 \item{permu.dir}{A path where the output of permutation will be.}
 
