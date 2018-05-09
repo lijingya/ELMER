@@ -101,7 +101,7 @@ If you used ELMER package or its results, please cite:
 
 * Yao, L., Shen, H., Laird, P. W., Farnham, P. J., & Berman, B. P. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome Biol 16 (2015): 105.
 * Yao, Lijing, Benjamin P. Berman, and Peggy J. Farnham. "Demystifying the secret mission of enhancers: linking distal regulatory elements to target genes." Critical reviews in biochemistry and molecular biology 50.6 (2015): 550-573. 
-*  Chedraoui Silva, Tiago and Coetzee, Simon G. and Yao, Lijing and Hazelett, Dennis J. and Noushmehr, Houtan and Berman, Benjamin P. "Enhancer Linking by Methylation/Expression Relationships with the R package ELMER version 2" (bioRxiv 148726; doi: https://doi.org/10.1101/148726) 
+*  Silva, T.C., Coetzee, S.G., Yao, L., Gull, N., Hazelett, D.J., Noushmehr, H., Lin, D.C. and Berman, B.P., 2018. ELMER v. 2: An R/Bioconductor package to reconstruct gene regulatory networks from DNA methylation and transcriptome profiles. bioRxiv, p.148726. (doi: https://doi.org/10.1101/148726) 
 
 If you get TCGA data using `getTCGA` function, please cite TCGAbiolinks package: 
 
