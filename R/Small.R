@@ -371,13 +371,15 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
   
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
   annotation <-   getInfiniumAnnotation(met.platform, genome)
-  rowRanges <- annotation[rownames(met),,drop=FALSE]
+  
+  rowRanges <- annotation[names(annotation) %in% rownames(met),,drop=FALSE]
   
   # Remove masked probes, besed on the annotation
   rowRanges <- rowRanges[!rowRanges$MASK_general]
   
   colData <-  DataFrame(samples = colnames(met))
   met <- met[rownames(met) %in% names(rowRanges),,drop = FALSE]
+  met <- met[names(rowRanges),,drop = FALSE]
   assay <- data.matrix(met)
   met <- SummarizedExperiment(assays=assay,
                               rowRanges=rowRanges,
