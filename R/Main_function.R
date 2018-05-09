@@ -1625,8 +1625,6 @@ getTopFamily <- function(motif,
   TF.family <-  createMotifRelevantTfs()
   TF <-  stringr::str_trim(unlist(stringr::str_split(TF.family[[motif]],";")))
   TF <- TF[TF %in% rownames(TF.meth.cor)]
-  message(motif)
-  message(TF)
   topfamily <- names(sort(TF.meth.cor[TF,motif]))[1:n]
   return(topfamily)
 }
