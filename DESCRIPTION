@@ -3,14 +3,15 @@ Title:
     Inferring Regulatory Element Landscapes and Transcription Factor
     Networks Using Cancer Methylomes
 Version: 2.5.2
-Authors@R: c( person("Tiago","Chedraoui Silva", role = c("aut")),
+Authors@R: c( person("Tiago","Chedraoui Silva", role = c("aut"), email = "tiagochst@gmail.com"),
            person("Lijing", "Yao", role = "aut", email = "lijingya@usc.edu"),
-		       person("Peggy", "Farnham", role = "aut"),
+		       person("Simon","Coetzee", role = c("aut"), email = "Simon.Coetzee@cshs.org"),
+		       person("Nicole", "Gull", role = "ctb"),
 		       person("Hui", "Shen", role = "ctb"),
 		       person("Peter", "Laird", role = "ctb"),
-		       person("Ben", "Berman", role = "aut"),
+		       person("Peggy", "Farnham", role = "aut"),
 		       person("Dechen", "Li", role = "ctb"),
-		       person("Simon","Coetzee", role = c("cre","ctb"), email = "Simon.Coetzee@cshs.org")
+		       person("Benjamin", "Berman", role = "aut")
 		       )
 Maintainer:
  Tiago Chedraoui Silva <tiagochst@usp.br>
