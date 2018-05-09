@@ -14,7 +14,7 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1, mode = "unsupervised",
 See \code{\link{createMAE}} function.}
 
 \item{diff.dir}{A character can be "hypo", "hyper" or "both", showing differential 
-methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
+methylation direction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
 "hyper" which is only selecting hypermethylated probes (one tailed test); 
 or "both" which are probes differenly methylated (two tailed test).}
 

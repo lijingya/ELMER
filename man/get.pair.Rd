@@ -43,10 +43,10 @@ If you are using pre-defined group labels, such as treated replicates vs. untrea
 
 \item{permu.dir}{A path where the output of permutation will be.}
 
-\item{raw.pvalue}{A number specify the raw p-value cutoff for defining signficant pairs.
+\item{raw.pvalue}{A number specify the raw p-value cutoff for defining significant pairs.
 Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.}
 
-\item{Pe}{A number specify the empirical p-value cutoff for defining signficant pairs.
+\item{Pe}{A number specify the empirical p-value cutoff for defining significant pairs.
 Default is 0.001}
 
 \item{mode}{A character. Can be "unsupervised" or "supervised". If unsupervised is set
@@ -57,7 +57,7 @@ If diff.dir is "hypo, U will be the group 1 and M the group2.
 If diff.dir is "hyper" M group will be the group1 and U the group2.}
 
 \item{diff.dir}{A character can be "hypo" or "hyper", showing differential 
-methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
 "hyper" which means the probes are hypermethylated in group1; 
 This argument is used only when mode is supervised nad 
 it should be the same value from get.diff.meth function.}
@@ -85,7 +85,7 @@ Default is 1: don't use parallel process.}
 a certain number of samples below and above a certain cut-off. 
 See \code{\link{preAssociationProbeFiltering}} function.}
 
-\item{filter.portion}{A number specify the cut point to define binary methlation level for probe loci. 
+\item{filter.portion}{A number specify the cut point to define binary methylation level for probe loci. 
 Default is 0.3. When beta value is above 0.3, the probe is methylated and 
 vice versa. For one probe, the percentage of methylated and unmethylated samples 
 should be above filter.percentage value.   

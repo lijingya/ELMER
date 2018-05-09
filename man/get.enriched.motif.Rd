@@ -75,7 +75,7 @@ background.probes:
   if save is TRUE, two files will be save on the disk. The first file is 
   getMotif.XX.motif.enrichment.csv (XX depends on option label). This file reports 
   the Odds Ratio and 95\% confidence interval for these Odds Ratios which pass the 
-  signficant cutoff (lower.OR and min.incidence). The second file is 
+  significant cutoff (lower.OR and min.incidence). The second file is 
   getMotif.XX.enriched.motifs.rda (XX depends on option lable). This file contains
   a list R object with enriched motifs as name and probes containing the enriched 
   motif as contents. This object will be used in \code{\link{get.TFs}} function.

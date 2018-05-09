@@ -113,7 +113,7 @@ get.feature.probe <- function(feature = NULL,
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
 #' @param diff.dir A character can be "hypo", "hyper" or "both", showing differential 
-#' methylation dirction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
+#' methylation direction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
 #' "hyper" which is only selecting hypermethylated probes (one tailed test); 
 #' or "both" which are probes differenly methylated (two tailed test).
 #' @param cores A interger which defines the number of cores to be used in parallel 
@@ -345,14 +345,14 @@ get.diff.meth <- function(data,
 #' If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).
 #' @param permu.size A number specify the times of permuation used in the unsupervised mode. Default is 10000.
 #' @param permu.dir A path where the output of permutation will be. 
-#' @param raw.pvalue A number specify the raw p-value cutoff for defining signficant pairs.
+#' @param raw.pvalue A number specify the raw p-value cutoff for defining significant pairs.
 #'  Default is 0.001. It will select the significant P value  cutoff before calculating the empirical p-values.
-#' @param Pe A number specify the empirical p-value cutoff for defining signficant pairs.
+#' @param Pe A number specify the empirical p-value cutoff for defining significant pairs.
 #'  Default is 0.001
 #' @param filter.probes Should filter probes by selecting only probes that have at least
 #' a certain number of samples below and above a certain cut-off. 
 #' See \code{\link{preAssociationProbeFiltering}} function.
-#' @param filter.portion A number specify the cut point to define binary methlation level for probe loci. 
+#' @param filter.portion A number specify the cut point to define binary methylation level for probe loci. 
 #' Default is 0.3. When beta value is above 0.3, the probe is methylated and 
 #' vice versa. For one probe, the percentage of methylated and unmethylated samples 
 #' should be above filter.percentage value.   
@@ -377,7 +377,7 @@ get.diff.meth <- function(data,
 #' If diff.dir is "hypo, U will be the group 1 and M the group2.
 #' If diff.dir is "hyper" M group will be the group1 and U the group2.
 #' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+#' methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
 #' "hyper" which means the probes are hypermethylated in group1; 
 #' This argument is used only when mode is supervised nad 
 #' it should be the same value from get.diff.meth function.
@@ -929,7 +929,7 @@ promoterMeth <- function(data,
 #'   if save is TRUE, two files will be save on the disk. The first file is 
 #'   getMotif.XX.motif.enrichment.csv (XX depends on option label). This file reports 
 #'   the Odds Ratio and 95\% confidence interval for these Odds Ratios which pass the 
-#'   signficant cutoff (lower.OR and min.incidence). The second file is 
+#'   significant cutoff (lower.OR and min.incidence). The second file is 
 #'   getMotif.XX.enriched.motifs.rda (XX depends on option lable). This file contains
 #'   a list R object with enriched motifs as name and probes containing the enriched 
 #'   motif as contents. This object will be used in \code{\link{get.TFs}} function.
@@ -1180,7 +1180,7 @@ get.enriched.motif <- function(data,
 #' If diff.dir is "hypo, U will be the group 1 and M the group2.
 #' If diff.dir is "hyper" M group will be the group1 and U the group2.
 #' @param diff.dir A character can be "hypo" or "hyper", showing differential 
-#' methylation dirction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
+#' methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
 #' "hyper" which means the probes are hypermethylated in group1; 
 #' This argument is used only when mode is supervised nad 
 #' it should be the same value from get.diff.meth function.
