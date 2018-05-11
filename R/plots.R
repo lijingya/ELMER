@@ -465,30 +465,14 @@ heatmapGene <- function(data,
     gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
     # Get the regions of the 2 nearest genes, we will get all probes on those regions
     regions <- range(gene.gr)
-    p <- names(sort(subsetByOverlaps(probes.info,regions)))
-    p <- names(sort(subsetByOverlaps(probes.info,resize(regions))))
+    p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
     neargenes <- ELMER::GetNearGenes(probes = p,
                                      data = data,
-                                     numFlankingGenes = 4)
-    pairs <-  get.pair(data = data,
-                      permu.dir = "elmer_trash/permu",
-                      diff.dir = "hyper",
-                      dir.out = "elmer_trash",
-                      label = "hyper",
-                      raw.pvalue = 2,
-                      Pe = 2,
-                      filter.probes = FALSE,
-                      permu.size = 10,
-                      minSubgroupFrac = 1,
-                      nearGenes = neargenes, 
-                      group.col = group.col,
-                      group1 = group1,
-                      group2 = group2,
-                      mode = "unsupervised")
-    unlink("elmer_trash",force = T,recursive = T)
+                                     numFlankingGenes = 10)
+    pairs <- plyr::ldply(neargenes)
     pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
-    pairs <- pairs[na.omit(match(rev(p),pairs$Probe)),]
+    pairs <- addDistNearestTSS(data, pairs)
   }
   if(!GeneSymbol %in%  unique(pairs$Symbol)) stop("GeneID not in the pairs")
   pairs <- pairs[pairs$Symbol == GeneSymbol,]

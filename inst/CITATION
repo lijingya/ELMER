@@ -4,14 +4,14 @@ citEntry(entry="article",
             as.person("Tiago Chedraoui Silva"),
             as.person("Simon G Coetzee”), 
             as.person("Nicole Gull”), 
-            as.person("Lijing Yao”), 
+            as.person("Lijing Yao”), 
             as.person("Dennis J Hazelett”),
-            as.person("Houtan Noushmehr”),   
-            as.person("De-Chen Lin ”),  
+            as.person("Houtan Noushmehr”),   
+            as.person("De-Chen Lin ”),  
             as.person("Benjamin P Berman”)),
         year = 2018,
         journal = "bioRxiv",
         doi = "10.1101/148726",
         textVersion = 
-        "Silva, T.C., Coetzee, S.G., Yao, L., Gull, N., Hazelett, D.J., Noushmehr, H., Lin, D.C. and Berman, B.P., 2018. ELMER v. 2: An R/Bioconductor package to reconstruct gene regulatory networks from DNA methylation and transcriptome profiles. bioRxiv, p.148726.”
+        "Silva, T.C., Coetzee, S.G., Yao, L., Gull, N., Hazelett, D.J., Noushmehr, H., Lin, D.C. and Berman, B.P., 2018. ELMER v. 2: An R/Bioconductor package to reconstruct gene regulatory networks from DNA methylation and transcriptome profiles. bioRxiv, p.148726.”
         )
