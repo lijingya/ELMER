@@ -1541,12 +1541,21 @@ getTFtargets <- function(pairs,
   return(df.all)
 }
 
-#' @importFrom R.utils gunzip 
-#' @importFrom rtracklayer import.chain
 maphg38tohg19 <- function(file,
                           TF,
                           dir.out = "./",
                           label = NULL){
+  
+  if (!requireNamespace("rtracklayer", quietly = TRUE)) {
+    stop("rtracklayer package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
+  if (!requireNamespace("R.utils", quietly = TRUE)) {
+    stop("R.utils package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
   chain.file <- "http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver/hg38ToHg19.over.chain.gz"
   if(!file.exists(gsub(".gz","",basename(chain.file)))){
     downloader::download(chain.file,basename(chain.file))
