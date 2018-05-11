@@ -12,5 +12,8 @@ devtools::install_github("tiagochst/ELMER");
 ```
 
 #### Documentation
-* [ELMER documentation](https://tiagochst.github.io/ELMER/index.nb.html)
+* [ELMER documentation](https://bioconductor.org/packages/devel/bioc/vignettes/ELMER/inst/doc/index.html)
 * [ELMER.data documentation](https://tiagochst.github.io/ELMER.data/index.nb.html)
+* [Paper supplemental files](https://tiagochst.github.io/ELMER_supplemental/)
+
+
