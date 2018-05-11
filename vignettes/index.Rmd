@@ -120,6 +120,10 @@ If you get use the Graphical user interface, please cite `TCGAbiolinksGUI` packa
 
 If you have questions, wants to report a bug, please use our github repository: http://www.github.com/tiagochst/ELMER
 
+# Paper supplemental material
+
+TCGA-BRCA reports  (paper supplemental material) can be found at https://tiagochst.github.io/ELMER_supplemental/
+
 # Session Info
 
 ```{r sessioninfo, eval=TRUE}
