@@ -53,7 +53,7 @@ The package workflow is showed in the figure below:
 |--------------------------------|:----------------------------------------------|:--------------------------------------------------------------------|
 | Primary data structure         | mee object (custom data structure)             | MAE object (Bioconductor data structure)                             |
 | Auxiliary data                 | Manually created                               | Programmatically created                                             |
-| Number of human TFs            | 1,982                                          | 2,014 (UniProt database)                                             |
+| Number of human TFs            | 1,982                                          | 1,639 (curated list from Lambert, Samuel A., et al.)                 |
 | Number of TF motifs            | 91                                             | 771  (HOCOMOCO v11 database)                                         |
 | TF classification              | 78 families                                    | 82 families and 331 subfamilies \newline(TFClass database, HOCOMOCO) |
 | Analysis performed             | Normal vs tumor samples                        | Group 1 vs group 2                                                   |
@@ -72,6 +72,8 @@ In ELMER v2 we introduce a new concept, the algorithm `mode` that can be either 
 On the other hand, the `supervised` algorithm version assumes that both groups have samples belonging to only one molecular subtype.  As consequce, every step of the algorithm  will use all samples from both groups for comparison.
 
 Importantly, this final feature allows application of ELMER to arbitrary disease datasets, rather than the tumor/normal comparisons supported by ELMER version 1.
+
+![](figures/modes.png) 
 
 # Installing and loading ELMER
   
