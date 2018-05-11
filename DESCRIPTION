@@ -69,6 +69,7 @@ Suggests:
     GenomicInteractions,
     webshot,
     rtracklayer,
+    R.utils,
     covr
 biocViews:
     DNAMethylation, 

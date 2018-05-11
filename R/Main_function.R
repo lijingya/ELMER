@@ -1541,6 +1541,8 @@ getTFtargets <- function(pairs,
   return(df.all)
 }
 
+#' @importFrom R.utils gunzip 
+#' @importFrom rtracklayer import.chain
 maphg38tohg19 <- function(file,
                           TF,
                           dir.out = "./",
