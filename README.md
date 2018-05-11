@@ -1,4 +1,5 @@
-## ELMER
+<img src="vignettes/hexELMER.png" width="200">
+
 ### An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes
 
 #### Installing and loading ELMER
