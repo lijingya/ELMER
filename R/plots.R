@@ -389,6 +389,8 @@ heatmapPairs <- function(data,
 #' to be added as annotation to the heatmap
 #' @param met.metadata A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap. 
 #' @param exp.metadata A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.
+#' @param scatter.plot Plot scatter plots
+#' @param dir.out Where to save the plots
 #' @param width Figure width
 #' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
@@ -437,19 +439,19 @@ heatmapGene <- function(data,
                         group2, 
                         pairs, 
                         GeneSymbol,
+                        scatter.plot = FALSE,
                         annotation.col = NULL, 
                         met.metadata = NULL,
                         exp.metadata = NULL,
+                        dir.out = ".",
                         width = 10,
                         height = 7,
                         filename = NULL) {
   
   if(missing(data)) stop("Please set data argument")
   if(missing(group.col)) stop("Please set group.col argument")
-  if(missing(group1)) stop("Please set group1 argument")
-  if(missing(group2)) stop("Please set group2 argument")
   if(missing(GeneSymbol)) stop("Please set GeneSymbol argument")
-  
+  dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
   # If pairs are missing we will select the probes that are closer to the gene
   if(missing(pairs)) {
     
@@ -458,7 +460,6 @@ heatmapGene <- function(data,
     gene.info <- rowRanges(getExp(data))
     
     gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
-    
     # Get closer genes
     gene.follow <- gene.info[follow(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
     gene.precede <- gene.info[precede(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
@@ -469,7 +470,7 @@ heatmapGene <- function(data,
                      start= min(start(regions)), 
                      end = max(end(regions)))
     regions <- as(df, "GRanges")
-   
+    
     p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
     neargenes <- ELMER::GetNearGenes(probes = p,
@@ -480,30 +481,49 @@ heatmapGene <- function(data,
     pairs <- addDistNearestTSS(data, pairs)
     p <- rev(names(sort(probes.info[p], ignore.strand=TRUE)))
     pairs <- pairs[match(p,pairs$Probe),]
+    if(scatter.plot){
+      for(p in pairs$Probe){
+        scatter.plot(data = mae,
+                     byPair = list(probe = p, 
+                                   gene = gene.location$ensembl_gene_id), # TNFRSF11A
+                     category = group.col, 
+                     dir.out = dir.out, 
+                     save = TRUE, 
+                     correlation = TRUE,
+                     lm_line = TRUE)
+      }
+    }
   }
   if(!GeneSymbol %in%  unique(pairs$Symbol)) stop("GeneID not in the pairs")
   pairs <- pairs[pairs$Symbol == GeneSymbol,]
-
+  
   if(!"distNearestTSS" %in% colnames(pairs)) {
     # For a given probe and gene find nearest TSS
     pairs <- addDistNearestTSS(data, pairs)
   }
-  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  if(!(missing(group1) & missing(group2))){
+    data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  } 
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[unique(pairs$GeneID),,drop = FALSE]
   
   # Ordering the heatmap
   # Split data into the two groups and sort samples by the expression of the gene  
-  idx1 <- which(colData(data)[,group.col] == group1)
-  aux <- na.omit(exp[,idx1])
-  dist1 <- sort(aux, index.return = T)$ix
-  
-  idx2 <- which(colData(data)[,group.col] == group2)
-  aux <- na.omit(exp[,idx2])
-  dist2 <- sort(aux, index.return = T)$ix
-  
-  order <- c(idx1[dist1],idx2[dist2])
-  
+  if(!(missing(group1) & missing(group2))){
+    idx1 <- which(colData(data)[,group.col] == group1)
+    aux <- na.omit(exp[,idx1])
+    dist1 <- sort(aux, index.return = T)$ix
+    
+    idx2 <- which(colData(data)[,group.col] == group2)
+    aux <- na.omit(exp[,idx2])
+    dist2 <- sort(aux, index.return = T)$ix
+    
+    order <- c(idx1[dist1],idx2[dist2])
+  } else {
+    aux <- na.omit(exp)
+    dist1 <- sort(aux, index.return = T)$ix
+    order <- dist1
+  }  
   # Create color
   colors <- c("#6495ED", "#22b315", "#458B74", "#ffe300",  
               "#ff0000", "#473C8B", "#00F5FF", "#CD6889", 
@@ -608,17 +628,17 @@ heatmapGene <- function(data,
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
-  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))), collapse = ""))) - unit(1, "cm"),
+  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.15), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))
   if(grepl("\\.pdf",filename)) {
     message("Saving as PDF")
-    pdf(filename, width = width, height = height)
+    pdf(sprintf("%s/%s",dir.out,filename), width = width, height = height)
   }
   if(grepl("\\.png",filename)) { 
     message("Saving as PNG")
     if(width < 100) width <- 1000
     if(height < 100) height <- 1000
-    png(filename, width = width, height = height)
+    png(sprintf("%s/%s",dir.out,filename), width = width, height = height)
   }
   draw(ht_list, padding = padding, newpage = TRUE, 
        column_title = paste0("Correspondence between probe DNA methylation and ",  GeneSymbol," expression"), 
