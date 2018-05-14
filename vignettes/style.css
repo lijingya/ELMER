@@ -76,3 +76,10 @@ a {
     color: #00CD00;
     background-color: #1a242f;
 }
+
+
+th {
+    background-color: #336699;
+    color: white;
+}
+tr:nth-child(even) {background-color: #f2f2f2;}

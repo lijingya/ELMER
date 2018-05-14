@@ -1,6 +1,6 @@
 ---
-title: "ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"
-author: "Tiago Chedraoui Silva [aut], Lijing Yao [aut], Simon Coetzee [aut],  Nicole Gull [ctb], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb], De-Chen Lin [ctb], Benjamin P. Berman [aut]"
+title: "ELMER v.2: An R/Bioconductor package to reconstruct gene regulatory networks from DNA methylation and transcriptome profiles"
+author: "Tiago Chedraoui Silva [aut], Lijing Yao [aut], Simon Coetzee [aut], Nicole Gull [ctb], Houtan Noushmehr [ctb], Dennis J. Hazelett [ctb], Peggy Farnham [aut], Hui Shen [ctb], Peter Laird [ctb], De-Chen Lin[ctb], Benjamin P. Berman [aut]"
 date: "`r Sys.Date()`"
 output: 
   html_document:
@@ -16,7 +16,7 @@ output:
 fontsize: 11pt
 bibliography: bibliography.bib    
 vignette: >
-  %\VignetteIndexEntry{"1 - ELMER: An R/Bioconductor Tool Inferring Regulatory Element Landscapes and Transcription Factor Networks Using Methylomes"}
+  %\VignetteIndexEntry{"1 - ELMER v.2: An R/Bioconductor package to reconstruct gene regulatory networks from DNA methylation and transcriptome profiles"}
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8]{inputenc}
 ---
@@ -115,6 +115,14 @@ If you get TCGA data using `getTCGA` function, please cite TCGAbiolinks package:
 If you get use the Graphical user interface, please cite `TCGAbiolinksGUI` package: 
 
 * Silva, Tiago C. and Colaprico, Antonio and Olsen, Catharina and Bontempi, Gianluca and Ceccarelli, Michele and Berman, Benjamin P. and Noushmehr, Houtan. "TCGAbiolinksGUI: A graphical user interface to analyze cancer molecular and clinical data" (bioRxiv 147496; doi: https://doi.org/10.1101/147496)
+
+# Bugs and questions 
+
+If you have questions, wants to report a bug, please use our github repository: http://www.github.com/tiagochst/ELMER
+
+# Paper supplemental material
+
+TCGA-BRCA reports  (paper supplemental material) can be found at https://tiagochst.github.io/ELMER_supplemental/
 
 # Session Info
 
