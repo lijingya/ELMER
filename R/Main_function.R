@@ -1442,6 +1442,7 @@ get.TFs <- function(data,
 #' @param dmc.analysis DMC results file or data frame
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
+#' @param cores Number of cores to be used in parallel
 #' @param mae A multiAssayExperiment outputed from createMAE function
 #' @param save A logic. If save is true, a files will be saved: getTFtarget.XX..csv  
 #'  If save is false, only a data frame contains the same content with the first file.
@@ -1466,6 +1467,7 @@ getTFtargets <- function(pairs,
                          mae,
                          save = TRUE,
                          dir.out = "./",
+                         cores = 1,
                          label = NULL) 
 {
   if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
@@ -1509,9 +1511,8 @@ getTFtargets <- function(pairs,
     metadata$Probe <- rownames(metadata)
     pairs <- merge(pairs, metadata, by = "Probe")
     metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
-    pairs <- merge(pairs, metadata, by.x = "Symbol", by.y = "external_gene_name")
-    
-    
+    pairs <- merge(pairs, metadata, by.x = "GeneID", by.y = "ensembl_gene_id")
+
     pairs$TF <- NA
     
     # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
@@ -1520,20 +1521,28 @@ getTFtargets <- function(pairs,
     # remove enriched motifs without any MR TFs
     enriched.motif <- enriched.motif[!is.na(names(enriched.motif))]
     
-    # For each paired probe get the enriched motifs in which it appears
-    aux <- plyr::alply(pairs$Probe,1, function(x) {
-      unique(names(enriched.motif)[grep(x,enriched.motif)])
-    },.progress = "text")
     
-    # For each enriched motif the the potencial TF family members 
-    pairs[,"TF"] <- plyr::ldply(aux, function(x) {
-      paste(
+    parallel <- FALSE
+    if (cores > 1){
+      if (cores > detectCores()) cores <- detectCores()
+      registerDoParallel(cores)
+      parallel = TRUE
+    }
+    
+    # For each paired probe get the enriched motifs in which it appears
+    aux <- plyr::adply(unique(pairs$Probe),1, function(x) {
+      y <- paste(unique(names(enriched.motif)[grep(x,enriched.motif)]),collapse = ";")
+      y <- paste(
         unique(na.omit(unlist(
-          stringr::str_split(x,";")
+          stringr::str_split(y,";")
         ))),
         collapse = ";")
-    },
-    .progress = "text")$V1
+      return(y)
+    },.progress = "text",.parallel = parallel)
+    aux$X1 <- unique(pairs$Probe)
+    
+    # For each enriched motif the the potencial TF family members 
+    pairs[,"TF"] <- aux[match(pairs$Probe,aux$X1),]$V1
     if(save) readr::write_csv(pairs,
                               path=sprintf("%s/getTFtargets_genomic_coordinates.%s.csv",
                                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
