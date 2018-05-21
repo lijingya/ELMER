@@ -1483,7 +1483,12 @@ getTFtargets <- function(pairs,
   df.all <- NULL
   for(m in TF.result$motif){
     targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
-    x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
+    if(classification == "family"){
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
+    } else {
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.subfamily
+    }
+    
     if(is.na(x)) next
     
     x <- strsplit(as.character(x),";") %>% unlist
@@ -1496,8 +1501,12 @@ getTFtargets <- function(pairs,
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
   
   if(save) readr::write_csv(df.all,
-                            path=sprintf("%s/getTFtargets.%s.csv",
-                                         dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+                            path=sprintf("%s/getTFtargets.%s.%s.csv",
+                                         dir.out=dir.out, 
+                                         label=ifelse(is.null(label),"",label),
+                                         classification = classification
+                                         )
+                            )
   
   if(!missing(dmc.analysis)) {
     if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
