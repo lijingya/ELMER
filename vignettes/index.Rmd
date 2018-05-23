@@ -67,13 +67,12 @@ The package workflow is showed in the figure below:
 
 ## Supervised vs Unsupervised mode
 
-In ELMER v2 we introduce a new concept, the algorithm `mode` that can be either `supervised` or `unsupervised`. The `unsupervised` algorithm mode, which is the described in ELMER v1, assumes that for at least one of the groups the samples belong to more than one molecular subtypes. As consequce, every step of the algorithm takes into account that the groups are heterogenous and statistical tests are performed on only a subset of the original samples.
+In ELMER v2 we introduce a new concept, the algorithm `mode` that can be either `supervised` or `unsupervised`. 
+In the unsupervised mode (described in ELMER v1), it is assumed that one of the two groups is a heterogeneous mix of different (sometimes unknown) molecular phenotypes. For instance, in the example of Breast Cancer, normal breast tissues (Group A) are relatively homogenous, whereas Breast tumors fall into multiple molecular subtypes.
 
-On the other hand, the `supervised` algorithm version assumes that both groups have samples belonging to only one molecular subtype.  As consequce, every step of the algorithm  will use all samples from both groups for comparison.
+The assumption of the Unsupervised mode is that methylation changes may be restricted to a subset of one or more molecular subtypes, and thus only be present in a fraction of the samples in the test group. For instance, methylation changes related to estrogen signaling may only be present in LuminalA or LuminalB subtypes. 
 
-Importantly, this final feature allows application of ELMER to arbitrary disease datasets, rather than the tumor/normal comparisons supported by ELMER version 1.
-
-![](figures/modes.png) 
+When this structure is unknown, the Unsupervised mode is the appropriate model, since it only requires changes in a subset of samples (by default, 20%). In contrast, in the Supervised mode, it is assumed that each group represents a more homogenous molecular phenotype, and thus we compare all samples in Group A vs. all samples in Group B. This can be used in the case of direct comparison of tumor subtypes (i.e. Luminal vs. Basal-like tumors), but can also be used in numerous other situations, including sorted cells of different types, or treated vs. untreated samples in perturbation experiments.
 
 # Installing and loading ELMER
   
