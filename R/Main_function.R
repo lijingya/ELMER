@@ -1652,7 +1652,7 @@ summarizeTF <- function(files = NULL,
     TF <- readr::read_csv(f,col_types = readr::cols())
     df$analysis <- NA
     df$analysis[df$TF %in% sort(na.omit(unique(unlist(stringr::str_split(TF$potential.TF.family,";")))))] <- "x"
-    colnames(df)[which(colnames(df) == "analysis")] <- dirname(f)
+    colnames(df)[which(colnames(df) == "analysis")] <- paste0(basename(dirname(f)), " in ",basename(dirname(dirname(f))))
   }
   
   return(df)
