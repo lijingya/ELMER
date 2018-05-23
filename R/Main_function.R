@@ -1443,6 +1443,7 @@ get.TFs <- function(data,
 #' @param dir.out A path specifies the directory for outputs of get.pair function. Default is current directory
 #' @param label A character labels the outputs.
 #' @param cores Number of cores to be used in parallel
+#' @param classification use family or subfamily classification to consider potential TF
 #' @param mae A multiAssayExperiment outputed from createMAE function
 #' @param save A logic. If save is true, a files will be saved: getTFtarget.XX..csv  
 #'  If save is false, only a data frame contains the same content with the first file.
@@ -1467,6 +1468,7 @@ getTFtargets <- function(pairs,
                          mae,
                          save = TRUE,
                          dir.out = "./",
+                         classification = "family",
                          cores = 1,
                          label = NULL) 
 {
@@ -1481,7 +1483,12 @@ getTFtargets <- function(pairs,
   df.all <- NULL
   for(m in TF.result$motif){
     targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
-    x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
+    if(classification == "family"){
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
+    } else {
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.subfamily
+    }
+    
     if(is.na(x)) next
     
     x <- strsplit(as.character(x),";") %>% unlist
@@ -1494,8 +1501,12 @@ getTFtargets <- function(pairs,
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
   
   if(save) readr::write_csv(df.all,
-                            path=sprintf("%s/getTFtargets.%s.csv",
-                                         dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+                            path=sprintf("%s/getTFtargets.%s.%s.csv",
+                                         dir.out=dir.out, 
+                                         label=ifelse(is.null(label),"",label),
+                                         classification = classification
+                                         )
+                            )
   
   if(!missing(dmc.analysis)) {
     if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
@@ -1516,7 +1527,11 @@ getTFtargets <- function(pairs,
     pairs$TF <- NA
     
     # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
+    if(classification == "family"){
     names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
+    } else {
+      names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.subfamily
+    }
     
     # remove enriched motifs without any MR TFs
     enriched.motif <- enriched.motif[!is.na(names(enriched.motif))]
@@ -1544,8 +1559,12 @@ getTFtargets <- function(pairs,
     # For each enriched motif the the potencial TF family members 
     pairs[,"TF"] <- aux[match(pairs$Probe,aux$X1),]$V1
     if(save) readr::write_csv(pairs,
-                              path=sprintf("%s/getTFtargets_genomic_coordinates.%s.csv",
-                                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+                              path=sprintf("%s/getTFtargets_genomic_coordinates.%s.%s.csv",
+                                           dir.out=dir.out, 
+                                           label=ifelse(is.null(label),"",label),
+                                           classification = classification
+                                           )
+                              )
   }
   return(df.all)
 }

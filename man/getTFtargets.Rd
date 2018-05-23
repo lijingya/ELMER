@@ -5,7 +5,7 @@
 \title{Get TF target genes}
 \usage{
 getTFtargets(pairs, enriched.motif, TF.result, dmc.analysis, mae, save = TRUE,
-  dir.out = "./", cores = 1, label = NULL)
+  dir.out = "./", classification = "family", cores = 1, label = NULL)
 }
 \arguments{
 \item{pairs}{Output of get.pairs function: dataframe or file path}
@@ -23,6 +23,8 @@ The file created by ELMER is getMotif...enriched.motifs.rda}
 If save is false, only a data frame contains the same content with the first file.}
 
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
+
+\item{classification}{use family or subfamily classification to consider potential TF}
 
 \item{cores}{Number of cores to be used in parallel}
 
