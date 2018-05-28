@@ -236,8 +236,8 @@ scatter <- function(meth,
                       y = as.numeric(exp[,GeneID]),
                       method=c("pearson"))
       corval <- round(cor$estimate,digits = 2)
-      pvalue <- round(cor$p.value,digits = 4)
-      P <- P + annotate("text",x=0,y=0,hjust=.2,label=paste0("PCC: ",corval," / P-value: ",pvalue))
+      pvalue <- signif(cor$p.value,digits=3)
+      P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("PCC: ",corval," / P-value: ",pvalue))
     }
   } else {
     df <- data.frame(meth=meth,exp=exp,category=category)
