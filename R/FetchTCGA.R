@@ -16,7 +16,13 @@
 #'                genome = "hg38", Methfilter=0.2)
 #' @export
 #' @examples
-#' getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
+#' getTCGA(disease = "BRCA",
+#'         Meth = FALSE, 
+#'         RNA = FALSE, 
+#'         Clinic = TRUE, 
+#'         basedir = tempdir(), 
+#'         genome = "hg19"
+#'         )
 getTCGA <- function(disease,
                     Meth = TRUE,
                     RNA = TRUE,

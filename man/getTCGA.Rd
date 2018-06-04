@@ -32,5 +32,11 @@ samples of certain cancer type from TCGA website. And downloaded data will be tr
 to matrixes or data frame for further analysis.
 }
 \examples{
-getTCGA("BRCA",Meth=FALSE, RNA=FALSE, Clinic=TRUE, basedir="~", genome = "hg19")
+getTCGA(disease = "BRCA",
+        Meth = FALSE, 
+        RNA = FALSE, 
+        Clinic = TRUE, 
+        basedir = tempdir(), 
+        genome = "hg19"
+        )
 }
