@@ -1620,14 +1620,13 @@ maphg38tohg19 <- function(file,
                                  strand.field = "strand")
   gr$GeneID  <- ret$GeneID
   gr <- unique(gr)
-  x <-data.frame(unlist(liftOver(gr,ch)))
+  x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
   colnames(x) <- paste0("gene_hg19_",colnames(x))
   ret.hg19[,c("seqnames","start","end","strand")] <- NULL
   ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
   readr::write_csv(ret.hg19,
-                   path=sprintf("%s/getTFtargets_genomic_coordinates_mapped_to_hg19.%s.csv",
-                                dir.out=dir.out, 
-                                label=ifelse(is.null(label),"",label)))
+                   path = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
+                   )
 }
 
 
@@ -1636,9 +1635,10 @@ summarizeTF <- function(files = NULL,
                         path = NULL){
   
   if(!is.null(path)) {
-    files <- dir(path = ".",
+    files <- dir(path = path,
                  pattern = "TF.*with.motif.summary.csv",
-                 recursive = T)
+                 recursive = T,
+                 full.names = TRUE)
   }
   aux <- list()
   for(f in files){
@@ -1652,7 +1652,7 @@ summarizeTF <- function(files = NULL,
     TF <- readr::read_csv(f,col_types = readr::cols())
     df$analysis <- NA
     df$analysis[df$TF %in% sort(na.omit(unique(unlist(stringr::str_split(TF$potential.TF.family,";")))))] <- "x"
-    colnames(df)[which(colnames(df) == "analysis")] <- dirname(f)
+    colnames(df)[which(colnames(df) == "analysis")] <- paste0(basename(dirname(f)), " in ",basename(dirname(dirname(f))))
   }
   
   return(df)
