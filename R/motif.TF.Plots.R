@@ -89,7 +89,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                      " (", round(motif.enrichment$lowerOR,digits = 2),"-", 
                      round(motif.enrichment$upperOR,digits = 2),")")
     probe.col <- paste0(motif.enrichment$NumOfProbes,
-                        " (", round(motif.enrichment$PercentageOfProbes, digits = 2),"%)")
+                        " (", round(100 * motif.enrichment$PercentageOfProbes, digits = 2),"%)")
     lab <- data.frame(x = factor(c("",as.character(motif.enrichment$motif)), 
                                  levels = rev(c("",as.character(motif.enrichment$motif)))),
                       y = rep(c(1,2,3),each=length(motif.enrichment$motif) + 1),
