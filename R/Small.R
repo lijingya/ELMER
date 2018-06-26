@@ -762,6 +762,7 @@ getHocomocoTable <- function(){
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
 #' @return A data frame with the random linkages
+#' @export
 #' @examples
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
