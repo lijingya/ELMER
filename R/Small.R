@@ -919,19 +919,26 @@ calculateEnrichement <- function(foreground,
 #' Step:
 #' 1 - get DNA methylation probes annotation with the regions
 #' 2 - Make a bed file from it
-#' 3 - Execute section: Finding Instance of Specific Motifs from http://homer.salk.edu/homer/ngs/peakMotifs.html to the HOCOMOCO TF motifs
+#' 3 - Execute section: Finding Instance of Specific Motifs 
+#' from http://homer.salk.edu/homer/ngs/peakMotifs.html to the HOCOMOCO TF motifs
 #' Also, As HOMER is using more RAM than the available we will split the files in to 100k probes.
-#' Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
+#' Obs: for each probe we create a winddow of 500 bp (-size 500) around it. 
+#' This might lead to false positives, but will not have false negatives.
 #' The false posives will be removed latter with some statistical tests.
 #' @examples 
 #' \dontrun{
 #'  # use the center of the region and +-250bp around it
-#'  gr0 <- GRanges(Rle(c("chr2", "chr2", "chr1", "chr3"), c(1, 3, 2, 4)), IRanges(1:10, width=10:1))
+#'  gr0 <- GRanges(Rle(c("chr2", "chr2", "chr1", "chr3"), 
+#'                     c(1, 3, 2, 4)
+#'                     ), 
+#'                IRanges(1:10, width=10:1)
+#'                )
 #'  names(gr0) <- paste0("ID",c(1:10))
 #'  findMotifRegion(regions = gr0, region.size = 500, genome = "hg38", cores = 1)
 #'  
 #'  # use the region size itself
-#'  gr1 <- GRanges(Rle(c("chr2", "chr2", "chr1", "chr3"), c(1, 3, 2, 4)), IRanges(1:10, width=sample(200:1000,10)))
+#'  gr1 <- GRanges(Rle(c("chr2", "chr2", "chr1", "chr3"), c(1, 3, 2, 4)), 
+#'                 IRanges(1:10, width=sample(200:1000,10)))
 #'  names(gr1) <- paste0("ID",c(1:10))
 #'  findMotifRegion(regions = gr0, genome = "hg38", cores = 1)
 #' }
