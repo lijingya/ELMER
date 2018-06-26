@@ -843,3 +843,63 @@ getRandomPairs <- function(pairs,
    
   return(near.genes.linked)
 }
+
+
+# Reading homer output. For each reagion (rows)
+# homer will try to find if a given motif was found in it.
+# This will read this homer file and create a sparce matrix
+# in which 1 means the motif was found and 0 not found.
+# this is used to calculate the motif enrichement compared 
+# to a background signal.
+getMatrix <- function(filename) {
+  motifs <- readr::read_tsv(filename)
+  # From 1 to 21 we have annotations
+  matrix <- Matrix::Matrix(0, nrow = nrow(motifs), ncol = ncol(motifs) - 21 ,sparse = TRUE)
+  colnames(matrix) <- gsub(" Distance From Peak\\(sequence,strand,conservation\\)","",colnames(motifs)[-c(1:21)])
+  rownames(matrix) <- motifs$PeakID
+  matrix[!is.na(motifs[,-c(1:21)])] <- 1
+  matrix <- as(matrix, "nsparseMatrix")
+  return(matrix)
+}
+
+#' @title Calculate motif Erichment 
+#' @description Calculates fisher exact test
+#' @param foreground A nsparseMatrix object in each 1 means the motif is found in a region, 0 not.
+#' @param background A nsparseMatrix object in each 1 means the motif is found in a region, 0 not.
+#' @examples 
+#' foreground <- Matrix::Matrix(sample(0:1,size = 100,replace = T), nrow = 10, ncol = 10,sparse = TRUE)
+#' rownames(foreground) <- paste0("region",1:10)
+#' colnames(foreground) <- paste0("motif",1:10)
+#' background <- Matrix::Matrix(sample(0:1,size = 100,replace = T), nrow = 10, ncol = 10,sparse = TRUE)
+#' rownames(background) <- paste0("region",1:10)
+#' colnames(background) <- paste0("motif",1:10)
+#' calculateEnrichement(foreground,background)
+calculateEnrichement <- function(foreground, 
+                                 background){
+  if(missing(foreground)) stop("foreground argument is missing")
+  if(missing(background)) stop("background argument is missing")
+  
+  # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
+  # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
+  # c and d are the same counts within the entire enhancer probe set (background)
+  # lower boundary of 95% conf idence interval = exp (ln OR - SD)
+  a <- Matrix::colSums(foreground)
+  b <- nrow(foreground) - Matrix::colSums(foreground)
+  c <- Matrix::colSums(background)
+  d <- nrow(background) - Matrix::colSums(background)
+  fisher <- plyr::adply(seq_len(length(a)),.margins = 1, .fun = function(i)  { 
+    x <- fisher.test(matrix(c(a[i],b[i],c[i],d[i]),nrow = 2,ncol = 2))
+    ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
+    colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
+    ret
+  },.id = NULL,.progress = "text")
+  rownames(fisher) <- names(a)
+  Summary <- data.frame(motif  =  names(a),
+                        NumOfRegions = Matrix::colSums(foreground, na.rm=TRUE),
+                        fisher,
+                        FDR = p.adjust(fisher$p.value,method = "BH"),
+                        stringsAsFactors = FALSE)
+  Summary <- Summary[order(-Summary$lowerOR),]
+  return(Summary)
+}
+
