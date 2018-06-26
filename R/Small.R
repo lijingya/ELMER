@@ -941,19 +941,20 @@ findMotifRegion <- function(regions,
                             genome = "hg38",
                             cores = 1){
   
+  if(!is(regions, class(GRanges()))) stop("Regions must be a Genomic Ranges object")
   # get all hocomoco 11 motifs
   TFBS.motif <- "http://hocomoco11.autosome.ru/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
+  
   if(!file.exists(output.filename)){
-    
     df <- data.frame(seqnames = seqnames(gr),
                      starts = as.integer(start(gr)),
                      ends = end(gr),
                      names = names(gr),
                      scores = c(rep(".", length(gr))),
                      strands = strand(gr))
-    step <- 1000 # nb of lines in each file. 1K was selected to not explode RAM
     n <- nrow(df)
+    step <- ifelse(n > 1000, 1000, n )
     pb <- txtProgressBar(max = floor(n/step), style = 3)
     
     for(j in 0:floor(n/step)){
@@ -970,7 +971,12 @@ findMotifRegion <- function(regions,
                      ifelse(is.null(region.size),"",paste0("-size ", region.size)),
                      "-cpu", cores,
                      ">", gsub(".bed",".txt",file.aux))
-        system(cmd)
+        error <- system(cmd)
+        if(error == 127) {
+          unlink(file.aux)
+          unlink(gsub(".bed",".txt",file.aux))
+          stop("annotatePeaks.pl had an error. Please check homer install")
+        }
       }
     }
   }
@@ -980,17 +986,20 @@ findMotifRegion <- function(regions,
   pb <- txtProgressBar(max = floor(n/step), style = 3)
   for(j in 0:floor(n/step)){
     setTxtProgressBar(pb, j)
-    aux <-  readr::read_tsv(paste0(plat,gen,"_",j,".txt"))
-    colnames(aux)[1] <- "PeakID"
-    if(is.null(peaks)) {
-      peaks <- aux
-    } else {
-      peaks <- rbind(peaks, aux)
+    f <- paste0(gsub(".txt","",output.filename),"_",j,".txt")
+    if(file.exists(f)){
+      aux <-  readr::read_tsv(f)
+      colnames(aux)[1] <- "PeakID"
+      if(is.null(peaks)) {
+        peaks <- aux
+      } else {
+        peaks <- rbind(peaks, aux)
+      }
     }
     gc()
   }
   close(pb)
   print("Writing file...")
-  readr::write_tsv(peaks, path = file,col_names = TRUE)
+  if(!is.null(peaks)) readr::write_tsv(peaks, path = file,col_names = TRUE)
   print("DONE!")
 }
