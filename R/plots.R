@@ -247,7 +247,8 @@ heatmapPairs <- function(data,
   
   for(i in annotation.col){
     l <- length(unique(colData(data)[,c(i)]))
-    if(l < 40){
+    p <- l/length(na.omit(colData(data)[,c(i)]))
+    if(p < 0.3 & !is.numeric(colData(data)[,c(i)])){
       if(l.all + l <= length(colors)) {
         col <- colors[(l.all+1):(l.all + l)]
         l.all <- l.all + l
