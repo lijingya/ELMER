@@ -793,7 +793,7 @@ getRandomPairs <- function(pairs,
   
   if(missing(pairs)) stop("Please set pairs argument")
   if(is.data.frame(pairs))
-  pairs <- as.data.frame(pairs)
+    pairs <- as.data.frame(pairs)
   
   # Get Probe information
   data("hm450.hg38.manifest")
@@ -808,7 +808,7 @@ getRandomPairs <- function(pairs,
   
   nb.pairs <- nrow(pairs)
   nb.probes <- length(unique(pairs$Probe))
-
+  
   # get gene information
   genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
   
@@ -840,7 +840,7 @@ getRandomPairs <- function(pairs,
   # Add probe metadata to output
   probes.ranges$Probe <- rownames(probes.ranges)
   near.genes.linked <- merge(near.genes.linked,probes.ranges,by ="Probe")
-   
+  
   return(near.genes.linked)
 }
 
@@ -903,3 +903,81 @@ calculateEnrichement <- function(foreground,
   return(Summary)
 }
 
+
+#' @title Use Hocomoco motif and homer to identify motifs in a given region
+#' @param regions A GRanges object. Names will be used as the identifier.
+#' @param output.filename Final file name
+#' @param region.size If NULL the motif will be mapped to the region. If set a window around its center will be considered.
+#' For example if region.size is 500, then +-250bp round it will be searched.
+#' @param cores A interger which defines the number of cores to be used in parallel 
+#' process. Default is 1: no parallel process.
+#' @param genome Homer genome (hg38, hg19)
+#' @description 
+#' To find for each probe the know motif we will use HOMER software (http://homer.salk.edu/homer/).
+#' Homer and genome should be installed before this function is executed
+#' Step:
+#' 1 - get DNA methylation probes annotation with the regions
+#' 2 - Make a bed file from it
+#' 3 - Execute section: Finding Instance of Specific Motifs from http://homer.salk.edu/homer/ngs/peakMotifs.html to the HOCOMOCO TF motifs
+#' Also, As HOMER is using more RAM than the available we will split the files in to 100k probes.
+#' Obs: for each probe we create a winddow of 500 bp (-size 500) around it. This might lead to false positives, but will not have false negatives.
+#' The false posives will be removed latter with some statistical tests.
+findMotifRegion <- function(regions, 
+                            output.filename = "mapped_motifs_regions.txt",
+                            region.size = NULL,
+                            genome = "hg38",
+                            cores = 1){
+  
+  # get all hocomoco 11 motifs
+  TFBS.motif <- "http://hocomoco11.autosome.ru/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
+  if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
+  if(!file.exists(output.filename)){
+    
+    df <- data.frame(seqnames = seqnames(gr),
+                     starts = as.integer(start(gr)),
+                     ends = end(gr),
+                     names = names(gr),
+                     scores = c(rep(".", length(gr))),
+                     strands = strand(gr))
+    step <- 1000 # nb of lines in each file. 1K was selected to not explode RAM
+    n <- nrow(df)
+    pb <- txtProgressBar(max = floor(n/step), style = 3)
+    
+    for(j in 0:floor(n/step)){
+      setTxtProgressBar(pb, j)
+      # STEP 2
+      file.aux <- paste0(gsub(".txt","",output.filename),"_",j,".bed")
+      if(!file.exists(gsub(".bed",".txt",file.aux))){
+        end <- ifelse(((j + 1) * step) > n, n,((j + 1) * step))
+        write.table(df[((j * step) + 1):end,], file = file.aux, col.names = F, quote = F,row.names = F,sep = "\t")
+        
+        # STEP 3 use -mscore to get scores
+        # we need to check if annotatePeaks.pl is available!
+        cmd <- paste("annotatePeaks.pl" ,file.aux, genome, "-m", basename(TFBS.motif), 
+                     ifelse(is.null(region.size),"",paste0("-size ", region.size)),
+                     "-cpu", cores,
+                     ">", gsub(".bed",".txt",file.aux))
+        system(cmd)
+      }
+    }
+  }
+  close(pb)
+  # We will merge the results from each file into one
+  peaks <- NULL
+  pb <- txtProgressBar(max = floor(n/step), style = 3)
+  for(j in 0:floor(n/step)){
+    setTxtProgressBar(pb, j)
+    aux <-  readr::read_tsv(paste0(plat,gen,"_",j,".txt"))
+    colnames(aux)[1] <- "PeakID"
+    if(is.null(peaks)) {
+      peaks <- aux
+    } else {
+      peaks <- rbind(peaks, aux)
+    }
+    gc()
+  }
+  close(pb)
+  print("Writing file...")
+  readr::write_tsv(peaks, path = file,col_names = TRUE)
+  print("DONE!")
+}
