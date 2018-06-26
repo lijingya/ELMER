@@ -1017,22 +1017,6 @@ get.enriched.motif <- function(data,
   ## load probes for enriched motif ----------------------------------------------
   probes.TF <- all.probes.TF[rownames(all.probes.TF) %in% probes,]
   probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
-  
-  # Odds ratio
-  #      p/(1-p)     p * (1-P)   where p = a/(a + b) probes with motif
-  # OR =--------- = -----------   where P = c/(c + d) bg probes with motif (entire enhancer probe set)
-  #      P/(1-P)     P * (1-p)
-  p <- Matrix::colMeans(probes.TF)
-  P <- bg.Probes.TF.percent
-  sub.enrich.TF <- multiply_by(p,(1-P)) %>%  divide_by(P)  %>%  divide_by(1-p)  
-  # Extreme cases: p = 1(likely)/0 (likely) or P = 1 (unlikely) / 0 (likely) 
-  # case 1 p:1,P=1 OR = 1/0/1/0 = Inf
-  # case 2 p:0,P=0 OR = 0/1/0/1 = NaN
-  # case 3 p:1,P=0 OR = 1/0/0/1 = Inf
-  # case 4 p:0,P=1 OR = 0/1/1/0 = NaN
-  # Cases with NaN p = 0, so we will set OR to 0
-  sub.enrich.TF[is.nan(sub.enrich.TF)] <- 0 
-  # SD = sqrt(1/a + 1/b + 1/c + 1/d)
   # a is the number of probes within the selected probe set that contain one or more motif occurrences; 
   # b is the number of probes within the selected probe set that do not contain a motif occurrence; 
   # c and d are the same counts within the entire enhancer probe set (background)
