@@ -867,6 +867,7 @@ getMatrix <- function(filename) {
 #' @description Calculates fisher exact test
 #' @param foreground A nsparseMatrix object in each 1 means the motif is found in a region, 0 not.
 #' @param background A nsparseMatrix object in each 1 means the motif is found in a region, 0 not.
+#' @export
 #' @examples 
 #' foreground <- Matrix::Matrix(sample(0:1,size = 100,replace = TRUE), nrow = 10, ncol = 10,sparse = TRUE)
 #' rownames(foreground) <- paste0("region",1:10)
