@@ -7,10 +7,10 @@
 # @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
 #'@importFrom GenomicRanges strand<-
-NearGenes <- function (Target=NULL,
-                       Gene=NULL,
-                       geneNum=20,
-                       TRange=NULL){
+NearGenes <- function (Target = NULL,
+                       Gene = NULL,
+                       geneNum = 20,
+                       TRange = NULL){
   # Algorithm:
   # 1) get the follow gene (overlapping genes are diconsidered) to be the first in L1 (index variable)
   #                 probe
