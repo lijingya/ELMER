@@ -70,6 +70,7 @@ scatter.plot <- function(data,
                          save = TRUE, 
                          ...){
   simpleCap <- function(x) {
+    if(is.na(x)) return("NA")
     s <- x
     paste(toupper(substring(s, first = 1, last = 1)), tolower(substring(s, 2)),
           sep = "", collapse = " ")
