@@ -4,12 +4,16 @@
 \alias{addDistNearestTSS}
 \title{Calculate the distance between probe and gene TSS}
 \usage{
-addDistNearestTSS(data, NearGenes, cores = 1)
+addDistNearestTSS(data, NearGenes, genome, met.platform, cores = 1)
 }
 \arguments{
 \item{data}{A multi Assay Experiment with both DNA methylation and gene Expression objects}
 
 \item{NearGenes}{A list or a data frame with the pairs gene probes}
+
+\item{genome}{Which genome build will be used: hg38 (default) or hg19.}
+
+\item{met.platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
 
 \item{cores}{Number fo cores to be used. Deafult: 1}
 }
