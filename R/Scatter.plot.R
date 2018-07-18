@@ -32,6 +32,7 @@
 #'will label different color. The color can be customized by using color.value. 
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
+#'@param ylim y-axis limit i.e. c(0,25)
 #'@param save A logic. If true, figure will be saved to dir.out.
 #'@param height PDF height
 #'@param width PDF width
@@ -63,6 +64,7 @@ scatter.plot <- function(data,
                          byTF = list(TF = c(),
                                      probe = c()), 
                          category=NULL, 
+                         ylim = NULL,
                          correlation = FALSE,
                          width = 7,
                          height = 6,
@@ -105,6 +107,7 @@ scatter.plot <- function(data,
       P <- scatter(meth     = assay(getMet(data)[probe,]),
                    exp      = assay(getExp(data)[gene,] ),
                    category = category, 
+                   ylim     = ylim,
                    legend.title = legend.title,
                    correlation = correlation,
                    xlab     = sprintf("DNA methyation at %s",probe), 
@@ -130,6 +133,7 @@ scatter.plot <- function(data,
       rownames(exp) <- symbol
       P <- scatter(meth     = meth, 
                    exp      = exp,
+                   ylim     = ylim,
                    category = category,
                    legend.title = legend.title,
                    xlab     = sprintf("DNA methyation at %s", probe), 
@@ -166,6 +170,7 @@ scatter.plot <- function(data,
     
     P <- scatter(meth     = meth, 
                  exp      = exp,
+                 ylim     = ylim,
                  category = category,
                  legend.title = legend.title,
                  xlab     = "Avg DNA methyation", 
@@ -190,6 +195,7 @@ scatter.plot <- function(data,
 #'@param legend.title Plot legend title 
 #'@param xlab A character specify the title of x axis.
 #'@param ylab A character specify the title of y axis.
+#'@param ylim y-axis limit i.e. c(0,25)
 #'@param title A character specify the figure title.
 #'@param correlation Show person correlation values 
 #'@param color.value A vector specify the color of each category, such as 
@@ -202,6 +208,7 @@ scatter <- function(meth,
                     category=NULL, 
                     xlab=NULL, 
                     ylab=NULL,
+                    ylim = NULL,
                     title=NULL,
                     correlation = FALSE,
                     color.value=NULL,
@@ -231,6 +238,7 @@ scatter <- function(meth,
                                    nrow = ceiling(sum(stringr::str_length(unique(category)))/100),
                                    title.hjust = 0.5)) 
     if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
+    if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
     if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
     if(correlation){
       cor <- cor.test(x = as.numeric(meth), 

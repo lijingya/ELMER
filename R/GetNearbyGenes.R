@@ -326,7 +326,7 @@ addDistNearestTSS <- function(data,
         x.tss <- tss[tss$ensembl_gene_id == x$GeneID,]
         probe <- met[x$Probe,]
         return(values(distanceToNearest(probe,x.tss, ignore.strand = TRUE))$distance)
-      },.parallel = parallel)
+      },.parallel = parallel,.progress = "text")
       colnames(distance) <- c("Probe","GeneID","distNearestTSS")
       NearGenes <- merge(NearGenes,distance, by = c("Probe","GeneID"))
     }
