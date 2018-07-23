@@ -222,11 +222,11 @@ heatmapPairs <- function(data,
     idx1 <- which(colData(data)[,group.col] == group1)
     aux <- na.omit(meth[,idx1])
     dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-  
+    
     idx2 <- which(colData(data)[,group.col] == group2)
     aux <- na.omit(meth[,idx2])
     dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-  
+    
     order <- c(idx1[dist1$order],idx2[dist2$order])
   }
   # Create color
@@ -653,4 +653,88 @@ heatmapGene <- function(data,
        annotation_legend_side = "right", 
        heatmap_legend_side = "bottom")
   dev.off()
+}
+
+
+#' @title Create a junction track for IGV visualization of interection
+#' @description 
+#' Create a junction track for IGV visualization of interection
+#' @param pairs A data frame output from getPairs function
+#' @param filename Filename (".bed")
+#' @param met.platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
+#' @param genome Which genome build will be used: hg38 (default) or hg19.
+#' @param color.track A color for the track (i.e blue, red,#272E6A)
+#' @param gene.symbol Filter pairs to a single gene.
+#' @param all.tss A logical. If TRUE it will link probes to all TSS  of a gene (transcript level), if FALSE 
+#' it will link to the promoter region of a gene (gene level).
+#' @importFrom dplyr %>%
+#' @export
+#' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
+#' @examples
+#'  \dontrun{            
+#' data <- ELMER:::getdata("elmer.data.example")
+#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+#'                          geneAnnot=getExp(data))
+#' Hypo.pair <- get.pair(data=data,
+#'                        nearGenes=nearGenes,
+#'                        permu.size=5,
+#'                        group.col = "definition",
+#'                        group1 = "Primary solid Tumor", 
+#'                        group2 = "Solid Tissue Normal",
+#'                        raw.pvalue = 0.2,
+#'                        Pe = 0.2,
+#'                        dir.out="./",
+#'                        label= "hypo")
+#'  createIGVtrack(Hypo.pair,platform = "450K", genome = "hg38")
+#'  }
+createIGVtrack <- function(pairs,
+                           met.platform = "450K",
+                           genome = "hg38",
+                           filename = "ELMER_interactions.bed",
+                           color.track = "black",
+                           gene.symbol = NULL,
+                           all.tss = TRUE){
+  if(all.tss){
+    tss <- getTSS(genome = genome)
+    tss <- tibble::as.tibble(tss)
+  } else {
+    tss <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
+    tss <- tibble::as.tibble(promoters(tss))
+  }
+  
+  if(!is.null(gene.symbol)) pairs <- pairs[pairs$Symbol == gene.symbol,]
+  
+  met.metadata <- ELMER:::getInfiniumAnnotation(plat = met.platform,genome = genome)
+  met.metadata <- as.data.frame(met.metadata,row.names = names(met.metadata))
+  met.metadata$Probe <- rownames(met.metadata)
+  pairs <- merge(pairs, tss, by.x = "GeneID", by.y = "ensembl_gene_id",all.x = TRUE) %>% 
+    merge(met.metadata,  by = "Probe", all.x = TRUE)
+  
+  pairs$ID <- paste0(pairs$Probe, ".", pairs$GeneID)
+  pairs$geneCordinates <- paste0(0,",",pairs$width.x)
+  pairs$strand <- "*"
+  pairs$Raw.p <- as.integer(-log10(pairs$Raw.p)/10)
+  pairs$RGB <- paste(col2rgb(color.track)[,1],collapse = ",")
+  pairs$block_counts <- 2
+  pairs$block_sizes <- "0,0"
+  # [seqname] [start] [end] [id] [score] [strand] 
+  # [thickStart] [thickEnd] [r,g,b] [block_count] [block_sizes] [block_locations]
+  
+  pairs <- pairs[,c("seqnames.y", # [seqname]
+                    "start.y",    # [start] # probe
+                    "end.x",    # [end]
+                    "ID",         # ID
+                    "Raw.p",      # Depth
+                    "strand",     # Strand
+                    "start.x",    # thickStart
+                    "end.x",      # thickEnd
+                    "RGB",        # color 
+                    "block_counts",    # block_count
+                    "block_sizes",     # block_sizes
+                    "geneCordinates")] # block_locations
+  pairs <- na.omit(pairs)
+  header <- "track name=junctions"
+  unlink(filename,force = TRUE)
+  cat(header,file = filename,sep="\n",append = TRUE)
+  readr::write_delim(pairs, path = filename, append = TRUE)
 }

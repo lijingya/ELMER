@@ -34,6 +34,8 @@ symbol and probe contains the a vector of probes' name. Output see detail.}
 column name in the colData(data) in the multiAssayExperiment object. Once specified, samples 
 will label different color. The color can be customized by using color.value.}
 
+\item{ylim}{y-axis limit i.e. c(0,25)}
+
 \item{correlation}{Add pearson correlation values to the plot}
 
 \item{width}{PDF width}

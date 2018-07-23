@@ -438,6 +438,7 @@ get.pair <- function(data,
                      filter.portion = 0.3, 
                      filter.percentage = 0.05,
                      label = NULL,
+                     addDistNearestTSS = FALSE,
                      save = TRUE){
   
   if(!all(names(nearGenes) %in% rownames(getMet(data))))
@@ -550,9 +551,10 @@ get.pair <- function(data,
   }
   
   # Change distance from gene to nearest TSS
-  selected$Distance <- NULL
-  selected <- addDistNearestTSS(data, NearGenes = selected)
-  
+  if(addDistNearestTSS) {
+    selected$Distance <- NULL
+    selected <- addDistNearestTSS(data, NearGenes = selected)
+  }
   if(diffExp){
     message("Calculating differential expression between two groups")
     Exp <- assay(getExp(data)[unique(selected$GeneID),])

@@ -5,8 +5,8 @@
 \title{scatter}
 \usage{
 scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
-  ylab = NULL, title = NULL, correlation = FALSE, color.value = NULL,
-  lm_line = FALSE)
+  ylab = NULL, ylim = NULL, title = NULL, correlation = FALSE,
+  color.value = NULL, lm_line = FALSE)
 }
 \arguments{
 \item{meth}{A vector of number.}
@@ -20,6 +20,8 @@ scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
 \item{xlab}{A character specify the title of x axis.}
 
 \item{ylab}{A character specify the title of y axis.}
+
+\item{ylim}{y-axis limit i.e. c(0,25)}
 
 \item{title}{A character specify the figure title.}
 
