@@ -710,10 +710,10 @@ createIGVtrack <- function(pairs,
   pairs <- merge(pairs, tss, by.x = "GeneID", by.y = "ensembl_gene_id",all.x = TRUE) %>% 
     merge(met.metadata,  by = "Probe", all.x = TRUE)
   
-  pairs$ID <- paste0(pairs$Probe, ".", pairs$GeneID)
+  pairs$ID <- paste0(pairs$Probe, ".", pairs$Symbol)
   pairs$geneCordinates <- paste0(0,",",pairs$width.x)
   pairs$strand <- "*"
-  pairs$Raw.p <- as.integer(-log10(pairs$Raw.p)/10)
+  pairs$Raw.p <- as.integer(4)
   pairs$RGB <- paste(col2rgb(color.track)[,1],collapse = ",")
   pairs$block_counts <- 2
   pairs$block_sizes <- "0,0"
@@ -722,7 +722,7 @@ createIGVtrack <- function(pairs,
   
   pairs <- pairs[,c("seqnames.y", # [seqname]
                     "start.y",    # [start] # probe
-                    "end.x",    # [end]
+                    "transcription_start_site",        # [end]
                     "ID",         # ID
                     "Raw.p",      # Depth
                     "strand",     # Strand
@@ -731,7 +731,7 @@ createIGVtrack <- function(pairs,
                     "RGB",        # color 
                     "block_counts",    # block_count
                     "block_sizes",     # block_sizes
-                    "geneCordinates")] # block_locations
+                    "block_counts")] # block_locations
   pairs <- na.omit(pairs)
   header <- "track name=junctions"
   unlink(filename,force = TRUE)
