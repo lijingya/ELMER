@@ -323,8 +323,8 @@ get.diff.meth <- function(data,
 #'          dir.out = "./",
 #'          diffExp = FALSE,
 #'          group.col, 
-#'          group1, 
-#'          group2, 
+#'          group1 = NULL, 
+#'          group2 = NULL, 
 #'          cores = 1, 
 #'          filter.probes = TRUE, 
 #'          filter.portion = 0.3,  
@@ -944,6 +944,7 @@ promoterMeth <- function(data,
 #' @importFrom plyr alply
 #' @importFrom utils data read.csv
 #' @importFrom S4Vectors metadata
+#' @importFrom stats fisher.test cor.test
 #' @importFrom dplyr filter
 #' @importFrom Matrix colMeans colSums
 #' @import ELMER.data

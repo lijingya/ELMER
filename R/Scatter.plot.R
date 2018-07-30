@@ -12,6 +12,7 @@
 #'              byProbe = list(probe = c(), numFlankingGenes = 20), 
 #'              byTF = list(TF = c(), probe = c()),
 #'              category = NULL,
+#'              ylim = NULL,
 #'              correlation = FALSE,
 #'              width = 7,
 #'              height = 6,

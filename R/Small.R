@@ -870,10 +870,12 @@ getMatrix <- function(filename) {
 #' @param background A nsparseMatrix object in each 1 means the motif is found in a region, 0 not.
 #' @export
 #' @examples 
-#' foreground <- Matrix::Matrix(sample(0:1,size = 100,replace = TRUE), nrow = 10, ncol = 10,sparse = TRUE)
+#' foreground <- Matrix::Matrix(sample(0:1,size = 100,replace = TRUE), 
+#'                              nrow = 10, ncol = 10,sparse = TRUE)
 #' rownames(foreground) <- paste0("region",1:10)
 #' colnames(foreground) <- paste0("motif",1:10)
-#' background <- Matrix::Matrix(sample(0:1,size = 100,replace = TRUE), nrow = 10, ncol = 10,sparse = TRUE)
+#' background <- Matrix::Matrix(sample(0:1,size = 100,replace = TRUE), 
+#'                              nrow = 10, ncol = 10,sparse = TRUE)
 #' rownames(background) <- paste0("region",1:10)
 #' colnames(background) <- paste0("motif",1:10)
 #' calculateEnrichement(foreground,background)
