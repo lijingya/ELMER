@@ -711,6 +711,7 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   Meth_B <- rowMeans(met > K, na.rm = TRUE)
   # We should  have at least 5% methylation value < K or at least 5% methylation value > K
   keep <- Meth_B < (1 - percentage) & Meth_B > percentage
+  keep[is.na(keep)] <- FALSE
   message("Making sure we have at least ", percentage * 100, "% of beta values lesser than ", K," and ", 
           percentage * 100, "% of beta values greater ",K,".") 
   if(length(keep) - sum(keep) != 0) {

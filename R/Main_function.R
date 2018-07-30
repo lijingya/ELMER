@@ -255,7 +255,7 @@ get.diff.meth <- function(data,
                                 test = test,
                                 group2 = group2,
                                 Top.m = Top.m)},
-               .progress = "text", .parallel = parallel
+               .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
   )
   out <- do.call(rbind,out)
   out <- as.data.frame(out,stringsAsFactors = FALSE)
@@ -502,7 +502,7 @@ get.pair <- function(data,
                                      unmethy = unmethylated,
                                      Top = minSubgroupFrac/2, # Each group will have half of the samples
                                      Exps = exp)},
-                      .progress = "text", .parallel = parallel, .id = NULL
+                      .progress = "text", .parallel = parallel, .id = NULL,.paropts=list(.errorhandling='pass')
   )
   
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
@@ -570,7 +570,7 @@ get.pair <- function(data,
                    out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
                                      "diff.pvalue" = test$p.value)
                  },
-                 .progress = "text", .parallel = parallel,.id = "GeneID"
+                 .progress = "text", .parallel = parallel,.id = "GeneID",.paropts=list(.errorhandling='pass')
     )
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
     colnames(add) <- c(log.col,diff.col)
@@ -707,7 +707,7 @@ get.permu <- function(data,
                        unmethy = unmethy,
                        Top   = percentage,
                        Exps  = exps)},
-                   .progress = "text", .parallel = parallel
+                   .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
     )
     
     permu <- sapply(permu,
@@ -746,7 +746,7 @@ get.permu <- function(data,
                              methy = methy,
                              unmethy = unmethy,
                              Exps  = exps)},
-                         .progress = "text", .parallel = parallel
+                         .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
     )
     
     permu.genes <- sapply(permu.genes,
@@ -862,7 +862,7 @@ promoterMeth <- function(data,
                                 NearGenes = Fake,
                                 Top = minSubgroupFrac/2,
                                 Exps = exps)},
-                 .progress = "text", .parallel = parallel, .id = NULL
+                 .progress = "text", .parallel = parallel, .id = NULL,.paropts=list(.errorhandling='pass')
     )
     
     out <- out[,c("GeneID","Symbol","Raw.p")]
@@ -1317,7 +1317,7 @@ get.TFs <- function(data,
                         } else {
                           return(colMeans(meth[x,],na.rm = TRUE))
                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
-                      .progress = "text", .parallel = parallel, .id = "rownames"
+                      .progress = "text", .parallel = parallel, .id = "rownames",.paropts=list(.errorhandling='pass')
   )
   rownames(motif.meth) <- motif.meth$rownames
   motif.meth$rownames <- NULL
@@ -1353,7 +1353,7 @@ get.TFs <- function(data,
                            methy = methylated,
                            Top   = minSubgroupFrac/2,
                            Exps  = exps)},
-                       .progress = "text", .parallel = parallel
+                       .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
   )
   # We are going to make a multiple hypothesis correction
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
@@ -1397,7 +1397,7 @@ get.TFs <- function(data,
                          return(out)
                        },                                         
                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily, 
-                       .progress = "text", .parallel = parallel,.margins = 1, .id = NULL)
+                       .progress = "text", .parallel = parallel,.margins = 1, .id = NULL,.paropts=list(.errorhandling='pass'))
   rownames(cor.summary) <- cor.summary$motif
   
   if(save){
@@ -1539,7 +1539,7 @@ getTFtargets <- function(pairs,
         ))),
         collapse = ";")
       return(y)
-    },.progress = "text",.parallel = parallel)
+    },.progress = "text",.parallel = parallel,.paropts=list(.errorhandling='pass'))
     aux$X1 <- unique(pairs$Probe)
     
     # For each enriched motif the the potencial TF family members 

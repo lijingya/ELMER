@@ -52,10 +52,9 @@ Stat.diff.meth <- function(meth,
       TT <- test(x = group1.tmp, y = group2.tmp, alternative = alternative, conf.int = TRUE)
       MeanDiff <- ifelse(length(TT$estimate) == 2, TT$estimate[1]-TT$estimate[2],TT$estimate)
       PP <- TT$p.value
-      out <- data.frame(PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
+      data.frame(PP=PP,MeanDiff=MeanDiff, stringsAsFactors = FALSE)
     }, error = function(e) {
-      message(e)
-      out <- data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
+      data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
     })
   } else{
     out <- data.frame(PP=NA,MeanDiff=NA,stringsAsFactors = FALSE)
