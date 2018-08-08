@@ -668,6 +668,8 @@ heatmapGene <- function(data,
 #' @param all.tss A logical. If TRUE it will link probes to all TSS  of a gene (transcript level), if FALSE 
 #' it will link to the promoter region of a gene (gene level).
 #' @importFrom dplyr %>%
+#' @importFrom grDevices col2rgb
+#' @importFrom utils write.table
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples

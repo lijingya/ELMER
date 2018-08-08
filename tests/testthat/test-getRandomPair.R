@@ -1,4 +1,8 @@
 context("Checking getRandomPair function")
+library(plyr)
+library(dplyr)
+library(data.table)
+
 test_that("Links are as expected", {
   
   data <- ELMER:::getdata("elmer.data.example")

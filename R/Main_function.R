@@ -329,7 +329,9 @@ get.diff.meth <- function(data,
 #'          filter.probes = TRUE, 
 #'          filter.portion = 0.3,  
 #'          filter.percentage = 0.05,
-#'          label = NULL, save = TRUE)
+#'          label = NULL, 
+#'          addDistNearestTSS = FALSE,
+#'          save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. 
 #' See \code{\link{createMAE}} function.
 #' @param nearGenes Can be either a list containing output of GetNearGenes 

@@ -22,7 +22,9 @@ get.pair(data,
          filter.probes = TRUE, 
          filter.portion = 0.3,  
          filter.percentage = 0.05,
-         label = NULL, save = TRUE)
+         label = NULL, 
+         addDistNearestTSS = FALSE,
+         save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
