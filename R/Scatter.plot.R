@@ -111,7 +111,7 @@ scatter.plot <- function(data,
                    ylim     = ylim,
                    legend.title = legend.title,
                    correlation = correlation,
-                   xlab     = sprintf("DNA methyation at %s",probe), 
+                   xlab     = sprintf("DNA methylation at %s",probe), 
                    ylab     = sprintf("%s gene expression",symbol), 
                    title    = sprintf("%s_%s",probe,symbol),
                    ...)
@@ -137,7 +137,7 @@ scatter.plot <- function(data,
                    ylim     = ylim,
                    category = category,
                    legend.title = legend.title,
-                   xlab     = sprintf("DNA methyation at %s", probe), 
+                   xlab     = sprintf("DNA methylation at %s", probe), 
                    ylab     = sprintf("Gene expression"), 
                    title    = sprintf("%s nearby %s genes", probe, byProbe$numFlankingGenes),
                    ...)
@@ -174,7 +174,7 @@ scatter.plot <- function(data,
                  ylim     = ylim,
                  category = category,
                  legend.title = legend.title,
-                 xlab     = "Avg DNA methyation", 
+                 xlab     = "Avg DNA methylation", 
                  ylab     = sprintf("TF expression"), 
                  title    = "TF vs avg DNA methylation",
                  ...)
@@ -240,7 +240,7 @@ scatter <- function(meth,
                                    title.hjust = 0.5)) 
     if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
     if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
-    if(lm_line) P <- P + geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x,data=df)
+    if(lm_line) P <- P + geom_smooth(method = "lm", se=TRUE, color="black", formula = y ~ x,data=df)
     if(correlation){
       cor <- cor.test(x = as.numeric(meth), 
                       y = as.numeric(exp[,GeneID]),
@@ -278,7 +278,8 @@ scatter <- function(meth,
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
       P <- P + geom_smooth(method = "lm", 
-                           se=FALSE, 
+                           span = 1, 
+                           se=TRUE, 
                            color="black", 
                            formula = y ~ x,
                            data = df)

@@ -797,6 +797,13 @@ getRandomPairs <- function(pairs,
   if(is.data.frame(pairs))
     pairs <- as.data.frame(pairs)
   
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
   # Get Probe information
   data("hm450.hg38.manifest")
   probes.ranges <- as.data.frame(hm450.hg38.manifest)[,1:5]
@@ -810,40 +817,43 @@ getRandomPairs <- function(pairs,
   
   nb.pairs <- nrow(pairs)
   nb.probes <- length(unique(pairs$Probe))
-  
   # get gene information
   genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
   
   df.random <- NULL
+  near.genes.linked <- NULL
+  near.genes.df <- NULL
   # We will get the double of random probes, because some will not be used in case it does not matches the position
   # Example: real probe + gene R10 and random probe does not have R10. Discart and get next random
-  random.probes <- distal.probe[sample(1:length(distal.probe), nb.probes * 2),]
-  near.genes <- GetNearGenes(TRange = random.probes, 
-                             geneAnnot = genes, 
-                             numFlankingGenes = 24, 
-                             cores = cores)
-  near.genes.df <- data.table::rbindlist(near.genes)
-  # Now we should get the exactly same genes positions
-  # if probe 1 was linked to R4 and L10 the random probe 1 will also be linked to its R4 and L10
-  near.genes.linked <- NULL
-  eval <- 1
-  for(p in 1:length(near.genes)){
-    side <- unique(pairs[pairs$Probe == unique(pairs$Probe)[eval],"Sides"])
-    aux <-  near.genes.df[near.genes.df$Target == names(near.genes)[p],]
-    same <- aux[aux$Side %in% side,]
-    # If I do not have the same nearby positions
-    if(length(side) != nrow(same)) next
-    near.genes.linked <- rbind(near.genes.linked, same)
-    eval <- eval+ 1
-    if(length(unique(near.genes.linked$Target)) == nb.probes) break
+  not.matched <- 1:nb.probes
+  numFlankingGenes <- 20
+  while(length(not.matched) > 0){
+    random.probes <- distal.probe[sample(1:length(distal.probe), length(not.matched)),]
+    near.genes <- GetNearGenes(TRange = random.probes, 
+                               geneAnnot = genes, 
+                               numFlankingGenes = numFlankingGenes, 
+                               cores = cores)
+    
+    near.genes.linked <- plyr::alply(1:length(not.matched),1,.fun = function(x){
+      side <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull(Sides)
+      ret <- near.genes[[x]] %>% filter(Side %in% side)
+      if(!all(side %in% ret$Side)) return(NULL)
+      ret
+    },.progress = "text",.parallel = parallel )
+    not.matched <- not.matched[grep("NULL",near.genes.linked)]
+    if(length(not.matched) > 0){
+      aux <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[1]]) %>% pull(Sides) 
+      numFlankingGenes <- max(as.numeric(gsub("L|R","",aux))) * 2
+    }
+    near.genes.df <- rbind(near.genes.df,data.table::rbindlist(near.genes.linked))
+    distal.probe <- distal.probe[!names(distal.probe) %in% near.genes.df$Target,] # Remove probes already used
   }
-  colnames(near.genes.linked)[1] <- "Probe" 
+  colnames(near.genes.df)[1] <- "Probe" 
   
   # Add probe metadata to output
   probes.ranges$Probe <- rownames(probes.ranges)
-  near.genes.linked <- merge(near.genes.linked,probes.ranges,by ="Probe")
-  
-  return(near.genes.linked)
+  near.genes.df <- merge(near.genes.df, probes.ranges, by ="Probe")
+  return(near.genes.df)
 }
 
 
