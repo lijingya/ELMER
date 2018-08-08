@@ -764,6 +764,7 @@ getHocomocoTable <- function(){
 #' process. Default is 1: no parallel process.
 #' @return A data frame with the random linkages
 #' @export
+#' @importFrom dplyr pull filter
 #' @examples
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
