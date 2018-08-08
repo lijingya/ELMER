@@ -795,8 +795,13 @@ getRandomPairs <- function(pairs,
                            cores = 1) {
   
   if(missing(pairs)) stop("Please set pairs argument")
-  if(is.data.frame(pairs))
-    pairs <- as.data.frame(pairs)
+  if(is.data.frame(pairs)) pairs <- as.data.frame(pairs)
+
+  # Rename column
+  if("Side" %in% colnames(pairs)) colnames(pairs)[grep("Side",colnames(pairs))] <- "Sides"
+  if(!"Sides" %in% colnames(pairs)) stop("No column Sides in the object")
+
+  if("Target" %in% colnames(pairs)) colnames(pairs)[grep("Target",colnames(pairs))] <- "Probe"
   
   parallel <- FALSE
   if (cores > 1){
