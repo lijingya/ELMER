@@ -4,17 +4,20 @@ test_that("Links are as expected", {
   data <- ELMER:::getdata("elmer.data.example")
   nearGenes <- GetNearGenes(TRange=getMet(data),
                             geneAnnot=getExp(data))
-  links <- rbindlist(nearGenes)
-  links <-  links[sample(1:nrow(links),250)] # get 250 random links
-  random.pairs <- getRandomPairs(as.data.frame(links))
+  links <- as.data.frame(rbindlist(nearGenes))
+  links <-  links[sample(1:nrow(links),250),] # get 250 random links
+  random.pairs <- getRandomPairs(links)
   
-  library(data.table)
-  DT <- data.table(links[order(links$Side),], key="Target")
-  sig.pairs.links <- DT[, list(col1=paste(Side,collapse = ",")),by=Target]
+  random.pairs %>% 
+    group_by(Probe) %>%
+    summarize(col1=paste(sort(Side),collapse = ",")) %>%
+    data.frame() -> sig.pairs.links
+  links %>% 
+    group_by(Target) %>%
+    summarize(col1=paste(sort(Side),collapse = ",")) %>%
+    data.frame() -> random.pairs.links
   
-  DT <- data.table(random.pairs[order(random.pairs$Side),], key="Probe")
-  random.pairs.links <- DT[, list(col1=paste(Side,collapse = ",")),by=Probe]
-  
+
   # Same nb of probes ? 
   expect_true(length(unique(links$Target)) == length(unique(random.pairs$Probe)))
   
@@ -23,5 +26,4 @@ test_that("Links are as expected", {
   
   # same links per probe
   expect_true(all(table(random.pairs.links$col1) == table(sig.pairs.links$col1)))
-  
 })
