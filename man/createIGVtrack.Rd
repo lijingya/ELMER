@@ -6,7 +6,7 @@
 \usage{
 createIGVtrack(pairs, met.platform = "450K", genome = "hg38",
   filename = "ELMER_interactions.bed", color.track = "black",
-  gene.symbol = NULL, all.tss = TRUE)
+  track.name = "junctions", gene.symbol = NULL, all.tss = TRUE)
 }
 \arguments{
 \item{pairs}{A data frame output from getPairs function}
@@ -18,6 +18,8 @@ createIGVtrack(pairs, met.platform = "450K", genome = "hg38",
 \item{filename}{Filename (".bed")}
 
 \item{color.track}{A color for the track (i.e blue, red,#272E6A)}
+
+\item{track.name}{Track name}
 
 \item{gene.symbol}{Filter pairs to a single gene.}
 

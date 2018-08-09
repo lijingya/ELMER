@@ -21,7 +21,8 @@
 #' @param filter.genes List of genes ensemble ids to filter from object  
 #' @param save If TRUE, MAE object will be saved into a file named as the argument save.file if this was set, otherwise as mae_genome_met.platform.rda.
 #' @param save.filename Name of the rda file to save the object (must end in .rda)
-#' @param met.na.cut Define the percentage of NA that the line should have to remove the probes for humanmethylation platforms.
+#' @param met.na.cut Define the percentage of NA that the line should have to remove the probes 
+#' for humanmethylation platforms.  
 #' @return A MultiAssayExperiment object
 #' @export 
 #' @importFrom MultiAssayExperiment MultiAssayExperiment 

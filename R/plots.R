@@ -665,6 +665,7 @@ heatmapGene <- function(data,
 #' @param genome Which genome build will be used: hg38 (default) or hg19.
 #' @param color.track A color for the track (i.e blue, red,#272E6A)
 #' @param gene.symbol Filter pairs to a single gene.
+#' @param track.name Track name
 #' @param all.tss A logical. If TRUE it will link probes to all TSS  of a gene (transcript level), if FALSE 
 #' it will link to the promoter region of a gene (gene level).
 #' @importFrom dplyr %>%
@@ -694,6 +695,7 @@ createIGVtrack <- function(pairs,
                            genome = "hg38",
                            filename = "ELMER_interactions.bed",
                            color.track = "black",
+                           track.name = "junctions",
                            gene.symbol = NULL,
                            all.tss = TRUE){
   if(all.tss){
@@ -701,11 +703,14 @@ createIGVtrack <- function(pairs,
     tss <- tibble::as.tibble(tss)
   } else {
     tss <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
-    tss <- tibble::as.tibble(promoters(tss))
+    tss <- tibble::as.tibble(promoters(tss,upstream = 0,downstream = 0))
+    tss$transcription_start_site <- tss$start
   }
   
-  if(!is.null(gene.symbol)) pairs <- pairs[pairs$Symbol == gene.symbol,]
-  
+  if(!is.null(gene.symbol)) {
+    if(!gene.symbol %in% pairs$Symbol) stop("Gene link with that gene symbol")
+    pairs <- pairs[pairs$Symbol == gene.symbol,]
+  }
   met.metadata <- ELMER:::getInfiniumAnnotation(plat = met.platform,genome = genome)
   met.metadata <- as.data.frame(met.metadata,row.names = names(met.metadata))
   met.metadata$Probe <- rownames(met.metadata)
@@ -735,7 +740,7 @@ createIGVtrack <- function(pairs,
                     "block_sizes",     # block_sizes
                     "block_counts")] # block_locations
   pairs <- na.omit(pairs)
-  header <- "track name=junctions"
+  header <- paste0('track name="',track.name,'" graphType=junctions')
   unlink(filename,force = TRUE)
   cat(header,file = filename,sep="\n",append = TRUE)
   readr::write_delim(pairs, path = filename, append = TRUE)
