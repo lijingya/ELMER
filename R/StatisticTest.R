@@ -135,22 +135,17 @@ Stat.nonpara <- function(Probe,
                                         exact = FALSE)$p.value}))
   
   if(length(Gene)==1){
-    out <- data.frame(Probe    = rep(Probe,length(Gene)),
-                      GeneID   = Gene,
-                      Symbol   = NearGenes[NearGenes$ID == Probe,]$Symbol, 
-                      Distance = NearGenes[NearGenes$ID == Probe,]$Distance, 
-                      Sides    = NearGenes[NearGenes$ID == Probe,]$Side,
-                      Raw.p    = test.p, 
-                      stringsAsFactors = FALSE)
+    Raw.p <- test.p
   } else {
-    out <- data.frame(Probe    = rep(Probe,length(Gene)),
-                      GeneID   = Gene,
-                      Symbol   = NearGenes[NearGenes$ID == Probe,]$Symbol, 
-                      Distance = NearGenes[NearGenes$ID == Probe,]$Distance, 
-                      Sides    = NearGenes[NearGenes$ID == Probe,]$Side,
-                      Raw.p    = test.p[match(Gene, names(test.p))], 
-                      stringsAsFactors = FALSE)
+    Raw.p <- test.p[match(Gene, names(test.p))]
   }
+  out <- data.frame(Probe    = rep(Probe,length(Gene)),
+                    GeneID   = Gene,
+                    Symbol   = NearGenes[NearGenes$ID == Probe,]$Symbol, 
+                    Distance = NearGenes[NearGenes$ID == Probe,]$Distance, 
+                    Sides    = NearGenes[NearGenes$ID == Probe,]$Side,
+                    Raw.p    = Raw.p, 
+                    stringsAsFactors = FALSE)
   
   return(out)
 }
