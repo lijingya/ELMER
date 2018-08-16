@@ -16,13 +16,13 @@ test_that("Links are as expected", {
     summarize(col1=paste(sort(Side),collapse = ",")) %>%
     data.frame() -> sig.pairs.links
   links %>% 
-    group_by(Target) %>%
+    group_by(ID) %>%
     summarize(col1=paste(sort(Side),collapse = ",")) %>%
     data.frame() -> random.pairs.links
   
   
   # Same nb of probes ? 
-  expect_true(length(unique(links$Target)) == length(unique(random.pairs$Probe)))
+  expect_true(length(unique(links$ID)) == length(unique(random.pairs$Probe)))
   
   # Same number of position links
   expect_true(all(table(links$Side) == table(random.pairs$Side)))
