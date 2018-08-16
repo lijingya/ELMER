@@ -548,7 +548,8 @@ getRegionNearGenes <- function(TRange = NULL,
   ret <- dplyr::select(.data = as.data.frame(ret),
                        "ID","ensembl_gene_id", 
                        grep("external_gene_", colnames(ret), value = T),
-                       "Side"
+                       "Side",
+                       "Distance"
   )
   
   if (!is.null(tssAnnot)) {
