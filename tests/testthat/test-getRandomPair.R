@@ -6,9 +6,8 @@ library(data.table)
 test_that("Links are as expected", {
   
   data <- ELMER:::getdata("elmer.data.example")
-  nearGenes <- GetNearGenes(TRange=getMet(data),
-                            geneAnnot=getExp(data))
-  links <- as.data.frame(rbindlist(nearGenes))
+  links <- GetNearGenes(TRange=rowRanges(getMet(data)),
+                        geneAnnot=rowRanges(getExp(data)))
   links <-  links[sample(1:nrow(links),250),] # get 250 random links
   random.pairs <- getRandomPairs(links)
   
@@ -21,7 +20,7 @@ test_that("Links are as expected", {
     summarize(col1=paste(sort(Side),collapse = ",")) %>%
     data.frame() -> random.pairs.links
   
-
+  
   # Same nb of probes ? 
   expect_true(length(unique(links$Target)) == length(unique(random.pairs$Probe)))
   

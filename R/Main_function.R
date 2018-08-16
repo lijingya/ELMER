@@ -255,7 +255,9 @@ get.diff.meth <- function(data,
                                 test = test,
                                 group2 = group2,
                                 Top.m = Top.m)},
-               .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
+               .progress = "time", 
+               .parallel = parallel,
+               .paropts = list(.errorhandling = 'pass')
   )
   out <- do.call(rbind,out)
   out <- as.data.frame(out,stringsAsFactors = FALSE)
@@ -443,13 +445,8 @@ get.pair <- function(data,
                      addDistNearestTSS = FALSE,
                      save = TRUE){
   
-  if(!all(names(nearGenes) %in% rownames(getMet(data))))
-    stop("Probes option should be subset of rownames of methylation matrix.")
   if(is.character(nearGenes)){
     nearGenes <- get(load(nearGenes))
-  } else if(!is.list(nearGenes)){
-    stop("nearGene option must be a list containing output of GetNearGenes function 
-         or path of rda file containing output of GetNearGenes function.")
   }
   if(diffExp & missing(group.col)) 
     stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
@@ -487,24 +484,30 @@ get.pair <- function(data,
   
   met <- assay(getMet(data))
   # Probes that were removed from the last steps cannot be verified
-  nearGenes <- nearGenes[names(nearGenes) %in% rownames(met)] 
+  nearGenes <- nearGenes[nearGenes$ID %in% rownames(met),] 
   
-  if(length(nearGenes) == 0) {
+  if(nrow(nearGenes) == 0) {
     message("No probes passed the preAssociationProbeFiltering filter")
     return(NULL)
   }
   exp <- assay(getExp(data))
   message("Calculating Pp (probe - gene) for all nearby genes")
-  Probe.gene <- adply(.data = names(nearGenes), .margins = 1,
+  Probe.gene <- adply(.data = unique(nearGenes$ID), 
+                      .margins = 1,
                       .fun = function(x) {
                         Stat.nonpara(Probe = x,
                                      Meths = met[x,], 
-                                     NearGenes = nearGenes,
                                      methy = methylated,
+                                     NearGenes = nearGenes,
                                      unmethy = unmethylated,
                                      Top = minSubgroupFrac/2, # Each group will have half of the samples
-                                     Exps = exp)},
-                      .progress = "text", .parallel = parallel, .id = NULL,.paropts=list(.errorhandling='pass')
+                                     Exps = exp
+                        )
+                      },
+                      .progress = "time", 
+                      .parallel = parallel, 
+                      .id = NULL,
+                      .paropts = list(.errorhandling = 'pass')
   )
   
   rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
@@ -534,7 +537,7 @@ get.pair <- function(data,
     permu <- get.permu(data,
                        geneID     = GeneID, 
                        percentage = minSubgroupFrac / 2,
-                       rm.probes  = names(nearGenes), 
+                       rm.probes  = unique(nearGenes$ID), 
                        methy      = methylated,
                        unmethy    = unmethylated,
                        permu.size = permu.size, 
@@ -543,12 +546,16 @@ get.pair <- function(data,
     # Get empirical p-value
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
     
-    if(save) write_csv(Probe.gene.Pe, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
+    if(save) write_csv(Probe.gene.Pe, 
+                       path = sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, 
+                                      ifelse(is.null(label),"",label)))
     # Pe will always be 1 for the supervised mode. As the test exp(U) > exp(M) will always be doing the same comparison.
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   } else {
     Probe.gene$FDR <- p.adjust(Probe.gene$Raw.p,method = "BH")
-    if(save) write_csv(Probe.gene, path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, ifelse(is.null(label),"",label)))
+    if(save) write_csv(Probe.gene, 
+                       path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out, 
+                                    ifelse(is.null(label),"",label)))
     selected <-  Probe.gene[Probe.gene$FDR < Pe,] 
   }
   
@@ -572,7 +579,10 @@ get.pair <- function(data,
                    out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
                                      "diff.pvalue" = test$p.value)
                  },
-                 .progress = "text", .parallel = parallel,.id = "GeneID",.paropts=list(.errorhandling='pass')
+                 .progress = "time", 
+                 .parallel = parallel,
+                 .id = "GeneID",
+                 .paropts = list(.errorhandling = 'pass')
     )
     add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
     colnames(add) <- c(log.col,diff.col)
@@ -709,7 +719,9 @@ get.permu <- function(data,
                        unmethy = unmethy,
                        Top   = percentage,
                        Exps  = exps)},
-                   .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
+                   .progress = "time", 
+                   .parallel = parallel,
+                   .paropts = list(.errorhandling = 'pass')
     )
     
     permu <- sapply(permu,
@@ -748,7 +760,9 @@ get.permu <- function(data,
                              methy = methy,
                              unmethy = unmethy,
                              Exps  = exps)},
-                         .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
+                         .progress = "time", 
+                         .parallel = parallel,
+                         .paropts = list(.errorhandling = 'pass')
     )
     
     permu.genes <- sapply(permu.genes,
@@ -864,7 +878,10 @@ promoterMeth <- function(data,
                                 NearGenes = Fake,
                                 Top = minSubgroupFrac/2,
                                 Exps = exps)},
-                 .progress = "text", .parallel = parallel, .id = NULL,.paropts=list(.errorhandling='pass')
+                 .progress = "time", 
+                 .parallel = parallel, 
+                 .id = NULL,
+                 .paropts = list(.errorhandling = 'pass')
     )
     
     out <- out[,c("GeneID","Symbol","Raw.p")]
@@ -1035,7 +1052,8 @@ get.enriched.motif <- function(data,
     ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
     colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
     ret
-  },.id = NULL,.progress = "text")
+  },.id = NULL,
+  .progress = "time")
   rownames(fisher) <- names(a)
   Summary <- data.frame(motif  =  names(a),
                         NumOfProbes = probes.TF.num,
@@ -1320,7 +1338,10 @@ get.TFs <- function(data,
                         } else {
                           return(colMeans(meth[x,],na.rm = TRUE))
                         }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
-                      .progress = "text", .parallel = parallel, .id = "rownames",.paropts=list(.errorhandling='pass')
+                      .progress = "time", 
+                      .parallel = parallel, 
+                      .id = "rownames",
+                      .paropts=list(.errorhandling='pass')
   )
   rownames(motif.meth) <- motif.meth$rownames
   motif.meth$rownames <- NULL
@@ -1356,7 +1377,9 @@ get.TFs <- function(data,
                            methy = methylated,
                            Top   = minSubgroupFrac/2,
                            Exps  = exps)},
-                       .progress = "text", .parallel = parallel,.paropts=list(.errorhandling='pass')
+                       .progress = "time", 
+                       .parallel = parallel,
+                       .paropts = list(.errorhandling='pass')
   )
   # We are going to make a multiple hypothesis correction
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
@@ -1400,7 +1423,11 @@ get.TFs <- function(data,
                          return(out)
                        },                                         
                        TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily, 
-                       .progress = "text", .parallel = parallel,.margins = 1, .id = NULL,.paropts=list(.errorhandling='pass'))
+                       .progress = "time", 
+                       .parallel = parallel,
+                       .margins = 1, 
+                       .id = NULL,
+                       .paropts=list(.errorhandling='pass'))
   rownames(cor.summary) <- cor.summary$motif
   
   if(save){
@@ -1494,8 +1521,8 @@ getTFtargets <- function(pairs,
                                          dir.out=dir.out, 
                                          label=ifelse(is.null(label),"",label),
                                          classification = classification
-                                         )
                             )
+  )
   
   if(!missing(dmc.analysis)) {
     if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
@@ -1512,12 +1539,12 @@ getTFtargets <- function(pairs,
     pairs <- merge(pairs, metadata, by = "Probe")
     metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
     pairs <- merge(pairs, metadata, by.x = "GeneID", by.y = "ensembl_gene_id")
-
+    
     pairs$TF <- NA
     
     # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
     if(classification == "family"){
-    names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
+      names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
     } else {
       names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.subfamily
     }
@@ -1542,7 +1569,9 @@ getTFtargets <- function(pairs,
         ))),
         collapse = ";")
       return(y)
-    },.progress = "text",.parallel = parallel,.paropts=list(.errorhandling='pass'))
+    },.progress = "time",
+    .parallel = parallel,
+    .paropts = list(.errorhandling = 'pass'))
     aux$X1 <- unique(pairs$Probe)
     
     # For each enriched motif the the potencial TF family members 
@@ -1552,8 +1581,8 @@ getTFtargets <- function(pairs,
                                            dir.out=dir.out, 
                                            label=ifelse(is.null(label),"",label),
                                            classification = classification
-                                           )
                               )
+    )
   }
   return(df.all)
 }
@@ -1615,7 +1644,7 @@ maphg38tohg19 <- function(file,
   ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
   readr::write_csv(ret.hg19,
                    path = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
-                   )
+  )
 }
 
 

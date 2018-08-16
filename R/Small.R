@@ -803,6 +803,7 @@ getRandomPairs <- function(pairs,
   if(!"Sides" %in% colnames(pairs)) stop("No column Sides in the object")
 
   if("Target" %in% colnames(pairs)) colnames(pairs)[grep("Target",colnames(pairs))] <- "Probe"
+  if("ID" %in% colnames(pairs)) colnames(pairs)[colnames(pairs) == "ID"] <- "Probe"
   
   parallel <- FALSE
   if (cores > 1){
@@ -841,12 +842,15 @@ getRandomPairs <- function(pairs,
                                numFlankingGenes = numFlankingGenes, 
                                cores = cores)
     
-    near.genes.linked <- plyr::alply(1:length(not.matched),1,.fun = function(x){
+    near.genes.linked <- plyr::alply(1:length(not.matched),
+                                     .margins = 1,
+                                     .fun = function(x){
       side <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull(Sides)
-      ret <- near.genes[[x]] %>% filter(Side %in% side)
+      ret <- near.genes %>% filter(ID == unique(near.genes$ID)[x] & Side %in% side)
       if(!all(side %in% ret$Side)) return(NULL)
       ret
-    },.progress = "text",.parallel = parallel )
+    },.progress = "time", .parallel = parallel)
+    
     not.matched <- not.matched[grep("NULL",near.genes.linked)]
     if(length(not.matched) > 0){
       aux <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[1]]) %>% pull(Sides) 

@@ -63,7 +63,7 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(file.exists("permu_test/permu.rda"))
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 5)
   # Result correctly use a gene from the nearGene list
-  expect_true(all(Hypo.pair[Hypo.pair$Probe %in% "cg00329272" ,]$GeneID %in% nearGenes$cg00329272$GeneID))
+  expect_true(all(Hypo.pair[Hypo.pair$Probe %in% "cg00329272" ,]$GeneID %in% nearGenes[nearGenes$ID == "cg00329272",]$GeneID))
   expect_true(all(Hypo.pair$Pe < 0.2))
   expect_true(min(Hypo.pair$Pe) >= 0)
   expect_true(max(Hypo.pair$Pe) <= 1)
@@ -117,13 +117,13 @@ test_that("Function uses correctly the permu.dir", {
                         label= "hypo")
 
   # If we add new genes and new probes
-  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg19403323",
+  nearGenes <- GetNearGenes(TRange=rowRanges(getMet(data)[c("cg19403323",
                                                   "cg17468663",
                                                   "cg00329272",
                                                   "cg14036402",
                                                   "cg10097755",
-                                                  "cg22396959"),],
-                            geneAnnot=getExp(data))
+                                                  "cg22396959"),]),
+                            geneAnnot=rowRanges(getExp(data)))
   Hypo.pair <- get.pair(data=data,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
