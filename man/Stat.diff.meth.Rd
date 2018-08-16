@@ -4,8 +4,8 @@
 \alias{Stat.diff.meth}
 \title{Stat.diff.meth}
 \usage{
-Stat.diff.meth(meth, groups, group1, group2, test = t.test, min.samples = 5,
-  percentage = 0.2, Top.m = NULL)
+Stat.diff.meth(meth, groups, group1, group2, test = t.test,
+  min.samples = 5, percentage = 0.2, Top.m = NULL)
 }
 \arguments{
 \item{meth}{A matrix contain DNA methylation data.}

@@ -5,8 +5,8 @@
 \title{TF.rank.plot to plot the scores (-log10(P value)) which assess the correlation between 
 TF expression and average DNA methylation at motif sites.}
 \usage{
-TF.rank.plot(motif.pvalue, motif, title = NULL, TF.label, dir.out = "./",
-  save = TRUE)
+TF.rank.plot(motif.pvalue, motif, title = NULL, TF.label,
+  dir.out = "./", save = TRUE)
 }
 \arguments{
 \item{motif.pvalue}{A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"

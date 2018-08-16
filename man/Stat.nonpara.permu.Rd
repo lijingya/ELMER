@@ -4,8 +4,8 @@
 \alias{Stat.nonpara.permu}
 \title{Stat.nonpara.permu}
 \usage{
-Stat.nonpara.permu(Probe, Gene, Top = 0.2, unmethy = NULL, methy = NULL,
-  Meths = Meths, Exps = Exps)
+Stat.nonpara.permu(Probe, Gene, Top = 0.2, unmethy = NULL,
+  methy = NULL, Meths = Meths, Exps = Exps)
 }
 \arguments{
 \item{Probe}{A character of name of Probe in array.}

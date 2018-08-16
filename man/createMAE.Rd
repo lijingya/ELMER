@@ -28,7 +28,8 @@ This object must have columns primary (sample ID) and colname (names of the colu
 within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
 See \code{\link{get.feature.probe}} function.}
 
-\item{met.na.cut}{Define the percentage of NA that the line should have to remove the probes for humanmethylation platforms.}
+\item{met.na.cut}{Define the percentage of NA that the line should have to remove the probes 
+for humanmethylation platforms.}
 
 \item{filter.genes}{List of genes ensemble ids to filter from object}
 

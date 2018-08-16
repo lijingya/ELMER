@@ -334,3 +334,202 @@ addDistNearestTSS <- function(data,
   
   return(NearGenes)
 }
+
+
+
+#' @description 
+#' Idea 
+#' For a given region R linked to X genes G
+#' merge R with nearest TSS for G (multiple)
+#' this will increse nb of lines 
+#' i.e R1 - G1 - TSS1 - DIST1
+#'    R1 - G1 - TSS2 - DIST2
+#'    To vectorize the code:
+#' make a granges from left and onde from right 
+#' and find distance
+#' collapse the results keeping min distance for equals values
+#' @param links Links to calculate the distance
+#' @param TRange Genomic coordinates for Tartget region
+#' @param tssAnnot TSS annotation
+#' @examples 
+#' \dontrun{
+#'  data <- ELMER:::getdata("elmer.data.example")
+#'   NearbyGenes <- GetNearGenes(data = data, 
+#'                               probes = c("cg15924102", "cg24741609"),  
+#'                               numFlankingGenes = 20)
+#'   NearbyGenes <- dplyr::rbind_list(NearbyGenes)
+#'   colnames(NearbyGenes)[1:2] <- c("ID","ensembl_gene_id")                           
+#'   NearbyGenes <- addDistNearestTSS.new(
+#'        links = NearbyGenes,
+#'        tssAnnot =  getTSS(genome = "hg38"),
+#'        TRange = rowRanges(getMet(data))
+#'        )
+#' }
+addDistNearestTSS.new <- function(links,
+                                  TRange,
+                                  tssAnnot){
+  if(!is(tssAnnot,"GenomicRanges")){
+    stop("tssAnnot is not a GenomicRanges")
+  }
+  if(!is(TRange,"GenomicRanges")){
+    stop("tssAnnot is not a GenomicRanges")
+  }
+  
+  
+  if(!"ID" %in% colnames(TRange)){
+    TRange$ID <- rownames(TRange)
+  }
+  merged <- left_join(links,tibble::as_tibble(tssAnnot),
+                      by = c("ensembl_gene_id"))
+  merged <- left_join(merged,tibble::as_tibble(TRange),
+                      by = c("ID"))
+  
+  left <- makeGRangesFromDataFrame(merged,
+                                   start.field = "transcription_start_site",
+                                   end.field = "transcription_start_site",
+                                   seqnames.field = "seqnames.x",
+                                   strand.field = "strand.x",
+                                   ignore.strand = F)
+  
+  right <- makeGRangesFromDataFrame(merged,
+                                    start.field = "start.y",
+                                    end.field = "end.y",
+                                    strand.field = "strand.y",
+                                    seqnames.field = "seqnames.y",
+                                    ignore.strand = F)
+  
+  merged$DistanceTSS <- distance(left,right)
+  ret <- merged %>% group_by(ID,ensembl_gene_id) %>%
+    slice(which.min(DistanceTSS)) %>% select(ID,ensembl_gene_id,DistanceTSS)
+  
+  #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
+  #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
+  links <- full_join(links,ret)
+  return(links)
+}
+
+#  Auxiliary function for GetNearGenes
+#  This will get the closest genes (n=numFlankingGenes) for a target region (TRange)
+#  based on a genome of refenrece gene annotation (geneAnnot). If the
+#  transcript level annotation (tssAnnot) is provided the Distance will be updated to
+#  the distance to the nearest TSS.
+#' @param geneAnnot A GRange object contains gene coordinates of for human genome.
+#' @param tssAnnot A GRange object contains tss coordinates of for human genome.
+#' @param numFlankingGenes A number determine how many gene will be collected from each 
+# side of target (number shoule be even).
+#' @param TRange A GRange object contains coordinate of targets.
+#' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
+# distance with target and side to which the gene locate to the target.
+#' @examples
+#' geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = T)
+#' tssAnnot <-  getTSS(genome = "hg38")
+#' probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
+#' range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
+#' name= c("cg18108049","cg17125141"))
+#' names(probe) <- c("cg18108049","cg17125141")
+#' NearbyGenes <- NearGenes.aux(numFlankingGenes = 20,
+#'                              geneAnnot=geneAnnot,
+#'                              TRange=probe,
+#'                              tssAnnot=tssAnnot)
+NearGenes.aux <- function(TRange = NULL,
+                          numFlankingGenes = 20,
+                          geneAnnot = NULL,
+                          tssAnnot = NULL){
+  TRange$ID <- names(TRange)
+  # Optimized version
+  # IDEA vectorize search
+  # 1) For all regions, get nearest gene
+  # 2) check follow and overlapping genes recursively
+  # 3) check precede and overlapping genes recursively
+  # 4) map the positions based on min distance (L1)
+  all <- 1:length(TRange)
+  nearest.idx <- nearest(TRange,geneAnnot,select = "all",ignore.strand = T)
+  idx <- tibble::as_tibble(nearest.idx)
+  evaluating <- idx$queryHits
+  suppressWarnings({
+    ret <- cbind(tibble::as_tibble(geneAnnot[idx$subjectHits]),
+                 tibble::tibble("ID"=names(TRange)[idx$queryHits],
+                                "Distance" = distance(TRange[idx$queryHits],
+                                                      geneAnnot[idx$subjectHits],select = "all")
+                 )
+    )
+  })
+  
+  
+  for(i in 1:(numFlankingGenes/2)){
+    idx <- unique(rbind(tibble::as_tibble(findOverlaps(geneAnnot[idx$subjectHits],
+                                                       geneAnnot,
+                                                       ignore.strand = T, 
+                                                       type = "any",
+                                                       select="all")),
+                        tibble::as_tibble(precede(geneAnnot[idx$subjectHits],
+                                                  geneAnnot,select = "all",
+                                                  ignore.strand = T))
+    ))
+    idx$evaluating <-  evaluating[idx$queryHits]
+    idx <- idx[!duplicated(idx[,2:3]),]
+    # todo remove already evaluated previously (we don't wanna do it again)
+    idx <- idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id,names(TRange)[evaluating]) %in% paste0(ret$ensembl_gene_id,ret$ID),]
+    evaluating <- evaluating[idx$queryHits]
+    ret <- rbind(ret, cbind(tibble::as_tibble(geneAnnot[idx$subjectHits]),
+                            tibble::tibble("ID"=names(TRange)[evaluating],
+                                           "Distance" = -1 * distance(TRange[evaluating],
+                                                                      geneAnnot[idx$subjectHits],select = "all")
+                            )
+    )
+    )
+    ret <- unique(ret)
+  }
+  
+  
+  idx <- tibble::as_tibble(nearest.idx)
+  evaluating <- idx$queryHits
+  for(i in 1:(numFlankingGenes/2)){
+    idx <- unique(rbind(tibble::as_tibble(findOverlaps(geneAnnot[idx$subjectHits],geneAnnot,ignore.strand = T, type = "any",select="all")),
+                        tibble::as_tibble(follow(geneAnnot[idx$subjectHits],geneAnnot,select = "all",ignore.strand = T))
+    ))
+    idx$evaluating <-  evaluating[idx$queryHits]
+    idx <- idx[!duplicated(idx[,2:3]),]
+    idx <- idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id,names(TRange)[evaluating]) %in% paste0(ret$ensembl_gene_id,ret$ID),]
+    evaluating <- evaluating[idx$queryHits]
+    ret <- rbind(ret, cbind(tibble::as_tibble(geneAnnot[idx$subjectHits]),
+                            tibble::tibble("ID"=names(TRange)[evaluating],
+                                           "Distance" = 1 * distance(TRange[evaluating],
+                                                                     geneAnnot[idx$subjectHits],select = "all")
+                            )
+    )
+    )
+  }
+  ret <- unique(ret)
+  
+  ret <- plyr::adply(unique(ret$ID),
+                     .margins = 1,
+                     .fun = function(x){
+                       x <- ret[ret$ID == x,]
+                       x <- x[order(x$Distance),]
+                       center <- which(x$Distance == min(abs(x$Distance)))[1]
+                       pos <- setdiff(-center:(nrow(x)-center),0)
+                       x$Side <- ifelse(pos > 0,paste0("R",abs(pos)),paste0("L",abs(pos)))
+                       out <- x %>% filter(Side %in% c(paste0("R",1:(numFlankingGenes/2)),paste0("L",1:(numFlankingGenes/2))))
+                       if(nrow(out) < numFlankingGenes){
+                         if("R10" %in% out$Side) {
+                           out <- x %>% filter(Side %in% c(paste0("R",1:(numFlankingGenes-as.numeric(gsub("L","",max(grep("L",sort(x$Side),value = T)))))),
+                                                           grep("L",sort(out$Side),value = T)))
+                         } else {
+                           out <- x %>% filter(Side %in% c(paste0("L",1:(numFlankingGenes-as.numeric(gsub("R","",max(grep("R",sort(x$Side),value = T)))))),
+                                                           grep("R",sort(out$Side),value = T)))
+                           
+                         }
+                       }
+                       out <- out[order(out$Distance),]
+                       return(out)
+                     },.progress = "text",.id = NULL)
+  
+  ret <- dplyr::select(.data = as.data.frame(ret),"ID","ensembl_gene_id","external_gene_name","Side")
+  if(!is.null(tssAnnot)){
+    ret <- addDistNearestTSS.new(ret,
+                                 gr1 = TRange,
+                                 gr2 = tssAnnot)
+  }
+  return(ret)
+}
