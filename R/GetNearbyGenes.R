@@ -283,8 +283,8 @@ addDistNearestTSS <- function(data,
   } else {
     region <- TRUE
     gr <- NearGenes %>% tidyr::separate("Target", c("seqnames","start","end"), 
-                                                    sep = ":|-", remove = FALSE,
-                                                    convert = FALSE, extra = "warn", fill = "warn") %>% 
+                                        sep = ":|-", remove = FALSE,
+                                        convert = FALSE, extra = "warn", fill = "warn") %>% 
       makeGRangesFromDataFrame(keep.extra.columns = T)
   }
   
@@ -375,13 +375,12 @@ addDistNearestTSS.new <- function(links,
     stop("tssAnnot is not a GenomicRanges")
   }
   
-  
-  if(!"ID" %in% colnames(TRange)){
+  if(!"ID" %in% colnames(values(TRange))){
     TRange$ID <- rownames(TRange)
   }
-  merged <- left_join(links,tibble::as_tibble(tssAnnot),
+  merged <- dplyr::left_join(links,tibble::as_tibble(tssAnnot),
                       by = c("ensembl_gene_id"))
-  merged <- left_join(merged,tibble::as_tibble(TRange),
+  merged <- dplyr::left_join(merged,tibble::as_tibble(TRange),
                       by = c("ID"))
   
   left <- makeGRangesFromDataFrame(merged,
@@ -399,12 +398,12 @@ addDistNearestTSS.new <- function(links,
                                     ignore.strand = F)
   
   merged$DistanceTSS <- distance(left,right)
-  ret <- merged %>% group_by(ID,ensembl_gene_id) %>%
-    slice(which.min(DistanceTSS)) %>% select(ID,ensembl_gene_id,DistanceTSS)
+  ret <- merged %>% dplyr::group_by(ID,ensembl_gene_id) %>%
+    dplyr::slice(which.min(DistanceTSS)) %>% select(ID,ensembl_gene_id,DistanceTSS)
   
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
-  links <- full_join(links,ret)
+  links <- dplyr::full_join(links,ret)
   return(links)
 }
 
@@ -456,7 +455,7 @@ NearGenes.aux <- function(TRange = NULL,
   })
   
   
-  for(i in 1:(numFlankingGenes/2)){
+  for(i in 1:(numFlankingGenes)){
     idx <- unique(rbind(tibble::as_tibble(findOverlaps(geneAnnot[idx$subjectHits],
                                                        geneAnnot,
                                                        ignore.strand = T, 
@@ -484,7 +483,7 @@ NearGenes.aux <- function(TRange = NULL,
   
   idx <- tibble::as_tibble(nearest.idx)
   evaluating <- idx$queryHits
-  for(i in 1:(numFlankingGenes/2)){
+  for(i in 1:(numFlankingGenes)){
     idx <- unique(rbind(tibble::as_tibble(findOverlaps(geneAnnot[idx$subjectHits],geneAnnot,ignore.strand = T, type = "any",select="all")),
                         tibble::as_tibble(follow(geneAnnot[idx$subjectHits],geneAnnot,select = "all",ignore.strand = T))
     ))
@@ -512,11 +511,13 @@ NearGenes.aux <- function(TRange = NULL,
                        x$Side <- ifelse(pos > 0,paste0("R",abs(pos)),paste0("L",abs(pos)))
                        out <- x %>% filter(Side %in% c(paste0("R",1:(numFlankingGenes/2)),paste0("L",1:(numFlankingGenes/2))))
                        if(nrow(out) < numFlankingGenes){
-                         if("R10" %in% out$Side) {
-                           out <- x %>% filter(Side %in% c(paste0("R",1:(numFlankingGenes-as.numeric(gsub("L","",max(grep("L",sort(x$Side),value = T)))))),
+                         if(paste0("R",floor(numFlankingGenes/2)) %in% out$Side) {
+                           cts <- length(grep("L",sort(x$Side),value = T))
+                           out <- x %>% filter(Side %in% c(paste0("R",1:(numFlankingGenes-cts)),
                                                            grep("L",sort(out$Side),value = T)))
                          } else {
-                           out <- x %>% filter(Side %in% c(paste0("L",1:(numFlankingGenes-as.numeric(gsub("R","",max(grep("R",sort(x$Side),value = T)))))),
+                           cts <- length(grep("R",sort(x$Side),value = T))
+                           out <- x %>% filter(Side %in% c(paste0("L",1:(numFlankingGenes-cts)),
                                                            grep("R",sort(out$Side),value = T)))
                            
                          }
@@ -527,9 +528,9 @@ NearGenes.aux <- function(TRange = NULL,
   
   ret <- dplyr::select(.data = as.data.frame(ret),"ID","ensembl_gene_id","external_gene_name","Side")
   if(!is.null(tssAnnot)){
-    ret <- addDistNearestTSS.new(ret,
-                                 gr1 = TRange,
-                                 gr2 = tssAnnot)
+    ret <- addDistNearestTSS.new(links = ret,
+                                 TRange = TRange,
+                                 tssAnnot = tssAnnot)
   }
   return(ret)
 }
