@@ -434,6 +434,8 @@ NearGenes.aux <- function(TRange = NULL,
                           numFlankingGenes = 20,
                           geneAnnot = NULL,
                           tssAnnot = NULL){
+  pb <- progress::progress_bar$new(total = numFlankingGenes * 2)
+  
   TRange$ID <- names(TRange)
   # Optimized version
   # IDEA vectorize search
@@ -453,7 +455,6 @@ NearGenes.aux <- function(TRange = NULL,
                  )
     )
   })
-  
   
   for(i in 1:(numFlankingGenes)){
     idx <- unique(rbind(tibble::as_tibble(findOverlaps(geneAnnot[idx$subjectHits],
@@ -478,8 +479,8 @@ NearGenes.aux <- function(TRange = NULL,
     )
     )
     ret <- unique(ret)
+    pb$tick()
   }
-  
   
   idx <- tibble::as_tibble(nearest.idx)
   evaluating <- idx$queryHits
@@ -498,6 +499,7 @@ NearGenes.aux <- function(TRange = NULL,
                             )
     )
     )
+    pb$tick()
   }
   ret <- unique(ret)
   
@@ -524,7 +526,7 @@ NearGenes.aux <- function(TRange = NULL,
                        }
                        out <- out[order(out$Distance),]
                        return(out)
-                     },.progress = "text",.id = NULL)
+                     },.progress = "time",.id = NULL)
   
   ret <- dplyr::select(.data = as.data.frame(ret),"ID","ensembl_gene_id","external_gene_name","Side")
   if(!is.null(tssAnnot)){
