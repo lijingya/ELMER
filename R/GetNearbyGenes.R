@@ -376,7 +376,7 @@ calcDistNearestTSS <- function(links,
 #' range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
 #' names(probe) <- c("cg18108049","cg17125141")
-#' NearbyGenes <- NearGenes.aux(numFlankingGenes = 20,
+#' NearbyGenes <- getRegionNearGenes(numFlankingGenes = 20,
 #'                              geneAnnot=geneAnnot,
 #'                              TRange=probe,
 #'                              tssAnnot=tssAnnot)
