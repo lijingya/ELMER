@@ -1038,7 +1038,9 @@ findMotifRegion <- function(regions,
     gc()
   }
   close(pb)
-  print("Writing file...")
-  if(!is.null(peaks)) readr::write_tsv(peaks, path = file,col_names = TRUE)
+  print(paste0("Writing file: ",output.filename))
+  if(!is.null(peaks)) {
+    readr::write_tsv(peaks, path = output.filename,col_names = TRUE)
+  }
   print("DONE!")
 }
