@@ -979,12 +979,15 @@ findMotifRegion <- function(regions,
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
   
   if(!file.exists(output.filename)){
-    df <- data.frame(seqnames = seqnames(gr),
-                     starts = as.integer(start(gr)),
-                     ends = end(gr),
-                     names = names(gr),
-                     scores = c(rep(".", length(gr))),
-                     strands = strand(gr))
+    if(is.null(names(regions))){
+      names(regions) <- tibble::as_tibble(dmr.gr) %>% tidyr::unite(col = "names","seqnames","start","end") %>% pull(names)
+    }
+    df <- data.frame(seqnames = seqnames(regions),
+                     starts = as.integer(start(regions)),
+                     ends = end(regions),
+                     names = names(regions),
+                     scores = c(rep(".", length(regions))),
+                     strands = strand(regions))
     n <- nrow(df)
     step <- ifelse(n > 1000, 1000, n )
     pb <- txtProgressBar(max = floor(n/step), style = 3)
@@ -1007,7 +1010,11 @@ findMotifRegion <- function(regions,
         if(error == 127) {
           unlink(file.aux)
           unlink(gsub(".bed",".txt",file.aux))
-          stop("annotatePeaks.pl had an error. Please check homer install")
+          stop(paste0("annotatePeaks.pl had an error. Please check homer install.",
+                      "\nIf already installed be sure R can see it.",
+                      "You can change PATH evn variable with usethis::edit_r_environ()",
+                      "\nAdding, for example, a modified version of this line: PATH=$PATH:path_to_homer/bin:/usr/bin/")
+               )
         }
       }
     }
