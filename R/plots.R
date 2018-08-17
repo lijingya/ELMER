@@ -711,7 +711,7 @@ createIGVtrack <- function(pairs,
     if(!gene.symbol %in% pairs$Symbol) stop("Gene link with that gene symbol")
     pairs <- pairs[pairs$Symbol == gene.symbol,]
   }
-  met.metadata <- ELMER:::getInfiniumAnnotation(plat = met.platform,genome = genome)
+  met.metadata <- getInfiniumAnnotation(plat = met.platform,genome = genome)
   met.metadata <- as.data.frame(met.metadata,row.names = names(met.metadata))
   met.metadata$Probe <- rownames(met.metadata)
   pairs <- merge(pairs, tss, by.x = "GeneID", by.y = "ensembl_gene_id",all.x = TRUE) %>% 

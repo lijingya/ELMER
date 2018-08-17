@@ -291,7 +291,6 @@ addDistNearestTSS <- function(data,
 #' @param links Links to calculate the distance
 #' @param TRange Genomic coordinates for Tartget region
 #' @param tssAnnot TSS annotation
-#' @param cores Number of cores used in the parallelization
 #' @examples 
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")

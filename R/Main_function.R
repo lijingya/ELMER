@@ -328,7 +328,7 @@ get.diff.meth <- function(data,
 #'          group1 = NULL, 
 #'          group2 = NULL, 
 #'          cores = 1, 
-#'          filter.probes = FALSE, 
+#'          filter.probes = TRUE, 
 #'          filter.portion = 0.3,  
 #'          filter.percentage = 0.05,
 #'          label = NULL, 
@@ -389,6 +389,8 @@ get.diff.meth <- function(data,
 #' @param label A character labels the outputs.
 #' @param save Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 #' and getPair.XX.pairs.significant.csv (see detail).
+#' @param addDistNearestTSS Calculated distance to the nearest TSS instead of gene distance.
+#' Having to calculate the distance to nearest TSS will take some time.
 #' @return Statistics for all pairs and significant pairs
 #' @export 
 #' @author 

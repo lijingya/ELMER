@@ -813,8 +813,8 @@ getRandomPairs <- function(pairs,
   }
   
   # Get Probe information
-  data("hm450.hg38.manifest")
-  probes.ranges <- as.data.frame(hm450.hg38.manifest)[,1:5]
+  met.info <- getInfiniumAnnotation(plat = met.platform, genome = genome) 
+  probes.ranges <- as.data.frame(met.info)[,1:5]
   colnames(probes.ranges) <- paste0("probe_",colnames(probes.ranges))
   
   # Get distal probes not in the pairs
@@ -826,7 +826,7 @@ getRandomPairs <- function(pairs,
   nb.pairs <- nrow(pairs)
   nb.probes <- length(unique(pairs$Probe))
   # get gene information
-  genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
+  genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome, as.granges = TRUE)
   
   df.random <- NULL
   near.genes.linked <- NULL

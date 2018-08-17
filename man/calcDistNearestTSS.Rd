@@ -12,8 +12,6 @@ calcDistNearestTSS(links, TRange, tssAnnot)
 \item{TRange}{Genomic coordinates for Tartget region}
 
 \item{tssAnnot}{TSS annotation}
-
-\item{cores}{Number of cores used in the parallelization}
 }
 \description{
 Idea 

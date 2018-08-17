@@ -19,7 +19,7 @@ get.pair(data,
          group1 = NULL, 
          group2 = NULL, 
          cores = 1, 
-         filter.probes = FALSE, 
+         filter.probes = TRUE, 
          filter.portion = 0.3,  
          filter.percentage = 0.05,
          label = NULL, 
@@ -98,6 +98,9 @@ for the filter.portion option. Default 5\%. Only used if filter.probes is TRUE.
  See \code{\link{preAssociationProbeFiltering}} function.}
 
 \item{label}{A character labels the outputs.}
+
+\item{addDistNearestTSS}{Calculated distance to the nearest TSS instead of gene distance.
+Having to calculate the distance to nearest TSS will take some time.}
 
 \item{save}{Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 and getPair.XX.pairs.significant.csv (see detail).}
