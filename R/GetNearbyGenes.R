@@ -367,6 +367,8 @@ calcDistNearestTSS <- function(links,
 #' @param numFlankingGenes A number determine how many gene will be collected from each 
 # side of target (number shoule be even).
 #' @param TRange A GRange object contains coordinate of targets.
+#' @param cores A interger which defines the number of cores to be used in parallel 
+#' process. Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
 #' @examples
