@@ -27,16 +27,16 @@ Auxiliary function for GetNearGenes
  the distance to the nearest TSS.
 }
 \examples{
-geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = T)
+geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = TRUE)
 tssAnnot <-  getTSS(genome = "hg38")
 probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
 range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 name= c("cg18108049","cg17125141"))
 names(probe) <- c("cg18108049","cg17125141")
 NearbyGenes <- getRegionNearGenes(numFlankingGenes = 20,
-                             geneAnnot=geneAnnot,
-                             TRange=probe,
-                             tssAnnot=tssAnnot)
+                             geneAnnot = geneAnnot,
+                             TRange = probe,
+                             tssAnnot = tssAnnot)
 }
 \author{
 Tiago C Silva (maintainer: tiagochst@usp.br)

@@ -266,7 +266,7 @@ addDistNearestTSS <- function(data,
     met <- NearGenes %>% tidyr::separate("Target", c("seqnames","start","end"), 
                                          sep = ":|-", remove = FALSE,
                                          convert = FALSE, extra = "warn", fill = "warn") %>% 
-      makeGRangesFromDataFrame(keep.extra.columns = T)
+      makeGRangesFromDataFrame(keep.extra.columns = TRUE)
   }
   
   NearGenes <- calcDistNearestTSS(links = NearGenes,TRange = met,tssAnnot = tss)
@@ -370,16 +370,16 @@ calcDistNearestTSS <- function(links,
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
 #' @examples
-#' geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = T)
+#' geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = TRUE)
 #' tssAnnot <-  getTSS(genome = "hg38")
 #' probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
 #' range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
 #' name= c("cg18108049","cg17125141"))
 #' names(probe) <- c("cg18108049","cg17125141")
 #' NearbyGenes <- getRegionNearGenes(numFlankingGenes = 20,
-#'                              geneAnnot=geneAnnot,
-#'                              TRange=probe,
-#'                              tssAnnot=tssAnnot)
+#'                              geneAnnot = geneAnnot,
+#'                              TRange = probe,
+#'                              tssAnnot = tssAnnot)
 #' @importFrom GenomicRanges nearest precede follow                              
 #' @author 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
@@ -414,7 +414,7 @@ getRegionNearGenes <- function(TRange = NULL,
     nearest(TRange,
             geneAnnot,
             select = "all",
-            ignore.strand = T)
+            ignore.strand = TRUE)
   idx <- suppressWarnings(tibble::as_tibble(nearest.idx))
   evaluating <- idx$queryHits
   suppressWarnings({
@@ -446,7 +446,7 @@ getRegionNearGenes <- function(TRange = NULL,
             geneAnnot[idx$subjectHits],
             geneAnnot,
             select = "all",
-            ignore.strand = T
+            ignore.strand = TRUE
           )
         ))
       ))
@@ -526,14 +526,14 @@ getRegionNearGenes <- function(TRange = NULL,
       )
       if (nrow(out) < numFlankingGenes) {
         if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
-          cts <- length(grep("L", sort(x$Side), value = T))
+          cts <- length(grep("L", sort(x$Side), value = TRUE))
           out <- x %>% filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
-                                          grep("L", sort(out$Side), value = T)))
+                                          grep("L", sort(out$Side), value = TRUE)))
         } else {
-          cts <- length(grep("R", sort(x$Side), value = T))
+          cts <- length(grep("R", sort(x$Side), value = TRUE))
           out <- x %>% filter(Side %in% 
                                 c(paste0("L", 1:(numFlankingGenes - cts)),
-                                  grep("R", sort(out$Side), value = T))
+                                  grep("R", sort(out$Side), value = TRUE))
           )
           
         }
@@ -548,7 +548,7 @@ getRegionNearGenes <- function(TRange = NULL,
   
   ret <- dplyr::select(.data = as.data.frame(ret),
                        "ID","ensembl_gene_id", 
-                       grep("external_gene_", colnames(ret), value = T),
+                       grep("external_gene_", colnames(ret), value = TRUE),
                        "Side",
                        "Distance"
   )
