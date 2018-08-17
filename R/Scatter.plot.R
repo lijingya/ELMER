@@ -127,7 +127,7 @@ scatter.plot <- function(data,
                               numFlankingGenes = byProbe$numFlankingGenes)
     for(i in byProbe$probe){
       probe <- i
-      gene <- nearGenes[[i]]$GeneID
+      gene <- nearGenes %>% filter(ID == i) %>% pull(GeneID)
       symbol <- getSymbol(data,geneID=gene)
       exp <- assay(getExp(data)[gene,])
       meth <- assay(getMet(data)[byProbe$probe,])
