@@ -119,8 +119,8 @@ schematic.plot <- function(data,
         progress <- progress + 1
         setTxtProgressBar(pb, progress)
         significant <- pair[pair$Probe == probe,]
-        gene.gr <- rowRanges(getExp(data))[nearGenes[[probe]]$GeneID,]
-        probe.gr <- rowRanges(getMet(data))[unique(nearGenes[[probe]]$Target),]
+        gene.gr <- rowRanges(getExp(data))[nearGenes[nearGenes$ID == probe,]$GeneID,]
+        probe.gr <- rowRanges(getMet(data))[unique(nearGenes[nearGenes$ID == probe,]$ID),]
         schematic(data = data,
                   gene.gr   = gene.gr,
                   probe.gr  =  probe.gr,

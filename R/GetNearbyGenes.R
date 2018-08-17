@@ -383,6 +383,7 @@ calcDistNearestTSS <- function(links,
 #' @importFrom GenomicRanges nearest precede follow                              
 #' @author 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
+#' @export
 getRegionNearGenes <- function(TRange = NULL,
                                numFlankingGenes = 20,
                                geneAnnot = NULL,
