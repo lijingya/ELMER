@@ -522,7 +522,7 @@ getRegionNearGenes <- function(TRange = NULL,
     .fun = function(x) {
       x <- ret[ret$ID == x, ]
       x <- x[order(x$Distance), ]
-      center <- which(x$Distance == min(abs(x$Distance)))[1]
+      center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
       pos <- setdiff(-center:(nrow(x) - center), 0)
       x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
       out <-  x %>% filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
