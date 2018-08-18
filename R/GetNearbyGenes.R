@@ -425,7 +425,9 @@ getRegionNearGenes <- function(TRange = NULL,
         tibble::tibble(
           "ID" = names(TRange)[idx$queryHits],
           "Distance" = distance(TRange[idx$queryHits],
-                                geneAnnot[idx$subjectHits], select = "all", ignore.strand = TRUE)
+                                geneAnnot[idx$subjectHits], select = "all", ignore.strand = TRUE) *
+             ifelse(TRange[idx$queryHits] < geneAnnot[idx$subjectHits], 1,-1)
+          
         )
       )
   })
@@ -462,7 +464,8 @@ getRegionNearGenes <- function(TRange = NULL,
         suppressWarnings(tibble::as_tibble(geneAnnot[idx$subjectHits])),
         tibble::tibble(
           "ID" = names(TRange)[evaluating],
-          "Distance" = -1 * distance(TRange[evaluating],
+          "Distance" = ifelse(TRange[evaluating] < geneAnnot[idx$subjectHits], 1,-1) * 
+            distance(TRange[evaluating],
                                      geneAnnot[idx$subjectHits], select = "all",
                                      ignore.strand = TRUE)
         )
@@ -504,7 +507,8 @@ getRegionNearGenes <- function(TRange = NULL,
         suppressWarnings(tibble::as_tibble(geneAnnot[idx$subjectHits])),
         suppressWarnings(tibble::tibble(
           "ID" = names(TRange)[evaluating],
-          "Distance" = 1 * distance(TRange[evaluating],
+          "Distance" = ifelse(TRange[evaluating] < geneAnnot[idx$subjectHits], 1,-1) *
+            distance(TRange[evaluating],
                                     geneAnnot[idx$subjectHits], select = "all",ignore.strand = TRUE)
         ))
       ))

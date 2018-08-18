@@ -980,7 +980,7 @@ findMotifRegion <- function(regions,
   
   if(!file.exists(output.filename)){
     if(is.null(names(regions))){
-      names(regions) <- tibble::as_tibble(dmr.gr) %>% tidyr::unite(col = "names","seqnames","start","end") %>% pull(names)
+      names(regions) <- tibble::as_tibble(regions) %>% tidyr::unite(col = "names","seqnames","start","end") %>% pull(names)
     }
     df <- data.frame(seqnames = seqnames(regions),
                      starts = as.integer(start(regions)),
