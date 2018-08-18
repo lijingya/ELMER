@@ -235,9 +235,10 @@ motif.enrichment.plot <- function(motif.enrichment,
 TF.rank.plot <- function(motif.pvalue, 
                          motif, 
                          title = NULL,
-                         TF.label, 
+                         TF.label = NULL, 
                          dir.out = "./", 
-                         save = TRUE){
+                         save = TRUE,
+                         cores = 1){
   if(missing(motif.pvalue)) stop("motif.pvalue should be specified.")
   if(missing(motif)) stop("Please specify which motif you want to plot.")
   if(!all(motif %in% colnames(motif.pvalue))) {
@@ -248,7 +249,7 @@ TF.rank.plot <- function(motif.pvalue,
   if(is.character(motif.pvalue)) {
     motif.pvalue <- get(load(motif.pvalue)) # The data is in the one and only variable
   }
-  if(missing(TF.label)){
+  if(is.null(TF.label)){
     motif.relavent.TFs <- createMotifRelevantTfs()
     TF.label <- motif.relavent.TFs[motif]
     motif.relavent.TFs <- createMotifRelevantTfs("subfamily")
@@ -260,8 +261,14 @@ TF.rank.plot <- function(motif.pvalue,
   significant <- floor(0.05 * nrow(motif.pvalue))
   motif.pvalue <- -log10(motif.pvalue)
   
-  Plots <- list()
-  for(i in motif){
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+
+  Plots <- alply(motif, 1, function(i){
     df <- data.frame(pvalue = motif.pvalue[,i], 
                      Gene = rownames(motif.pvalue), 
                      stringAsFactors = FALSE)
@@ -273,7 +280,7 @@ TF.rank.plot <- function(motif.pvalue,
     
     
     # TF in the family
-    if(!missing(TF.label)){
+    if(!is.null(TF.label)){
       TF.family <- TF.label[[i]]
       df$label[df$Gene %in% TF.family] <- "Same family"
     }    
@@ -319,15 +326,14 @@ TF.rank.plot <- function(motif.pvalue,
       point.padding = unit(1.0, "lines")
     ) 
     
-    
     if(save){
       dir.create(dir.out, showWarnings = FALSE,recursive = TRUE)
       file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
       message("Saving plot as: ", file)
       ggsave(P,filename = file, height = 8, width = 10)
     }
-    Plots[[i]] <- P
-  }
+    P
+  },.progress = "time",.parallel = parallel)
   if(!save) return(Plots)
 }
 
