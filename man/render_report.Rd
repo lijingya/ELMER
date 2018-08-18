@@ -4,11 +4,11 @@
 \alias{render_report}
 \title{Build report for TCGA.pipe function}
 \usage{
-render_report(title = "Report", mae, group.col, group1, group2,
-  direction, dir.out, genome = "hg38", mode = "supervised",
-  minSubgroupFrac = "20\%", minMetdiff = "0.3", metfdr = "0.01",
-  permu = "10000", rawpval = "0.01", pe = "0.01", nprobes = "10",
-  lower.OR = "1.1", out_file = file.path(getwd(), "report.html"))
+render_report(title = "Report", mae, group.col, group1, group2, direction,
+  dir.out, genome = "hg38", mode = "supervised", minSubgroupFrac = "20\%",
+  minMetdiff = "0.3", metfdr = "0.01", permu = "10000",
+  rawpval = "0.01", pe = "0.01", nprobes = "10", lower.OR = "1.1",
+  out_file = file.path(getwd(), "report.html"))
 }
 \arguments{
 \item{title}{HTML report title}

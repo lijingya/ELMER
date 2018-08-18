@@ -190,6 +190,8 @@ motif.enrichment.plot <- function(motif.enrichment,
 #'Current directory is default.
 #'@param save A logic. If true (default), figure will be saved to dir.out
 #'@param title Tite title (the motif will still be added to the title)
+#'@param cores A interger which defines the number of cores to be used in parallel process. 
+#'Default is 1: no parallel process.
 #'@return A plot shows the score (-log(P value)) of association between TF
 #'expression and DNA methylation at sites of a certain motif.
 #'@export
