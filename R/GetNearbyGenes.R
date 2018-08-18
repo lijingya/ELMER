@@ -426,7 +426,7 @@ getRegionNearGenes <- function(TRange = NULL,
           "ID" = names(TRange)[idx$queryHits],
           "Distance" = distance(TRange[idx$queryHits],
                                 geneAnnot[idx$subjectHits], select = "all", ignore.strand = TRUE) *
-             ifelse(TRange[idx$queryHits] < geneAnnot[idx$subjectHits], 1,-1)
+            ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) 
           
         )
       )
@@ -464,7 +464,7 @@ getRegionNearGenes <- function(TRange = NULL,
         suppressWarnings(tibble::as_tibble(geneAnnot[idx$subjectHits])),
         tibble::tibble(
           "ID" = names(TRange)[evaluating],
-          "Distance" = ifelse(TRange[evaluating] < geneAnnot[idx$subjectHits], 1,-1) * 
+          "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
             distance(TRange[evaluating],
                                      geneAnnot[idx$subjectHits], select = "all",
                                      ignore.strand = TRUE)
@@ -507,7 +507,7 @@ getRegionNearGenes <- function(TRange = NULL,
         suppressWarnings(tibble::as_tibble(geneAnnot[idx$subjectHits])),
         suppressWarnings(tibble::tibble(
           "ID" = names(TRange)[evaluating],
-          "Distance" = ifelse(TRange[evaluating] < geneAnnot[idx$subjectHits], 1,-1) *
+          "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
             distance(TRange[evaluating],
                                     geneAnnot[idx$subjectHits], select = "all",ignore.strand = TRUE)
         ))
@@ -524,7 +524,7 @@ getRegionNearGenes <- function(TRange = NULL,
       x <- x[order(x$Distance), ]
       center <- which(x$Distance == min(abs(x$Distance)))[1]
       pos <- setdiff(-center:(nrow(x) - center), 0)
-      x$Side <- ifelse(pos < 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
+      x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
       out <-  x %>% filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
                                        paste0("L", 1:(numFlankingGenes / 2))
       )
