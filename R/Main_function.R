@@ -1446,6 +1446,7 @@ get.TFs <- function(data,
   TF.rank.plot(motif.pvalue = TF.meth.cor, 
                motif        = colnames(TF.meth.cor), 
                dir.out      = sprintf("%s/TFrankPlot",dir.out), 
+               cores        = cores,
                save         = TRUE)
   return(cor.summary)
 }
