@@ -5,8 +5,8 @@
 \title{U test (non parameter test) for permutation. This is one probe vs nearby gene 
 which is good for computing each probes for nearby genes.}
 \usage{
-Stat.nonpara(Probe, NearGenes, Top = NULL, unmethy = NULL,
-  methy = NULL, Meths = Meths, Exps = Exps)
+Stat.nonpara(Probe, NearGenes, Top = NULL, unmethy = NULL, methy = NULL,
+  Meths = Meths, Exps = Exps)
 }
 \arguments{
 \item{Probe}{A character of name of Probe in array.}

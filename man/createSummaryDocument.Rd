@@ -6,8 +6,7 @@
 \usage{
 createSummaryDocument(analysis = "all", argument.values = "defaults",
   genome = NULL, mae.path = NULL, mode = NULL, direction = NULL,
-  group.col = NULL, group1 = NULL, group2 = NULL,
-  results.path = NULL)
+  group.col = NULL, group1 = NULL, group2 = NULL, results.path = NULL)
 }
 \arguments{
 \item{analysis}{Which analysis were performed}

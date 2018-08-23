@@ -5,8 +5,8 @@
 \title{TF.rank.plot to plot the scores (-log10(P value)) which assess the correlation between 
 TF expression and average DNA methylation at motif sites.}
 \usage{
-TF.rank.plot(motif.pvalue, motif, title = NULL, TF.label,
-  dir.out = "./", save = TRUE)
+TF.rank.plot(motif.pvalue, motif, title = NULL, TF.label = NULL,
+  dir.out = "./", save = TRUE, cores = 1)
 }
 \arguments{
 \item{motif.pvalue}{A matrix or a path specifying location of  "XXX.with.motif.pvalue.rda"
@@ -23,6 +23,9 @@ the motif relevant TF and top3 TF will be labeled.}
 Current directory is default.}
 
 \item{save}{A logic. If true (default), figure will be saved to dir.out}
+
+\item{cores}{A interger which defines the number of cores to be used in parallel process. 
+Default is 1: no parallel process.}
 }
 \value{
 A plot shows the score (-log(P value)) of association between TF

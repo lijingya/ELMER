@@ -194,6 +194,8 @@ heatmapPairs <- function(data,
                          group1, 
                          group2, 
                          pairs, 
+                         subset = FALSE,
+                         plot.distNearestTSS = FALSE,
                          annotation.col = NULL, 
                          met.metadata = NULL,
                          exp.metadata = NULL,
@@ -205,11 +207,12 @@ heatmapPairs <- function(data,
   if(missing(group.col)) stop("Please set group.col argument")
   if(missing(pairs)) stop("Please set probe argument")
   
-  if(!"distNearestTSS" %in% colnames(pairs)) {
+  if((!"distNearestTSS" %in% colnames(pairs)) & plot.distNearestTSS) {
     # For a given probe and gene find nearest TSS
     pairs <- addDistNearestTSS(data, pairs)
   }
-  if(!missing(group1)){
+  if(!missing(group1) & subset){
+    message("Subsetting")
     data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   }
   meth <- assay(getMet(data))[pairs$Probe,]
@@ -218,6 +221,7 @@ heatmapPairs <- function(data,
   order <- NULL
   cluster_columns <- TRUE
   if(!missing(group1)){
+    message("Ordering groups")
     cluster_columns <- FALSE
     idx1 <- which(colData(data)[,group.col] == group1)
     aux <- na.omit(meth[,idx1])
@@ -228,7 +232,21 @@ heatmapPairs <- function(data,
     dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
     
     order <- c(idx1[dist1$order],idx2[dist2$order])
+    
+    if(!subset){
+      idx2 <- which(!colData(data)[,group.col] %in% c(group1,group2))
+      aux <- na.omit(meth[,idx2])
+      dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
+      order <- c(order,idx2[dist2$order])
+    }
+  } else {
+    cluster_columns <- FALSE
+    aux <- na.omit(meth)
+    dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
+    order <- dist1$order
   }
+  
+  
   # Create color
   colors <- c("#6495ED", "#8B2323", "#458B74", "#7AC5CD",  
               "#4F4F4F", "#473C8B", "#00F5FF", "#CD6889", 
@@ -339,17 +357,17 @@ heatmapPairs <- function(data,
                 show_column_names = F
         ) 
   }
-  
-  ht_list <-  ht_list +
-    Heatmap(log10(pairs$distNearestTSS + 1),
-            name = "log10(distNearestTSS + 1)", 
-            width = unit(5, "mm"),
-            column_title = "", 
-            show_column_names = F,
-            col = colorRamp2(c(0, 8), c("white", "orange")),
-            heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
-                                        labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
-  
+  if(plot.distNearestTSS){
+    ht_list <-  ht_list +
+      Heatmap(log10(pairs$distNearestTSS + 1),
+              name = "log10(distNearestTSS + 1)", 
+              width = unit(5, "mm"),
+              column_title = "", 
+              show_column_names = F,
+              col = colorRamp2(c(0, 8), c("white", "orange")),
+              heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
+                                          labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
+  }
   ht_list <- ht_list +
     ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
                   heatmap_legend_labels_gp = gpar(fontsize = 10))
@@ -366,7 +384,9 @@ heatmapPairs <- function(data,
     if(height < 100) height <- 1000
     png(filename, width = width, height = height)
   }
-  draw(ht_list, padding = padding, newpage = TRUE, 
+  draw(ht_list, 
+       #padding = padding, 
+       newpage = TRUE, 
        column_title = "Correspondence between probe DNA methylation and distal gene expression", 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
        annotation_legend_side = "right")

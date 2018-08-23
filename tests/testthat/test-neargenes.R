@@ -12,21 +12,24 @@ test_that("It maps correctly to hg38", {
   
   NearbyGenes <- ELMER:::getRegionNearGenes(TRange = probe,
                                        geneAnnot = geneAnnot,
-                                       numFlankingGenes = 2)
+                                       numFlankingGenes = 4)
   
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","GeneID"], "ENSG00000184908")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","GeneID"], "ENSG00000185519")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","Symbol"], "CLCNKB")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","Symbol"], "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","GeneID"], "ENSG00000184908")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","GeneID"], "ENSG00000185519")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","Symbol"], "CLCNKB")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","Symbol"], "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","GeneID"], "ENSG00000142627")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","Symbol"], "EPHA2")
   
-  NearbyGenes <- GetNearGenes(numFlankingGenes = 2,
+  NearbyGenes <- GetNearGenes(numFlankingGenes = 4,
                               geneAnnot = geneAnnot,
                               TRange = probe)
-  res <- NearbyGenes
-  expect_equal(res[res$Side == "L1","GeneID"], "ENSG00000184908")
-  expect_equal(res[res$Side == "R1","GeneID"], "ENSG00000185519")
-  expect_equal(res[res$Side == "L1","Symbol"], "CLCNKB")
-  expect_equal(res[res$Side == "R1","Symbol"], "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","GeneID"], "ENSG00000184908")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","GeneID"], "ENSG00000185519")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","Symbol"], "CLCNKB")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","Symbol"], "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","GeneID"], "ENSG00000142627")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","Symbol"], "EPHA2")
 })
 
 test_that("It maps correctly to hg19", {

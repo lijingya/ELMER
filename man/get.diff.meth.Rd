@@ -4,10 +4,10 @@
 \alias{get.diff.meth}
 \title{Identify hypo/hyper-methylated CpG sites between two groups (i.e. normal vs tumor samples, treated vs untreated).}
 \usage{
-get.diff.meth(data, diff.dir = "hypo", cores = 1,
-  mode = "unsupervised", minSubgroupFrac = 0.2, pvalue = 0.01,
-  group.col, min.samples = 5, group1, group2, test = t.test,
-  sig.dif = 0.3, dir.out = "./", save = TRUE)
+get.diff.meth(data, diff.dir = "hypo", cores = 1, mode = "unsupervised",
+  minSubgroupFrac = 0.2, pvalue = 0.01, group.col, min.samples = 5,
+  group1, group2, test = t.test, sig.dif = 0.3, dir.out = "./",
+  save = TRUE)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
