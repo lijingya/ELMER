@@ -9,11 +9,9 @@
 #' @param Clinic A logic if TRUE clinic data will be download for that disease.
 #' @param genome Data aligned against which genome of reference. Options: "hg19", "hg38" (default)
 #' @param basedir A path shows where the data will be stored.
-#' @param Methfilter A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.
 #' @return Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for
 #' the specified disease from TCGA.
-#' @usage getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
-#'                genome = "hg38", Methfilter=0.2)
+#' @usage getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", genome = "hg38")
 #' @export
 #' @examples
 #' getTCGA(disease = "BRCA",
@@ -28,15 +26,14 @@ getTCGA <- function(disease,
                     RNA = TRUE,
                     Clinic = TRUE,
                     basedir = "./Data",
-                    genome = "hg38",
-                    Methfilter = 0.2){
+                    genome = "hg38"){
   
   if(missing(disease)) stop("disease need to be specified.")
   
   if(Meth){
     print.header("Downloading DNA methylation", "subsection")
     test.meth <- tryCatch({
-      get450K(disease, basedir,filter = Methfilter, genome = genome)
+      get450K(disease, basedir, genome = genome)
     }, error = function(err){
       return("error")
     })

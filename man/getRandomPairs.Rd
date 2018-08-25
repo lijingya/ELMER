@@ -4,7 +4,8 @@
 \alias{getRandomPairs}
 \title{Get random pairs}
 \usage{
-getRandomPairs(pairs, genome = "hg38", met.platform = "450K", cores = 1)
+getRandomPairs(pairs, genome = "hg38", met.platform = "450K",
+  cores = 1)
 }
 \arguments{
 \item{pairs}{A data frame with probe, gene and side information. See example below.}

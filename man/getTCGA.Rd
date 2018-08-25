@@ -4,8 +4,7 @@
 \alias{getTCGA}
 \title{getTCGA to download DNA methylation, RNA expression and clinic data for all samples of certain cancer type from TCGA.}
 \usage{
-getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", 
-               genome = "hg38", Methfilter=0.2)
+getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data", genome = "hg38")
 }
 \arguments{
 \item{disease}{A character specifies the disease to download in TCGA such as BLCA}
@@ -19,8 +18,6 @@ getTCGA(disease, Meth=TRUE, RNA=TRUE, Clinic=TRUE, basedir="./Data",
 \item{basedir}{A path shows where the data will be stored.}
 
 \item{genome}{Data aligned against which genome of reference. Options: "hg19", "hg38" (default)}
-
-\item{Methfilter}{A number. For each probe, the percentage of NA among the all the samples should smaller than Methfilter.}
 }
 \value{
 Download DNA methylation (HM450K)/RNAseq(HiseqV2)/Clinic data for

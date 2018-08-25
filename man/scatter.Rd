@@ -4,9 +4,9 @@
 \alias{scatter}
 \title{scatter}
 \usage{
-scatter(meth, exp, legend.title = "Legend", category = NULL, xlab = NULL,
-  ylab = NULL, ylim = NULL, title = NULL, correlation = FALSE,
-  color.value = NULL, lm_line = FALSE)
+scatter(meth, exp, legend.title = "Legend", category = NULL,
+  xlab = NULL, ylab = NULL, ylim = NULL, title = NULL,
+  correlation = FALSE, color.value = NULL, lm_line = FALSE)
 }
 \arguments{
 \item{meth}{A vector of number.}

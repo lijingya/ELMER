@@ -4,8 +4,9 @@
 \alias{getTFtargets}
 \title{Get TF target genes}
 \usage{
-getTFtargets(pairs, enriched.motif, TF.result, dmc.analysis, mae, save = TRUE,
-  dir.out = "./", classification = "family", cores = 1, label = NULL)
+getTFtargets(pairs, enriched.motif, TF.result, dmc.analysis, mae,
+  save = TRUE, dir.out = "./", classification = "family",
+  cores = 1, label = NULL)
 }
 \arguments{
 \item{pairs}{Output of get.pairs function: dataframe or file path}
