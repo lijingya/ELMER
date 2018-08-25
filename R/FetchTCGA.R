@@ -95,11 +95,13 @@ getRNAseq <- function(disease,
   if(!file.exists(fout)){
     
     if (genome == "hg38"){
+      message("Downloading HTSeq - FPKM-UQ data (hg38)")
       query <- GDCquery(project = paste0("TCGA-",toupper(disease)), 
                         data.category = "Transcriptome Profiling", 
                         data.type = "Gene Expression Quantification", 
                         workflow.type = "HTSeq - FPKM-UQ")
     } else {
+      message("Downloading RSEM - normalized results data (hg19)")
       query <- GDCquery(project = paste0("TCGA-",toupper(disease)),
                         data.category = "Gene expression",
                         data.type = "Gene expression quantification",
@@ -117,8 +119,7 @@ getRNAseq <- function(disease,
     # Preparing to save output if it does not exists
     rna <- GDCprepare(query, 
                       directory = dir.rna,
-                      save = TRUE,
-                      save.filename =   sprintf("%s/%s_RNA_%s_no_filter.rda",diseasedir,toupper(disease), genome),
+                      save = FALSE,
                       remove.files.prepared = TRUE,
                       summarizedExperiment = TRUE)
     if(genome == "hg19"){
