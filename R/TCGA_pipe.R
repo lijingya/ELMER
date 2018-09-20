@@ -475,7 +475,7 @@ addMutCol <- function(data,
                                                         "In_Frame_Ins",
                                                         "Translation_Start_Site",
                                                         "Nonstop_Mutation")){
-  maf <- TCGAbiolinks::GDCquery_Maf(disease , pipeline = "mutect2")
+  maf <- TCGAbiolinks::GDCquery_Maf(disease, pipeline = "mutect2")
   for(gene in genes) {
     if(gene %in% maf$Hugo_Symbol) {
       message("Adding information for gene: ", gene)

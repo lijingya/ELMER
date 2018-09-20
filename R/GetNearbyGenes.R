@@ -317,7 +317,7 @@ calcDistNearestTSS <- function(links,
   }
   
   if(!"ID" %in% colnames(values(TRange))){
-    TRange$ID <- rownames(TRange)
+    TRange$ID <- names(TRange)
   }
   merged <- dplyr::left_join(links,
                              suppressWarnings(tibble::as_tibble(tssAnnot)),
