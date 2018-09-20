@@ -86,8 +86,9 @@ devtools::install_github(repo = "tiagochst/ELMER")
 To install this package from Bioconductor start R and enter:
   
 ```{r, eval = FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("ELMER")
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("ELMER")
 ```
   
 Then, to load ELMER enter:
