@@ -5,9 +5,9 @@
 \title{Heatmap of pairs gene and probes anti-correlated}
 \usage{
 heatmapPairs(data, group.col, group1, group2, pairs, subset = FALSE,
-  plot.distNearestTSS = FALSE, annotation.col = NULL,
-  met.metadata = NULL, exp.metadata = NULL, width = 10, height = 7,
-  filename = NULL)
+  cluster.within.groups = TRUE, plot.distNearestTSS = FALSE,
+  annotation.col = NULL, met.metadata = NULL, exp.metadata = NULL,
+  width = 10, height = 7, filename = NULL)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.}
@@ -23,6 +23,8 @@ That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{pairs}{List of probe and pair genes}
+
+\item{cluster.within.groups}{Cluster columns based on the groups}
 
 \item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
 to be added as annotation to the heatmap.}

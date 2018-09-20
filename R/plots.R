@@ -163,6 +163,7 @@ metBoxPlot <- function(data,
 #' @param width Figure width
 #' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
+#' @param cluster.within.groups Cluster columns based on the groups
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
 #' @importFrom stats hclust dist
@@ -195,6 +196,7 @@ heatmapPairs <- function(data,
                          group2, 
                          pairs, 
                          subset = FALSE,
+                         cluster.within.groups = TRUE,
                          plot.distNearestTSS = FALSE,
                          annotation.col = NULL, 
                          met.metadata = NULL,
@@ -220,31 +222,18 @@ heatmapPairs <- function(data,
   
   order <- NULL
   cluster_columns <- TRUE
-  if(!missing(group1)){
+  if(cluster.within.groups){
     message("Ordering groups")
     cluster_columns <- FALSE
-    idx1 <- which(colData(data)[,group.col] == group1)
-    aux <- na.omit(meth[,idx1])
-    dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-    
-    idx2 <- which(colData(data)[,group.col] == group2)
-    aux <- na.omit(meth[,idx2])
-    dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-    
-    order <- c(idx1[dist1$order],idx2[dist2$order])
-    
-    if(!subset){
-      idx2 <- which(!colData(data)[,group.col] %in% c(group1,group2))
-      aux <- na.omit(meth[,idx2])
-      dist2 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-      order <- c(order,idx2[dist2$order])
+    order <- unlist(plyr::alply(unique(colData(data)[,group.col]), 1 , function(x) {
+      idx <- which(colData(data)[,group.col] == x)
+      aux <- na.omit(meth[,idx])
+      order <- t(aux) %>% dist %>% hclust(method = "average")
+      as.numeric(idx[order$order])
     }
-  } else {
-    cluster_columns <- FALSE
-    aux <- na.omit(meth)
-    dist1 <-  t(aux) %>% dist %>% hclust(method = "ward.D2")
-    order <- dist1$order
+    ))
   }
+  
   
   
   # Create color
@@ -316,7 +305,7 @@ heatmapPairs <- function(data,
             column_order = order, 
             show_row_names = F,
             cluster_columns = cluster_columns,
-            cluster_rows = F,
+            cluster_rows = T,
             row_names_gp = gpar(fontsize = 6),
             top_annotation = ha,
             column_title = "DNA methylation", 
