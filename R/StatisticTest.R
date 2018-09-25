@@ -129,10 +129,15 @@ Stat.nonpara <- function(Probe,
   # Here we will test if the Expression of the unmethylated group is higher than the exptression of the methylated group
   test.p <- unlist(lapply(splitmatrix(Exp),
                           function(x) {
-                            wilcox.test(x[unmethy],
-                                        x[methy],
-                                        alternative = "greater",
-                                        exact = FALSE)$p.value}))
+                            tryCatch({
+                              wilcox.test(x[unmethy],
+                                          x[methy],
+                                          alternative = "greater",
+                                          exact = FALSE)$p.value},
+                              error = function(x){
+                                NA
+                              })
+                          }))
   
   if(length(Gene)==1){
     Raw.p <- test.p
