@@ -34,6 +34,7 @@
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
 #'@param ylim y-axis limit i.e. c(0,25)
+#'@param dots.size Dots size
 #'@param save A logic. If true, figure will be saved to dir.out.
 #'@param height PDF height
 #'@param width PDF width
@@ -66,6 +67,7 @@ scatter.plot <- function(data,
                                      probe = c()), 
                          category=NULL, 
                          ylim = NULL,
+                         dots.size = 0.9,
                          correlation = FALSE,
                          width = 7,
                          height = 6,
@@ -88,7 +90,7 @@ scatter.plot <- function(data,
     legend.title <- simpleCap(category)
     samples <- sampleMap(data)[sampleMap(data)$assay == "DNA methylation","primary"]
     category <- colData(data)[samples,category]
-    category <- sapply(category, simpleCap)
+    if(!"color.value" %in% names(list(...)))  category <- sapply(category, simpleCap)
   }
   
   if(length(byPair$probe) != 0){
@@ -109,6 +111,7 @@ scatter.plot <- function(data,
                    exp      = assay(getExp(data)[gene,] ),
                    category = category, 
                    ylim     = ylim,
+                   dots.size = dots.size,
                    legend.title = legend.title,
                    correlation = correlation,
                    xlab     = sprintf("DNA methylation at %s",probe), 
@@ -136,6 +139,7 @@ scatter.plot <- function(data,
                    exp      = exp,
                    ylim     = ylim,
                    category = category,
+                   dots.size = dots.size,
                    legend.title = legend.title,
                    xlab     = sprintf("DNA methylation at %s", probe), 
                    ylab     = sprintf("Gene expression"), 
@@ -147,8 +151,8 @@ scatter.plot <- function(data,
   }
   
   if(length(byTF$TF)!=0){
-    
-    meth <- colMeans(assay(getMet(data)[byTF$probe,]),na.rm = TRUE)
+    probes <- byTF$probe[byTF$probe %in% rownames(assay(getMet(data)))]
+    meth <- colMeans(assay(getMet(data)[probes,]),na.rm = TRUE)
     gene <- getGeneID(data,symbol = byTF$TF)
     
     # Our input might not be mapped, we need to verify it    
@@ -173,6 +177,8 @@ scatter.plot <- function(data,
                  exp      = exp,
                  ylim     = ylim,
                  category = category,
+                 dots.size = dots.size,
+                 correlation = correlation,
                  legend.title = legend.title,
                  xlab     = "Avg DNA methylation", 
                  ylab     = sprintf("TF expression"), 
@@ -206,14 +212,15 @@ scatter.plot <- function(data,
 scatter <- function(meth, 
                     exp, 
                     legend.title = "Legend",
-                    category=NULL, 
-                    xlab=NULL, 
-                    ylab=NULL,
+                    category = NULL, 
+                    xlab = NULL, 
+                    ylab = NULL,
                     ylim = NULL,
-                    title=NULL,
+                    dots.size = 0.9,
+                    title = NULL,
                     correlation = FALSE,
-                    color.value=NULL,
-                    lm_line=FALSE){
+                    color.value = NULL,
+                    lm_line = FALSE){
   
   if(is.null(category)) category <- rep(1,length(meth))
   
@@ -224,7 +231,7 @@ scatter <- function(meth,
     exp$category <- category
     df <- melt.data.frame(exp, measure.vars = GeneID)
     P <- ggplot(df, aes(x = meth, y = value, color = factor(category))) +
-      geom_point(size = 0.9) +
+      geom_point(size = dots.size) +
       facet_wrap(facets = ~ variable, ncol = 5) +
       scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1)) +
       theme_bw() +
@@ -238,16 +245,19 @@ scatter <- function(meth,
                                    title.position="top", 
                                    nrow = ceiling(sum(stringr::str_length(unique(category)))/100),
                                    title.hjust = 0.5)) 
-    if(!is.null(color.value)) P <- P + scale_colour_manual(values = color.value)
+    if(!is.null(color.value)) {
+    
+      P <- P + scale_colour_manual(values = color.value)
+    }
     if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
     if(lm_line) P <- P + geom_smooth(method = "lm", se=TRUE, color="black", formula = y ~ x,data=df)
     if(correlation){
       cor <- cor.test(x = as.numeric(meth), 
                       y = as.numeric(exp[,GeneID]),
-                      method=c("pearson"))
+                      method=c("spearman"))
       corval <- round(cor$estimate,digits = 2)
       pvalue <- signif(cor$p.value,digits=3)
-      P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("PCC: ",corval," / P-value: ",pvalue))
+      P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("Rho: ",corval," / P-value: ",pvalue))
     }
   } else {
     df <- data.frame(meth=meth,exp=exp,category=category)

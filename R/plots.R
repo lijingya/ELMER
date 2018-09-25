@@ -217,6 +217,11 @@ heatmapPairs <- function(data,
     message("Subsetting")
     data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   }
+  
+  # Remove pairs to be ploted if not found in the object
+  pairs <- pairs[pairs$Probe %in% rownames(getMet(data)),]
+  pairs <- pairs[pairs$GeneID %in% rownames(getExp(data)),]
+  
   meth <- assay(getMet(data))[pairs$Probe,]
   exp <- assay(getExp(data))[pairs$GeneID,]
   
@@ -249,6 +254,7 @@ heatmapPairs <- function(data,
   l.all <-  l
   col <- colors[1:l]
   names(col) <- unique(colData(data)[,c(group.col)]) 
+  names(col)[is.na(names(col))] <- "NA"
   col.list <- list()
   col.list[[group.col]] <- col
   
@@ -301,11 +307,14 @@ heatmapPairs <- function(data,
             name = "DNA methylation level", 
             col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
             column_names_gp = gpar(fontsize = 8),
-            show_column_names = F,
+            show_column_names = FALSE,
             column_order = order, 
-            show_row_names = F,
+            show_row_names = FALSE,
+            use_raster = TRUE,
+            raster_device = c("png"),
+            raster_quality = 2,
             cluster_columns = cluster_columns,
-            cluster_rows = T,
+            cluster_rows = TRUE,
             row_names_gp = gpar(fontsize = 6),
             top_annotation = ha,
             column_title = "DNA methylation", 
@@ -317,6 +326,9 @@ heatmapPairs <- function(data,
       ht_list <- ht_list + 
         Heatmap(values(getMet(data)[pairs$Probe,])[i],
                 name = i, 
+                use_raster = TRUE,
+                raster_device = c("png"),
+                raster_quality = 2,
                 width = unit(5, "mm"),
                 column_title = "", 
                 show_column_names = F
@@ -328,11 +340,14 @@ heatmapPairs <- function(data,
             name = "Expression (z-score)", 
             col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
             top_annotation = ha2,
-            show_row_names = F,
+            show_row_names = FALSE,
+            use_raster = TRUE,
+            raster_device = c("png"),
+            raster_quality = 2,
             column_order = order, 
             cluster_columns = cluster_columns,
             column_names_gp = gpar(fontsize = 8), 
-            show_column_names = F,
+            show_column_names = FALSE,
             column_title = "Expression", 
             column_title_gp = gpar(fontsize = 10)) 
   
@@ -341,9 +356,12 @@ heatmapPairs <- function(data,
       ht_list <- ht_list + 
         Heatmap(values(getExp(data)[pairs$Probe,])[i],
                 name = i, 
+                use_raster = TRUE,
+                raster_device = c("png"),
+                raster_quality = 2,
                 width = unit(5, "mm"),
                 column_title = "", 
-                show_column_names = F
+                show_column_names = FALSE
         ) 
   }
   if(plot.distNearestTSS){
@@ -352,7 +370,10 @@ heatmapPairs <- function(data,
               name = "log10(distNearestTSS + 1)", 
               width = unit(5, "mm"),
               column_title = "", 
-              show_column_names = F,
+              show_column_names = FALSE,
+              use_raster = TRUE,
+              raster_device = c("png"),
+              raster_quality = 2,
               col = colorRamp2(c(0, 8), c("white", "orange")),
               heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
                                           labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
