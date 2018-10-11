@@ -5,8 +5,9 @@
 \title{scatter}
 \usage{
 scatter(meth, exp, legend.title = "Legend", category = NULL,
-  xlab = NULL, ylab = NULL, ylim = NULL, title = NULL,
-  correlation = FALSE, color.value = NULL, lm_line = FALSE)
+  xlab = NULL, ylab = NULL, ylim = NULL, dots.size = 0.9,
+  title = NULL, correlation = FALSE, color.value = NULL,
+  lm_line = FALSE)
 }
 \arguments{
 \item{meth}{A vector of number.}

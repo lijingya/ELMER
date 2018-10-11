@@ -953,6 +953,7 @@ calculateEnrichement <- function(foreground,
 #' Obs: for each probe we create a winddow of 500 bp (-size 500) around it. 
 #' This might lead to false positives, but will not have false negatives.
 #' The false posives will be removed latter with some statistical tests.
+#' @importFrom utils write.table
 #' @examples 
 #' \dontrun{
 #'  # use the center of the region and +-250bp around it

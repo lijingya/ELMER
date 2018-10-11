@@ -11,7 +11,7 @@ get.TFs(data,
           group1,
           group2,
           mode = "unsupervised",
-         diff.dir = NULL,
+          diff.dir = NULL,
           motif.relevant.TFs, 
           minSubgroupFrac = 0.4,
           dir.out = "./",
@@ -66,6 +66,8 @@ U group and the highest quintile of all samples in the M group).}
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
 
 \item{label}{A character labels the outputs.}
+
+\item{save.plots}{Create TF ranking plots ?}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.}
 

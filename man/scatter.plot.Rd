@@ -37,6 +37,8 @@ will label different color. The color can be customized by using color.value.}
 
 \item{ylim}{y-axis limit i.e. c(0,25)}
 
+\item{dots.size}{Dots size}
+
 \item{correlation}{Add pearson correlation values to the plot}
 
 \item{width}{PDF width}
