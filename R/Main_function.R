@@ -160,6 +160,7 @@ get.feature.probe <- function(feature = NULL,
 #' @importFrom plyr adply
 #' @importFrom stats p.adjust
 #' @importFrom MultiAssayExperiment colData
+#' @importFrom TCGAbiolinks TCGAVisualize_volcano
 #' @references 
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
@@ -274,7 +275,7 @@ get.diff.meth <- function(data,
     ylab <- ifelse(is.na(diff.dir),
                    " (FDR corrected P-values) [two tailed test]",
                    " (FDR corrected P-values) [one tailed test]")
-    TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
+    TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
                                          y = out$adjust.p, 
                                          title =  paste0("Volcano plot - Probes ",
                                                          ifelse(is.na(diff.dir),"differently ",diff.dir),
