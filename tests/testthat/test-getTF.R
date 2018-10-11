@@ -259,6 +259,7 @@ test_that("Test if the results is right", {
                   group.col = "group",
                   group1 = "g1",
                   group2 = "g2",
+                  save.plots = TRUE,
                   TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
                                    ensembl_gene_id= c("ENSG00000141510",
                                                       "ENSG00000073282",
@@ -273,7 +274,6 @@ test_that("Test if the results is right", {
 })
 
 test_that("It creates a PDF with the TF ranking plot", {
-  expect_true(file.exists("TFrankPlot/P53_HUMAN.H11MO.0.A.TFrankPlot.pdf"))
   expect_true(file.exists("TFrankPlot/P53_HUMAN.H11MO.0.A.TFrankPlot.pdf"))
   unlink("TFrankPlot",recursive = TRUE, force = TRUE)
   unlink("getTF.hypo.significant.TFs.with.motif.summary.csv",recursive = TRUE, force = TRUE)
