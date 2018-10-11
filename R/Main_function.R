@@ -1148,7 +1148,7 @@ get.enriched.motif <- function(data,
 #'           group1,
 #'           group2,
 #'           mode = "unsupervised",
-#'          diff.dir = NULL,
+#'           diff.dir = NULL,
 #'           motif.relevant.TFs, 
 #'           minSubgroupFrac = 0.4,
 #'           dir.out = "./",
@@ -1193,6 +1193,7 @@ get.enriched.motif <- function(data,
 #' "hyper" which means the probes are hypermethylated in group1; 
 #' This argument is used only when mode is supervised nad 
 #' it should be the same value from get.diff.meth function.
+#' @param save.plots Create TF ranking plots ?
 #' @export 
 #' @details 
 #' save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
@@ -1262,6 +1263,7 @@ get.TFs <- function(data,
                     minSubgroupFrac = 0.4,
                     dir.out = "./",
                     label = NULL,
+                    save.plots = FALSE,
                     cores = 1,
                     save = TRUE){
   if(missing(data)){
@@ -1440,14 +1442,16 @@ get.TFs <- function(data,
                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   } 
   
-  print.header("Creating plots", "subsection")
-  message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
-  dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
-  TF.rank.plot(motif.pvalue = TF.meth.cor, 
-               motif        = colnames(TF.meth.cor), 
-               dir.out      = sprintf("%s/TFrankPlot",dir.out), 
-               cores        = cores,
-               save         = TRUE)
+  if(save.plots){
+    print.header("Creating plots", "subsection")
+    message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
+    dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
+    TF.rank.plot(motif.pvalue  = TF.meth.cor, 
+                 motif         = colnames(TF.meth.cor), 
+                 dir.out       = sprintf("%s/TFrankPlot",dir.out), 
+                  cores        = cores,
+                  save         = TRUE)
+  }
   return(cor.summary)
 }
 

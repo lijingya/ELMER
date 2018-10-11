@@ -120,7 +120,7 @@ getRNAseq <- function(disease,
     rna <- GDCprepare(query, 
                       directory = dir.rna,
                       save = FALSE,
-                      remove.files.prepared = TRUE,
+                      remove.files.prepared = FALSE,
                       summarizedExperiment = TRUE)
     if(genome == "hg19"){
       rownames(rna) <- values(rna)$ensembl_gene_id
