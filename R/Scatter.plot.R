@@ -13,6 +13,7 @@
 #'              byTF = list(TF = c(), probe = c()),
 #'              category = NULL,
 #'              ylim = NULL,
+#'              dots.size = 0.9,
 #'              correlation = FALSE,
 #'              width = 7,
 #'              height = 6,
@@ -34,7 +35,7 @@
 #'@param dir.out A path specify the directory to which the figures will be saved. 
 #'Current directory is default.
 #'@param ylim y-axis limit i.e. c(0,25)
-#'@param dots.size Dots size
+#'@param dots.size Control dots size
 #'@param save A logic. If true, figure will be saved to dir.out.
 #'@param height PDF height
 #'@param width PDF width
@@ -204,6 +205,7 @@ scatter.plot <- function(data,
 #'@param xlab A character specify the title of x axis.
 #'@param ylab A character specify the title of y axis.
 #'@param ylim y-axis limit i.e. c(0,25)
+#'@param dots.size Control dots size
 #'@param title A character specify the figure title.
 #'@param correlation Show person correlation values 
 #'@param color.value A vector specify the color of each category, such as 

@@ -24,7 +24,11 @@ hypermethylated in group 1 compared to group 2.}
 
 \item{pairs}{List of probe and pair genes}
 
+\item{subset}{Subset MAE object to keep only groups compared ?}
+
 \item{cluster.within.groups}{Cluster columns based on the groups}
+
+\item{plot.distNearestTSS}{Plot track with distNearestTSS ?}
 
 \item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
 to be added as annotation to the heatmap.}

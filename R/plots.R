@@ -155,6 +155,7 @@ metBoxPlot <- function(data,
 #' @param group2 A group from group.col. ELMER will run group1 vs group2. 
 #' That means, if direction is hyper, get probes
 #' hypermethylated in group 1 compared to group 2.
+#' @param subset Subset MAE object to keep only groups compared ?
 #' @param pairs List of probe and pair genes
 #' @param annotation.col A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
 #' to be added as annotation to the heatmap.
@@ -164,6 +165,7 @@ metBoxPlot <- function(data,
 #' @param height Figure height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
 #' @param cluster.within.groups Cluster columns based on the groups
+#' @param plot.distNearestTSS Plot track with distNearestTSS ?
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
 #' @importFrom stats hclust dist

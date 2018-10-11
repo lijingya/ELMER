@@ -1154,6 +1154,7 @@ get.enriched.motif <- function(data,
 #'           minSubgroupFrac = 0.4,
 #'           dir.out = "./",
 #'           label = NULL, 
+#'           save.plots = FALSE,
 #'           cores = 1,
 #'           save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.

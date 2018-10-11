@@ -16,6 +16,7 @@ get.TFs(data,
           minSubgroupFrac = 0.4,
           dir.out = "./",
           label = NULL, 
+          save.plots = FALSE,
           cores = 1,
           save = TRUE)
 }

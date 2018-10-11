@@ -24,6 +24,8 @@ scatter(meth, exp, legend.title = "Legend", category = NULL,
 
 \item{ylim}{y-axis limit i.e. c(0,25)}
 
+\item{dots.size}{Control dots size}
+
 \item{title}{A character specify the figure title.}
 
 \item{correlation}{Show person correlation values}

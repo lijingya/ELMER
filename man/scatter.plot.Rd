@@ -10,6 +10,7 @@ scatter.plot(data,
              byTF = list(TF = c(), probe = c()),
              category = NULL,
              ylim = NULL,
+             dots.size = 0.9,
              correlation = FALSE,
              width = 7,
              height = 6,
@@ -37,7 +38,7 @@ will label different color. The color can be customized by using color.value.}
 
 \item{ylim}{y-axis limit i.e. c(0,25)}
 
-\item{dots.size}{Dots size}
+\item{dots.size}{Control dots size}
 
 \item{correlation}{Add pearson correlation values to the plot}
 
