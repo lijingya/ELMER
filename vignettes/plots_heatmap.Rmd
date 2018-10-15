@@ -30,7 +30,7 @@ mae <- get(load("mae.rda"))
 
 Generate a heatmap of paired probes.
 
-```{r results='hide', echo=TRUE, message=FALSE, warning=FALSE, fig.width=10, fig.height=5, fig.cap="Heatmap of paired pairs."}
+```{r results='hide', echo=TRUE,eval=F, message=FALSE, warning=FALSE, fig.width=10, fig.height=5, fig.cap="Heatmap of paired pairs."}
 
 pair <- read.csv("result/getPair.hypo.pairs.significant.csv")
 
