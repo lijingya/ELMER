@@ -89,6 +89,9 @@ r_github_packages:
   - hfang-bristol/dnet
   - BioinformaticsFMRP/TCGAbiolinks
 
+install:
+  - echo 'GITHUB_PAT=15f150aedeaf7dea7ba59ffacb54243b66c10618' > .Renviron
+  
 script: 
   - |
     travis_wait R CMD build .

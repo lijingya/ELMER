@@ -39,6 +39,7 @@ build_script:
   - travis-tool.sh install_bioc clusterProfiler
   - travis-tool.sh install_bioc GenomicInteractions
   - travis-tool.sh install_bioc ELMER.data
+  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_github BioinformaticsFMRP/TCGAbiolinks tiagochst/ELMER.data
   
 test_script:
