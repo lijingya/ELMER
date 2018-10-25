@@ -87,8 +87,17 @@ Stat.nonpara.permu <- function(Probe,
   }
   test.p <- unlist(lapply(splitmatrix(Exps),
                           function(x) {
-                            wilcox.test(x[unmethy],x[methy],alternative = "greater",exact=FALSE)$p.value
-                          }))
+                            tryCatch({
+                              wilcox.test(x[unmethy],
+                                          x[methy],
+                                          alternative = "greater",
+                                          exact = FALSE)$p.value
+                            }, error = function(e){
+                              NA
+                            })                            
+                          }
+                          
+  ))
   
   test.p <- data.frame(GeneID=Gene,
                        Raw.p=test.p[match(Gene, names(test.p))], 
