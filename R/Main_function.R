@@ -220,13 +220,6 @@ get.diff.meth <- function(data,
   if(diff.dir %in% c("both")) diff.dir <- NA
   
   
-  counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
-  message(paste0("ELMER will search for probes ", ifelse(is.na(diff.dir),"differently ",diff.dir),"methylated in group ",
-                 group1, " (n:",subset(counts,x == group1)$freq,")", 
-                 " compared to ", 
-                 group2, " (n:",subset(counts,x == group2)$freq,")"))
-  message(paste0("Number of probes: ",nrow(getMet(data))))
-  
   parallel <- FALSE
   if (cores > 1){
     if (cores > detectCores()) cores <- detectCores()
@@ -242,6 +235,31 @@ get.diff.meth <- function(data,
     message("Supervised mode will use all samples from boths groups. Setting argument minSubgroupFrac to 1")
     minSubgroupFrac <- 1
   }
+  
+  counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
+  message(paste0("ELMER will search for probes ", ifelse(is.na(diff.dir),"differently ",diff.dir),"methylated in group ",
+                 group1, " (n:",subset(counts,x == group1)$freq,")", 
+                 " compared to ", 
+                 group2, " (n:",subset(counts,x == group2)$freq,")"))
+  
+  message(paste0("ooo Arguments ooo"))
+  message(paste0("o Number of probes: ",nrow(getMet(data))))
+  message(paste0("o Beta value difference cut-off: ",sig.dif))
+  message(paste0("o FDR cut-off: ", pvalue))
+  message(paste0("o Mode: ", mode))
+  message(paste0("o % of samples per group in each comparison: ", minSubgroupFrac))
+  message(paste0("o Min number of samples per group in each comparison: ", min.samples))
+  message(paste0("o Nb of samples group1 in each comparison: ",
+                 ifelse(round(subset(counts,x == group1)$freq * minSubgroupFrac) > min.samples,
+                        round(subset(counts,x == group1)$freq * minSubgroupFrac),
+                        min(min.samples,subset(counts,x == group1)$freq))))
+  message(paste0("o Nb of samples group2 in each comparison: ",
+                 ifelse(round(subset(counts,x == group2)$freq * minSubgroupFrac) > min.samples,
+                        round(subset(counts,x == group2)$freq * minSubgroupFrac),
+                        min(min.samples,subset(counts,x == group2)$freq))))
+  message(paste0("Output direction: ", dir.out))
+  message(paste0("ooooooooooooooooo"))
+  
   
   groups.info <- colData(data)[getMetSamples(data),group.col]
   met <- assay(getMet(data))
@@ -276,20 +294,20 @@ get.diff.meth <- function(data,
                    " (FDR corrected P-values) [two tailed test]",
                    " (FDR corrected P-values) [one tailed test]")
     TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
-                                         y = out$adjust.p, 
-                                         title =  paste0("Volcano plot - Probes ",
-                                                         ifelse(is.na(diff.dir),"differently ",diff.dir),
-                                                         "methylated in ", group1, " vs ", group2,"\n"),
-                                         filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
-                                         label =  c("Not Significant",
-                                                    paste0("Hypermethylated in ",group1),
-                                                    paste0("Hypomethylated in ",group1)),
-                                         ylab =  bquote(-Log[10] ~ .(ylab)),
-                                         xlab =  expression(paste(
-                                           "DNA Methylation difference (",beta,"-values)")
-                                         ),
-                                         x.cut = sig.dif, 
-                                         y.cut = pvalue)
+                          y = out$adjust.p, 
+                          title =  paste0("Volcano plot - Probes ",
+                                          ifelse(is.na(diff.dir),"differently ",diff.dir),
+                                          "methylated in ", group1, " vs ", group2,"\n"),
+                          filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
+                          label =  c("Not Significant",
+                                     paste0("Hypermethylated in ",group1),
+                                     paste0("Hypomethylated in ",group1)),
+                          ylab =  bquote(-Log[10] ~ .(ylab)),
+                          xlab =  expression(paste(
+                            "DNA Methylation difference (",beta,"-values)")
+                          ),
+                          x.cut = sig.dif, 
+                          y.cut = pvalue)
     write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
     write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
               path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
@@ -1008,7 +1026,7 @@ get.enriched.motif <- function(data,
                                dir.out="./",
                                label = NULL,
                                save = TRUE,
-                               plot.title = NULL){
+                               plot.title = ""){
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -1087,29 +1105,31 @@ get.enriched.motif <- function(data,
   message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
   enriched.motif <- alply(en.motifs, 
                           function(x, probes.TF) {
-                            rownames(probes.TF[probes.TF[,x]==1,x,drop=FALSE])
+                            rownames(probes.TF[probes.TF[,x] == 1,x,drop = FALSE])
                           },
-                          probes.TF=probes.TF,.margins = 1, .dims = FALSE)
+                          probes.TF = probes.TF,.margins = 1, .dims = FALSE)
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
   
   if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,ifelse(is.null(label),"",label)))
   
   ## make plot 
-  suppressWarnings({
-    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                               significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
-                               dir.out = dir.out,
-                               label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
-                               save=TRUE)
-    P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
-                               significant = list(lowerOR = lower.OR), 
-                               dir.out = dir.out,
-                               summary = TRUE,
-                               label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
-                               title = plot.title,
-                               save = TRUE)
-  })
+  if(length(enriched.motif) > 1){
+    suppressWarnings({
+      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+                                 significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR), 
+                                 dir.out = dir.out,
+                                 label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
+                                 save=TRUE)
+      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)), 
+                                 significant = list(lowerOR = lower.OR), 
+                                 dir.out = dir.out,
+                                 summary = TRUE,
+                                 label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
+                                 title = plot.title,
+                                 save = TRUE)
+    })
+  }
   ## add information to siginificant pairs
   if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))){
     sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)), 
@@ -1451,8 +1471,8 @@ get.TFs <- function(data,
     TF.rank.plot(motif.pvalue  = TF.meth.cor, 
                  motif         = colnames(TF.meth.cor), 
                  dir.out       = sprintf("%s/TFrankPlot",dir.out), 
-                  cores        = cores,
-                  save         = TRUE)
+                 cores        = cores,
+                 save         = TRUE)
   }
   return(cor.summary)
 }
