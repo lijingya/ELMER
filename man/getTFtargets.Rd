@@ -32,7 +32,7 @@ If save is false, only a data frame contains the same content with the first fil
 \item{label}{A character labels the outputs.}
 }
 \description{
-This function uses ELMER analysis 
+This function uses ELMER analysis
 results and summarizes the possible  genes targets for each TF
 }
 \examples{
@@ -42,7 +42,7 @@ enriched.motif <- list("FOXD3_HUMAN.H11MO.0.D"= c("cg26992800","cg26992900"))
 TF.result <- data.frame(motif = c("FOXD3_HUMAN.H11MO.0.D"),
                         potential.TF.family = c("TP63;TP73"))
 getTFtargets(pairs,enriched.motif,TF.result)
- 
+
 \dontrun{
 getTFtargets("../LUAD_LUSC_analysis_hg38/hyper/getPair.hyper.pairs.significant.csv",
 enriched.motif = "../LUAD_analysis_hg38/hyper/getMotif.hyper.enriched.motifs.rda",

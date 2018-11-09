@@ -5,14 +5,14 @@
 \title{get.permu to generate permutation results for calculation of empirical P values for
 each enhancer-gene linkage.}
 \usage{
-get.permu(data, 
-          geneID, 
+get.permu(data,
+          geneID,
           methy = NULL,
           unmethy = NULL,
-          percentage = 0.2, 
-          rm.probes = NULL, 
-          permu.size = 10000, 
-          permu.dir = NULL, 
+          percentage = 0.2,
+          rm.probes = NULL,
+          permu.size = 10000,
+          permu.dir = NULL,
           cores = 1)
 }
 \arguments{
@@ -40,13 +40,13 @@ Default is 1: don't use parallel process.}
 Permutations
 }
 \description{
-get.permu is a function to use the same statistic model to calculate random enhancer-gene 
-pairs. Based on the permutation value, empirical P value can be calculated for the 
+get.permu is a function to use the same statistic model to calculate random enhancer-gene
+pairs. Based on the permutation value, empirical P value can be calculated for the
 real enhancer-gene pair (see reference).
 }
 \note{
-Permutation is the most time consuming step. It is recommended to use multiple  
-cores for this step. Default permutation time is 1000 which may need 12 hrs by 4 cores. 
+Permutation is the most time consuming step. It is recommended to use multiple
+cores for this step. Default permutation time is 1000 which may need 12 hrs by 4 cores.
 However 10,000 permutations is recommended to get high confidence results. But it may cost 2 days.
 }
 \examples{
@@ -57,10 +57,10 @@ permu <-get.permu(data = data,
                   permu.size=5)
 }
 \references{
-Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
 \author{
-Lijing Yao (creator: lijingya@usc.edu) 
+Lijing Yao (creator: lijingya@usc.edu)
 Tiago C Silva (maintainer: tiagochst@usp.br)
 }

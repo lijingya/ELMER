@@ -10,55 +10,55 @@ get.diff.meth(data, diff.dir = "hypo", cores = 1,
   sig.dif = 0.3, dir.out = "./", save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data.
 See \code{\link{createMAE}} function.}
 
-\item{diff.dir}{A character can be "hypo", "hyper" or "both", showing differential 
-methylation direction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test); 
-"hyper" which is only selecting hypermethylated probes (one tailed test); 
+\item{diff.dir}{A character can be "hypo", "hyper" or "both", showing differential
+methylation direction.  It can be "hypo" which is only selecting hypomethylated probes (one tailed test);
+"hyper" which is only selecting hypermethylated probes (one tailed test);
 or "both" which are probes differenly methylated (two tailed test).}
 
-\item{cores}{A interger which defines the number of cores to be used in parallel 
+\item{cores}{A interger which defines the number of cores to be used in parallel
 process. Default is 1: no parallel process.}
 
 \item{mode}{A character. Can be "unsupervised" or "supervised". If "supervised", the
 minSubgroupFrac argument will be set to 1 to use all samples from both groups to find the
-differently methylated regions. The supervised mode should be used when all samples from both 
-groups are considered homogenous (i.e. treated vs untreated, molecular subtype A vs molecular subtype B), 
+differently methylated regions. The supervised mode should be used when all samples from both
+groups are considered homogenous (i.e. treated vs untreated, molecular subtype A vs molecular subtype B),
 while unsupervised mode should be used when there is at least one group with heterogenous samples
 (i.e tumor samples).}
 
-\item{minSubgroupFrac}{A number ranging from 0 to 1, 
-specifying the fraction of extreme samples from group 1 and group 2 
-that are used to identify the differential DNA methylation. 
-The default is 0.2 because we typically want to be able to detect a specific 
-(possibly unknown) molecular subtype among tumor; these subtypes often make up only 
-a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
-If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, 
+\item{minSubgroupFrac}{A number ranging from 0 to 1,
+specifying the fraction of extreme samples from group 1 and group 2
+that are used to identify the differential DNA methylation.
+The default is 0.2 because we typically want to be able to detect a specific
+(possibly unknown) molecular subtype among tumor; these subtypes often make up only
+a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power.
+If you are using pre-defined group labels, such as treated replicates vs. untreated replicated,
 use a value of 1.0 (Supervised mode)}
 
-\item{pvalue}{A number specifies the significant P value (adjusted P value by BH) 
+\item{pvalue}{A number specifies the significant P value (adjusted P value by BH)
 threshold Limit for selecting significant hypo/hyper-methylated probes. Default is 0.01
 If pvalue is smaller than pvalue than it is considered significant.}
 
-\item{group.col}{A column defining the groups of the sample. You can view the 
+\item{group.col}{A column defining the groups of the sample. You can view the
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
 \item{min.samples}{Minimun number of samples to use in the analysis. Default 5.
-If you have 10 samples in one group, minSubgroupFrac is 0.2 this will give 2 samples 
+If you have 10 samples in one group, minSubgroupFrac is 0.2 this will give 2 samples
 in the lower quintile, but then 5 will be used.}
 
-\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group2}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{test}{Statistical test to be used. Options: t.test (DEFAULT), wilcox.test}
 
-\item{sig.dif}{A number specifies the smallest DNA methylation difference as a cutoff for 
+\item{sig.dif}{A number specifies the smallest DNA methylation difference as a cutoff for
 selecting significant hypo/hyper-methylated probes. Default is 0.3.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is is current directory.}
@@ -69,17 +69,17 @@ selecting significant hypo/hyper-methylated probes. Default is 0.3.}
 Statistics for all probes and significant hypo or hyper-methylated probes.
 }
 \description{
-get.diff.meth applys one-way t-test to identify the CpG sites that are significantly 
-hypo/hyper-methyalated using proportional samples (defined by minSubgroupFrac option) from group 1 
-and group 2. The P values will be adjusted by Benjamini-Hochberg method. 
-Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant 
+get.diff.meth applys one-way t-test to identify the CpG sites that are significantly
+hypo/hyper-methyalated using proportional samples (defined by minSubgroupFrac option) from group 1
+and group 2. The P values will be adjusted by Benjamini-Hochberg method.
+Option pvalue and sig.dif will be the criteria (cutoff) for selecting significant
 differentially methylated CpG sites.
 If save is TURE, two getMethdiff.XX.csv files will be generated (see detail).
 }
 \details{
-save: 
- When save is TRUE, function will generate two XX.csv files.The first one is named 
- getMethdiff.hypo.probes.csv (or getMethdiff.hyper.probes.csv depends on diff.dir). 
+save:
+ When save is TRUE, function will generate two XX.csv files.The first one is named
+ getMethdiff.hypo.probes.csv (or getMethdiff.hyper.probes.csv depends on diff.dir).
  The first file contains all statistic results for each probe. Based on this
  file, user can change different P value or sig.dir cutoff to select the significant results
  without redo the analysis. The second file is named getMethdiff.hypo.probes.significant.csv
@@ -90,18 +90,18 @@ save:
 }
 \examples{
 data <- ELMER:::getdata("elmer.data.example")
-Hypo.probe <- get.diff.meth(data, 
+Hypo.probe <- get.diff.meth(data,
                             diff.dir="hypo",
-                            group.col = "definition", 
-                            group1 = "Primary solid Tumor", 
+                            group.col = "definition",
+                            group1 = "Primary solid Tumor",
                             group2 = "Solid Tissue Normal",
                             sig.dif = 0.1) # get hypomethylated probes
-Hyper.probe <- get.diff.meth(data, 
+Hyper.probe <- get.diff.meth(data,
                             diff.dir="hyper",
-                            group.col = "definition", 
+                            group.col = "definition",
                             sig.dif = 0.1) # get hypomethylated probes
 }
 \references{
-Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
