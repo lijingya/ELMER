@@ -1688,7 +1688,7 @@ maphg38tohg19 <- function(file,
 summarizeTF <- function(files = NULL,
                         path = NULL,
                         classification = "family",
-                        top = TRUE){
+                        top = FALSE){
 
     top <- ifelse(top, "top.", "")
     col <- ifelse(classification == "family",
