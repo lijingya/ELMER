@@ -282,7 +282,7 @@ TCGA.pipe <- function(disease,
     nearGenes.file <- args[names(args) %in% "nearGenes"]
     if(length(nearGenes.file)==0){
       nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
-      params <- args[names(args) %in% c("geneNum")]
+      params <- args[names(args) %in% c("numFlankingGenes")]
       nearGenes <- do.call(GetNearGenes,
                            c(list(data = mae, 
                                   probes = Sig.probes,
