@@ -309,6 +309,7 @@ addDistNearestTSS <- function(data,
 calcDistNearestTSS <- function(links,
                                TRange,
                                tssAnnot){
+	message("calculating Distance to nearest TSS")
   if(!is(tssAnnot,"GenomicRanges")){
     stop("tssAnnot is not a GenomicRanges")
   }
@@ -431,7 +432,6 @@ getRegionNearGenes <- function(TRange = NULL,
         )
       )
   })
-  
   for (i in 1:(numFlankingGenes)) {
     idx <-
       unique(rbind(
@@ -473,7 +473,6 @@ getRegionNearGenes <- function(TRange = NULL,
     ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
     pb$tick()
   }
-  
   idx <- suppressWarnings(tibble::as_tibble(nearest.idx))
   evaluating <- idx$queryHits
   for (i in 1:(numFlankingGenes)) {
@@ -516,6 +515,7 @@ getRegionNearGenes <- function(TRange = NULL,
   }
   ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
   ret <- ret[order(ret$Distance),]
+  message("Identifying gene position for each probe") 
   ret <- plyr::adply(
     unique(ret$ID),
     .margins = 1,
@@ -556,7 +556,8 @@ getRegionNearGenes <- function(TRange = NULL,
   )
   
   if (!is.null(tssAnnot)) {
-    ret <- calcDistNearestTSS(links = ret,
+    message("Calculating distance to nearest TSS")
+	  ret <- calcDistNearestTSS(links = ret,
                               TRange = TRange,
                               tssAnnot = tssAnnot)
   }
