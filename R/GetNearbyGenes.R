@@ -470,7 +470,7 @@ getRegionNearGenes <- function(TRange = NULL,
                                      ignore.strand = TRUE)
         )
       ))
-    ret <- unique(ret)
+    ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
     pb$tick()
   }
   
@@ -514,7 +514,7 @@ getRegionNearGenes <- function(TRange = NULL,
       ))
     pb$tick()
   }
-  ret <- unique(ret)
+  ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
   ret <- ret[order(ret$Distance),]
   ret <- plyr::adply(
     unique(ret$ID),
@@ -548,7 +548,7 @@ getRegionNearGenes <- function(TRange = NULL,
     .id = NULL
   )
   
-  ret <- dplyr::select(.data = as.data.frame(ret),
+  ret <- dplyr::select(.data = ret,
                        "ID","ensembl_gene_id", 
                        grep("external_gene_", colnames(ret), value = TRUE),
                        "Side",
