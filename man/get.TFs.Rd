@@ -4,18 +4,18 @@
 \alias{get.TFs}
 \title{get.TFs to identify regulatory TFs.}
 \usage{
-get.TFs(data, 
-          enriched.motif, 
-          TFs, 
+get.TFs(data,
+          enriched.motif,
+          TFs,
           group.col,
           group1,
           group2,
           mode = "unsupervised",
           diff.dir = NULL,
-          motif.relevant.TFs, 
+          motif.relevant.TFs,
           minSubgroupFrac = 0.4,
           dir.out = "./",
-          label = NULL, 
+          label = NULL,
           save.plots = FALSE,
           cores = 1,
           save = TRUE)
@@ -26,42 +26,42 @@ get.TFs(data,
 \item{enriched.motif}{A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.}
 
 \item{TFs}{A data.frame containing TF GeneID and Symbol or a path of XX.csv file containing TF GeneID and Symbol.
-If missing, human.TF list will be used (human.TF data in ELMER.data). 
+If missing, human.TF list will be used (human.TF data in ELMER.data).
 For detail information, refer the reference paper.}
 
-\item{group.col}{A column defining the groups of the sample. You can view the 
+\item{group.col}{A column defining the groups of the sample. You can view the
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
-\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group2}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
 \item{mode}{A character. Can be "unsupervised" or "supervised". If unsupervised is set
-the U (unmethylated) and M (methylated) groups will be selected 
+the U (unmethylated) and M (methylated) groups will be selected
 among all samples based on methylation of each probe.
 Otherwise U group and M group will set as the samples of group1 or group2 as described below:
 If diff.dir is "hypo, U will be the group 1 and M the group2.
 If diff.dir is "hyper" M group will be the group1 and U the group2.}
 
-\item{diff.dir}{A character can be "hypo" or "hyper", showing differential 
-methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
-"hyper" which means the probes are hypermethylated in group1; 
-This argument is used only when mode is supervised nad 
+\item{diff.dir}{A character can be "hypo" or "hyper", showing differential
+methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1;
+"hyper" which means the probes are hypermethylated in group1;
+This argument is used only when mode is supervised nad
 it should be the same value from get.diff.meth function.}
 
 \item{motif.relevant.TFs}{A list containing motif as names and relavent TFs as contents
- for each list element or a path of XX.rda file containing a list as above. 
-If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data). 
+ for each list element or a path of XX.rda file containing a list as above.
+If missing, motif.relavent.TFs will be used (motif.relavent.TFs data in ELMER.data).
 For detail information, refer the reference paper.}
 
-\item{minSubgroupFrac}{A number ranging from 0 to 1 
-specifying the percentage of samples used to create the groups U (unmethylated) 
-and M (methylated) used to link probes to TF expression. 
-Default is 0.4 (lowest quintile of all samples will be in the 
+\item{minSubgroupFrac}{A number ranging from 0 to 1
+specifying the percentage of samples used to create the groups U (unmethylated)
+and M (methylated) used to link probes to TF expression.
+Default is 0.4 (lowest quintile of all samples will be in the
 U group and the highest quintile of all samples in the M group).}
 
 \item{dir.out}{A path specifies the directory for outputs of get.pair function. Default is current directory}
@@ -72,7 +72,7 @@ U group and the highest quintile of all samples in the M group).}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.}
 
-\item{save}{A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and 
+\item{save}{A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and
 getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.}
 }
 \value{
@@ -87,20 +87,20 @@ Potential responsible TFs will be reported in a dataframe with 4 columns:
  }
 }
 \description{
-get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis 
-between the probes containing a particular motif and expression of all known TFs. If save is true, 
+get.TFs is a function to identify regulatory TFs based on motif analysis and association analysis
+between the probes containing a particular motif and expression of all known TFs. If save is true,
 two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and getTF.hypo.TFs.with.motif.pvalue.rda (see detail).
 }
 \details{
-save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable). 
-This file contain the regulatory TF significantly associate with average DNA methylation at particular motif sites. 
-The second file is getTF.hypo.TFs.with.motif.pvalue.rda (XX depends on option label). 
-This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column). 
+save: If save is ture, two files will be saved. The first file is getTF.XX.significant.TFs.with.motif.summary.csv (XX depends on option lable).
+This file contain the regulatory TF significantly associate with average DNA methylation at particular motif sites.
+The second file is getTF.hypo.TFs.with.motif.pvalue.rda (XX depends on option label).
+This file contains a matrix storing the statistic results for significant associations between TFs (row) and average DNA methylation at motifs (column).
 If save is false, a data frame which contains the same content with the first file will be reported.
 }
 \examples{
 data <- tryCatch(
-  ELMER:::getdata("elmer.data.example"), 
+  ELMER:::getdata("elmer.data.example"),
   error = function(e) {
     message(e)
      data(elmer.data.example, envir = environment())
@@ -109,10 +109,10 @@ enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg0
                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
                                  "cg10097755", "cg09247779", "cg09181054"))
-TF <- get.TFs(data, 
-              enriched.motif, 
+TF <- get.TFs(data,
+              enriched.motif,
               group.col = "definition",
-              group1 = "Primary solid Tumor", 
+              group1 = "Primary solid Tumor",
               group2 = "Solid Tissue Normal",
               TFs = data.frame(
                      external_gene_name=c("TP53","TP63","TP73"),
@@ -121,19 +121,19 @@ TF <- get.TFs(data,
                                         "ENSG00000078900"),
                      stringsAsFactors = FALSE),
              label="hypo")
-# This case will use Uniprot dabase to get list of Trasncription factors              
-TF <- get.TFs(data, 
+# This case will use Uniprot dabase to get list of Trasncription factors
+TF <- get.TFs(data,
               group.col = "definition",
-              group1 = "Primary solid Tumor", 
+              group1 = "Primary solid Tumor",
               group2 = "Solid Tissue Normal",
-              enriched.motif, 
-              label="hypo")              
+              enriched.motif,
+              label="hypo")
 }
 \references{
-Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
 \author{
-Lijing Yao (creator: lijingya@usc.edu) 
+Lijing Yao (creator: lijingya@usc.edu)
 Tiago C Silva (maintainer: tiagochst@usp.br)
 }

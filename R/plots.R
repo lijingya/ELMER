@@ -233,7 +233,11 @@ heatmapPairs <- function(data,
     message("Ordering groups")
     cluster_columns <- FALSE
     order <- unlist(plyr::alply(unique(colData(data)[,group.col]), 1 , function(x) {
-      idx <- which(colData(data)[,group.col] == x)
+      if(is.na(x)){
+        idx <- which(is.na(colData(data)[,group.col]))
+      } else {
+        idx <- which(colData(data)[,group.col] == x)
+      }
       aux <- na.omit(meth[,idx])
       order <- t(aux) %>% dist %>% hclust(method = "average")
       as.numeric(idx[order$order])

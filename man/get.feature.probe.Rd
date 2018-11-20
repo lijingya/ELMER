@@ -9,8 +9,8 @@ get.feature.probe(feature = NULL, TSS, genome = "hg38",
   2000), promoter = FALSE, rm.chr = NULL)
 }
 \arguments{
-\item{feature}{A GRange object containing biofeature coordinate such as 
-enhancer coordinates. 
+\item{feature}{A GRange object containing biofeature coordinate such as
+enhancer coordinates.
 If NULL only distal probes (2Kbp away from TSS will be selected)
 feature option is only usable when promoter option is FALSE.}
 
@@ -22,11 +22,11 @@ be used as default (see detail). User can specify their own preference TSS annot
 
 \item{met.platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
 
-\item{TSS.range}{A list specify how to define promoter regions. 
+\item{TSS.range}{A list specify how to define promoter regions.
 Default is upstream =2000bp and downstream=2000bp.}
 
 \item{promoter}{A logical.If TRUE, function will ouput the promoter probes.
-If FALSE, function will ouput the distal probes overlaping with features. The 
+If FALSE, function will ouput the distal probes overlaping with features. The
 default is FALSE.}
 
 \item{rm.chr}{A vector of chromosome need to be remove from probes such as chrX chrY or chrM}
@@ -35,24 +35,24 @@ default is FALSE.}
 A GRange object containing probes that satisfy selecting critiria.
 }
 \description{
-get.feature.probe is a function to select the probes falling into 
+get.feature.probe is a function to select the probes falling into
 distal feature regions or promoter regions.
 
-This function selects the probes on HM450K that either overlap 
+This function selects the probes on HM450K that either overlap
 distal biofeatures or TSS promoter.
 }
 \details{
-In order to get real distal probes, we use more comprehensive annotated TSS by both 
+In order to get real distal probes, we use more comprehensive annotated TSS by both
  GENCODE and UCSC. However, to get probes within promoter regions need more
  accurate annotated TSS such as UCSC. Therefore, there are different settings for
  promoter and distal probe selection. But user can specify their own favorable
  TSS annotation. Then there won't be any difference between promoter and distal
  probe selection.
- @return A GRanges object contains the coordinate of probes which locate 
+ @return A GRanges object contains the coordinate of probes which locate
  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
- @usage get.feature.probe(feature, 
-                          TSS, 
-                          TSS.range = list(upstream = 2000, downstream = 2000), 
+ @usage get.feature.probe(feature,
+                          TSS,
+                          TSS.range = list(upstream = 2000, downstream = 2000),
                           promoter = FALSE, rm.chr = NULL)
 }
 \examples{

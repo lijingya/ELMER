@@ -5,47 +5,47 @@
 \title{get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.}
 \usage{
 get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
-                   background.probes,  pvalue = 0.05, lower.OR = 1.1, min.incidence = 10, 
+                   background.probes,  pvalue = 0.05, lower.OR = 1.1, min.incidence = 10,
                    dir.out = "./", label = NULL, save = TRUE, plot.title=NULL)
 }
 \arguments{
 \item{data}{A multi Assay Experiment from  \code{\link{createMAE}} function.
-If set and probes.motif/background probes are missing this will be used to get 
-this other two arguments correctly. This argument is not require, you can set probes.motif and 
+If set and probes.motif/background probes are missing this will be used to get
+this other two arguments correctly. This argument is not require, you can set probes.motif and
 the backaground.probes manually.}
 
-\item{probes.motif}{A matrix contains motifs occurrence within probes regions. Probes.motif in 
+\item{probes.motif}{A matrix contains motifs occurrence within probes regions. Probes.motif in
 \pkg{ELMER.data} will be used if probes.motif is missing (detail see Probes.motif.hg19.450K in ELMER.data).}
 
 \item{probes}{A vector lists the name of probes to define the set of probes in which motif enrichment
 OR and confidence interval will be calculated.}
 
-\item{min.motif.quality}{Minimum motif quality score to consider. 
-Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default) 
-Description: Each PWM has a quality rating from A to D where 
-A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a 
-limited applications for quantitative analyses. 
-Special S quality marks the single-box motifs (secondary motif). 
+\item{min.motif.quality}{Minimum motif quality score to consider.
+Possible valules: A, B, C , D, AS (A and S), BS (A, B and S), CS (A, B , C and S), DS (all - default)
+Description: Each PWM has a quality rating from A to D where
+A represents motifs with the highest confidence, and D motifs only weakly describe the pattern with a
+limited applications for quantitative analyses.
+Special S quality marks the single-box motifs (secondary motif).
 Source: http://hocomoco.autosome.ru/help#description_quality_score
 More information: \url{http://nar.oxfordjournals.org/content/44/D1/D116.full#sec-8}}
 
-\item{background.probes}{A vector lists name of probes which are considered as 
+\item{background.probes}{A vector lists name of probes which are considered as
 background for motif.enrichment  calculation (see detail).}
 
 \item{pvalue}{FDR P-value cut off (default 0.05)}
 
 \item{lower.OR}{A number specifies the smallest lower boundary of 95\% confidence interval for Odds Ratio.
-The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number 
+The motif with higher lower boudnary of 95\% confidence interval for Odds Ratio than the number
 are the significantly enriched motifs (detail see reference).}
 
-\item{min.incidence}{A non-negative integer specifies the minimum incidence of motif in the given probes set. 
+\item{min.incidence}{A non-negative integer specifies the minimum incidence of motif in the given probes set.
 10 is default.}
 
 \item{dir.out}{A path. Specifies the directory for outputs. Default is current directory}
 
 \item{label}{A character. Labels the outputs such as "hypo", "hyper"}
 
-\item{save}{If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and 
+\item{save}{If save is TURE, two files will be saved: getMotif.XX.enriched.motifs.rda and
 getMotif.XX.motif.enrichment.csv (see detail).}
 
 \item{plot.title}{Plot title. Default: no title.}
@@ -53,15 +53,15 @@ getMotif.XX.motif.enrichment.csv (see detail).}
 \value{
 A list contains enriched motifs with the probes regions harboring the motif.
 
-A list (R object) with enriched motifs as name and probes containing the enriched 
+A list (R object) with enriched motifs as name and probes containing the enriched
   motif as contents. And hypo.motif.enrichment.pdf plot will be generated.
 }
 \description{
-get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}  
+get.enriched.motif is a function make use of Probes.motif data from \pkg{ELMER.data}
 package to calculate the motif enrichment Odds Ratio and  95\% confidence interval for
-a given set of probes using fisher test function, after performing the Fisher's exact test, 
-the results for all transcription factors are corrected for multiple testing with the Benjamini-Hochberg procedure. 
-If save is TURE, two output files will be saved: 
+a given set of probes using fisher test function, after performing the Fisher's exact test,
+the results for all transcription factors are corrected for multiple testing with the Benjamini-Hochberg procedure.
+If save is TURE, two output files will be saved:
 getMotif.XX.enriched.motifs.rda and getMotif.XX.motif.enrichment.csv (see detail).
 }
 \details{
@@ -70,14 +70,14 @@ background.probes:
   background.probes. For promoter study, it is better to use probes within promoter
   regions as background.probes. Because enhancer and promoter have different CG content
   and harbors different clusters of TFs motif.
-  
+
   save:
-  if save is TRUE, two files will be save on the disk. The first file is 
-  getMotif.XX.motif.enrichment.csv (XX depends on option label). This file reports 
-  the Odds Ratio and 95\% confidence interval for these Odds Ratios which pass the 
-  significant cutoff (lower.OR and min.incidence). The second file is 
+  if save is TRUE, two files will be save on the disk. The first file is
+  getMotif.XX.motif.enrichment.csv (XX depends on option label). This file reports
+  the Odds Ratio and 95\% confidence interval for these Odds Ratios which pass the
+  significant cutoff (lower.OR and min.incidence). The second file is
   getMotif.XX.enriched.motifs.rda (XX depends on option lable). This file contains
-  a list R object with enriched motifs as name and probes containing the enriched 
+  a list R object with enriched motifs as name and probes containing the enriched
   motif as contents. This object will be used in \code{\link{get.TFs}} function.
   if save is FALSE, the function will return a R object which is the same with second file.
 }
@@ -94,20 +94,20 @@ data(Probes.motif.hg38.450K,package = "ELMER.data")
 enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
                                      probes = probes,
                                      background.probes = bg,
-                                     pvalue = 1, 
-                                     min.incidence = 2, 
+                                     pvalue = 1,
+                                     min.incidence = 2,
                                      label = "hypo")
-# If the MAE is set, the background and the probes.motif will 
-# be automatically set                                     
+# If the MAE is set, the background and the probes.motif will
+# be automatically set
 enriched.motif <- get.enriched.motif(data = data,
                                      min.motif.quality = "DS",
                                      probes=probes,
                                      pvalue = 1,
-                                     min.incidence=2, 
+                                     min.incidence=2,
                                      label="hypo")
 }
 \references{
-Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
 \author{

@@ -4,41 +4,41 @@
 \alias{get.pair}
 \title{get.pair to predict enhancer-gene linkages.}
 \usage{
-get.pair(data, 
-         nearGenes, 
-         minSubgroupFrac = 0.4, 
-         permu.size = 10000, 
-         permu.dir = NULL, 
-         raw.pvalue = 0.001, 
-         Pe = 0.001, 
+get.pair(data,
+         nearGenes,
+         minSubgroupFrac = 0.4,
+         permu.size = 10000,
+         permu.dir = NULL,
+         raw.pvalue = 0.001,
+         Pe = 0.001,
          mode = "unsupervised",
          diff.dir = NULL,
          dir.out = "./",
          diffExp = FALSE,
-         group.col, 
-         group1 = NULL, 
-         group2 = NULL, 
-         cores = 1, 
-         filter.probes = TRUE, 
-         filter.portion = 0.3,  
+         group.col,
+         group1 = NULL,
+         group2 = NULL,
+         cores = 1,
+         filter.probes = TRUE,
+         filter.portion = 0.3,
          filter.percentage = 0.05,
-         label = NULL, 
+         label = NULL,
          addDistNearestTSS = FALSE,
          save = TRUE)
 }
 \arguments{
-\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 
+\item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data.
 See \code{\link{createMAE}} function.}
 
-\item{nearGenes}{Can be either a list containing output of GetNearGenes 
+\item{nearGenes}{Can be either a list containing output of GetNearGenes
 function or path of rda file containing output of GetNearGenes function.}
 
-\item{minSubgroupFrac}{A number ranging from 0 to 1, specifying the fraction of 
-extreme  samples that define group U (unmethylated) and group M (methylated), 
-which are used to link probes to genes. 
-The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group) 
-because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor; 
-these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power. 
+\item{minSubgroupFrac}{A number ranging from 0 to 1, specifying the fraction of
+extreme  samples that define group U (unmethylated) and group M (methylated),
+which are used to link probes to genes.
+The default is 0.4 (the lowest quintile of samples is the U group and the highest quintile samples is the M group)
+because we typically want to be able to detect a specific (possibly unknown) molecular subtype among tumor;
+these subtypes often make up only a minority of samples, and 20\% was chosen as a lower bound for the purposes of statistical power.
 If you are using pre-defined group labels, such as treated replicates vs. untreated replicated, use a value of 1.0 (Supervised mode).}
 
 \item{permu.size}{A number specify the times of permuation used in the unsupervised mode. Default is 10000.}
@@ -52,31 +52,31 @@ Default is 0.001. It will select the significant P value  cutoff before calculat
 Default is 0.001}
 
 \item{mode}{A character. Can be "unsupervised" or "supervised". If unsupervised is set
-the U (unmethylated) and M (methylated) groups will be selected 
+the U (unmethylated) and M (methylated) groups will be selected
 among all samples based on methylation of each probe.
 Otherwise U group and M group will set as the samples of group1 or group2 as described below:
 If diff.dir is "hypo, U will be the group 1 and M the group2.
 If diff.dir is "hyper" M group will be the group1 and U the group2.}
 
-\item{diff.dir}{A character can be "hypo" or "hyper", showing differential 
-methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1; 
-"hyper" which means the probes are hypermethylated in group1; 
-This argument is used only when mode is supervised nad 
+\item{diff.dir}{A character can be "hypo" or "hyper", showing differential
+methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1;
+"hyper" which means the probes are hypermethylated in group1;
+This argument is used only when mode is supervised nad
 it should be the same value from get.diff.meth function.}
 
 \item{dir.out}{A path specify the directory for outputs. Default is current directory}
 
-\item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to 
+\item{diffExp}{A logic. Default is FALSE. If TRUE, t test will be applied to
 test whether putative target gene are differentially expressed between two groups.}
 
-\item{group.col}{A column defining the groups of the sample. You can view the 
+\item{group.col}{A column defining the groups of the sample. You can view the
 available columns using: colnames(MultiAssayExperiment::colData(data)).}
 
-\item{group1}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group1}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
-\item{group2}{A group from group.col. ELMER will run group1 vs group2. 
+\item{group2}{A group from group.col. ELMER will run group1 vs group2.
 That means, if direction is hyper, get probes
 hypermethylated in group 1 compared to group 2.}
 
@@ -84,13 +84,13 @@ hypermethylated in group 1 compared to group 2.}
 Default is 1: don't use parallel process.}
 
 \item{filter.probes}{Should filter probes by selecting only probes that have at least
-a certain number of samples below and above a certain cut-off. 
+a certain number of samples below and above a certain cut-off.
 See \code{\link{preAssociationProbeFiltering}} function.}
 
-\item{filter.portion}{A number specify the cut point to define binary methylation level for probe loci. 
-Default is 0.3. When beta value is above 0.3, the probe is methylated and 
-vice versa. For one probe, the percentage of methylated and unmethylated samples 
-should be above filter.percentage value.   
+\item{filter.portion}{A number specify the cut point to define binary methylation level for probe loci.
+Default is 0.3. When beta value is above 0.3, the probe is methylated and
+vice versa. For one probe, the percentage of methylated and unmethylated samples
+should be above filter.percentage value.
 Only used if filter.probes is TRUE. See \code{\link{preAssociationProbeFiltering}} function.}
 
 \item{filter.percentage}{Minimun percentage of samples to be considered in methylated and unmethylated
@@ -109,7 +109,7 @@ and getPair.XX.pairs.significant.csv (see detail).}
 Statistics for all pairs and significant pairs
 }
 \description{
-get.pair is a function to predict enhancer-gene linkages using associations between 
+get.pair is a function to predict enhancer-gene linkages using associations between
 DNA methylation at enhancer CpG sites and expression of 20 nearby genes of the CpG sites
 (see reference). Two files will be saved if save is true: getPair.XX.all.pairs.statistic.csv
 and getPair.XX.pairs.significant.csv (see detail).
@@ -122,30 +122,30 @@ Hypo.pair <- get.pair(data=data,
                        nearGenes=nearGenes,
                        permu.size=5,
                        group.col = "definition",
-                       group1 = "Primary solid Tumor", 
+                       group1 = "Primary solid Tumor",
                        group2 = "Solid Tissue Normal",
                        raw.pvalue = 0.2,
                        Pe = 0.2,
                        dir.out="./",
                        label= "hypo")
-                     
+
 Hypo.pair <- get.pair(data = data,
                       nearGenes = nearGenes,
                       permu.size = 5,
                       raw.pvalue = 0.2,
                       Pe = 0.2,
                       dir.out = "./",
-                      diffExp = TRUE, 
+                      diffExp = TRUE,
                       group.col = "definition",
-                      group1 = "Primary solid Tumor", 
+                      group1 = "Primary solid Tumor",
                       group2 = "Solid Tissue Normal",
-                      label = "hypo")                    
+                      label = "hypo")
 }
 \references{
-Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription 
+Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
 factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 }
 \author{
-Lijing Yao (creator: lijingya@usc.edu) 
+Lijing Yao (creator: lijingya@usc.edu)
 Tiago C Silva (maintainer: tiagochst@usp.br)
 }
