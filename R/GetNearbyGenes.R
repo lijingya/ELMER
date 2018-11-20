@@ -515,32 +515,29 @@ getRegionNearGenes <- function(TRange = NULL,
     pb$tick()
   }
   ret <- unique(ret)
-  
+  ret <- ret[order(ret$Distance),]
   ret <- plyr::adply(
     unique(ret$ID),
     .margins = 1,
     .fun = function(x) {
-      x <- ret[ret$ID == x, ]
-      x <- x[order(x$Distance), ]
+      x <- ret %>% dplyr::filter(ID == x)
       center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
       pos <- setdiff(-center:(nrow(x) - center), 0)
       x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
-      out <-  x %>% filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
-                                       paste0("L", 1:(numFlankingGenes / 2))
-      )
-      )
+      out <-  x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
+                                              paste0("L", 1:(numFlankingGenes / 2))
+      ))
       if (nrow(out) < numFlankingGenes) {
         if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
           cts <- length(grep("L", sort(x$Side), value = TRUE))
-          out <- x %>% filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
+          out <- x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
                                           grep("L", sort(out$Side), value = TRUE)))
         } else {
           cts <- length(grep("R", sort(x$Side), value = TRUE))
-          out <- x %>% filter(Side %in% 
+          out <- x %>% dplyr::filter(Side %in% 
                                 c(paste0("L", 1:(numFlankingGenes - cts)),
                                   grep("R", sort(out$Side), value = TRUE))
           )
-          
         }
       }
       out <- out[order(out$Distance), ]
