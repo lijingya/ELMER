@@ -210,12 +210,16 @@ TCGA.pipe <- function(disease,
   # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
     print.header("Get differential DNA methylation loci")
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
-    if(!file.exists(mae.file)){
-      message("MAE not found, please run pipe with createMAE or all options")
-      return(NULL)
+    if(!"data" %in% names(args)){
+      mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+      if(!file.exists(mae.file)){
+        message("MAE not found, please run pipe with createMAE or all options")
+        return(NULL)
+      }
+      load(mae.file)
+    } else {
+      mae <- args$data
     }
-    load(mae.file)
     params <- args[names(args) %in% c("pvalue","sig.dif")]
     params <- c(params,list(diff.dir = diff.dir, 
                             dir.out = dir.out, 
@@ -239,12 +243,16 @@ TCGA.pipe <- function(disease,
   # predict pair
   if("pair" %in% tolower(analysis)){
     print.header("Predict pairs")
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
-    if(!file.exists(mae.file)){
-      message("MAE not found, please run pipe with createMAE or all options")
-      return(NULL)
+    if(!"data" %in% names(args)){
+      mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+      if(!file.exists(mae.file)){
+        message("MAE not found, please run pipe with createMAE or all options")
+        return(NULL)
+      }
+      load(mae.file)
+    } else {
+      mae <- args$data
     }
-    load(mae.file)
     
     Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
                                    dir.out,diff.dir),
@@ -350,12 +358,18 @@ TCGA.pipe <- function(disease,
   # search enriched motif
   if("motif" %in% tolower(analysis)){
     print.header("Motif search")
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
-    if(!file.exists(mae.file)){
-      message("MAE not found, please run pipe with createMAE or all options")
-      return(NULL)
+    
+    if(!"data" %in% names(args)){
+      mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+      if(!file.exists(mae.file)){
+        message("MAE not found, please run pipe with createMAE or all options")
+        return(NULL)
+      }
+      load(mae.file)
+    } else {
+      mae <- args$data
     }
-    load(mae.file)
+
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- readr::read_csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), 
@@ -371,7 +385,7 @@ TCGA.pipe <- function(disease,
       message(sprintf("%s/%s.pairs.significant.csv file doesn't exist",dir.out, diff.dir))
       return(NULL)
     }
-    params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence")]
+    params <- args[names(args) %in% c("background.probes","lower.OR","min.incidence","pvalue")]
     
     newenv <- new.env()
     if(genome == "hg19") data("Probes.motif.hg19.450K", package = "ELMER.data", envir = newenv)
@@ -396,12 +410,16 @@ TCGA.pipe <- function(disease,
   if(tolower("TF.search") %in% tolower(analysis)){
     print.header("Search responsible TFs")
     ## load mae
-    mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
-    if(!file.exists(mae.file)){
-      message("MAE not found, please run pipe with createMAE or all options")
-      return(NULL)
+    if(!"data" %in% names(args)){
+      mae.file <- sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome)
+      if(!file.exists(mae.file)){
+        message("MAE not found, please run pipe with createMAE or all options")
+        return(NULL)
+      }
+      load(mae.file)
+    } else {
+      mae <- args$data
     }
-    load(mae.file)
     #construct RNA seq data
     print.header(sprintf("Identify regulatory TF for enriched motif in %smethylated probes",
                          diff.dir), "subsection")
@@ -531,8 +549,8 @@ createSummaryDocument <- function(analysis = "all",
                "o group.col: ",  ifelse(is.null(group.col),"",group.col), "\n",
                "o group1: ",   ifelse(is.null(group1),"",group1), "\n",
                "o group2: ",   ifelse(is.null(group2),"",group2), "\n",
-               "o results.path: ",  ifelse(is.null(results.path),"",results.path), "\n",
-               "o argument.values: ",paste(paste0(names(argument.values),"=",as.character(argument.values)), collapse = ",")
+               "o results.path: ",  ifelse(is.null(results.path),"",results.path), "\n"
+               #"o argument.values: ",paste(paste0(names(argument.values),"=",as.character(argument.values)), collapse = ",")
   )
   fileConn <- file(file.path(results.path,"TCGA.pipe_records.txt"),open = "w")
   write(df, fileConn, append=TRUE)
