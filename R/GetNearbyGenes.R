@@ -309,7 +309,7 @@ addDistNearestTSS <- function(data,
 calcDistNearestTSS <- function(links,
                                TRange,
                                tssAnnot){
-	message("calculating Distance to nearest TSS")
+  message("calculating Distance to nearest TSS")
   if(!is(tssAnnot,"GenomicRanges")){
     stop("tssAnnot is not a GenomicRanges")
   }
@@ -466,8 +466,8 @@ getRegionNearGenes <- function(TRange = NULL,
           "ID" = names(TRange)[evaluating],
           "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
             distance(TRange[evaluating],
-                                     geneAnnot[idx$subjectHits], select = "all",
-                                     ignore.strand = TRUE)
+                     geneAnnot[idx$subjectHits], select = "all",
+                     ignore.strand = TRUE)
         )
       ))
     ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
@@ -508,19 +508,24 @@ getRegionNearGenes <- function(TRange = NULL,
           "ID" = names(TRange)[evaluating],
           "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
             distance(TRange[evaluating],
-                                    geneAnnot[idx$subjectHits], select = "all",ignore.strand = TRUE)
+                     geneAnnot[idx$subjectHits], select = "all",ignore.strand = TRUE)
         ))
       ))
     pb$tick()
   }
   ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
   ret <- ret[order(ret$Distance),]
+  
+  ret <- ret[,c("ID","ensembl_gene_id", 
+                grep("external_gene_", colnames(ret), value = TRUE),
+                "Distance")]
+  
   message("Identifying gene position for each probe") 
   ret <- plyr::adply(
     unique(ret$ID),
     .margins = 1,
     .fun = function(x) {
-      x <- ret %>% dplyr::filter(ID == x)
+      x <- ret %>% dplyr::filter(ID == x) %>% as_tibble
       center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
       pos <- setdiff(-center:(nrow(x) - center), 0)
       x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
@@ -531,12 +536,12 @@ getRegionNearGenes <- function(TRange = NULL,
         if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
           cts <- length(grep("L", sort(x$Side), value = TRUE))
           out <- x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
-                                          grep("L", sort(out$Side), value = TRUE)))
+                                                 grep("L", sort(out$Side), value = TRUE)))
         } else {
           cts <- length(grep("R", sort(x$Side), value = TRUE))
           out <- x %>% dplyr::filter(Side %in% 
-                                c(paste0("L", 1:(numFlankingGenes - cts)),
-                                  grep("R", sort(out$Side), value = TRUE))
+                                       c(paste0("L", 1:(numFlankingGenes - cts)),
+                                         grep("R", sort(out$Side), value = TRUE))
           )
         }
       }
@@ -547,17 +552,9 @@ getRegionNearGenes <- function(TRange = NULL,
     .parallel = parallel,
     .id = NULL
   )
-  
-  ret <- dplyr::select(.data = ret,
-                       "ID","ensembl_gene_id", 
-                       grep("external_gene_", colnames(ret), value = TRUE),
-                       "Side",
-                       "Distance"
-  )
-  
   if (!is.null(tssAnnot)) {
     message("Calculating distance to nearest TSS")
-	  ret <- calcDistNearestTSS(links = ret,
+    ret <- calcDistNearestTSS(links = ret,
                               TRange = TRange,
                               tssAnnot = tssAnnot)
   }
