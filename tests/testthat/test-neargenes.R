@@ -14,22 +14,22 @@ test_that("It maps correctly to hg38", {
                                        geneAnnot = geneAnnot,
                                        numFlankingGenes = 4)
   
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","GeneID"], "ENSG00000184908")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","GeneID"], "ENSG00000185519")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","Symbol"], "CLCNKB")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","Symbol"], "FAM131C")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","GeneID"], "ENSG00000142627")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","Symbol"], "EPHA2")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2",]$GeneID , "ENSG00000184908")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1",]$GeneID, "ENSG00000185519")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2",]$Symbol, "CLCNKB")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1",]$Symbol, "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1",]$GeneID, "ENSG00000142627")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1",]$Symbol, "EPHA2")
   
   NearbyGenes <- GetNearGenes(numFlankingGenes = 4,
                               geneAnnot = geneAnnot,
                               TRange = probe)
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","GeneID"], "ENSG00000184908")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","GeneID"], "ENSG00000185519")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L2","Symbol"], "CLCNKB")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "L1","Symbol"], "FAM131C")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","GeneID"], "ENSG00000142627")
-  expect_equal(NearbyGenes[NearbyGenes$Side == "R1","Symbol"], "EPHA2")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2",]$GeneID, "ENSG00000184908")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1",]$GeneID, "ENSG00000185519")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L2",]$Symbol, "CLCNKB")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "L1",]$Symbol, "FAM131C")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1",]$GeneID, "ENSG00000142627")
+  expect_equal(NearbyGenes[NearbyGenes$Side == "R1",]$Symbol, "EPHA2")
 })
 
 test_that("It maps correctly to hg19", {

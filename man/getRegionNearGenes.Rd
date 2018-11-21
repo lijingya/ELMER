@@ -5,7 +5,7 @@
 \title{Identifies nearest genes to a region}
 \usage{
 getRegionNearGenes(TRange = NULL, numFlankingGenes = 20,
-  geneAnnot = NULL, tssAnnot = NULL, cores = 1)
+  geneAnnot = NULL, tssAnnot = NULL)
 }
 \arguments{
 \item{TRange}{A GRange object contains coordinate of targets.}
@@ -15,9 +15,6 @@ getRegionNearGenes(TRange = NULL, numFlankingGenes = 20,
 \item{geneAnnot}{A GRange object contains gene coordinates of for human genome.}
 
 \item{tssAnnot}{A GRange object contains tss coordinates of for human genome.}
-
-\item{cores}{A interger which defines the number of cores to be used in parallel 
-process. Default is 1: no parallel process.}
 }
 \value{
 A data frame of nearby genes and information: genes' IDs, genes' symbols,

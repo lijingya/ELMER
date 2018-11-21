@@ -149,8 +149,6 @@ NearGenes <- function (Target = NULL,
 #' Then the number devided by 2 is the number of genes collected from 
 #' each side of targets (number shoule be even) Default to 20.
 #' @param TRange A GRange object or Summarized Experiment object that contains coordinates of a list of targets loci.
-#' @param cores A interger which defines the number of cores to be used in parallel process.
-#'  Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 #' distance with target and side to which the gene locate to the target.
 #' @export
@@ -172,8 +170,7 @@ GetNearGenes <- function(data = NULL,
                          probes = NULL,
                          geneAnnot = NULL,
                          TRange = NULL,
-                         numFlankingGenes = 20,
-                         cores = 1){
+                         numFlankingGenes = 20){
   message("Searching for the ", numFlankingGenes, " near genes")
   if(!is.null(data)){
     if(is.null(probes)) stop("Please set the probes argument (names of probes to select nearby genes)")
@@ -209,8 +206,7 @@ GetNearGenes <- function(data = NULL,
       numFlankingGenes = numFlankingGenes,
       geneAnnot = geneAnnot,
       tssAnnot = tssAnnot,
-      TRange = TRange,
-      cores = cores
+      TRange = TRange
     )
   return(NearGenes)
 }
@@ -367,8 +363,6 @@ calcDistNearestTSS <- function(links,
 #' @param numFlankingGenes A number determine how many gene will be collected from each 
 # side of target (number shoule be even).
 #' @param TRange A GRange object contains coordinate of targets.
-#' @param cores A interger which defines the number of cores to be used in parallel 
-#' process. Default is 1: no parallel process.
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
 #' @examples
@@ -391,18 +385,8 @@ calcDistNearestTSS <- function(links,
 getRegionNearGenes <- function(TRange = NULL,
                                numFlankingGenes = 20,
                                geneAnnot = NULL,
-                               tssAnnot = NULL,
-                               cores = 1){
+                               tssAnnot = NULL){
   
-  
-  # Paralellization code
-  parallel <- FALSE
-  if (cores > 1) {
-    if (cores > detectCores())
-      cores <- detectCores()
-    registerDoParallel(cores)
-    parallel = TRUE
-  }
   
   pb <- progress::progress_bar$new(total = numFlankingGenes * 2)
   
