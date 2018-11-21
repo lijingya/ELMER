@@ -519,7 +519,7 @@ get.pair <- function(data,
                             Stat.nonpara(Probe = x,
                                          Meths = met[x,],
                                          methy = methylated,
-                                         NearGenes = nearGenes,
+                                         NearGenes = as.data.frame(nearGenes),
                                          unmethy = unmethylated,
                                          Top = minSubgroupFrac/2, # Each group will have half of the samples
                                          Exps = exp
