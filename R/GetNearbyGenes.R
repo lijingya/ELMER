@@ -384,6 +384,7 @@ calcDistNearestTSS <- function(links,
 #'                              tssAnnot = tssAnnot)
 #' @importFrom GenomicRanges nearest precede follow
 #' @importFrom tibble as_tibble                              
+#' @importFrom dplyr group_by do                           
 #' @author 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @export
@@ -522,37 +523,31 @@ getRegionNearGenes <- function(TRange = NULL,
                 "Distance")]
   
   message("Identifying gene position for each probe") 
-  ret <- plyr::adply(
-    unique(ret$ID),
-    .margins = 1,
-    .fun = function(x) {
-      x <- ret %>% dplyr::filter(ID == x) %>% as_tibble
-      center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
-      pos <- setdiff(-center:(nrow(x) - center), 0)
-      x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
-      out <-  x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
-                                              paste0("L", 1:(numFlankingGenes / 2))
-      ))
-      if (nrow(out) < numFlankingGenes) {
-        if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
-          cts <- length(grep("L", sort(x$Side), value = TRUE))
-          out <- x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
-                                                 grep("L", sort(out$Side), value = TRUE)))
-        } else {
-          cts <- length(grep("R", sort(x$Side), value = TRUE))
-          out <- x %>% dplyr::filter(Side %in% 
-                                       c(paste0("L", 1:(numFlankingGenes - cts)),
-                                         grep("R", sort(out$Side), value = TRUE))
-          )
-        }
+  f <- function(x) {
+    center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
+    pos <- setdiff(-center:(nrow(x) - center), 0)
+    x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
+    out <-  x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
+                                            paste0("L", 1:(numFlankingGenes / 2))
+    ))
+    if (nrow(out) < numFlankingGenes) {
+      if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
+        cts <- length(grep("L", sort(x$Side), value = TRUE))
+        out <- x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes - cts)),
+                                               grep("L", sort(out$Side), value = TRUE)))
+      } else {
+        cts <- length(grep("R", sort(x$Side), value = TRUE))
+        out <- x %>% dplyr::filter(Side %in% 
+                                     c(paste0("L", 1:(numFlankingGenes - cts)),
+                                       grep("R", sort(out$Side), value = TRUE))
+        )
       }
-      out <- out[order(out$Distance), ]
-      return(out)
-    },
-    .progress = "time",
-    .parallel = parallel,
-    .id = NULL
-  )
+    }
+    out <- out[order(out$Distance), ]
+    return(out)
+  }
+  ret <- ret %>% group_by(ID) %>% do(f(.))
+  
   if (!is.null(tssAnnot)) {
     message("Calculating distance to nearest TSS")
     ret <- calcDistNearestTSS(links = ret,
