@@ -842,8 +842,7 @@ getRandomPairs <- function(pairs,
     random.probes <- distal.probe[sample(1:length(distal.probe), length(not.matched)),]
     near.genes <- GetNearGenes(TRange = random.probes, 
                                geneAnnot = genes, 
-                               numFlankingGenes = numFlankingGenes, 
-                               cores = cores)
+                               numFlankingGenes = numFlankingGenes)
     
     near.genes.linked <- plyr::alply(1:length(not.matched),
                                      .margins = 1,
