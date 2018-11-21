@@ -382,7 +382,8 @@ calcDistNearestTSS <- function(links,
 #'                              geneAnnot = geneAnnot,
 #'                              TRange = probe,
 #'                              tssAnnot = tssAnnot)
-#' @importFrom GenomicRanges nearest precede follow                              
+#' @importFrom GenomicRanges nearest precede follow
+#' @importFrom tibble as_tibble                              
 #' @author 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @export
