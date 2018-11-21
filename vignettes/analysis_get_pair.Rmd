@@ -110,8 +110,7 @@ sig.diff <- read.csv("result/getMethdiff.hypo.probes.significant.csv")
 
 nearGenes <- GetNearGenes(data = mae, 
                          probes = sig.diff$probe, 
-                         numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
-                         cores = 1)
+                         numFlankingGenes = 20) # 10 upstream and 10 dowstream genes
 
 Hypo.pair <- get.pair(data = mae,
                       group.col = "definition",

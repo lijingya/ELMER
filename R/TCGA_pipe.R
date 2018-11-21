@@ -285,8 +285,7 @@ TCGA.pipe <- function(disease,
       params <- args[names(args) %in% c("numFlankingGenes")]
       nearGenes <- do.call(GetNearGenes,
                            c(list(data = mae, 
-                                  probes = Sig.probes,
-                                  cores = cores),
+                                  probes = Sig.probes),
                              params))
       save(nearGenes,file=nearGenes.file)
       message("File saved: ", nearGenes.file)

@@ -73,8 +73,7 @@ sig.diff <- get.diff.meth(data = mae,
 
 nearGenes <- GetNearGenes(data = mae, 
                           probes = sig.diff$probe, 
-                          numFlankingGenes = 20, # 10 upstream and 10 dowstream genes
-                          cores = 1)
+                          numFlankingGenes = 20) # 10 upstream and 10 dowstream genes
 
 pair <- get.pair(data = mae,
                  group.col = group.col,
@@ -187,8 +186,7 @@ diff.probes <- get.diff.meth(data = mae,
 # 20 nearby genes (10 downstream and 10 upstream)
 nearGenes <- GetNearGenes(data = mae, 
                           probes =  diff.probes$probe, 
-                          numFlankingGenes = 20,
-                          cores = cores)
+                          numFlankingGenes = 20)
 
 # This step is the most time consuming. Depending on the size of the groups
 # and the number of probes found previously it migh take hours
@@ -321,8 +319,7 @@ for(g in 1:nrow(groups)) {
       #-------------------------------------------------------------
       # Collect nearby 20 genes for Sig.probes
       nearGenes <- GetNearGenes(data  = mae,
-                                probe = Sig.probes$probe,
-                                cores = cores)
+                                probe = Sig.probes$probe)
       
       pair <- get.pair(data       = mae,
                        nearGenes  = nearGenes,
