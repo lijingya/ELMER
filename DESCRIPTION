@@ -60,14 +60,14 @@ Imports:
     plotly,
     gridExtra,
     rmarkdown,
-    stringr
+    stringr,
+    tibble,
+    tidyr
 Suggests:
     BiocStyle,
     knitr,
     testthat,
-    tidyr,
     data.table, 
-    tibble,
     DT,
     GenomicInteractions,
     webshot,
