@@ -805,9 +805,11 @@ get.tabs <- function(dir, classification = "family"){
   tab <- get.tab(dir,classification)
   tab.pval <- get.tab.pval(dir,classification,tab)
   tab.or <- get.tab.or(dir,classification,tab)
+  tf.or.table <- get.tf.or.table(dir,classification,tab)
   return(list("tab" = tab,
               "tab.pval" = tab.pval,
-              "tab.or" = tab.or))
+              "tab.or" = tab.or,
+              "tf.or.table" = tf.or.table))
 }    
 
 #' @importFrom dplyr full_join as_data_frame
@@ -922,10 +924,10 @@ get.tf.or.table <-function(dir,classification,tab){
                              function(path){
                                TF <- readr::read_csv(dir(path = path, 
                                                          pattern = ".significant.TFs.with.motif.summary.csv",
-                                                         recursive = T,full.names = T))
+                                                         recursive = T,full.names = T),col_types = readr::cols())
                                motif <- readr::read_csv(dir(path = path, 
                                                             pattern = ".motif.enrichment.csv",
-                                                            recursive = T,full.names = T))
+                                                            recursive = T,full.names = T),col_types = readr::cols())
                                
                                # For each TF breaks into lines (P53;P63) will create two lines. Then merge with motif to get OR value
                                z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
@@ -946,9 +948,9 @@ get.tf.or.table <-function(dir,classification,tab){
                                  match(paste0(rownames(tab),motif),
                                        paste0(TF.meth.cor$TF,TF.meth.cor$motif)),] %>% 
                                  na.omit
-                               TF.meth.cor$analysis <- colnames(tab.pval)[which(path == hypo.dir)]
+                               TF.meth.cor$analysis <- path
                                TF.meth.cor
-                             }
+                             },.id = NULL
   ) 
   tf.or.table <- tf.or.table[order(tf.or.table$FDR,decreasing = F),]
   return(tf.or.table)
