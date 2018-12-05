@@ -74,7 +74,8 @@ Suggests:
     rtracklayer,
     R.utils,
     covr,
-    purrr
+    purrr,
+    DelayedArray
 biocViews:
     DNAMethylation, 
     GeneExpression, 

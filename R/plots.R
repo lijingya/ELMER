@@ -893,3 +893,23 @@ get.tab.pval <- function(dir,classification,tab){
     colnames(tab.pval) <- colnames(tab)
     return(tab.pval)
 }
+
+
+#' @importFrom DelayedArray rowMins
+get.top.tf.by.pval <- function(tab.pval,top = 5){
+    labels <- c()
+    for(i in 1:ncol(tab.pval)){
+      labels <- sort(
+        unique(
+          c(labels,
+            rownames(tab.pval)[head(sort(DelayedArray::rowMins(tab.pval[,i,drop = F],na.rm = T), 
+                                         index.return = TRUE, 
+                                         decreasing = F)$ix, 
+                                    n = top)]
+          )
+        )
+      )
+    }
+
+  return(labels)
+}
