@@ -913,3 +913,43 @@ get.top.tf.by.pval <- function(tab.pval,top = 5){
 
   return(labels)
 }
+
+
+get.tf.or.table <-function(dir,classification,tab){ 
+  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+  tf.or.table <- plyr::adply(dir,
+                             .margins = 1,
+                             function(path){
+                               TF <- readr::read_csv(dir(path = path, 
+                                                         pattern = ".significant.TFs.with.motif.summary.csv",
+                                                         recursive = T,full.names = T))
+                               motif <- readr::read_csv(dir(path = path, 
+                                                            pattern = ".motif.enrichment.csv",
+                                                            recursive = T,full.names = T))
+                               
+                               # For each TF breaks into lines (P53;P63) will create two lines. Then merge with motif to get OR value
+                               z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
+                               z <- z[order(-z$OR),] # Drecreasing order of OR
+                               colnames(z)[grep(paste0("^",col),colnames(z))] <- "TF"
+                               motif <- z[match(rownames(tab),z$TF),] %>% pull(motif) # get higher OR for that TF binding
+                               TF.meth.cor <- get(load(dir(path = path, 
+                                                           pattern = ".TFs.with.motif.pvalue.rda", 
+                                                           recursive = T, full.names = T))
+                               )
+                               TF.meth.cor <- cbind(TF.meth.cor,TF =rownames(TF.meth.cor))
+                               TF.meth.cor <- dplyr::as_data_frame(TF.meth.cor)
+                               # Create table TF, motif, FDR
+                               TF.meth.cor <- TF.meth.cor %>% tidyr::gather(key = motif, value = FDR, -TF)
+                               TF.meth.cor$FDR <- as.numeric(TF.meth.cor$FDR)
+                               TF.meth.cor <- TF.meth.cor[order(TF.meth.cor$FDR,decreasing = F),]
+                               TF.meth.cor <- TF.meth.cor[
+                                 match(paste0(rownames(tab),motif),
+                                       paste0(TF.meth.cor$TF,TF.meth.cor$motif)),] %>% 
+                                 na.omit
+                               TF.meth.cor$analysis <- colnames(tab.pval)[which(path == hypo.dir)]
+                               TF.meth.cor
+                             }
+  ) 
+  tf.or.table <- tf.or.table[order(tf.or.table$FDR,decreasing = F),]
+  return(tf.or.table)
+}
