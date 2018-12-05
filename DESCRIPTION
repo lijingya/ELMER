@@ -73,7 +73,8 @@ Suggests:
     webshot,
     rtracklayer,
     R.utils,
-    covr
+    covr,
+    purrr
 biocViews:
     DNAMethylation, 
     GeneExpression, 
@@ -82,4 +83,5 @@ biocViews:
     GeneRegulation,
     Transcription, 
     Network
+Encoding: UTF-8
 RoxygenNote: 6.1.1
