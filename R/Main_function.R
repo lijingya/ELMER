@@ -928,7 +928,7 @@ promoterMeth <- function(data,
 #' @usage
 #' get.enriched.motif(data, probes.motif, probes, min.motif.quality = "DS",
 #'                    background.probes,  pvalue = 0.05, lower.OR = 1.1, min.incidence = 10,
-#'                    dir.out = "./", label = NULL, save = TRUE, plot.title=NULL)
+#'                    dir.out = "./", label = NULL, save = TRUE, plot.title="")
 #' @param data A multi Assay Experiment from  \code{\link{createMAE}} function.
 #' If set and probes.motif/background probes are missing this will be used to get
 #' this other two arguments correctly. This argument is not require, you can set probes.motif and

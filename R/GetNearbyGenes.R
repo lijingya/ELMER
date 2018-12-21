@@ -378,7 +378,8 @@ calcDistNearestTSS <- function(links,
 #'                              tssAnnot = tssAnnot)
 #' @importFrom GenomicRanges nearest precede follow
 #' @importFrom tibble as_tibble                              
-#' @importFrom dplyr group_by do                           
+#' @importFrom dplyr group_by do   
+#' @importFrom progress progress_bar             
 #' @author 
 #' Tiago C Silva (maintainer: tiagochst@usp.br)
 #' @export
@@ -539,5 +540,6 @@ getRegionNearGenes <- function(TRange = NULL,
                               tssAnnot = tssAnnot)
   }
   colnames(ret)[1:3] <- c("ID", "GeneID", "Symbol")
+  pb$terminate()
   return(ret)
 }
