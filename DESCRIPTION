@@ -39,7 +39,7 @@ Imports:
     GenomeInfoDb,
     S4Vectors,
     GenomicFeatures,
-    TCGAbiolinks (>= 2.5.5),
+    TCGAbiolinks (>= 2.9.2),
     plyr,
     Matrix,
     dplyr,
@@ -84,4 +84,5 @@ biocViews:
     GeneRegulation,
     Transcription, 
     Network
+Encoding: UTF-8
 RoxygenNote: 6.1.1
