@@ -63,7 +63,9 @@ Imports:
     stringr,
     tibble,
     tidyr,
-    progress
+    progress,
+    purrr,
+    DelayedArray
 Suggests:
     BiocStyle,
     knitr,
@@ -74,9 +76,7 @@ Suggests:
     webshot,
     rtracklayer,
     R.utils,
-    covr,
-    purrr,
-    DelayedArray
+    covr
 biocViews:
     DNAMethylation, 
     GeneExpression, 
