@@ -815,104 +815,104 @@ get.tabs <- function(dir, classification = "family"){
 #' @importFrom dplyr full_join as_data_frame
 #' @importFrom purrr reduce
 get.tab <- function(dir,classification){
-    message("o Creating TF binary matrix")
-    tab <- purrr::reduce(lapply(dir, 
-                                function(x) {
-                                  ret <- ELMER:::summarizeTF(path = x,
-                                                             classification = classification,
-                                                             top = TRUE)
-                                  colnames(ret)[2] <- x
-                                  return(ret)
-                                }),
-                         dplyr::full_join)
-    tab[tab == "x"] <- 1
-    tab[is.na(tab)] <- 0
-    rownames(tab) <- tab$TF
-    tab$TF <- NULL
-    for(i in 1:ncol(tab)){
-      tab[,i] <- as.numeric(tab[,i])
-    }
-    tab <- tab[rowSums(tab) > 0,]
- return(tab)
+  message("o Creating TF binary matrix")
+  tab <- purrr::reduce(lapply(dir, 
+                              function(x) {
+                                ret <- summarizeTF(path = x,
+                                                   classification = classification,
+                                                   top = TRUE)
+                                colnames(ret)[2] <- x
+                                return(ret)
+                              }),
+                       dplyr::full_join)
+  tab[tab == "x"] <- 1
+  tab[is.na(tab)] <- 0
+  rownames(tab) <- tab$TF
+  tab$TF <- NULL
+  for(i in 1:ncol(tab)){
+    tab[,i] <- as.numeric(tab[,i])
+  }
+  tab <- tab[rowSums(tab) > 0,]
+  return(tab)
 }    
 
 #' @importFrom tidyr separate_rows gather
 get.tab.or <- function(dir, classification, tab){
-    col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
-    message("o Creating TF OR matrix")
-    # For each of those analysis get the enriched motifs and the MR TFs.
-    tab.or <- plyr::adply(dir,
-                          .margins = 1,
-                          function(path){
-                            TF <- readr::read_csv(dir(path = path, pattern = ".significant.TFs.with.motif.summary.csv",
-                                                      recursive = T,full.names = T),col_types = readr::cols())
-                            motif <- readr::read_csv(dir(path = path, pattern = ".motif.enrichment.csv",
-                                                         recursive = T,full.names = T),col_types = readr::cols())
-                            z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
-                            z <- z[order(-z$OR),] # Drecreasing order of OR
-                            OR <- z[match(rownames(tab),z[[col]]),] %>% pull(OR)
-                            OR
-                          },.id = NULL
-    )
-    tab.or <- t(tab.or)
-    rownames(tab.or) <- rownames(tab)
-    colnames(tab.or) <- colnames(tab)
-    return(tab.or)
+  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+  message("o Creating TF OR matrix")
+  # For each of those analysis get the enriched motifs and the MR TFs.
+  tab.or <- plyr::adply(dir,
+                        .margins = 1,
+                        function(path){
+                          TF <- readr::read_csv(dir(path = path, pattern = ".significant.TFs.with.motif.summary.csv",
+                                                    recursive = T,full.names = T),col_types = readr::cols())
+                          motif <- readr::read_csv(dir(path = path, pattern = ".motif.enrichment.csv",
+                                                       recursive = T,full.names = T),col_types = readr::cols())
+                          z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
+                          z <- z[order(-z$OR),] # Drecreasing order of OR
+                          OR <- z[match(rownames(tab),z[[col]]),] %>% pull(OR)
+                          OR
+                        },.id = NULL
+  )
+  tab.or <- t(tab.or)
+  rownames(tab.or) <- rownames(tab)
+  colnames(tab.or) <- colnames(tab)
+  return(tab.or)
 }
 
 #' @importFrom tidyr separate_rows gather
 get.tab.pval <- function(dir,classification,tab){ 
-    col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
-    message("o Creating TF FDR matrix")
-    # For each of those analysis get the correlation pvalue of MR TFs exp  vs Avg DNA met. of inferred TFBS.
-    tab.pval <- plyr::adply(dir,
-                            .margins = 1,
-                            function(path){
-                              TF <- readr::read_csv(dir(path = path, 
-                                                        pattern = ".significant.TFs.with.motif.summary.csv",
-                                                        recursive = T,full.names = T),col_types = readr::cols())
-                              motif <- readr::read_csv(dir(path = path, 
-                                                           pattern = ".motif.enrichment.csv",
-                                                           recursive = T,full.names = T),col_types = readr::cols())
-                              # For each TF breaks into lines (P53;P63) will create two lines. Then merge with motif to get OR value
-                              z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
-                              z <- z[order(-z$OR),] # Drecreasing order of OR
-                              colnames(z)[grep(paste0("^",col),colnames(z))] <- "TF"
-                              motif <- z[match(rownames(tab),z$TF),] %>% pull(motif) # get higher OR for that TF binding
-                              TF.meth.cor <- get(load(dir(path = path, pattern = ".TFs.with.motif.pvalue.rda", recursive = T, full.names = T)))
-                              TF.meth.cor <- cbind(TF.meth.cor,TF = rownames(TF.meth.cor))
-                              TF.meth.cor <- dplyr::as_data_frame(TF.meth.cor)
-                              # Create table TF, motif, FDR
-                              TF.meth.cor <- TF.meth.cor  %>% tidyr::gather(key = motif, value = FDR, -TF) 
-                              # get FDR for TF and motif
-                              FDR <- TF.meth.cor[match(paste0(rownames(tab),motif),paste0(TF.meth.cor$TF,TF.meth.cor$motif)),]  %>% dplyr::pull(FDR)
-                              as.numeric(FDR)
-                            },.id = NULL
-    )
-    
-    tab.pval <- t(tab.pval)
-    rownames(tab.pval) <- rownames(tab)
-    colnames(tab.pval) <- colnames(tab)
-    return(tab.pval)
+  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+  message("o Creating TF FDR matrix")
+  # For each of those analysis get the correlation pvalue of MR TFs exp  vs Avg DNA met. of inferred TFBS.
+  tab.pval <- plyr::adply(dir,
+                          .margins = 1,
+                          function(path){
+                            TF <- readr::read_csv(dir(path = path, 
+                                                      pattern = ".significant.TFs.with.motif.summary.csv",
+                                                      recursive = T,full.names = T),col_types = readr::cols())
+                            motif <- readr::read_csv(dir(path = path, 
+                                                         pattern = ".motif.enrichment.csv",
+                                                         recursive = T,full.names = T),col_types = readr::cols())
+                            # For each TF breaks into lines (P53;P63) will create two lines. Then merge with motif to get OR value
+                            z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
+                            z <- z[order(-z$OR),] # Drecreasing order of OR
+                            colnames(z)[grep(paste0("^",col),colnames(z))] <- "TF"
+                            motif <- z[match(rownames(tab),z$TF),] %>% pull(motif) # get higher OR for that TF binding
+                            TF.meth.cor <- get(load(dir(path = path, pattern = ".TFs.with.motif.pvalue.rda", recursive = T, full.names = T)))
+                            TF.meth.cor <- cbind(TF.meth.cor,TF = rownames(TF.meth.cor))
+                            TF.meth.cor <- dplyr::as_data_frame(TF.meth.cor)
+                            # Create table TF, motif, FDR
+                            TF.meth.cor <- TF.meth.cor  %>% tidyr::gather(key = motif, value = FDR, -TF) 
+                            # get FDR for TF and motif
+                            FDR <- TF.meth.cor[match(paste0(rownames(tab),motif),paste0(TF.meth.cor$TF,TF.meth.cor$motif)),]  %>% dplyr::pull(FDR)
+                            as.numeric(FDR)
+                          },.id = NULL
+  )
+  
+  tab.pval <- t(tab.pval)
+  rownames(tab.pval) <- rownames(tab)
+  colnames(tab.pval) <- colnames(tab)
+  return(tab.pval)
 }
 
 
 #' @importFrom DelayedArray rowMins
 get.top.tf.by.pval <- function(tab.pval,top = 5){
-    labels <- c()
-    for(i in 1:ncol(tab.pval)){
-      labels <- sort(
-        unique(
-          c(labels,
-            rownames(tab.pval)[head(sort(DelayedArray::rowMins(tab.pval[,i,drop = F],na.rm = T), 
-                                         index.return = TRUE, 
-                                         decreasing = F)$ix, 
-                                    n = top)]
-          )
+  labels <- c()
+  for(i in 1:ncol(tab.pval)){
+    labels <- sort(
+      unique(
+        c(labels,
+          rownames(tab.pval)[head(sort(DelayedArray::rowMins(tab.pval[,i,drop = F],na.rm = T), 
+                                       index.return = TRUE, 
+                                       decreasing = F)$ix, 
+                                  n = top)]
         )
       )
-    }
-
+    )
+  }
+  
   return(labels)
 }
 

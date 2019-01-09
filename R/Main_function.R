@@ -1685,6 +1685,7 @@ maphg38tohg19 <- function(file,
 #' will be selected TF.*with.motif.summary.csv.
 #' @param classification Consider subfamily or family classifications
 #' @param top Get only the top potential (default) or all potentials
+#' @importFrom readr read_csv
 summarizeTF <- function(files = NULL,
                         path = NULL,
                         classification = "family",

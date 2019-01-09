@@ -211,7 +211,7 @@ createMAE <- function (exp,
   if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     required.cols <- required.cols[!required.cols %in% colnames(values(exp))]
     if(length(required.cols) > 0) {
-      gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+      gene.info <- TCGAbiolinks::get.GRCh.bioMart(genome)
       colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
       if(all(grepl("ENSG",rownames(exp)))) {
         extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
@@ -235,7 +235,7 @@ createMAE <- function (exp,
     
     # Get clinical information
     if(missing(colData)) {
-      colData <- TCGAbiolinks:::colDataPrepare(c(colnames(met), colnames(exp)))
+      colData <- TCGAbiolinks::colDataPrepare(c(colnames(met), colnames(exp)))
       # This will keep the same strategy the old ELMER version used:
       # Every type of tumor samples (starts with T) will be set to tumor and
       # every type of normal samples   (starts with N) will be set to normal 
@@ -338,7 +338,7 @@ createMAE <- function (exp,
 makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from gene expression input")
-  gene.info <- TCGAbiolinks:::get.GRCh.bioMart(genome)
+  gene.info <- TCGAbiolinks::get.GRCh.bioMart(genome)
   gene.info$chromosome_name <- paste0("chr",gene.info$chromosome_name)
   colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
   gene.info$strand[gene.info$strand == 1] <- "+"
@@ -769,6 +769,7 @@ getHocomocoTable <- function(){
 #' @return A data frame with the random linkages
 #' @export
 #' @importFrom dplyr pull filter
+#' @importFrom TCGAbiolinks get.GRCh.bioMart colDataPrepare
 #' @examples
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
@@ -829,7 +830,7 @@ getRandomPairs <- function(pairs,
   nb.pairs <- nrow(pairs)
   nb.probes <- length(unique(pairs$Probe))
   # get gene information
-  genes <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome, as.granges = TRUE)
+  genes <- TCGAbiolinks::get.GRCh.bioMart(genome = genome, as.granges = TRUE)
   
   df.random <- NULL
   near.genes.linked <- NULL
