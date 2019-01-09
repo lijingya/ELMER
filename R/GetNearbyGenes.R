@@ -185,7 +185,7 @@ GetNearGenes <- function(data = NULL,
     if("genome" %in% names(metadata(data))){
       genome <- metadata(data)$genome
       tssAnnot <- getTSS(genome = genome)
-      geneAnnot <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
+      geneAnnot <- TCGAbiolinks::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
     }
   }
   

@@ -738,7 +738,7 @@ createIGVtrack <- function(pairs,
     tss <- getTSS(genome = genome)
     tss <- tibble::as.tibble(tss)
   } else {
-    tss <- TCGAbiolinks:::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
+    tss <- TCGAbiolinks::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
     tss <- tibble::as.tibble(promoters(tss,upstream = 0,downstream = 0))
     tss$transcription_start_site <- tss$start
   }
