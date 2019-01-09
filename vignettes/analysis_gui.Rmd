@@ -18,7 +18,7 @@ vignette: >
 ---
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE,warning = FALSE}
-devtools::load_all(".")
+library(ELMER)
 ```
 
 <br>
