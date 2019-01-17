@@ -858,18 +858,28 @@ promoterMeth <- function(data,
     }
 
     message("Calculating associations of gene expression with DNA methylation at promoter regions")
+    
+    # get +-2KB around TSS
     TSS_2K <- promoters(rowRanges(getExp(data)), upstream = upstream, downstream = downstream)
+    
+    # get probes overlapping those promoter regions
     probes <- rowRanges(getMet(data))
     overlap <- findOverlaps(probes, TSS_2K)
+    
+    # make data frame with probe and gene
     df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]),
                      GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
+    
+    # no results ?
     if(nrow(df)==0){
         out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
     } else {
         df <- unique(df)
         ProbeInTSS <- split(df$Probe,df$GeneID)
+        
         message("Calculating average DNA methylation for probes near the same TSS")
-        ## calculate average methylation of promoter
+        
+        # calculate average methylation of promoter (if promoter has several probes)
         met <- assay(getMet(data))
         Gene.promoter <- lapply(ProbeInTSS,
                                 function(x, METH){
@@ -879,10 +889,10 @@ promoterMeth <- function(data,
                                     }
                                     return(meth)
                                 },
-                                METH=met)
-
+                                METH = met)
 
         Gene.promoter <- do.call(rbind, Gene.promoter)
+        
         ## make fake NearGene
         Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
                            GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
@@ -892,11 +902,11 @@ promoterMeth <- function(data,
         exps <- assay(getExp(data))
 
         message("Calculating Pp (probe - gene) for all nearby genes")
-        out <- adply(.data = rownames(Gene.promoter)[1:3], .margins = 1,
+        out <- adply(.data = rownames(Gene.promoter), .margins = 1,
                      .fun = function(x) {
                          Stat.nonpara(Probe = x,
-                                      Meths = Gene.promoter[x,],
-                                      NearGenes = Fake,
+                                      Meths = Gene.promoter[x,,drop = FALSE],
+                                      NearGenes = as.data.frame(Fake),
                                       Top = minSubgroupFrac/2,
                                       Exps = exps)},
                      .progress = "time",
