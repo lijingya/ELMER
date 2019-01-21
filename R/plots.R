@@ -782,7 +782,60 @@ createIGVtrack <- function(pairs,
   readr::write_delim(pairs, path = filename, append = TRUE)
 }
 
-
+#' @title Create a bigwig file for IGV visualization of DNA methylation data (Array)
+#' @description 
+#' Create a bigwig for IGV visualization of DNA methylation data (Array)
+#' @param data A matrix
+#' @param filename Filename (".bed")
+#' @param met.platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
+#' @param genome Which genome build will be used: hg38 (default) or hg19.
+#' @importFrom plyr a_ply
+#' @importFrom rtracklayer export.wig
+#' @importFrom GenomeInfoDb Seqinfo
+#' @export
+#' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
+#' @examples
+#'  \dontrun{            
+#'  data <- assay(getMet(ELMER:::getdata("elmer.data.example")))
+#'  createBigWinDNAmetArray(data = data, met.platform = "450K", genome = "hg38")
+#'  }
+createBigWinDNAmetArray <- function(data = NULL,
+                                      genome = "hg38",
+                                      met.platform = "450K",
+                                      track.names = NULL,
+                                      dir = "IGV_tracks"){
+  
+  # where we will save the several tracks
+  dir.create(dir,recursive = TRUE, showWarnings = FALSE)
+  
+  # get genomic information for array
+  message("Preparing array metadata")
+  metadata <- getInfiniumAnnotation(plat = met.platform,genome = genome)
+  metadata <- metadata[!metadata$MASK_general,]
+  values(metadata) <- NULL
+  metadata$score <- NA
+  strand(metadata) <- "*"
+  metadata <- keepStandardChromosomes(metadata, pruning.mode="coarse")
+  seqinfo(metadata) <- Seqinfo(genome=genome) %>% keepStandardChromosomes
+  
+  message("Creating bigwig tracks")
+  # for each samples create the track
+  plyr::a_ply(colnames(data),1,.fun = function(sample){
+    idx <- which(sample == colnames(data))
+    met <- data[,sample]
+    metadata <- metadata[names(metadata) %in% rownames(data),]
+    data <- data[rownames(data) %in% names(metadata),]
+    metadata$score <- met[match(rownames(data),names(metadata))]
+    metadata <- metadata[!is.na(metadata$score),]
+    if(!is.null(track.names)) {
+      filename <- file.path(dir,track.names[idx])
+    } else {
+      filename <- file.path(dir,paste0(sample,".bw"))
+    }
+    message("Saving: ", filename)
+    rtracklayer::export.bw(object = metadata,con = filename)
+  },.progress = "time")
+}
 
 
 
