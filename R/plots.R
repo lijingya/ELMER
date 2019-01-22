@@ -822,10 +822,10 @@ createBigWigDNAmetArray <- function(data = NULL,
   # for each samples create the track
   plyr::a_ply(colnames(data),1,.fun = function(sample){
     idx <- which(sample == colnames(data))
-    met <- data[,sample]
     metadata <- metadata[names(metadata) %in% rownames(data),]
     data <- data[rownames(data) %in% names(metadata),]
-    metadata$score <- met[match(rownames(data),names(metadata))]
+    met <- data[,sample]
+    metadata$score <- met[match(names(metadata),rownames(data))]
     metadata <- metadata[!is.na(metadata$score),]
     if(!is.null(track.names)) {
       filename <- file.path(dir,track.names[idx])
