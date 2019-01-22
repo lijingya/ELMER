@@ -797,9 +797,9 @@ createIGVtrack <- function(pairs,
 #' @examples
 #'  \dontrun{            
 #'  data <- assay(getMet(ELMER:::getdata("elmer.data.example")))
-#'  createBigWinDNAmetArray(data = data, met.platform = "450K", genome = "hg38")
+#'  createBigWigDNAmetArray(data = data, met.platform = "450K", genome = "hg38")
 #'  }
-createBigWinDNAmetArray <- function(data = NULL,
+createBigWigDNAmetArray <- function(data = NULL,
                                       genome = "hg38",
                                       met.platform = "450K",
                                       track.names = NULL,
@@ -832,7 +832,7 @@ createBigWinDNAmetArray <- function(data = NULL,
     } else {
       filename <- file.path(dir,paste0(sample,".bw"))
     }
-    message("Saving: ", filename)
+    message("\nSaving: ", filename)
     rtracklayer::export.bw(object = metadata,con = filename)
   },.progress = "time")
 }
