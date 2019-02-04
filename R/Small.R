@@ -497,74 +497,58 @@ getTSS <- function(genome = "hg38",
   msg <- character()
   while (tries < 3L) {
     tss <- tryCatch({
-      if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "feb2014.archive.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position", 
-                        "strand",
-                        "transcript_start",
-                        "transcript_end",
-                        "ensembl_transcript_id",
-                        "ensembl_gene_id", "entrezgene",
-                        "external_gene_id")
-      } else {
-        # for hg38
-        ensembl <- tryCatch({
-          useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl")
-        },  error = function(e) {
-          useEnsembl("ensembl",
-                     dataset = "hsapiens_gene_ensembl",
-                     mirror = "uswest")
-        })
-        attributes <- c("chromosome_name",
-                        "start_position",
-                        "end_position", "strand",
-                        "ensembl_gene_id", 
-                        "transcription_start_site",
-                        "transcript_start",
-                        "ensembl_transcript_id",
-                        "transcript_end",
-                        "external_gene_name")
-      }
-      chrom <- c(1:22, "X", "Y","M","*")
-      db.datasets <- listDatasets(ensembl)
-      description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
-      message(paste0("Downloading transcripts information. Using: ", description))
-      
-      filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
-      if(!file.exists(filename)) {
-        tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
-        tss <- tss[!duplicated(tss$ensembl_transcript_id),]
-        save(tss, file = filename)
-      } else {
-        tss <- get(load(filename))  
-      } 
-      if(genome == "hg19") {
-        tss$external_gene_name <- tss$external_gene_id
-        tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
-      }
-      tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
-      tss$strand[tss$strand == 1] <- "+" 
-      tss$strand[tss$strand == -1] <- "-" 
-      tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
-      
-      if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
-        tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
-      tss
-    }, error = function(e) {
-      msg <<- conditionMessage(e)
-      tries <<- tries + 1L
-    })
+      host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+      ensembl <- tryCatch({
+        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+      },  error = function(e) {
+        useEnsembl("ensembl",
+                   dataset = "hsapiens_gene_ensembl",
+                   mirror = "uswest",
+                   host =  host)
+      })
+      attributes <- c("chromosome_name",
+                      "start_position",
+                      "end_position", "strand",
+                      "ensembl_gene_id", 
+                      "transcription_start_site",
+                      "transcript_start",
+                      "ensembl_transcript_id",
+                      "transcript_end",
+                      "external_gene_name")
+    chrom <- c(1:22, "X", "Y","M","*")
+    db.datasets <- listDatasets(ensembl)
+    description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+    message(paste0("Downloading transcripts information. Using: ", description))
+    
+    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
+    if(!file.exists(filename)) {
+      tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+      tss <- tss[!duplicated(tss$ensembl_transcript_id),]
+      save(tss, file = filename)
+    } else {
+      tss <- get(load(filename))  
+    } 
+    if(genome == "hg19") {
+      tss$external_gene_name <- tss$external_gene_id
+      tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
+    }
+    tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
+    tss$strand[tss$strand == 1] <- "+" 
+    tss$strand[tss$strand == -1] <- "-" 
+    tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
+    
+    if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
+      tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+    tss
+  }, error = function(e) {
+    msg <<- conditionMessage(e)
+    tries <<- tries + 1L
+  })
     if(!is.null(tss)) break
-  }
-  if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
-  
-  return(tss)
+}
+if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
+
+return(tss)
 }
 
 #' @title  Get human TF list from the UNiprot database
@@ -801,11 +785,11 @@ getRandomPairs <- function(pairs,
   
   if(missing(pairs)) stop("Please set pairs argument")
   if(is.data.frame(pairs)) pairs <- as.data.frame(pairs)
-
+  
   # Rename column
   if("Side" %in% colnames(pairs)) colnames(pairs)[grep("Side",colnames(pairs))] <- "Sides"
   if(!"Sides" %in% colnames(pairs)) stop("No column Sides in the object")
-
+  
   if("Target" %in% colnames(pairs)) colnames(pairs)[grep("Target",colnames(pairs))] <- "Probe"
   if("ID" %in% colnames(pairs)) colnames(pairs)[colnames(pairs) == "ID"] <- "Probe"
   
@@ -848,11 +832,11 @@ getRandomPairs <- function(pairs,
     near.genes.linked <- plyr::alply(1:length(not.matched),
                                      .margins = 1,
                                      .fun = function(x){
-      side <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull(Sides)
-      ret <- near.genes %>% filter(ID == unique(near.genes$ID)[x] & Side %in% side)
-      if(!all(side %in% ret$Side)) return(NULL)
-      ret
-    },.progress = "time", .parallel = parallel)
+                                       side <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull(Sides)
+                                       ret <- near.genes %>% filter(ID == unique(near.genes$ID)[x] & Side %in% side)
+                                       if(!all(side %in% ret$Side)) return(NULL)
+                                       ret
+                                     },.progress = "time", .parallel = parallel)
     
     not.matched <- not.matched[grep("NULL",near.genes.linked)]
     if(length(not.matched) > 0){
@@ -1018,7 +1002,7 @@ findMotifRegion <- function(regions,
                       "\nIf already installed be sure R can see it.",
                       "You can change PATH evn variable with usethis::edit_r_environ()",
                       "\nAdding, for example, a modified version of this line: PATH=$PATH:path_to_homer/bin:/usr/bin/")
-               )
+          )
         }
       }
     }
