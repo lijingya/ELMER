@@ -515,40 +515,40 @@ getTSS <- function(genome = "hg38",
                       "ensembl_transcript_id",
                       "transcript_end",
                       "external_gene_name")
-    chrom <- c(1:22, "X", "Y","M","*")
-    db.datasets <- listDatasets(ensembl)
-    description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
-    message(paste0("Downloading transcripts information. Using: ", description))
-    
-    filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
-    if(!file.exists(filename)) {
-      tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
-      tss <- tss[!duplicated(tss$ensembl_transcript_id),]
-      save(tss, file = filename)
-    } else {
-      tss <- get(load(filename))  
-    } 
-    if(genome == "hg19") {
-      tss$external_gene_name <- tss$external_gene_id
-      tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
-    }
-    tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
-    tss$strand[tss$strand == 1] <- "+" 
-    tss$strand[tss$strand == -1] <- "-" 
-    tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
-    
-    if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
-      tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
-    tss
-  }, error = function(e) {
-    msg <<- conditionMessage(e)
-    tries <<- tries + 1L
-  })
+      chrom <- c(1:22, "X", "Y","M","*")
+      db.datasets <- listDatasets(ensembl)
+      description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+      message(paste0("Downloading transcripts information. Using: ", description))
+      
+      filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
+      if(!file.exists(filename)) {
+        tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+        tss <- tss[!duplicated(tss$ensembl_transcript_id),]
+        save(tss, file = filename)
+      } else {
+        tss <- get(load(filename))  
+      } 
+      if(genome == "hg19") {
+        tss$external_gene_name <- tss$external_gene_id
+        tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
+      }
+      tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
+      tss$strand[tss$strand == 1] <- "+" 
+      tss$strand[tss$strand == -1] <- "-" 
+      tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
+      
+      if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
+        tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+      tss
+    }, error = function(e) {
+      msg <<- conditionMessage(e)
+      tries <<- tries + 1L
+    })
     if(!is.null(tss)) break
-}
-if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
-
-return(tss)
+  }
+  if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
+  
+  return(tss)
 }
 
 #' @title  Get human TF list from the UNiprot database
@@ -569,24 +569,16 @@ get.GRCh <- function(genome = "hg19", genes, as.granges = FALSE) {
   msg <- character()
   while (tries < 3L) {
     gene.location <- tryCatch({
-      if (genome == "hg19"){
-        # for hg19
-        ensembl <- useMart(biomart = "ENSEMBL_MART_ENSEMBL",
-                           host = "feb2014.archive.ensembl.org",
-                           path = "/biomart/martservice" ,
-                           dataset = "hsapiens_gene_ensembl")
-        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_id")
-      } else {
-        # for hg38
-        ensembl <- tryCatch({
-          useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl")
-        },  error = function(e) {
-          useEnsembl("ensembl",
-                     dataset = "hsapiens_gene_ensembl",
-                     mirror = "uswest")
-        })
-        attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
-      }
+      host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+      ensembl <- tryCatch({
+        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+      },  error = function(e) {
+        useEnsembl("ensembl",
+                   dataset = "hsapiens_gene_ensembl",
+                   mirror = "uswest",
+                   host =  host)
+      })
+      attributes <- c("ensembl_gene_id", "entrezgene","external_gene_name")
       gene.location <- getBM(attributes = attributes,
                              filters = c("entrezgene"),
                              values = list(genes), mart = ensembl)
