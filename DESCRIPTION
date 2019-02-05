@@ -65,6 +65,7 @@ Imports:
     tidyr,
     progress,
     purrr,
+    rtracklayer,
     DelayedArray
 Suggests:
     BiocStyle,
@@ -74,7 +75,6 @@ Suggests:
     DT,
     GenomicInteractions,
     webshot,
-    rtracklayer,
     R.utils,
     covr
 biocViews:
