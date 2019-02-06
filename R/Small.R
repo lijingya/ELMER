@@ -958,18 +958,20 @@ findMotifRegion <- function(regions,
   TFBS.motif <- "http://hocomoco11.autosome.ru/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
   
+  
+  if(is.null(names(regions))){
+    names(regions) <- tibble::as_tibble(regions) %>% tidyr::unite(col = "names","seqnames","start","end") %>% pull(names)
+  }
+  df <- data.frame(seqnames = seqnames(regions),
+                   starts = as.integer(start(regions)),
+                   ends = end(regions),
+                   names = names(regions),
+                   scores = c(rep(".", length(regions))),
+                   strands = strand(regions))
+  n <- nrow(df)
+  step <- ifelse(n > 1000, 1000, n )
+  
   if(!file.exists(output.filename)){
-    if(is.null(names(regions))){
-      names(regions) <- tibble::as_tibble(regions) %>% tidyr::unite(col = "names","seqnames","start","end") %>% pull(names)
-    }
-    df <- data.frame(seqnames = seqnames(regions),
-                     starts = as.integer(start(regions)),
-                     ends = end(regions),
-                     names = names(regions),
-                     scores = c(rep(".", length(regions))),
-                     strands = strand(regions))
-    n <- nrow(df)
-    step <- ifelse(n > 1000, 1000, n )
     pb <- txtProgressBar(max = floor(n/step), style = 3)
     
     for(j in 0:floor(n/step)){
@@ -992,14 +994,14 @@ findMotifRegion <- function(regions,
           unlink(gsub(".bed",".txt",file.aux))
           stop(paste0("annotatePeaks.pl had an error. Please check homer install.",
                       "\nIf already installed be sure R can see it.",
-                      "You can change PATH evn variable with usethis::edit_r_environ()",
-                      "\nAdding, for example, a modified version of this line: PATH=$PATH:path_to_homer/bin:/usr/bin/")
+                      "You can change PATH evn variable with ",
+                      "\nSys.setenv(PATH=paste(Sys.getenv('PATH'), '/the/bin/folder/of/bedtools', sep=':'))")
           )
         }
       }
     }
+    close(pb)
   }
-  close(pb)
   # We will merge the results from each file into one
   peaks <- NULL
   pb <- txtProgressBar(max = floor(n/step), style = 3)
