@@ -14,7 +14,9 @@ createBigWigDNAmetArray(data = NULL, genome = "hg38",
 
 \item{met.platform}{DNA methyaltion platform to retrieve data from: EPIC or 450K (default)}
 
-\item{filename}{Filename (".bed")}
+\item{dir}{Which directory files will be saved}
+
+\item{filename}{track.names (".bw")}
 }
 \description{
 Create a bigwig for IGV visualization of DNA methylation data (Array)

@@ -786,9 +786,10 @@ createIGVtrack <- function(pairs,
 #' @description 
 #' Create a bigwig for IGV visualization of DNA methylation data (Array)
 #' @param data A matrix
-#' @param filename Filename (".bed")
+#' @param filename track.names (".bw")
 #' @param met.platform DNA methyaltion platform to retrieve data from: EPIC or 450K (default)
 #' @param genome Which genome build will be used: hg38 (default) or hg19.
+#' @param dir Which directory files will be saved
 #' @importFrom plyr a_ply
 #' @importFrom rtracklayer export.wig
 #' @importFrom GenomeInfoDb Seqinfo
@@ -800,10 +801,10 @@ createIGVtrack <- function(pairs,
 #'  createBigWigDNAmetArray(data = data, met.platform = "450K", genome = "hg38")
 #'  }
 createBigWigDNAmetArray <- function(data = NULL,
-                                      genome = "hg38",
-                                      met.platform = "450K",
-                                      track.names = NULL,
-                                      dir = "IGV_tracks"){
+                                    genome = "hg38",
+                                    met.platform = "450K",
+                                    track.names = NULL,
+                                    dir = "IGV_tracks"){
   
   # where we will save the several tracks
   dir.create(dir,recursive = TRUE, showWarnings = FALSE)
