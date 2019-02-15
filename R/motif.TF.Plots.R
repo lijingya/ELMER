@@ -94,8 +94,8 @@ motif.enrichment.plot <- function(motif.enrichment,
                      round(motif.enrichment$upperOR,digits = 2),")")
     nb.idx <- grep("NumOf",colnames(motif.enrichment))
     if("PercentageOfProbes" %in% colnames(motif.enrichment)){
-    probe.col <- paste0(motif.enrichment[,nb.idx],
-                        " (", round(100 * motif.enrichment$PercentageOfProbes, digits = 2),"%)")
+      probe.col <- paste0(motif.enrichment[,nb.idx],
+                          " (", round(100 * motif.enrichment$PercentageOfProbes, digits = 2),"%)")
     } else {
       probe.col <- paste0(motif.enrichment[,nb.idx])
     }
@@ -105,7 +105,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                       z = c("Motif",gsub("_HUMAN.H11MO.*","",as.character(motif.enrichment$motif)),
                             "Odds ratio \n (95% CI)",
                             or.col, 
-                            "# probes \n(% of paired)",
+                            ifelse("PercentageOfProbes"  %in% colnames(motif.enrichment), "# probes \n(% of paired)"," # regions"),
                             probe.col)
     )
     
@@ -166,6 +166,7 @@ motif.enrichment.plot <- function(motif.enrichment,
       scale_y_continuous(breaks=c(1,pretty(motif.enrichment$OR, n = 5)))
   }
   if(save) {
+    dir.create(dir.out,recursive = TRUE,showWarnings = FALSE)
     ggsave(filename = sprintf("%s/%s.motif.enrichment.pdf",dir.out,label),
            useDingbats = FALSE, 
            plot = P,
@@ -278,7 +279,7 @@ TF.rank.plot <- function(motif.pvalue,
     registerDoParallel(cores)
     parallel = TRUE
   }
-
+  
   Plots <- alply(motif, 1, function(i){
     df <- data.frame(pvalue = motif.pvalue[,i], 
                      Gene = rownames(motif.pvalue), 
