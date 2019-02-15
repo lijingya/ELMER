@@ -23,6 +23,10 @@ Current directory is default.}
 
 \item{title}{Plot title. Default: no title}
 
+\item{width}{Plot width}
+
+\item{height}{Plot height}
+
 \item{summary}{Create a summary table along with the plot, it is necessary 
 to add two new columns to object (NumOfProbes and PercentageOfProbes)}
 }

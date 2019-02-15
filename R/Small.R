@@ -917,6 +917,7 @@ calculateEnrichement <- function(foreground,
 #' @param cores A interger which defines the number of cores to be used in parallel 
 #' process. Default is 1: no parallel process.
 #' @param genome Homer genome (hg38, hg19)
+#' @param nstep Number of regions to evaluate in homer, the bigger, more memory it will use at each step.
 #' @description 
 #' To find for each probe the know motif we will use HOMER software (http://homer.salk.edu/homer/).
 #' Homer and genome should be installed before this function is executed
@@ -951,6 +952,7 @@ findMotifRegion <- function(regions,
                             output.filename = "mapped_motifs_regions.txt",
                             region.size = NULL,
                             genome = "hg38",
+                            nstep = 10000,
                             cores = 1){
   
   if(!is(regions, class(GRanges()))) stop("Regions must be a Genomic Ranges object")
@@ -969,7 +971,7 @@ findMotifRegion <- function(regions,
                    scores = c(rep(".", length(regions))),
                    strands = strand(regions))
   n <- nrow(df)
-  step <- ifelse(n > 1000, 1000, n )
+  step <- ifelse(n > nstep, nstep, n)
   
   if(!file.exists(output.filename)){
     pb <- txtProgressBar(max = floor(n/step), style = 3)

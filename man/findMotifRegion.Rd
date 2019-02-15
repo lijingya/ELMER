@@ -5,7 +5,7 @@
 \title{Use Hocomoco motif and homer to identify motifs in a given region}
 \usage{
 findMotifRegion(regions, output.filename = "mapped_motifs_regions.txt",
-  region.size = NULL, genome = "hg38", cores = 1)
+  region.size = NULL, genome = "hg38", nstep = 10000, cores = 1)
 }
 \arguments{
 \item{regions}{A GRanges object. Names will be used as the identifier.}
@@ -16,6 +16,8 @@ findMotifRegion(regions, output.filename = "mapped_motifs_regions.txt",
 For example if region.size is 500, then +-250bp round it will be searched.}
 
 \item{genome}{Homer genome (hg38, hg19)}
+
+\item{nstep}{Number of regions to evaluate in homer, the bigger, more memory it will use at each step.}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel 
 process. Default is 1: no parallel process.}
