@@ -75,6 +75,9 @@ scatter.plot <- function(data,
                          dir.out = "./", 
                          save = TRUE, 
                          ...){
+  
+  dir.create(dir.out,recursive = TRUE,showWarnings = FALSE)
+  
   simpleCap <- function(x) {
     if(is.na(x)) return("NA")
     s <- x
@@ -260,7 +263,9 @@ scatter <- function(meth,
                       method=c("spearman"))
       corval <- round(cor$estimate,digits = 2)
       pvalue <- signif(cor$p.value,digits=3)
-      P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("Rho: ",corval," / P-value: ",pvalue))
+      title <- paste0(title, "\n","Rho: ",corval," / P-value: ",pvalue)
+      P <- P + labs(title=title)
+      #P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("Rho: ",corval," / P-value: ",pvalue))
     }
   } else {
     df <- data.frame(meth=meth,exp=exp,category=category)
