@@ -316,6 +316,9 @@ calcDistNearestTSS <- function(links,
   if(!"ID" %in% colnames(values(TRange))){
     TRange$ID <- names(TRange)
   }
+  if(!"ensembl_gene_id" %in% colnames(links)){
+    colnames(links)[grep("GeneID", colnames(links))] <- "ensembl_gene_id"
+  }
   merged <- dplyr::left_join(links,
                              suppressWarnings(tibble::as_tibble(tssAnnot)),
                              by = c("ensembl_gene_id"))
@@ -347,7 +350,7 @@ calcDistNearestTSS <- function(links,
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
   links <- dplyr::full_join(links,ret)
-  colnames(ret)[1:3] <- c("ID","GeneID","Symbol")
+  colnames(links)[1:3] <- c("ID","GeneID","Symbol")
   return(links)
 }
 

@@ -516,16 +516,15 @@ heatmapGene <- function(data,
     
     p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
-    neargenes <- ELMER::GetNearGenes(probes = p,
+    pairs <- ELMER::GetNearGenes(probes = p,
                                      data = data,
                                      numFlankingGenes = 10)
-    pairs <- plyr::ldply(neargenes)
     pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
     pairs <- addDistNearestTSS(data, pairs)
     p <- rev(names(sort(probes.info[p], ignore.strand=TRUE)))
-    pairs <- pairs[match(p,pairs$Probe),]
+    pairs <- pairs[match(p,pairs$ID),]
     if(scatter.plot){
-      for(p in pairs$Probe){
+      for(p in pairs$ID){
         scatter.plot(data = mae,
                      byPair = list(probe = p, 
                                    gene = gene.location$ensembl_gene_id), # TNFRSF11A
@@ -547,7 +546,7 @@ heatmapGene <- function(data,
   if(!(missing(group1) & missing(group2))){
     data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   } 
-  meth <- assay(getMet(data))[pairs$Probe,]
+  meth <- assay(getMet(data))[pairs$ID,]
   exp <- assay(getExp(data))[unique(pairs$GeneID),,drop = FALSE]
   
   # Ordering the heatmap
@@ -600,7 +599,7 @@ heatmapGene <- function(data,
       suppressWarnings({
         nb <- as.numeric(colData(data)[,c(i)])
         colData(data)[,c(i)] <- nb
-        if(!all(na.omit(nb) >=0)){
+        if(!all(na.omit(nb) >= 0)){
           col <- circlize::colorRamp2(c(min(nb,na.rm = T),
                                         (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
                                         max(nb,na.rm = T)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
@@ -649,7 +648,7 @@ heatmapGene <- function(data,
   if(!is.null(met.metadata)) {
     for(i in met.metadata)
       ht_list <- ht_list + 
-        Heatmap(values(getMet(data)[pairs$Probe,])[i],
+        Heatmap(values(getMet(data)[pairs$ID,])[i],
                 name = i, 
                 width = unit(5, "mm"),
                 column_title = "", 
@@ -659,7 +658,7 @@ heatmapGene <- function(data,
   if(!is.null(exp.metadata)) {
     for(i in exp.metadata)
       ht_list <- ht_list + 
-        Heatmap(values(getExp(data)[pairs$Probe,])[i],
+        Heatmap(values(getExp(data)[pairs$ID,])[i],
                 name = i, 
                 width = unit(5, "mm"),
                 column_title = "", 
@@ -674,11 +673,11 @@ heatmapGene <- function(data,
   padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.15), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))
   if(grepl("\\.pdf",filename)) {
-    message("Saving as PDF")
+    message("Saving as PDF: ",sprintf("%s/%s",dir.out,filename))
     pdf(sprintf("%s/%s",dir.out,filename), width = width, height = height)
   }
   if(grepl("\\.png",filename)) { 
-    message("Saving as PNG")
+    message("Saving as PNG: ", sprintf("%s/%s",dir.out,filename))
     if(width < 100) width <- 1000
     if(height < 100) height <- 1000
     png(sprintf("%s/%s",dir.out,filename), width = width, height = height)
