@@ -491,7 +491,7 @@ getRegionNearGenes <- function(TRange = NULL,
     idx$evaluating <-  evaluating[idx$queryHits]
     idx <- idx[!duplicated(idx[, 2:3]), ]
     idx <-
-      idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
+      idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[idx$evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
     evaluating <- evaluating[idx$queryHits]
     ret <-
       rbind(ret, cbind(
