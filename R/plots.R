@@ -520,15 +520,10 @@ heatmapGene <- function(data,
     regions <- as(df, "GRanges")
     p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
-    print("cg04340430" %in% p)
     pairs <- ELMER::GetNearGenes(probes = p,
                                  data = data,
                                  numFlankingGenes = 10) 
-    print("cg04340430" %in% pairs$ID)
-    save(pairs,file = "pairs_all.rda")
     pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
-    print("cg04340430" %in% pairs$ID)
-    save(pairs,file = "pairs.rda")
     pairs <- addDistNearestTSS(data, pairs)  %>% na.omit
     p <- rev(names(sort(probes.info[p], ignore.strand=TRUE)))
     pairs <- pairs[match(p,pairs$ID),] %>% na.omit
