@@ -488,7 +488,7 @@ heatmapGene <- function(data,
                         exp.metadata = NULL,
                         dir.out = ".",
                         width = 10,
-                        height = 7,
+                        height = 10,
                         filename = NULL) {
   
   if(missing(data)) stop("Please set data argument")
@@ -648,7 +648,7 @@ heatmapGene <- function(data,
             cluster_columns = F,
             row_names_side = "left",
             cluster_rows = F,
-            row_names_gp = gpar(fontsize = 5),
+            row_names_gp = gpar(fontsize = 2),
             top_annotation = ha,
             column_title_gp = gpar(fontsize = 10), 
             row_title_gp = gpar(fontsize = 10)) 
@@ -694,7 +694,7 @@ heatmapGene <- function(data,
        column_title = paste0("Correspondence between probe DNA methylation and ",  GeneSymbol," expression"), 
        column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
        annotation_legend_side = "right", 
-       heatmap_legend_side = "bottom")
+       heatmap_legend_side = "right")
   dev.off()
 }
 

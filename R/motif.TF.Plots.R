@@ -94,7 +94,7 @@ motif.enrichment.plot <- function(motif.enrichment,
                      round(motif.enrichment$upperOR,digits = 2),")")
     nb.idx <- grep("NumOf",colnames(motif.enrichment))
     if("PercentageOfProbes" %in% colnames(motif.enrichment)){
-      probe.col <- paste0(motif.enrichment[,nb.idx],
+      probe.col <- paste0(motif.enrichment[,nb.idx,drop=T],
                           " (", round(100 * motif.enrichment$PercentageOfProbes, digits = 2),"%)")
     } else {
       probe.col <- paste0(motif.enrichment[,nb.idx])
