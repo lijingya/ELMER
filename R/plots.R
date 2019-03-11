@@ -503,9 +503,14 @@ heatmapGene <- function(data,
     gene.info <- rowRanges(getExp(data))
     
     gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
+    if(length(gene.location) == 0) {
+      message("Gene not found: ", GeneSymbol)
+      return(NULL)
+    }
     # Get closer genes
-    gene.follow <- gene.info[follow(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
-    gene.precede <- gene.info[precede(gene.info[gene.info$external_gene_name == GeneSymbol,],gene.info,ignore.strand=T),]$external_gene_name
+    selected.gene.gr <- gene.info[gene.info$external_gene_name == GeneSymbol,]
+    gene.follow <- gene.info[follow(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
+    gene.precede <- gene.info[precede(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
     gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
     # Get the regions of the 2 nearest genes, we will get all probes on those regions
     regions <- range(gene.gr)
@@ -513,21 +518,25 @@ heatmapGene <- function(data,
                      start= min(start(regions)), 
                      end = max(end(regions)))
     regions <- as(df, "GRanges")
-    
     p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
+    print("cg04340430" %in% p)
     pairs <- ELMER::GetNearGenes(probes = p,
-                                     data = data,
-                                     numFlankingGenes = 10)
+                                 data = data,
+                                 numFlankingGenes = 10) 
+    print("cg04340430" %in% pairs$ID)
+    save(pairs,file = "pairs_all.rda")
     pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
-    pairs <- addDistNearestTSS(data, pairs)
+    print("cg04340430" %in% pairs$ID)
+    save(pairs,file = "pairs.rda")
+    pairs <- addDistNearestTSS(data, pairs)  %>% na.omit
     p <- rev(names(sort(probes.info[p], ignore.strand=TRUE)))
-    pairs <- pairs[match(p,pairs$ID),]
+    pairs <- pairs[match(p,pairs$ID),] %>% na.omit
     if(scatter.plot){
       for(p in pairs$ID){
         scatter.plot(data = mae,
                      byPair = list(probe = p, 
-                                   gene = gene.location$ensembl_gene_id), # TNFRSF11A
+                                   gene = gene.location$ensembl_gene_id), 
                      category = group.col, 
                      dir.out = dir.out, 
                      save = TRUE, 
@@ -546,7 +555,11 @@ heatmapGene <- function(data,
   if(!(missing(group1) & missing(group2))){
     data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
   } 
+  strand.factor <- ifelse(as.data.frame(gene.location)$strand == "+",1,-1)
+  pairs$DistanceTSSwithSignal <- pairs$DistanceTSS * ifelse(grepl("R",pairs$Side),1,-1)  * strand.factor
+  
   meth <- assay(getMet(data))[pairs$ID,]
+  rownames(meth) <- paste0(pairs$ID, " (Dist.TSS ",pairs$DistanceTSSwithSignal,")")
   exp <- assay(getExp(data))[unique(pairs$GeneID),,drop = FALSE]
   
   # Ordering the heatmap

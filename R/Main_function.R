@@ -849,7 +849,7 @@ promoterMeth <- function(data,
                          downstream = 2000,
                          save = TRUE,
                          cores = 1){
-  stop("For the moment, this function was depreciated.")
+    # stop("For the moment, this function was depreciated.")
     parallel <- FALSE
     if (cores > 1){
         if (cores > detectCores()) cores <- detectCores()

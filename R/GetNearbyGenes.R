@@ -444,10 +444,12 @@ getRegionNearGenes <- function(TRange = NULL,
         ))
       ))
     idx$evaluating <-  evaluating[idx$queryHits]
+    # remove same target gene and probe if counted twice
     idx <- idx[!duplicated(idx[, 2:3]), ]
+
     # todo remove already evaluated previously (we don't wanna do it again)
     idx <-
-      idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
+      idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[idx$evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
     evaluating <- evaluating[idx$queryHits]
     ret <-
       rbind(ret, cbind(
