@@ -301,7 +301,7 @@ createMAE <- function (exp,
       sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
       sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
       
-      # Which ones have both DNA methylation and gene expresion ?
+      # Which ones have both DNA methylation and gene expression ?
       commun.samples <- intersect(sampleMap.met$primary,sampleMap.exp$primary)
       
       # Remove the one that does not have both data
