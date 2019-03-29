@@ -298,10 +298,10 @@ createMAE <- function (exp,
       #if(!any(rownames(colData) %in% sampleMap$primary))
       #  stop("colData row names should be mapped to sampleMap primary column ")
       # Find which samples are DNA methylation and gene expression
-      sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met) & sampleMap$assay == "DNA methylation",,drop = FALSE]
-      sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp) & sampleMap$assay == "Gene expression",,drop = FALSE]
+      sampleMap.met <- sampleMap[sampleMap$colname %in% colnames(met),,drop = FALSE]
+      sampleMap.exp <- sampleMap[sampleMap$colname %in% colnames(exp),,drop = FALSE]
       
-      # Which ones have both DNA methylation and gene expresion?
+      # Which ones have both DNA methylation and gene expression ?
       commun.samples <- intersect(sampleMap.met$primary,sampleMap.exp$primary)
       
       # Remove the one that does not have both data
