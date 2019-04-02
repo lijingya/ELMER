@@ -13,10 +13,10 @@ install:
 # Adapt as necessary starting from here
 
 build_script:
+  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_deps
   - travis-tool.sh install_bioc_deps
   - travis-tool.sh install_bioc BiocStyle
-  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_bioc GenomicRanges
   - travis-tool.sh install_bioc Biobase
   - travis-tool.sh install_bioc maftools affy
@@ -38,7 +38,6 @@ build_script:
   - travis-tool.sh install_bioc pathview
   - travis-tool.sh install_bioc clusterProfiler
   - travis-tool.sh install_bioc GenomicInteractions
-  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_bioc ELMER.data
   - travis-tool.sh install_github BioinformaticsFMRP/TCGAbiolinks tiagochst/ELMER.data
   
