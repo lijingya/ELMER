@@ -13,37 +13,15 @@ install:
 cache:
   - C:\RLibrary
 
-# Adapt as necessary starting from here
 
-build_script:
-  - travis-tool.sh install_deps
-
-test_script:
-  - travis-tool.sh run_tests
-
-on_failure:
-  - 7z a failure.zip *.Rcheck\*
-  - appveyor PushArtifact failure.zip
-
-artifacts:
-  - path: '*.Rcheck\**\*.log'
-    name: Logs
-
-  - path: '*.Rcheck\**\*.out'
-    name: Logs
-
-  - path: '*.Rcheck\**\*.fail'
-    name: Logs
-
-  - path: '*.Rcheck\**\*.Rout'
-    name: Logs
-
-  - path: '\*_*.tar.gz'
-    name: Bits
-
-  - path: '\*_*.zip'
-    name: Bits
-    
+environment:
+  matrix:
+    - R_VERSION: devel
+      R_ARCH: x64
+      GCC_PATH: mingw_64
+      USE_RTOOLS: true
+      WARNINGS_ARE_ERRORS: 0
+      
 
 build_script:
   - travis-tool.sh install_bioc GenomeInfoDbData
@@ -81,14 +59,27 @@ on_failure:
   - 7z a failure.zip *.Rcheck\*
   - appveyor PushArtifact failure.zip
 
-environment:
-  matrix:
-    - R_VERSION: devel
-      R_ARCH: x64
-      GCC_PATH: mingw_64
-      USE_RTOOLS: true
-      WARNINGS_ARE_ERRORS: 0
-      
+
+artifacts:
+  - path: '*.Rcheck\**\*.log'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.out'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.fail'
+    name: Logs
+
+  - path: '*.Rcheck\**\*.Rout'
+    name: Logs
+
+  - path: '\*_*.tar.gz'
+    name: Bits
+
+  - path: '\*_*.zip'
+    name: Bits
+    
+
 notifications:
   - provider: Slack
     incoming_webhook:
