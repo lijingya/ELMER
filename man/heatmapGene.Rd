@@ -6,7 +6,7 @@
 \usage{
 heatmapGene(data, group.col, group1, group2, pairs, GeneSymbol,
   scatter.plot = FALSE, annotation.col = NULL, met.metadata = NULL,
-  exp.metadata = NULL, dir.out = ".", width = 10, height = 7,
+  exp.metadata = NULL, dir.out = ".", width = 10, height = 10,
   filename = NULL)
 }
 \arguments{

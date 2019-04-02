@@ -139,8 +139,8 @@ test_that("Function uses correctly the permu.dir", {
 
 test_that("Gene expression is calculated", {
   data <- ELMER:::getdata("elmer.data.example")
-  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-                            geneAnnot=getExp(data))
+  nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
+                            geneAnnot = getExp(data))
   Hypo.pair <- get.pair(data = data,
                         nearGenes = nearGenes,
                         permu.size = 5,

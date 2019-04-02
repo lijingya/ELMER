@@ -4,9 +4,15 @@
 \alias{motif.enrichment.plot}
 \title{motif.enrichment.plot to plot bar plots showing motif enrichment ORs and  95\% confidence interval for ORs}
 \usage{
-motif.enrichment.plot(motif.enrichment, significant = NULL, 
-                      dir.out = "./", save = TRUE, label = NULL,
-                      title = NULL, summary = FALSE)
+motif.enrichment.plot(motif.enrichment, 
+                      significant = NULL, 
+                      dir.out = "./", 
+                      save = TRUE, 
+                      label = NULL,
+                      title = NULL, 
+                      summary = FALSE, 
+                      width = 10, 
+                      height = NULL)
 }
 \arguments{
 \item{motif.enrichment}{A data frame or a file path of get.enriched.motif output
@@ -25,7 +31,7 @@ Current directory is default.}
 
 \item{width}{Plot width}
 
-\item{height}{Plot height}
+\item{height}{Plot height. If NULL a default value will be calculated}
 
 \item{summary}{Create a summary table along with the plot, it is necessary 
 to add two new columns to object (NumOfProbes and PercentageOfProbes)}
