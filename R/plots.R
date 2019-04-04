@@ -510,7 +510,7 @@ heatmapGene <- function(data,
   
   # If pairs are missing we will select the probes that are closer to the gene
   if(missing(pairs)) {
-
+    
     # Get closer genes
     selected.gene.gr <- gene.info[gene.info$external_gene_name == GeneSymbol,]
     gene.follow <- gene.info[follow(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
@@ -881,17 +881,71 @@ get.tabs <- function(dir, classification = "family"){
 
 #' @importFrom dplyr full_join as_data_frame
 #' @importFrom purrr reduce
+#' @examples 
+#' \dontrun{
+#' dir.create("out")
+#' dir.create("out2")
+#' data <- tryCatch(
+#'   ELMER:::getdata("elmer.data.example"),
+#'   error = function(e) {
+#'     message(e)
+#'      data(elmer.data.example, envir = environment())
+#'   })
+#' enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
+#'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
+#'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
+#'                                  "cg10097755", "cg09247779", "cg09181054"))
+#' TF <- get.TFs(data,
+#'               enriched.motif,
+#'               group.col = "definition",
+#'               group1 = "Primary solid Tumor",
+#'               group2 = "Solid Tissue Normal",
+#'               TFs = data.frame(
+#'                      external_gene_name=c("TP53","TP63","TP73"),
+#'                      ensembl_gene_id= c("ENSG00000141510",
+#'                                         "ENSG00000073282",
+#'                                         "ENSG00000078900"),
+#'                      stringsAsFactors = FALSE),
+#'                      dir.out = "out",
+#'              label="hypo")
+#' TF <- get.TFs(data,
+#'               enriched.motif,
+#'               group.col = "definition",
+#'               group1 = "Primary solid Tumor",
+#'               group2 = "Solid Tissue Normal",
+#'               TFs = data.frame(
+#'                      external_gene_name=c("TP53","TP63","TP73"),
+#'                      ensembl_gene_id= c("ENSG00000141510",
+#'                                         "ENSG00000073282",
+#'                                         "ENSG00000078900"),
+#'                      stringsAsFactors = FALSE),
+#'                      dir.out = "out2",
+#'              label="hypo")
+#'  ta.family <- get.tab(dir = c("out","out2"),classification = "family")
+#'  ta.subfamily <- get.tab(dir = c("out","out2"),classification = "subfamily")    
+#'  unlink("out")         
+#'  unlink("out2")         
+#' }
 get.tab <- function(dir,classification){
   message("o Creating TF binary matrix")
-  tab <- purrr::reduce(lapply(dir, 
-                              function(x) {
-                                ret <- summarizeTF(path = x,
-                                                   classification = classification,
-                                                   top = TRUE)
-                                colnames(ret)[2] <- x
-                                return(ret)
-                              }),
-                       dplyr::full_join)
+  tab <- lapply(dir, 
+                function(x) {
+                  ret <- summarizeTF(path = x,
+                                     classification = classification,
+                                     top = TRUE)
+                  if(is.null(ret)) return(NULL)
+                  colnames(ret)[2] <- x
+                  return(ret)
+                })
+  tab <- tab[which(unlist(lapply(tab,function(x){!is.null(x)})))]
+
+  if(length(tab) == 0) {
+    message("No MR TF for classification ", classification)
+    return(NULL)
+  }
+  
+  tab <- purrr::reduce(tab,dplyr::full_join)
+  
   tab[tab == "x"] <- 1
   tab[is.na(tab)] <- 0
   rownames(tab) <- tab$TF
@@ -991,10 +1045,12 @@ get.tf.or.table <-function(dir,classification,tab){
                              function(path){
                                TF <- readr::read_csv(dir(path = path, 
                                                          pattern = ".significant.TFs.with.motif.summary.csv",
-                                                         recursive = T,full.names = T),col_types = readr::cols())
+                                                         recursive = T,full.names = T),
+                                                     col_types = readr::cols())
                                motif <- readr::read_csv(dir(path = path, 
                                                             pattern = ".motif.enrichment.csv",
-                                                            recursive = T,full.names = T),col_types = readr::cols())
+                                                            recursive = T,full.names = T),
+                                                        col_types = readr::cols())
                                
                                # For each TF breaks into lines (P53;P63) will create two lines. Then merge with motif to get OR value
                                z <- tidyr::separate_rows(TF, col, convert = TRUE,sep = ";") %>% dplyr::full_join(motif)
@@ -1005,7 +1061,7 @@ get.tf.or.table <-function(dir,classification,tab){
                                                            pattern = ".TFs.with.motif.pvalue.rda", 
                                                            recursive = T, full.names = T))
                                )
-                               TF.meth.cor <- cbind(TF.meth.cor,TF =rownames(TF.meth.cor))
+                               TF.meth.cor <- cbind(TF.meth.cor,TF = rownames(TF.meth.cor))
                                TF.meth.cor <- dplyr::as_data_frame(TF.meth.cor)
                                # Create table TF, motif, FDR
                                TF.meth.cor <- TF.meth.cor %>% tidyr::gather(key = "motif", value = "FDR", -TF)

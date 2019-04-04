@@ -1720,6 +1720,7 @@ summarizeTF <- function(files = NULL,
         aux[[f]] <- sort(na.omit(unique(unlist(stringr::str_split(TF[[col]],";")))))
     }
     TF <- sort(unique(unlist(unique(aux))))
+    if(length(TF) == 0) return(NULL)
     df <- data.frame(TF)
 
     for(f in files){
