@@ -227,7 +227,6 @@ GetNearGenes <- function(data = NULL,
 #'                               probes = c("cg15924102", "cg24741609"),  
 #'                               numFlankingGenes = 20)
 #'   NearbyGenes <- addDistNearestTSS(data,NearbyGenes)
-#'   NearbyGenes <- addDistNearestTSS(data,NearbyGenes[[1]])
 #' }
 addDistNearestTSS <- function(data,
                               NearGenes,
@@ -287,6 +286,7 @@ addDistNearestTSS <- function(data,
 #' @param links Links to calculate the distance
 #' @param TRange Genomic coordinates for Tartget region
 #' @param tssAnnot TSS annotation
+#' @importFrom dplyr slice left_join group_by_
 #' @examples 
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
