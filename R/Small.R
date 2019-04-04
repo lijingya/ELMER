@@ -1043,6 +1043,7 @@ findMotifRegion <- function(regions,
 #' @importFrom readr read_csv
 #' @importFrom dplyr %>% mutate
 #' @importFrom tidyr unnest 
+#' @importFrom GenomicRanges resize
 #' @examples 
 #' \dontrun{
 #'   getTFBindingSites("HNF1A",

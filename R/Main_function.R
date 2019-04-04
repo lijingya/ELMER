@@ -251,13 +251,13 @@ get.diff.meth <- function(data,
     message(paste0("o % of samples per group in each comparison: ", minSubgroupFrac))
     message(paste0("o Min number of samples per group in each comparison: ", min.samples))
     message(paste0("o Nb of samples group1 in each comparison: ",
-                   ifelse(round(subset(counts,x == group1)$freq * minSubgroupFrac) > min.samples,
-                          round(subset(counts,x == group1)$freq * minSubgroupFrac),
-                          min(min.samples,subset(counts,x == group1)$freq))))
+                   ifelse(round(subset(counts,counts$x == group1)$freq * minSubgroupFrac) > min.samples,
+                          round(subset(counts,counts$x == group1)$freq * minSubgroupFrac),
+                          min(min.samples,subset(counts,counts$x == group1)$freq))))
     message(paste0("o Nb of samples group2 in each comparison: ",
-                   ifelse(round(subset(counts,x == group2)$freq * minSubgroupFrac) > min.samples,
-                          round(subset(counts,x == group2)$freq * minSubgroupFrac),
-                          min(min.samples,subset(counts,x == group2)$freq))))
+                   ifelse(round(subset(counts,counts$x == group2)$freq * minSubgroupFrac) > min.samples,
+                          round(subset(counts,counts$x == group2)$freq * minSubgroupFrac),
+                          min(min.samples,subset(counts,counts$x == group2)$freq))))
     message(paste0("Output direction: ", dir.out))
     message(paste0("ooooooooooooooooo"))
 

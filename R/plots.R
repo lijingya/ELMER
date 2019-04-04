@@ -1008,7 +1008,7 @@ get.tf.or.table <-function(dir,classification,tab){
                                TF.meth.cor <- cbind(TF.meth.cor,TF =rownames(TF.meth.cor))
                                TF.meth.cor <- dplyr::as_data_frame(TF.meth.cor)
                                # Create table TF, motif, FDR
-                               TF.meth.cor <- TF.meth.cor %>% tidyr::gather(key = motif, value = FDR, -TF)
+                               TF.meth.cor <- TF.meth.cor %>% tidyr::gather(key = "motif", value = "FDR", -TF)
                                TF.meth.cor$FDR <- as.numeric(TF.meth.cor$FDR)
                                TF.meth.cor <- TF.meth.cor[order(TF.meth.cor$FDR,decreasing = F),]
                                TF.meth.cor <- TF.meth.cor[
