@@ -342,8 +342,8 @@ calcDistNearestTSS <- function(links,
                                     ignore.strand = F)
   
   merged$DistanceTSS <- distance(left,right,ignore.strand = TRUE)
-  ret <- merged %>% dplyr::group_by(ID,ensembl_gene_id) %>%
-    dplyr::slice(which.min(DistanceTSS)) %>% select(ID,ensembl_gene_id,DistanceTSS)
+  ret <- merged %>% dplyr::group_by('ID','ensembl_gene_id')
+  ret <- dplyr::slice(which.min(ret$DistanceTSS)) %>% select('ID','ensembl_gene_id','DistanceTSS')
   
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]

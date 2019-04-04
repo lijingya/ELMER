@@ -111,7 +111,7 @@ scatter.plot <- function(data,
       setTxtProgressBar(pb, i)
       probe <- byPair$probe[i]
       gene <- byPair$gene[i]
-      symbol <- getSymbol(data,geneID=gene)
+      symbol <- getSymbol(data,geneID = gene)
       P <- scatter(meth     = assay(getMet(data)[probe,]),
                    exp      = assay(getExp(data)[gene,] ),
                    category = category, 
@@ -123,8 +123,11 @@ scatter.plot <- function(data,
                    ylab     = sprintf("%s gene expression",symbol), 
                    title    = sprintf("%s_%s",probe,symbol),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s_%s_bypair.pdf",dir.out,probe,symbol),
-                      plot = P,useDingbats=FALSE, width=width, height = height)
+      if(save) ggsave(filename = sprintf("%s/%s_%s_bypair.pdf", dir.out, probe, symbol),
+                      plot = P,
+                      useDingbats = FALSE, 
+                      width = width, 
+                      height = height)
     }
     close(pb)  
     
@@ -135,8 +138,8 @@ scatter.plot <- function(data,
                               numFlankingGenes = byProbe$numFlankingGenes)
     for(i in byProbe$probe){
       probe <- i
-      gene <- nearGenes %>% filter(ID == i) %>% pull(GeneID)
-      symbol <- getSymbol(data,geneID=gene)
+      gene <- nearGenes %>% filter(nearGenes$ID == i) %>% pull('GeneID')
+      symbol <- getSymbol(data,geneID = gene)
       exp <- assay(getExp(data)[gene,])
       meth <- assay(getMet(data)[byProbe$probe,])
       rownames(exp) <- symbol
@@ -151,11 +154,14 @@ scatter.plot <- function(data,
                    title    = sprintf("%s nearby %s genes", probe, byProbe$numFlankingGenes),
                    ...)
       if(save) ggsave(filename = sprintf("%s/%s_byprobe.pdf", dir.out, probe),
-                      plot = P, useDingbats=FALSE, width=width, height = height)
+                      plot = P, 
+                      useDingbats = FALSE, 
+                      width = width, 
+                      height = height)
     }
   }
   
-  if(length(byTF$TF)!=0){
+  if(length(byTF$TF) != 0){
     probes <- byTF$probe[byTF$probe %in% rownames(assay(getMet(data)))]
     meth <- colMeans(assay(getMet(data)[probes,]),na.rm = TRUE)
     gene <- getGeneID(data,symbol = byTF$TF)
@@ -191,8 +197,10 @@ scatter.plot <- function(data,
                  ...)
     
     if(save) ggsave(filename = sprintf("%s/%s_byTF.pdf",dir.out,paste(byTF$TF,collapse = "_")),
-                    plot = P,useDingbats = FALSE, width = max(6,3*(length(byTF$TF)%%5)), 
-                    height = max(4,3 * ceiling(length(byTF$TF)/5)))
+                    plot = P,
+                    useDingbats = FALSE, 
+                    width = max(6, 3*(length(byTF$TF) %% 5)), 
+                    height = max(4, 3 * ceiling(length(byTF$TF) / 5)))
   }
   return(P)
 }
@@ -236,61 +244,62 @@ scatter <- function(meth,
     exp$meth <- as.vector(meth)
     exp$category <- category
     df <- melt.data.frame(exp, measure.vars = GeneID)
-    P <- ggplot(df, aes(x = meth, y = value, color = factor(category))) +
+    df$category <- factor(df$category)
+    P <- ggplot(df, aes_string(x = 'meth', y = 'value', color = 'category')) +
       geom_point(size = dots.size) +
       facet_wrap(facets = ~ variable, ncol = 5) +
-      scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1)) +
+      scale_x_continuous(limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1)) +
       theme_bw() +
       theme(panel.grid.major = element_blank(),  
             legend.position="bottom",
             legend.key = element_rect(colour = 'white'), 
-            axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5)) +
-      labs(x=xlab,y=ylab,title=title) + 
-      scale_colour_discrete(name=legend.title) + 
-      guides(colour = guide_legend(override.aes = list(size=4),
-                                   title.position="top", 
-                                   nrow = ceiling(sum(stringr::str_length(unique(category)))/100),
+            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+      labs(x = xlab, y = ylab, title = title) + 
+      scale_colour_discrete(name = legend.title) + 
+      guides(colour = guide_legend(override.aes = list(size = 4),
+                                   title.position = "top", 
+                                   nrow = ceiling(sum(stringr::str_length(unique(category))) / 100),
                                    title.hjust = 0.5)) 
     if(!is.null(color.value)) {
     
       P <- P + scale_colour_manual(values = color.value)
     }
     if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
-    if(lm_line) P <- P + geom_smooth(method = "lm", se=TRUE, color="black", formula = y ~ x,data=df)
+    if(lm_line) P <- P + geom_smooth(method = "lm", se = TRUE, color = "black", formula = y ~ x,data = df)
     if(correlation){
       cor <- cor.test(x = as.numeric(meth), 
                       y = as.numeric(exp[,GeneID]),
                       method=c("spearman"))
       corval <- round(cor$estimate,digits = 2)
-      pvalue <- signif(cor$p.value,digits=3)
-      title <- paste0(title, "\n","Rho: ",corval," / P-value: ",pvalue)
-      P <- P + labs(title=title)
+      pvalue <- signif(cor$p.value,digits = 3)
+      title <- paste0(title, "\n","Rho: ", corval," / P-value: ", pvalue)
+      P <- P + labs(title = title)
       #P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("Rho: ",corval," / P-value: ",pvalue))
     }
   } else {
-    df <- data.frame(meth=meth,exp=exp,category=category)
-    if(length(unique(df$category))==1){
-      P <- ggplot(df, aes(x = meth, y = exp))
+    df <- data.frame(meth = meth,exp = exp,category = factor(category))
+    if(length(unique(df$category)) == 1){
+      P <- ggplot(df, aes_string(x = 'meth', y = 'exp'))
     } else {
-      P <- ggplot(df, aes(x = meth, y = exp, color = factor(category)))
+      P <- ggplot(df, aes_string(x = 'meth', y = 'exp', color = 'category'))
     }
     P <- P + geom_point() +
-      scale_x_continuous(limits=c(0,1),breaks=c(0,0.25,0.5,0.75,1))+
+      scale_x_continuous(limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1))+
       theme_bw()+
       theme(panel.grid.major = element_blank(), 
             panel.grid.minor = element_blank(),
             legend.position="bottom",
             legend.key = element_rect(colour = 'white'),
             axis.text.x = element_text(angle = 90, hjust = 1, vjust=0.5))+
-      labs(x=xlab,
-           y=ylab,
-           title=title) +  
-      scale_colour_discrete(name=legend.title)+ 
+      labs(x = xlab,
+           y = ylab,
+           title = title) +  
+      scale_colour_discrete(name = legend.title)+ 
       guides(colour = guide_legend(override.aes = list(size=4),
                                    title.position="top", 
-                                   nrow = ceiling(sum(stringr::str_length(unique(mae$group)))/100),
-                                   title.hjust =0.5))  +
-      scale_fill_discrete(guide=FALSE) + 
+                                   nrow = ceiling(sum(stringr::str_length(unique(data$group)))/100),
+                                   title.hjust = 0.5))  +
+      scale_fill_discrete(guide = FALSE) + 
       guides(fill=FALSE) 
     if(lm_line){
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),

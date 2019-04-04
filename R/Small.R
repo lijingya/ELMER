@@ -824,15 +824,17 @@ getRandomPairs <- function(pairs,
     near.genes.linked <- plyr::alply(1:length(not.matched),
                                      .margins = 1,
                                      .fun = function(x){
-                                       side <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull(Sides)
-                                       ret <- near.genes %>% filter(ID == unique(near.genes$ID)[x] & Side %in% side)
+                                       side <- pairs %>% 
+                                         filter(pairs$Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull('Sides')
+                                       ret <- near.genes %>% 
+                                         filter(near.genes$ID == unique(near.genes$ID)[x] & near.genes$Side %in% side)
                                        if(!all(side %in% ret$Side)) return(NULL)
                                        ret
                                      },.progress = "time", .parallel = parallel)
     
     not.matched <- not.matched[grep("NULL",near.genes.linked)]
     if(length(not.matched) > 0){
-      aux <- pairs %>% filter(Probe == unique(pairs$Probe)[not.matched[1]]) %>% pull(Sides) 
+      aux <- pairs %>% filter(pairs$Probe == unique(pairs$Probe)[not.matched[1]]) %>% pull('Sides') 
       numFlankingGenes <- max(as.numeric(gsub("L|R","",aux))) * 2
     }
     near.genes.df <- rbind(near.genes.df,data.table::rbindlist(near.genes.linked))
@@ -1075,25 +1077,25 @@ getTFBindingSites <- function(tf = NULL,
   for(classification in c("family","subfamily")){
     if(classification == "family"){
       tf.tab <- tf.tab %>% 
-        mutate(tf.target = strsplit(as.character(potential.TF.family), ";")) %>% 
-        unnest(tf.target) 
+        mutate(tf.target = strsplit(as.character(tf.tab$potential.TF.family), ";")) %>% 
+        unnest() 
     } else {
       tf.tab <- tf.tab %>% 
-        mutate(tf.target = strsplit(as.character(potential.TF.subfamily), ";")) %>% 
-        unnest(tf.target) 
+        mutate(tf.target = strsplit(as.character(tf.tab$potential.TF.subfamily), ";")) %>% 
+        unnest() 
     }
     
     if( !tf %in% tf.tab$tf.target) stop("TF not found")
-    motif <- tf.tab %>% filter(tf.target == tf) %>% pull(motif)
+    motif <- tf.tab %>% filter(tf.tab$tf.target == tf) %>% pull('motif')
     
     # For each enriched motif find in each paired probes it appers
     pair.tab <- pair.tab %>% 
-      mutate(motif.target = strsplit(as.character(enriched_motifs), ";")) %>% 
-      unnest(motif.target) 
-    probes <- pair.tab %>% filter(motif.target %in% motif) %>% pull(Probe) %>% unique
+      mutate(motif.target = strsplit(as.character(pair.tab$enriched_motifs), ";")) %>% 
+      unnest() 
+    probes <- pair.tab %>% filter(pair.tab$motif.target %in% motif) %>% pull('Probe') %>% unique
     
     # for each probe get region and write bed file
-    metadata <- ELMER:::getInfiniumAnnotation(plat = met.platform,genome = genome)
+    metadata <- getInfiniumAnnotation(plat = met.platform, genome = genome)
     metadata <- metadata[probes,]
     metadata <- resize(metadata,  width = 500, fix = 'center')
     file.out <- file.path(results.dir, paste0(tf, "_",classification,".bed"))
