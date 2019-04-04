@@ -25,6 +25,6 @@ Adds mutation information to MAE
 \examples{
 \dontrun{
  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
- data <- addMutCol(data, "LUSC","TP53")
+ data <- ELMER:::addMutCol(data, "LUSC","TP53")
 }
 }

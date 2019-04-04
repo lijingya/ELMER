@@ -826,8 +826,7 @@ getRandomPairs <- function(pairs,
                                      .fun = function(x){
                                        side <- pairs %>% 
                                          filter(pairs$Probe == unique(pairs$Probe)[not.matched[x]]) %>% pull('Sides')
-                                       ret <- near.genes %>% 
-                                         filter(near.genes$ID == unique(near.genes$ID)[x] & near.genes$Side %in% side)
+                                       ret <- near.genes[near.genes$ID == unique(near.genes$ID)[x] & near.genes$Side %in% side,]
                                        if(!all(side %in% ret$Side)) return(NULL)
                                        ret
                                      },.progress = "time", .parallel = parallel)

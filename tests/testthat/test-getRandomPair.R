@@ -6,8 +6,8 @@ library(data.table)
 test_that("Links are as expected", {
   
   data <- ELMER:::getdata("elmer.data.example")
-  links <- GetNearGenes(TRange=rowRanges(getMet(data)),
-                        geneAnnot=rowRanges(getExp(data)))
+  links <- GetNearGenes(TRange = rowRanges(getMet(data)),
+                        geneAnnot = rowRanges(getExp(data)))
   links <-  links[sample(1:nrow(links),250),] # get 250 random links
   random.pairs <- getRandomPairs(links)
   
