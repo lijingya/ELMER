@@ -342,9 +342,10 @@ calcDistNearestTSS <- function(links,
                                     ignore.strand = F)
   
   merged$DistanceTSS <- distance(left,right,ignore.strand = TRUE)
-  ret <- merged %>% dplyr::group_by('ID','ensembl_gene_id')
-  ret <- dplyr::slice(which.min(ret$DistanceTSS)) %>% select('ID','ensembl_gene_id','DistanceTSS')
-  
+  merged <- unique(merged[,c("ID","ensembl_gene_id","DistanceTSS")])
+  ret <- merged %>% 
+     dplyr::group_by_(~ID,~ensembl_gene_id) %>% slice(which.min(DistanceTSS))
+
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
   links <- dplyr::full_join(links,ret)
@@ -444,7 +445,7 @@ getRegionNearGenes <- function(TRange = NULL,
     idx$evaluating <-  evaluating[idx$queryHits]
     # remove same target gene and probe if counted twice
     idx <- idx[!duplicated(idx[, 2:3]), ]
-
+    
     # todo remove already evaluated previously (we don't wanna do it again)
     idx <-
       idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[idx$evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
@@ -515,8 +516,8 @@ getRegionNearGenes <- function(TRange = NULL,
     center <- which(abs(x$Distance) == min(abs(x$Distance)))[1]
     pos <- setdiff(-center:(nrow(x) - center), 0)
     x$Side <- ifelse(pos > 0, paste0("R", abs(pos)), paste0("L", abs(pos)))
-    out <-  x %>% dplyr::filter(Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
-                                            paste0("L", 1:(numFlankingGenes / 2))
+    out <-  x %>% dplyr::filter(x$Side %in% c(paste0("R", 1:(numFlankingGenes / 2)), 
+                                              paste0("L", 1:(numFlankingGenes / 2))
     ))
     if (nrow(out) < numFlankingGenes) {
       if (paste0("R", floor(numFlankingGenes / 2)) %in% out$Side) {
@@ -525,7 +526,7 @@ getRegionNearGenes <- function(TRange = NULL,
                                                grep("L", sort(out$Side), value = TRUE)))
       } else {
         cts <- length(grep("R", sort(x$Side), value = TRUE))
-        out <- x %>% dplyr::filter(Side %in% 
+        out <- x %>% dplyr::filter(x$Side %in% 
                                      c(paste0("L", 1:(numFlankingGenes - cts)),
                                        grep("R", sort(out$Side), value = TRUE))
         )
