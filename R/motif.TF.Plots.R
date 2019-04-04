@@ -215,6 +215,7 @@ motif.enrichment.plot <- function(motif.enrichment,
 #' @author Lijing Yao (maintainer: lijingya@usc.edu)
 #' @importFrom graphics plot
 #' @importFrom ggplot2 ggsave
+#' @importFrom plyr alply
 #'@examples
 #' library(ELMER)
 #' data <- tryCatch(ELMER:::getdata("elmer.data.example"), error = function(e) {
@@ -310,13 +311,21 @@ TF.rank.plot <- function(motif.pvalue,
     }
     df.label <- data.frame(pvalue = df$pvalue[df$label %in% c("Same family","Same subfamily","Top 3")], 
                            text = as.character(df$Gene[df$label %in% c("Same family","Same subfamily","Top 3")]), 
-                           x = which(df$label %in% c("Same family","Same subfamily","Top 3")), stringsAsFactors = FALSE)
+                           x = which(df$label %in% c("Same family","Same subfamily","Top 3")), 
+                           stringsAsFactors = FALSE)
+    
     highlight.top3 <- df[df$label %in% c("Top 3"),]
     highlight.family <- df[df$label %in% c("Same family"),]
     highlight.subfamily <- df[df$label %in% c("Same subfamily"),]
-    P <- ggplot(df, aes(x=rank, y=pvalue, color=factor(label, levels = c("None","Same family","Same subfamily","Top 3"))))+
-      scale_color_manual(name = "TF classification",values = c("black","red","orange","lightblue"))+
-      geom_vline(xintercept=significant, linetype = "3313") +
+    df$label <- factor(df$label, levels = c("None","Same family","Same subfamily","Top 3"))
+    P <- ggplot(df, aes_string(x = 'rank', 
+                               y = 'pvalue', 
+                               color = 'label')) +
+      scale_color_manual(name = "TF classification",values = c("None" = "black",
+                                                               "Top 3" = "red",
+                                                               "Same family" = "orange",
+                                                               "Same subfamily" = "lightblue")) +
+      geom_vline(xintercept = significant, linetype = "3313") +
       geom_point() +
       theme_bw() +
       theme(panel.grid.major = element_blank(),
@@ -324,16 +333,17 @@ TF.rank.plot <- function(motif.pvalue,
       theme(legend.position="top") +
       labs(x = "Rank", 
            y ="-log10(corrected P-value)", 
-           title=ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),paste0(title, " (", gsub("_HUMAN.H11MO.*","",i),")"))) + 
-      geom_point(data=highlight.top3, aes(x=rank, y=pvalue)) +
-      geom_point(data=highlight.family, aes(x=rank, y=pvalue)) +
-      geom_point(data=highlight.subfamily, aes(x=rank, y=pvalue))
+           title = ifelse(is.null(title),paste0("Motif: ",gsub("_HUMAN.H11MO.*","",i)),
+                          paste0(title, " (", gsub("_HUMAN.H11MO.*","",i),")"))) + 
+      geom_point(data = highlight.top3, aes_string(x = 'rank', y = 'pvalue')) +
+      geom_point(data = highlight.family, aes_string(x = 'rank', y = 'pvalue')) +
+      geom_point(data = highlight.subfamily, aes_string(x = 'rank', y = 'pvalue'))
     
     df$Gene <- as.character(df$Gene)
     df$Gene[df$label %in% "None"] <- "" 
     P <- P + geom_text_repel(
       data = df,
-      aes(label = Gene),
+      aes_string(label = 'Gene'),
       min.segment.length = unit(0.0, "lines"),
       size = 3,
       segment.alpha = 0.5,
@@ -347,9 +357,9 @@ TF.rank.plot <- function(motif.pvalue,
     
     if(save){
       dir.create(dir.out, showWarnings = FALSE,recursive = TRUE)
-      file <- sprintf("%s/%s.TFrankPlot.pdf",dir.out,i)
+      file <- sprintf("%s/%s.TFrankPlot.pdf", dir.out, i)
       message("Saving plot as: ", file)
-      ggsave(P,filename = file, height = 8, width = 10)
+      ggsave(P, filename = file, height = 8, width = 10)
     }
     P
   },.progress = "time",.parallel = parallel)
