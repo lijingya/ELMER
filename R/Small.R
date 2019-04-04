@@ -842,7 +842,7 @@ getRandomPairs <- function(pairs,
   
   # Add probe metadata to output
   probes.ranges$Probe <- rownames(probes.ranges)
-  near.genes.df <- merge(near.genes.df, probes.ranges, by ="Probe")
+  near.genes.df <- merge(near.genes.df, probes.ranges, by = "Probe")
   return(near.genes.df)
 }
 

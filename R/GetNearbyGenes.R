@@ -293,8 +293,6 @@ addDistNearestTSS <- function(data,
 #'   NearbyGenes <- GetNearGenes(data = data, 
 #'                               probes = c("cg15924102", "cg24741609"),  
 #'                               numFlankingGenes = 20)
-#'   NearbyGenes <- dplyr::rbind_list(NearbyGenes)
-#'   colnames(NearbyGenes)[1:2] <- c("ID","ensembl_gene_id")                           
 #'   NearbyGenes <- calcDistNearestTSS(
 #'        links = NearbyGenes,
 #'        tssAnnot =  getTSS(genome = "hg38"),

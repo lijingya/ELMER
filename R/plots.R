@@ -444,6 +444,7 @@ heatmapPairs <- function(data,
 #' @importFrom plyr ddply .
 #' @importFrom GenomicRanges distanceToNearest
 #' @importFrom grDevices png
+#' @importFrom IRanges subsetByOverlaps
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
@@ -452,18 +453,19 @@ heatmapPairs <- function(data,
 #'   group.col <- "subtype_Expression.Subtype"
 #'   group1 <- "classical"
 #'   group2 <- "secretory"
-#'   pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
+#'   pairs <- data.frame(ID = c("cg15924102","cg19403323", "cg22396959"),
 #'                       GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
 #'                       Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+#'                       Side = c("R1","L1","R3"),
 #'                       Distance = c(6017,168499,0),
-#'                       Raw.p = c(0.001,0.00001,0.001),
-#'                       Pe = c(0.001,0.00001,0.001))
+#'                       stringsAsFactors = FALSE)
 #'  heatmapGene(data = data, 
 #'              group.col = group.col,
 #'              group1 = group1, 
 #'              group2 = group2,
 #'              pairs = pairs, 
 #'              GeneSymbol = "LAMB3",
+#'              height = 5,
 #'              annotation.col = c("ethnicity","vital_status"),
 #'              filename = "heatmap.pdf")
 #'  \dontrun{            
@@ -471,7 +473,7 @@ heatmapPairs <- function(data,
 #'                  group.col = group.col,
 #'                  group1 = group1, 
 #'                  group2 = group2,
-#'                  GeneSymbol = "LAMB3",
+#'                  GeneSymbol = "ACP6",
 #'                  annotation.col = c("ethnicity","vital_status"),
 #'                  filename = "heatmap_closer_probes.pdf")
 #'  }
@@ -495,31 +497,35 @@ heatmapGene <- function(data,
   if(missing(group.col)) stop("Please set group.col argument")
   if(missing(GeneSymbol)) stop("Please set GeneSymbol argument")
   dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
+  
+  # Probe and gene info
+  probes.info <- rowRanges(getMet(data)) # 450K and hg38
+  gene.info <- rowRanges(getExp(data))
+  gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
+  
+  if(length(gene.location) == 0) {
+    message("Gene not found: ", GeneSymbol)
+    return(NULL)
+  }
+  
   # If pairs are missing we will select the probes that are closer to the gene
   if(missing(pairs)) {
-    
-    # Probe and gene info
-    probes.info <- rowRanges(getMet(data)) # 450K and hg38
-    gene.info <- rowRanges(getExp(data))
-    
-    gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
-    if(length(gene.location) == 0) {
-      message("Gene not found: ", GeneSymbol)
-      return(NULL)
-    }
+
     # Get closer genes
     selected.gene.gr <- gene.info[gene.info$external_gene_name == GeneSymbol,]
     gene.follow <- gene.info[follow(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
     gene.precede <- gene.info[precede(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
     gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
+    
     # Get the regions of the 2 nearest genes, we will get all probes on those regions
     regions <- range(gene.gr)
-    df <- data.frame(chrom= unique(as.character(seqnames(regions))), 
-                     start= min(start(regions)), 
+    df <- data.frame(chrom = unique(as.character(seqnames(regions))), 
+                     start = min(start(regions)), 
                      end = max(end(regions)))
     regions <- as(df, "GRanges")
-    p <- names(sort(subsetByOverlaps(probes.info,regions,ignore.strand=TRUE)))
+    p <- names(sort(subsetByOverlaps(probes.info, regions, ignore.strand = TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
+    
     pairs <- ELMER::GetNearGenes(probes = p,
                                  data = data,
                                  numFlankingGenes = 10) 
@@ -529,7 +535,7 @@ heatmapGene <- function(data,
     pairs <- pairs[match(p,pairs$ID),] %>% na.omit
     if(scatter.plot){
       for(p in pairs$ID){
-        scatter.plot(data = mae,
+        scatter.plot(data = data,
                      byPair = list(probe = p, 
                                    gene = gene.location$ensembl_gene_id), 
                      category = group.col, 
@@ -553,7 +559,7 @@ heatmapGene <- function(data,
   strand.factor <- ifelse(as.data.frame(gene.location)$strand == "+",1,-1)
   pairs$DistanceTSSwithSignal <- pairs$DistanceTSS * ifelse(grepl("R",pairs$Side),1,-1)  * strand.factor
   
-  meth <- assay(getMet(data))[pairs$ID,]
+  meth <- assay(getMet(data))[pairs$ID,,drop = FALSE]
   rownames(meth) <- paste0(pairs$ID, " (Dist.TSS ",pairs$DistanceTSSwithSignal,")")
   exp <- assay(getExp(data))[unique(pairs$GeneID),,drop = FALSE]
   
@@ -629,7 +635,7 @@ heatmapGene <- function(data,
                          show_annotation_name = TRUE,
                          annotation_name_side = "left",
                          annotation_height = unit(c(rep(0.5,length(annotation.col) + 1), 3), "cm"),
-                         GeneExpression = anno_points(exp, size = unit(0.5, "mm"),axis = T, axis_side ="right"),
+                         GeneExpression = anno_points(as.numeric(exp), size = unit(0.5, "mm"),axis = T, axis_side ="right"),
                          annotation_name_gp = gpar(fontsize = 6))
   
   bottom_annotation_height = unit(3, "cm")
@@ -675,8 +681,8 @@ heatmapGene <- function(data,
   }
   
   ht_list <- ht_list +
-    ht_global_opt(heatmap_legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
-                  heatmap_legend_labels_gp = gpar(fontsize = 10))
+    ht_opt(legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
+           legend_labels_gp = gpar(fontsize = 10))
   if(is.null(filename)) return(ht_list)
   padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.15), collapse = ""))) - unit(1, "cm"),
                    unit(c(2, 2), "mm"))

@@ -59,18 +59,19 @@ DNA methylation level is affecting the gene expression
   group.col <- "subtype_Expression.Subtype"
   group1 <- "classical"
   group2 <- "secretory"
-  pairs <- data.frame(Probe = c("cg15924102","cg19403323", "cg22396959"),
+  pairs <- data.frame(ID = c("cg15924102","cg19403323", "cg22396959"),
                       GeneID = c("ENSG00000196878", "ENSG00000009790", "ENSG00000009790" ),
                       Symbol = c("TRAF3IP3","LAMB3","LAMB3"),
+                      Side = c("R1","L1","R3"),
                       Distance = c(6017,168499,0),
-                      Raw.p = c(0.001,0.00001,0.001),
-                      Pe = c(0.001,0.00001,0.001))
+                      stringsAsFactors = FALSE)
  heatmapGene(data = data, 
              group.col = group.col,
              group1 = group1, 
              group2 = group2,
              pairs = pairs, 
              GeneSymbol = "LAMB3",
+             height = 5,
              annotation.col = c("ethnicity","vital_status"),
              filename = "heatmap.pdf")
  \dontrun{            
@@ -78,7 +79,7 @@ DNA methylation level is affecting the gene expression
                  group.col = group.col,
                  group1 = group1, 
                  group2 = group2,
-                 GeneSymbol = "LAMB3",
+                 GeneSymbol = "ACP6",
                  annotation.col = c("ethnicity","vital_status"),
                  filename = "heatmap_closer_probes.pdf")
  }

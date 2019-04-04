@@ -6,13 +6,13 @@
 \usage{
 motif.enrichment.plot(motif.enrichment, 
                       significant = NULL, 
-                      dir.out = "./", 
-                      save = TRUE, 
+                      dir.out ="./", 
+                      save = TRUE,
                       label = NULL,
                       title = NULL, 
-                      summary = FALSE, 
                       width = 10, 
-                      height = NULL)
+                      height = NULL,
+                      summary = FALSE)
 }
 \arguments{
 \item{motif.enrichment}{A data frame or a file path of get.enriched.motif output
@@ -56,29 +56,29 @@ cutoff of OR, lowerOR, upperOR. significant=list(OR=1). More than one cutoff
 can be specified such as significant = list(OR=1, lowerOR=1,upperOR=4)
 }
 \examples{
-motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
-                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
-                               lowerOR =c(10,3,1.09,1.9,1.5,1.9, 0.82),
-                               upperOR =c(23,5,3,7,6,5,5),
-                               stringsAsFactors=FALSE)
-motif.enrichment.plot(motif.enrichment=motif.enrichment,
-                      significant=list(OR=3),
-                      label="hypo", save=FALSE)
+motif.enrichment <- data.frame(motif = c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
+                               OR = c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+                               lowerOR = c(10,3,1.09,1.9,1.5,1.9, 0.82),
+                               upperOR = c(23,5,3,7,6,5,5),
+                               stringsAsFactors = FALSE)
+motif.enrichment.plot(motif.enrichment = motif.enrichment,
+                      significant = list(OR = 3),
+                      label = "hypo", save = FALSE)
 motif.enrichment.plot(motif.enrichment = motif.enrichment,
                       significant = list(OR = 3),
                       label = "hypo", 
                       title = "OR for paired probes hypomethylated in Mutant vs WT",
                       save = FALSE)
-motif.enrichment <- data.frame(motif=c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
-                               OR=c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
-                               lowerOR =c(10,3,1.09,1.9,1.5,1.5, 0.82),
-                               upperOR =c(23,5,3,7,6,5,5),
+motif.enrichment <- data.frame(motif = c("TP53","NR3C1","E2F1","EBF1","RFX5","ZNF143", "CTCF"),
+                               OR = c(19.33,4.83,1, 4.18, 3.67,3.03,2.49),
+                               lowerOR = c(10,3,1.09,1.9,1.5,1.5, 0.82),
+                               upperOR = c(23,5,3,7,6,5,5),
                                NumOfProbes = c(23,5,3,7,6,5,5),
                                PercentageOfProbes = c(0.23,0.05,0.03,0.07,0.06,0.05,0.05),
                                stringsAsFactors=FALSE)
-motif.enrichment.plot(motif.enrichment=motif.enrichment,
-                      significant=list(OR=3),
-                      label="hypo", save=FALSE)
+motif.enrichment.plot(motif.enrichment = motif.enrichment,
+                      significant = list(OR = 3),
+                      label = "hypo", save = FALSE)
 motif.enrichment.plot(motif.enrichment = motif.enrichment,
                       significant = list(OR = 3),
                       label = "hypo", 
