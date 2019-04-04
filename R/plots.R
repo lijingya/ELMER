@@ -899,7 +899,7 @@ get.tab <- function(dir,classification){
   for(i in 1:ncol(tab)){
     tab[,i] <- as.numeric(tab[,i])
   }
-  tab <- tab[rowSums(tab) > 0,]
+  tab <- tab[rowSums(tab) > 0,,drop = FALSE]
   return(tab)
 }    
 
