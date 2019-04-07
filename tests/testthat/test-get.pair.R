@@ -2,8 +2,8 @@ context("Checking get pair function")
 test_that("Supervised mode works", {
 
   data <- ELMER:::getdata("elmer.data.example")
-  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-                            geneAnnot=getExp(data))
+  nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
+                            geneAnnot = getExp(data))
   Hypo.pair <- get.pair(data = data,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
@@ -46,8 +46,8 @@ test_that("Supervised mode works", {
 })
 test_that("Function uses correctly the permu.dir", {
   data <- ELMER:::getdata("elmer.data.example")
-  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
-                            geneAnnot=getExp(data))
+  nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
+                            geneAnnot = getExp(data))
   Hypo.pair <- get.pair(data = data,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
@@ -71,8 +71,8 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(max(Hypo.pair$Raw.p) <= 1)
     
   # If we add one more probe the value should be saved
-  Hypo.pair <- get.pair(data=data,
-                        nearGenes=nearGenes,
+  Hypo.pair <- get.pair(data = data,
+                        nearGenes = nearGenes,
                         permu.size = 6,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
@@ -81,14 +81,14 @@ test_that("Function uses correctly the permu.dir", {
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
-                        label= "hypo")
+                        label = "hypo")
   # Folder was crreated correcly
   expect_true(file.exists("permu_test/permu.rda"))
   expect_true(ncol(get(load("permu_test/permu.rda"))) == 6)
   
   # If we reduce the number of probes
-  Hypo.pair <- get.pair(data=data,
-                        nearGenes=nearGenes,
+  Hypo.pair <- get.pair(data = data,
+                        nearGenes = nearGenes,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
@@ -102,9 +102,9 @@ test_that("Function uses correctly the permu.dir", {
   expect_true(nrow(Hypo.pair) == 0)
   
   # If we add new genes
-  nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755","cg22396959"),],
-                            geneAnnot=getExp(data))
-  Hypo.pair <- get.pair(data=data,
+  nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755","cg22396959"),],
+                            geneAnnot = getExp(data))
+  Hypo.pair <- get.pair(data = data,
                         group.col = "definition", 
                         group1 = "Primary solid Tumor", 
                         group2 = "Solid Tissue Normal",
@@ -175,9 +175,9 @@ test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-pvalue is work
                       row.names = c("ENSG00000157916","ENSG00000149527","ENSG00000116213")
   )
   Pe <- Get.Pvalue.p(U.matrix = U.matrix, permu = permu)
-  expect_true(Pe[Pe$GeneID== "ENSG00000157916","Pe"] == min(Pe$Pe))
-  expect_true(Pe[Pe$GeneID== "ENSG00000149527","Pe"] < max(Pe$Pe) & Pe[Pe$GeneID== "ENSG00000149527","Pe"] > min(Pe$Pe))
-  expect_true(Pe[Pe$GeneID== "ENSG00000116213","Pe"] == max(Pe$Pe))
+  expect_true(Pe[Pe$GeneID == "ENSG00000157916","Pe"] == min(Pe$Pe))
+  expect_true(Pe[Pe$GeneID == "ENSG00000149527","Pe"] < max(Pe$Pe) & Pe[Pe$GeneID== "ENSG00000149527","Pe"] > min(Pe$Pe))
+  expect_true(Pe[Pe$GeneID == "ENSG00000116213","Pe"] == max(Pe$Pe))
 })
 test_that("Ramdom probe sleection is the same for every run", {
   probes <- paste0("cg",000000:450000)
@@ -188,14 +188,14 @@ test_that("Ramdom probe sleection is the same for every run", {
   data <- ELMER:::getdata("elmer.data.example")
   permu <- get.permu(data = data,
                      permu.dir = "test_permu_1",
-                     geneID=rownames(getExp(data))[1],
-                     rm.probes=c("cg00329272","cg10097755"),
-                     permu.size=51)
+                     geneID = rownames(getExp(data))[1],
+                     rm.probes = c("cg00329272","cg10097755"),
+                     permu.size = 51)
   permu <- get.permu(data = data,
                      permu.dir = "test_permu_2",
-                     geneID=rownames(getExp(data))[1],
-                     rm.probes=c("cg00329272","cg10097755"),
-                     permu.size=51)
+                     geneID = rownames(getExp(data))[1],
+                     rm.probes = c("cg00329272","cg10097755"),
+                     permu.size = 51)
   probes.permu <- colnames(get(load("test_permu_1/permu.rda")))
   probes.permu.rep <-  colnames(get(load("test_permu_2/permu.rda")))
   expect_true(all(probes.permu == probes.permu.rep))
