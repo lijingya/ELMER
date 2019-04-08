@@ -232,7 +232,7 @@ heatmapPairs <- function(data,
   if(cluster.within.groups){
     message("Ordering groups")
     cluster_columns <- FALSE
-    order <- unlist(plyr::alply(unique(colData(data)[,group.col]), 1 , function(x) {
+    order <- unlist(plyr::alply(as.character(unique(colData(data)[,group.col])), 1 , function(x) {
       if(is.na(x)){
         idx <- which(is.na(colData(data)[,group.col]))
       } else {
@@ -266,15 +266,16 @@ heatmapPairs <- function(data,
   
   for(i in annotation.col){
     l <- length(unique(colData(data)[,c(i)]))
+    if(l == 1) next
     p <- l/length(na.omit(colData(data)[,c(i)]))
-    if(p < 0.3 & !is.numeric(colData(data)[,c(i)])){
-      if(l.all + l <= length(colors)) {
-        col <- colors[(l.all+1):(l.all + l)]
-        l.all <- l.all + l
-      } else {
-        col <- colors[c((l.all+1):length(colors),1 + (l.all + l)%%length(colors))]
-        l.all <- (l.all + l)%%30
-      }
+    
+    # Is the variable non numeric ?
+    # i.e. entry might be purity lelels as character, while they represent a number
+    if(any(is.na(as.numeric(na.omit(colData(data)[,c(i)]))))){
+      col.idx <- (l.all+1):(l.all + l)  %% (length(colors) + 1)
+      if(0 %in% col.idx) col.idx <- col.idx + 1
+      col <- colors[col.idx]
+      l.all <- l.all + l
       n <- unique(colData(data)[,c(i)]) 
       n[is.na(n)] <- "NA"
       names(col) <- n
@@ -938,7 +939,7 @@ get.tab <- function(dir,classification){
                   return(ret)
                 })
   tab <- tab[which(unlist(lapply(tab,function(x){!is.null(x)})))]
-
+  
   if(length(tab) == 0) {
     message("No MR TF for classification ", classification)
     return(NULL)
