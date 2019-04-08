@@ -493,19 +493,34 @@ lm_eqn = function(df,Dep,Exp){
 #' @importFrom biomaRt useEnsembl
 getTSS <- function(genome = "hg38",
                    TSS = list(upstream = NULL, downstream = NULL)){
+ 
   tries <- 0L
   msg <- character()
   while (tries < 3L) {
     tss <- tryCatch({
       host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+      message("Accessing ", host, " to get TSS information")
       ensembl <- tryCatch({
-        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+        ensembl <- useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host,  mirror = "asia")
+        ensembl
       },  error = function(e) {
-        useEnsembl("ensembl",
-                   dataset = "hsapiens_gene_ensembl",
-                   mirror = "uswest",
-                   host =  host)
+        message(e)
+        x <- NULL
+        for(mirror in c("asia","useast","uswest")){
+          x <-  useEnsembl("ensembl",
+                           dataset = "hsapiens_gene_ensembl",
+                           mirror = mirror,
+                           host =  host)
+          if(class(x) == "Mart") {
+            return(x)
+          }
+        }
+        return(NULL)
       })
+      if(is.null(host)) {
+        message("Problems accessing ensembl dataabse")
+        return(NULL)
+      }
       attributes <- c("chromosome_name",
                       "start_position",
                       "end_position", "strand",
@@ -518,7 +533,7 @@ getTSS <- function(genome = "hg38",
       chrom <- c(1:22, "X", "Y","M","*")
       db.datasets <- listDatasets(ensembl)
       description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
-      message(paste0("Downloading transcripts information. Using: ", description))
+      message(paste0("Downloading transcripts information from ", ensembl@host, ". Using: ", description))
       
       filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
       if(!file.exists(filename)) {
@@ -526,6 +541,7 @@ getTSS <- function(genome = "hg38",
         tss <- tss[!duplicated(tss$ensembl_transcript_id),]
         save(tss, file = filename)
       } else {
+        message("Loading from disk")
         tss <- get(load(filename))  
       } 
       if(genome == "hg19") {
