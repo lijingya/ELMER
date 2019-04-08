@@ -493,21 +493,20 @@ lm_eqn = function(df,Dep,Exp){
 #' @importFrom biomaRt useEnsembl
 getTSS <- function(genome = "hg38",
                    TSS = list(upstream = NULL, downstream = NULL)){
- 
+  
   tries <- 0L
   msg <- character()
   while (tries < 3L) {
     tss <- tryCatch({
       host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
       message("Accessing ", host, " to get TSS information")
+      
       ensembl <- tryCatch({
-        ensembl <- useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host,  mirror = "asia")
-        ensembl
+        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
       },  error = function(e) {
         message(e)
-        x <- NULL
         for(mirror in c("asia","useast","uswest")){
-          x <-  useEnsembl("ensembl",
+          x <- useEnsembl("ensembl",
                            dataset = "hsapiens_gene_ensembl",
                            mirror = mirror,
                            host =  host)
@@ -517,8 +516,9 @@ getTSS <- function(genome = "hg38",
         }
         return(NULL)
       })
+      
       if(is.null(host)) {
-        message("Problems accessing ensembl dataabse")
+        message("Problems accessing ensembl database")
         return(NULL)
       }
       attributes <- c("chromosome_name",
