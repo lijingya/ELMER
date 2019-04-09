@@ -138,23 +138,23 @@ test_that("Function uses correctly the permu.dir", {
 })
 
 test_that("Gene expression is calculated", {
-  data <- ELMER:::getdata("elmer.data.example")
-  nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
-                            geneAnnot = getExp(data))
-  Hypo.pair <- get.pair(data = data,
-                        nearGenes = nearGenes,
-                        permu.size = 5,
-                        raw.pvalue =  0.001,
-                        Pe = 0.2,
-                        diffExp = TRUE,
-                        group.col = "definition", 
-                        group1 = "Primary solid Tumor", 
-                        group2 = "Solid Tissue Normal",
-                        dir.out="./",
-                        permu.dir = "permu_test",
-                        label = "hypo")
-  expect_true(any(grepl("log2FC", colnames(Hypo.pair))))
-  expect_true(any(grepl("pvalue", colnames(Hypo.pair))))
+  #data <- ELMER:::getdata("elmer.data.example")
+  #nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
+  #                          geneAnnot = getExp(data))
+  #Hypo.pair <- get.pair(data = data,
+  #                      nearGenes = nearGenes,
+  #                      permu.size = 5,
+  #                      raw.pvalue =  0.001,
+  #                      Pe = 0.2,
+  #                      diffExp = TRUE,
+  #                      group.col = "definition", 
+  #                      group1 = "Primary solid Tumor", 
+  #                      group2 = "Solid Tissue Normal",
+  #                      dir.out="./",
+  #                      permu.dir = "permu_test",
+  #                      label = "hypo")
+  #expect_true(any(grepl("log2FC", colnames(Hypo.pair))))
+  #expect_true(any(grepl("pvalue", colnames(Hypo.pair))))
 })
 
 
@@ -179,7 +179,7 @@ test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-pvalue is work
   expect_true(Pe[Pe$GeneID == "ENSG00000149527","Pe"] < max(Pe$Pe) & Pe[Pe$GeneID== "ENSG00000149527","Pe"] > min(Pe$Pe))
   expect_true(Pe[Pe$GeneID == "ENSG00000116213","Pe"] == max(Pe$Pe))
 })
-test_that("Ramdom probe sleection is the same for every run", {
+test_that("Random probe selection is the same for every run", {
   probes <- paste0("cg",000000:450000)
   set.seed(200); probes.permu <- sample(probes, size = 10000, replace = FALSE)
   set.seed(200); probes.permu.rep <- sample(probes, size = 10000, replace = FALSE)

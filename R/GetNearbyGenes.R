@@ -403,11 +403,13 @@ getRegionNearGenes <- function(TRange = NULL,
   
   
   # Optimized version
-  # IDEA vectorize search
+  # Idea: vectorize search
   # 1) For all regions, get nearest gene
   # 2) check follow and overlapping genes recursively
   # 3) check precede and overlapping genes recursively
   # 4) map the positions based on min distance (L1)
+  # The input data has to be at gene level and not transcript which would broke
+  # some of the optimizations for which we remove the genes already evaluated
   all <- 1:length(TRange)
   nearest.idx <-
     nearest(TRange,

@@ -272,7 +272,7 @@ heatmapPairs <- function(data,
     # Is the variable non numeric ?
     # i.e. entry might be purity lelels as character, while they represent a number
     if(any(is.na(as.numeric(na.omit(colData(data)[,c(i)]))))){
-      col.idx <- (l.all+1):(l.all + l)  %% (length(colors) + 1)
+      col.idx <- (l.all + 1):(l.all + l)  %% (length(colors) + 1)
       if(0 %in% col.idx) col.idx <- col.idx + 1
       col <- colors[col.idx]
       l.all <- l.all + l
