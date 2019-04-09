@@ -396,7 +396,7 @@ getRegionNearGenes <- function(TRange = NULL,
   TRange$ID <- names(TRange)
   
   # We will consider the input at a gene level only
-  if(! "ensembl_gene_id" %in%  colnames(mcols(gene.info))){
+  if(! "ensembl_gene_id" %in%  colnames(S4Vectors::mcols(geneAnnot))){
     message("geneAnnot needs the following column ensembl_gene_id")
   }
   geneAnnot <- geneAnnot[!duplicated(geneAnnot$ensembl_gene_id)]
