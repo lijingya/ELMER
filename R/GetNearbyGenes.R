@@ -344,8 +344,8 @@ calcDistNearestTSS <- function(links,
   merged$DistanceTSS <- distance(left,right,ignore.strand = TRUE)
   merged <- unique(merged[,c("ID","ensembl_gene_id","DistanceTSS")])
   ret <- merged %>% 
-     dplyr::group_by_(~ID,~ensembl_gene_id) %>% dplyr::slice(which.min(DistanceTSS))
-
+    dplyr::group_by_(~ID,~ensembl_gene_id) %>% dplyr::slice(which.min(DistanceTSS))
+  
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
   links <- dplyr::full_join(links,ret)
@@ -394,6 +394,14 @@ getRegionNearGenes <- function(TRange = NULL,
   pb <- progress::progress_bar$new(total = numFlankingGenes * 2)
   
   TRange$ID <- names(TRange)
+  
+  # We will consider the input at a gene level only
+  if(! "ensembl_gene_id" %in%  colnames(mcols(gene.info))){
+    message("geneAnnot needs the following column ensembl_gene_id")
+  }
+  geneAnnot <- geneAnnot[!duplicated(geneAnnot$ensembl_gene_id)]
+  
+  
   # Optimized version
   # IDEA vectorize search
   # 1) For all regions, get nearest gene
@@ -451,19 +459,22 @@ getRegionNearGenes <- function(TRange = NULL,
       idx[!paste0(geneAnnot[idx$subjectHits]$ensembl_gene_id, names(TRange)[idx$evaluating]) %in% paste0(ret$ensembl_gene_id, ret$ID), ]
     evaluating <- evaluating[idx$queryHits]
     ret <-
-      rbind(ret, cbind(
-        suppressWarnings(tibble::as_tibble(geneAnnot[idx$subjectHits])),
-        tibble::tibble(
-          "ID" = names(TRange)[evaluating],
-          "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
-            distance(TRange[evaluating],
-                     geneAnnot[idx$subjectHits], select = "all",
-                     ignore.strand = TRUE)
-        )
-      ))
-    ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
+      rbind(ret, # keep old results
+            cbind(
+              suppressWarnings(
+                tibble::as_tibble(geneAnnot[idx$subjectHits])),
+              tibble::tibble(
+                "ID" = names(TRange)[evaluating],
+                "Distance" = ifelse(start(TRange[evaluating]) < start(geneAnnot[idx$subjectHits]), 1,-1) * 
+                  distance(TRange[evaluating],
+                           geneAnnot[idx$subjectHits], select = "all",
+                           ignore.strand = TRUE)
+              )
+            ))
     pb$tick()
   }
+  ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
+  
   idx <- suppressWarnings(tibble::as_tibble(nearest.idx))
   evaluating <- idx$queryHits
   for (i in 1:(numFlankingGenes)) {
