@@ -822,7 +822,9 @@ getRandomPairs <- function(pairs,
   nb.pairs <- nrow(pairs)
   nb.probes <- length(unique(pairs$Probe))
   # get gene information
-  genes <- TCGAbiolinks::get.GRCh.bioMart(genome = genome, as.granges = TRUE)
+  genes <- getTSS(genome = genome)
+  genes$ensembl_transcript_id <- NULL
+  genes <- genes[!duplicated(genes$ensembl_gene_id)]
   
   df.random <- NULL
   near.genes.linked <- NULL

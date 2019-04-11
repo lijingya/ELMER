@@ -2,7 +2,8 @@ context("Get GetNearGenes")
 
 test_that("It maps correctly to hg38", {
   tssAnnot <- getTSS(genome = "hg38")
-  geneAnnot <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg38",as.granges = TRUE)
+  geneAnnot <- tssAnnot
+  
   probe <- GRanges(seqnames = c("chr1"), 
                    row.names =  c("cg18108049"),
                    names =  c("cg18108049"),
@@ -36,7 +37,7 @@ test_that("It maps correctly to hg38", {
 
 test_that("It maps correctly to hg38 if more than one region", {
   tssAnnot <- getTSS(genome = "hg38")
-  geneAnnot <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg38",as.granges = TRUE)
+  geneAnnot <- tssAnnot
   probe <- getInfiniumAnnotation(genome = "hg19")[c("cg18108049","cg14008030","cg00381604","cg15254640","cg08417382")] 
 
   NearbyGenes <- ELMER:::getRegionNearGenes(TRange = probe,
@@ -63,7 +64,7 @@ test_that("It maps correctly to hg38 if more than one region", {
 
 test_that("It maps correctly to hg19", {
   tssAnnot <- getTSS(genome = "hg19")
-  geneAnnot <- TCGAbiolinks:::get.GRCh.bioMart(genome = "hg19",as.granges = TRUE)
+  geneAnnot <- tssAnnot
   probe <- GRanges(seqnames = c("chr1"), 
                    row.names =  c("cg18108049"),
                    names =  c("cg18108049"),
