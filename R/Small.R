@@ -545,7 +545,6 @@ getTSS <- function(genome = "hg38",
         tss <- get(load(filename))  
       } 
       if(genome == "hg19") {
-        tss$external_gene_name <- tss$external_gene_id
         tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
       }
       tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
