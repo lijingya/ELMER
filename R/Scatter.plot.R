@@ -271,10 +271,16 @@ scatter <- function(meth,
                       y = as.numeric(exp[,GeneID]),
                       method=c("spearman"))
       corval <- round(cor$estimate,digits = 2)
-      pvalue <- signif(cor$p.value,digits = 3)
+      pvalue <- signif(cor$p.value,digits = 10)
       title <- paste0(title, "\n","Rho: ", corval," / P-value: ", pvalue)
       P <- P + labs(title = title)
-      #P <- P + annotate("text",x=0.1,y=0,hjust=.2,label=paste0("Rho: ",corval," / P-value: ",pvalue))
+      P <- P + annotate("text",
+                        x = 0.2,
+                        y = 0,
+                        hjust = 0.0,
+                        size = 2,
+                        label = paste0("Rho: ",corval," / P-value: ",pvalue))
+      print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
     }
   } else {
     df <- data.frame(meth = meth,exp = exp,category = factor(category))
