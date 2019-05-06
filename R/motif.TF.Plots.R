@@ -363,6 +363,9 @@ TF.rank.plot <- function(motif.pvalue,
     }
     P
   },.progress = "time",.parallel = parallel)
+  
+  names(Plots) <- motif
+  
   if(!save) return(Plots)
 }
 
