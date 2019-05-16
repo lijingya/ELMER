@@ -84,7 +84,7 @@ Fill the field `Save as:` and click on Create MAE object.
 </div>
 </div>
 
-![](figures/elmer_data_final.png)
+![](figures/elmer_data_final.jpg)
 
 
 <br />
@@ -255,7 +255,7 @@ of DNA methylation level on the significant paired probes with that motif vs the
 </div>
 </div>
 
-![](figures/elmer_visualize_tfraningplot.png)
+![](figures/elmer_visualize_tfraningplot.jpg)
 
 
 <br />
@@ -292,7 +292,7 @@ It is possible to visualize the table with the significant differently methylate
 </div>
 </div>
 
-![](figures/elmer_visualize_table_sigprobes.png)
+![](figures/elmer_visualize_table_sigprobes.jpg)
 
 
 <br />
@@ -303,7 +303,7 @@ DNA methyation levels and gene expression.
 </div>
 </div>
 
-![](figures/elmer_visualize_table_pair.png)
+![](figures/elmer_visualize_table_pair.jpg)
 
 <br />
 <div class="panel panel-info">
