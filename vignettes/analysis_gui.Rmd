@@ -224,7 +224,7 @@ DNA methyation levels and gene expression selecting a pair of gene and probe.
 </div>
 </div>
 
-![](figures/elmer_visualize_plot_scatter_byPair.png)
+![](figures/elmer_visualize_plot_scatter_byPair.jpg)
 
 
 <br />
@@ -234,7 +234,7 @@ A probe and its near genes.
 </div>
 </div>
 
-![](figures/elmer_visualize_plot_scatter_byProbe.png)
+![](figures/elmer_visualize_plot_scatter_byProbe.jpg)
 
 <br />
 <div class="panel panel-info">
@@ -244,7 +244,7 @@ TF.
 </div>
 </div>
 
-![](figures/elmer_visualize_plot_scatter_byTF.png)
+![](figures/elmer_visualize_plot_scatter_byTF.jpg)
 
 
 <br />
@@ -265,7 +265,7 @@ The enrichement of each motif can be visualized.
 </div>
 </div>
 
-![](figures/elemer_visualize_motif_enrichment.png)
+![](figures/elemer_visualize_motif_enrichment.jpg)
 
 <br />
 <div class="panel panel-info">
@@ -274,7 +274,7 @@ You can take a look for a gene which was the probe linked.
 </div>
 </div>
 
-![](figures/elemer_visualize_schematic_gene.png)
+![](figures/elemer_visualize_schematic_gene.jpg)
 
 <br />
 <div class="panel panel-info">
@@ -283,7 +283,7 @@ You can see the plot and its neraby genes.
 </div>
 </div>
 
-![](figures/elemer_visualize_schematic_probe.png)
+![](figures/elemer_visualize_schematic_probe.jpg)
 
 <br />
 <div class="panel panel-info">
@@ -312,7 +312,7 @@ It is possible to visualize the table with the enriched motifs.
 </div>
 </div>
 
-![](figures/elmer_visualize_table_enriched_motif.png)
+![](figures/elmer_visualize_table_enriched_motif.jpg)
 
 
 <br />
@@ -322,7 +322,7 @@ It is possible to visualize the table with the candidates regulatory TF.
 </div>
 </div>
 
-![](figures/elmer_visualize_table_tf.png)
+![](figures/elmer_visualize_table_tf.jpg)
 
 # Session Info
 

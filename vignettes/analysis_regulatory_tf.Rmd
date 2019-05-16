@@ -52,7 +52,7 @@ this ranking were considered candidate upstream regulators.
 By default, the top 3 most anti-correlated TFs, and all TF classified by TFClass database in the same (sub)family are highlighted.
 
 
-![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get_pairs.png) [@yao2015inferring,@yao2015demystifying]
+![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get_pairs.jpg) [@yao2015inferring,@yao2015demystifying]
 
 
 # Function arguments

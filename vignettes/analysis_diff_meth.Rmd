@@ -33,7 +33,7 @@ In the `Supervised` mode, where the comparison groups are implicit in the sample
 To identify hypomethylated DMCs, a one-tailed t-test is used to rule out the null hypothesis: $\mu_{group1} \geq \mu_{group2}$, where $\mu_{group1}$ is the mean methylation within the lowest group 1 quintile (or another percentile as specified by the `minSubgroupFrac` parameter) and $\mu_{group2}$ is the mean within the lowest group 2 quintile. Raw p-values are adjusted for multiple hypothesis testing using the Benjamini-Hochberg method, and probes are selected when they had adjusted p-value less than $0.01$ (which can be configured using the `pvalue` parameter). For additional stringency, probes are only selected if the methylation difference: $\Delta = \mu_{group1} - \mu_{group2}$ was greater than $0.3$. The same method is used to identify hypermethylated DMCs, except we use the *upper* quintile, and the opposite tail in the t-test is chosen.
 
 
-![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_diff_meth.png) [@yao2015inferring,@yao2015demystifying]
+![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_diff_meth.jpg) [@yao2015inferring,@yao2015demystifying]
 
 
 # Function arguments

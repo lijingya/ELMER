@@ -75,7 +75,7 @@ hypothesis using Benjamini-Hochberg Procedure.
 Notice that in the `Supervised` mode, no additional filtering is necessary to ensure that the $M$ and $U$ group segregate by sample group labels.  The two sample groups are segregated by definition, since these probes were selected for their differential methylation, with the same directionality, between the two groups. 
 
 
-![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.png) [@yao2015inferring]
+![Source: Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription factor networks from cancer methylomes." Genome biology 16.1 (2015): 105.](figures/paper_get.pairs.jpg) [@yao2015inferring]
 
 
 # Function arguments
