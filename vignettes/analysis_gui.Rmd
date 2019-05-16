@@ -219,26 +219,6 @@ Click on `Select results` and select the object created on the previous section.
 <br />
 <div class="panel panel-info">
 <div class="panel-body">
-You will be able to visualize the correlation between
-DNA methyation levels and gene expression selecting a pair of gene and probe.
-</div>
-</div>
-
-![](figures/elmer_visualize_plot_scatter_byPair.jpg)
-
-
-<br />
-<div class="panel panel-info">
-<div class="panel-body">
-A probe and its near genes.
-</div>
-</div>
-
-![](figures/elmer_visualize_plot_scatter_byProbe.jpg)
-
-<br />
-<div class="panel panel-info">
-<div class="panel-body">
 Or the avarage DNA methylation levels of probes of a Motif vs the expression of a 
 TF.
 </div>
