@@ -882,6 +882,8 @@ get.tabs <- function(dir, classification = "family"){
               "tf.or.table" = tf.or.table))
 }    
 
+#' @title summarize MR TF as a binary table with 1 if TF 
+#' was found in the analysis, 0 if not
 #' @importFrom dplyr full_join as_data_frame
 #' @importFrom purrr reduce
 #' @examples 
