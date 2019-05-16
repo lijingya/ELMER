@@ -7,6 +7,11 @@ was found in the analysis, 0 if not}
 \usage{
 get.tab(dir, classification)
 }
+\arguments{
+\item{dir}{Directory with ELMER  results}
+
+\item{classification}{Which columns to retrieve family or subfamily}
+}
 \description{
 summarize MR TF as a binary table with 1 if TF 
 was found in the analysis, 0 if not

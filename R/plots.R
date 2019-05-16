@@ -884,6 +884,8 @@ get.tabs <- function(dir, classification = "family"){
 
 #' @title summarize MR TF as a binary table with 1 if TF 
 #' was found in the analysis, 0 if not
+#' @param dir Directory with ELMER  results
+#' @param classification Which columns to retrieve family or subfamily 
 #' @importFrom dplyr full_join as_data_frame
 #' @importFrom purrr reduce
 #' @examples 
