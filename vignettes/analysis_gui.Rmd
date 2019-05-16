@@ -278,16 +278,6 @@ It is possible to visualize the table with the significant differently methylate
 <br />
 <div class="panel panel-info">
 <div class="panel-body">
-It is possible to visualize the table with the pairs genes probes that have an negative correlation between
-DNA methyation levels and gene expression. 
-</div>
-</div>
-
-![](figures/elmer_visualize_table_pair.jpg)
-
-<br />
-<div class="panel panel-info">
-<div class="panel-body">
 It is possible to visualize the table with the enriched motifs.
 </div>
 </div>
