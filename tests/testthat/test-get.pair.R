@@ -137,7 +137,7 @@ test_that("Function uses correctly the permu.dir", {
                         label= "hypo")
 })
 
-test_that("Gene expression is calculated", {
+#test_that("Gene expression is calculated", {
   #data <- ELMER:::getdata("elmer.data.example")
   #nearGenes <- GetNearGenes(TRange = getMet(data)[c("cg00329272","cg10097755"),],
   #                          geneAnnot = getExp(data))
@@ -155,7 +155,7 @@ test_that("Gene expression is calculated", {
   #                      label = "hypo")
   #expect_true(any(grepl("log2FC", colnames(Hypo.pair))))
   #expect_true(any(grepl("pvalue", colnames(Hypo.pair))))
-})
+#})
 
 
 test_that("Test calculation of Pe (empirical raw.pvalue) from Raw-pvalue is working", {
