@@ -27,7 +27,7 @@ Auxiliary function for GetNearGenes
  the distance to the nearest TSS.
 }
 \examples{
-geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = TRUE)
+geneAnnot <-  ELMER:::get.GRCh("hg38",as.granges = TRUE)
 tssAnnot <-  getTSS(genome = "hg38")
 probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
 range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 

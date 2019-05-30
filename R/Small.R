@@ -211,7 +211,7 @@ createMAE <- function (exp,
   if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
     required.cols <- required.cols[!required.cols %in% colnames(values(exp))]
     if(length(required.cols) > 0) {
-      gene.info <- TCGAbiolinks::get.GRCh.bioMart(genome)
+      gene.info <- get.GRCh(genome)
       colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
       if(all(grepl("ENSG",rownames(exp)))) {
         extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
@@ -338,7 +338,7 @@ createMAE <- function (exp,
 makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   message("=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-")
   message("Creating a SummarizedExperiment from gene expression input")
-  gene.info <- TCGAbiolinks::get.GRCh.bioMart(genome)
+  gene.info <- get.GRCh(genome)
   gene.info$chromosome_name <- paste0("chr",gene.info$chromosome_name)
   colnames(gene.info)[grep("external_gene", colnames(gene.info))] <- "external_gene_name"
   gene.info$strand[gene.info$strand == 1] <- "+"
@@ -587,70 +587,16 @@ getTF <- function(){
 
 #' @importFrom biomaRt getBM useMart listDatasets
 get.GRCh <- function(genome = "hg19", genes = NULL, as.granges = FALSE) {
-  tries <- 0L
-  msg <- character()
-  while (tries < 3L) {
-    gene.location <- tryCatch({
-      host <- ifelse(genome == "hg19", "grch37.ensembl.org", 
-                     "www.ensembl.org")
-      message("Accessing ", host, " to get gene information")
-      ensembl <- tryCatch({
-        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", 
-                   host = host)
-      }, error = function(e) {
-        message(e)
-        for (mirror in c("asia", "useast", "uswest")) {
-          x <- useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", 
-                          mirror = mirror, host = host)
-          if (class(x) == "Mart") {
-            return(x)
-          }
-        }
-        return(NULL)
-      })
-      if (is.null(host)) {
-        message("Problems accessing ensembl database")
-        return(NULL)
-      }
-      attributes <- c("chromosome_name", "start_position", 
-                      "end_position", "strand", "ensembl_gene_id", 
-                      "entrezgene", "external_gene_name")
-      db.datasets <- listDatasets(ensembl)
-      description <- db.datasets[db.datasets$dataset == 
-                                   "hsapiens_gene_ensembl", ]$description
-      message(paste0("Downloading genome information (try:", 
-                     tries, ") Using: ", description))
-      filename <- paste0(gsub("[[:punct:]]| ", "_", description), 
-                         ".rda")
-      if (!file.exists(filename)) {
-        chrom <- c(1:22, "X", "Y")
-        gene.location <- getBM(attributes = attributes, 
-                               filters = c("chromosome_name"), 
-                               values = list(chrom), 
-                               mart = ensembl)
-        save(gene.location, file = filename)
-        if (!is.null(genes)) { 
-          gene.location <- gene.location[match(genes,gene.location$entrezgene),]
-        }
-      }
-      else {
-        message("Loading from disk")
-        gene.location <- get(load(filename))
-        if (!is.null(genes)) { 
-          gene.location <- gene.location[match(genes,gene.location$entrezgene),]
-        }
-      }
-      gene.location
-    }, error = function(e) {
-      msg <<- conditionMessage(e)
-      tries <<- tries + 1L
-    })
-    if (!is.null(gene.location)) 
-      break
+  
+  if (tolower(genome) == "hg38") {
+    gene.location <- getdata("Human_genes__GRCh38_p12")
+  } else {
+    gene.location <- getdata("Human_genes__GRCh37_p13")
   }
-  if (tries == 3L) 
-    stop("failed to get URL after 3 tries:", "\n  error: ", 
-         msg)
+  
+  if (!is.null(genes))  
+    gene.location <- gene.location[match(genes,gene.location$entrezgene),]
+  
   if (as.granges) {
     gene.location$strand[gene.location$strand == 1] <- "+"
     gene.location$strand[gene.location$strand == -1] <- "-"
@@ -804,7 +750,7 @@ getHocomocoTable <- function(){
 #' @return A data frame with the random linkages
 #' @export
 #' @importFrom dplyr pull filter
-#' @importFrom TCGAbiolinks get.GRCh.bioMart colDataPrepare
+#' @importFrom TCGAbiolinks colDataPrepare
 #' @examples
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")

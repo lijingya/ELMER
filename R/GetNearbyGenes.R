@@ -185,7 +185,7 @@ GetNearGenes <- function(data = NULL,
     if("genome" %in% names(metadata(data))){
       genome <- metadata(data)$genome
       tssAnnot <- getTSS(genome = genome)
-      geneAnnot <- TCGAbiolinks::get.GRCh.bioMart(genome = genome,as.granges = TRUE)
+      geneAnnot <- get.GRCh(genome = genome,as.granges = TRUE)
     }
   }
   
@@ -368,7 +368,7 @@ calcDistNearestTSS <- function(links,
 #' @return A data frame of nearby genes and information: genes' IDs, genes' symbols, 
 # distance with target and side to which the gene locate to the target.
 #' @examples
-#' geneAnnot <-  TCGAbiolinks:::get.GRCh.bioMart("hg38",as.granges = TRUE)
+#' geneAnnot <-  ELMER:::get.GRCh("hg38",as.granges = TRUE)
 #' tssAnnot <-  getTSS(genome = "hg38")
 #' probe <- GenomicRanges::GRanges(seqnames = c("chr1","chr2"), 
 #' range=IRanges::IRanges(start = c(16058489,236417627), end= c(16058489,236417627)), 
