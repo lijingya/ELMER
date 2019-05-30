@@ -494,74 +494,81 @@ lm_eqn = function(df,Dep,Exp){
 getTSS <- function(genome = "hg38",
                    TSS = list(upstream = NULL, downstream = NULL)){
   
-  tries <- 0L
-  msg <- character()
-  while (tries < 3L) {
-    tss <- tryCatch({
-      host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
-      message("Accessing ", host, " to get TSS information")
-      
-      ensembl <- tryCatch({
-        useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
-      },  error = function(e) {
-        message(e)
-        for(mirror in c("asia","useast","uswest")){
-          x <- useEnsembl("ensembl",
-                          dataset = "hsapiens_gene_ensembl",
-                          mirror = mirror,
-                          host =  host)
-          if(class(x) == "Mart") {
-            return(x)
-          }
-        }
-        return(NULL)
-      })
-      
-      if(is.null(host)) {
-        message("Problems accessing ensembl database")
-        return(NULL)
-      }
-      attributes <- c("chromosome_name",
-                      "start_position",
-                      "end_position", "strand",
-                      "ensembl_gene_id", 
-                      "transcription_start_site",
-                      "transcript_start",
-                      "ensembl_transcript_id",
-                      "transcript_end",
-                      "external_gene_name")
-      chrom <- c(1:22, "X", "Y","M","*")
-      db.datasets <- listDatasets(ensembl)
-      description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
-      message(paste0("Downloading transcripts information from ", ensembl@host, ". Using: ", description))
-      
-      filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
-      if(!file.exists(filename)) {
-        tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
-        tss <- tss[!duplicated(tss$ensembl_transcript_id),]
-        save(tss, file = filename)
-      } else {
-        message("Loading from disk")
-        tss <- get(load(filename))  
-      } 
-      if(genome == "hg19") {
-        tss$transcription_start_site <- ifelse(tss$strand == 1,tss$start_position,tss$end_position)
-      }
-      tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
-      tss$strand[tss$strand == 1] <- "+" 
-      tss$strand[tss$strand == -1] <- "-" 
-      tss <- makeGRangesFromDataFrame(tss,start.field = "transcript_start", end.field = "transcript_end", keep.extra.columns = TRUE)
-      
-      if(!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
-        tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
-      tss
-    }, error = function(e) {
-      msg <<- conditionMessage(e)
-      tries <<- tries + 1L
-    })
-    if(!is.null(tss)) break
+  if (tolower(genome) == "hg38") {
+    tss <- getdata("Human_genes__GRCh38_p12__tss")
+  } else {
+    tss <- getdata("Human_genes__GRCh37_p13__tss")
   }
-  if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
+  
+  # tries <- 0L
+  # msg <- character()
+  # while (tries < 3L) {
+  #   tss <- tryCatch({
+  #     host <- ifelse(genome == "hg19",  "grch37.ensembl.org","www.ensembl.org")
+  #     message("Accessing ", host, " to get TSS information")
+  #     
+  #     ensembl <- tryCatch({
+  #       useEnsembl("ensembl", dataset = "hsapiens_gene_ensembl", host =  host)
+  #     },  error = function(e) {
+  #       message(e)
+  #       for(mirror in c("asia","useast","uswest")){
+  #         x <- useEnsembl("ensembl",
+  #                         dataset = "hsapiens_gene_ensembl",
+  #                         mirror = mirror,
+  #                         host =  host)
+  #         if(class(x) == "Mart") {
+  #           return(x)
+  #         }
+  #       }
+  #       return(NULL)
+  #     })
+  #     
+  #     if(is.null(host)) {
+  #       message("Problems accessing ensembl database")
+  #       return(NULL)
+  #     }
+  #     attributes <- c("chromosome_name",
+  #                     "start_position",
+  #                     "end_position", "strand",
+  #                     "ensembl_gene_id", 
+  #                     "transcription_start_site",
+  #                     "transcript_start",
+  #                     "ensembl_transcript_id",
+  #                     "transcript_end",
+  #                     "external_gene_name")
+  #     chrom <- c(1:22, "X", "Y","M","*")
+  #     db.datasets <- listDatasets(ensembl)
+  #     description <- db.datasets[db.datasets$dataset=="hsapiens_gene_ensembl",]$description
+  #     message(paste0("Downloading transcripts information from ", ensembl@host, ". Using: ", description))
+  #     
+  #     filename <-  paste0(gsub("[[:punct:]]| ", "_",description),"_tss.rda")
+  #     if(!file.exists(filename)) {
+  #       tss <- getBM(attributes = attributes, filters = c("chromosome_name"), values = list(chrom), mart = ensembl)
+  #       tss <- tss[!duplicated(tss$ensembl_transcript_id),]
+  #       save(tss, file = filename, compress = "xz")
+  #     } else {
+  #       message("Loading from disk")
+  #       tss <- get(load(filename))  
+  #     } 
+  tss$chromosome_name <-  paste0("chr", tss$chromosome_name)
+  tss$strand[tss$strand == 1] <- "+" 
+  tss$strand[tss$strand == -1] <- "-" 
+  tss <- makeGRangesFromDataFrame(tss,
+                                  strand.field = "strand",
+                                  start.field = "transcript_start", 
+                                  end.field = "transcript_end", 
+                                  keep.extra.columns = TRUE)
+  
+  if (!is.null(TSS$upstream) & !is.null(TSS$downstream)) 
+    tss <- promoters(tss, upstream = TSS$upstream, downstream = TSS$downstream)
+  #    tss
+  #  }, error = function(e) {
+  #    msg <<- conditionMessage(e)
+  #    tries <<- tries + 1L
+  #  })
+  #  if(!is.null(tss)) break
+  #}
+  #if (tries == 3L) stop("failed to get URL after 3 tries:", "\n  error: ", msg)
   
   return(tss)
 }
