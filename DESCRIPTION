@@ -20,7 +20,7 @@ Description: ELMER is designed to use DNA methylation and gene expression from a
     factor network in primary tissue.
 Depends:
     R (>= 3.4.0),
-    ELMER.data (>= 2.9.1)
+    ELMER.data (>= 2.9.3)
 License: GPL-3
 LazyData: true
 VignetteBuilder: knitr
