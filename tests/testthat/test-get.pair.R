@@ -54,7 +54,7 @@ test_that("Function uses correctly the permu.dir", {
                         group2 = "Solid Tissue Normal",
                         nearGenes = nearGenes,
                         permu.size = 5,
-                        raw.pvalue =  0.001,
+                        raw.pvalue =  0.1,
                         Pe = 0.2,
                         dir.out="./",
                         permu.dir = "permu_test",
