@@ -7,10 +7,9 @@ test_that("It maps correctly to hg38", {
   probe <- GRanges(seqnames = c("chr1"), 
                    row.names =  c("cg18108049"),
                    names =  c("cg18108049"),
-                   range = IRanges(start = c(16058489), end= c(16058489)))
+                   range = IRanges(start = c(16058489), end = c(16058490)))
   # this are hg19 annotation 
-  # chr1:16010827:16062808
-  # chr1:16058489:16058489
+  # chr1:16058489:16058490
   
   NearbyGenes <- getRegionNearGenes(TRange = probe,
                                     geneAnnot = geneAnnot,
@@ -68,7 +67,8 @@ test_that("It maps correctly to hg19", {
   probe <- GRanges(seqnames = c("chr1"), 
                    row.names =  c("cg18108049"),
                    names =  c("cg18108049"),
-                   range = IRanges(start = c(16058489), end= c(16058489)))
+                   range = IRanges(start = c(16058489), end= c(16058490)))
+
   # chr1:16010827:16062808
   # chr1:16058489:16058489
   NearbyGenes <- getRegionNearGenes(TRange = probe,
