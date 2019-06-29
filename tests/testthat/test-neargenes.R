@@ -3,14 +3,9 @@ context("Get GetNearGenes")
 test_that("It maps correctly to hg38", {
   tssAnnot <- getTSS(genome = "hg38")
   geneAnnot <- tssAnnot
-  
-  probe <- GRanges(seqnames = c("chr1"), 
-                   row.names =  c("cg18108049"),
-                   names =  c("cg18108049"),
-                   range = IRanges(start = c(16058489), end = c(16058490)))
-  # this are hg19 annotation 
-  # chr1:16058489:16058490
-  
+
+  probe <- getInfiniumAnnotation(genome = "hg19")["cg18108049"]
+
   NearbyGenes <- getRegionNearGenes(TRange = probe,
                                     geneAnnot = geneAnnot,
                                     numFlankingGenes = 4)
@@ -64,11 +59,8 @@ test_that("It maps correctly to hg38 if more than one region", {
 test_that("It maps correctly to hg19", {
   tssAnnot <- getTSS(genome = "hg19")
   geneAnnot <- tssAnnot
-  probe <- GRanges(seqnames = c("chr1"), 
-                   row.names =  c("cg18108049"),
-                   names =  c("cg18108049"),
-                   range = IRanges(start = c(16058489), end= c(16058490)))
-
+  probe <- getInfiniumAnnotation(genome = "hg19")["cg18108049"]
+  
   # chr1:16010827:16062808
   # chr1:16058489:16058489
   NearbyGenes <- getRegionNearGenes(TRange = probe,
