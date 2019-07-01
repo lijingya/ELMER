@@ -277,7 +277,7 @@ scatter <- function(meth,
       P <- P + labs(title = title)
       P <- P + annotate("text",
                         x = 0.2,
-                        y = max(as.numeric(exp[,GeneID])) + 1,
+                        y = ifelse(is.null(ylim),max(as.numeric(exp[,GeneID])) + 1, max(ylim) + 1),
                         hjust = 0.0,
                         size = 2,
                         label = paste0("Rho: ",corval," / P-value: ",pvalue))
