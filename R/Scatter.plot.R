@@ -269,9 +269,10 @@ scatter <- function(meth,
     if(correlation){
       cor <- cor.test(x = as.numeric(meth), 
                       y = as.numeric(exp[,GeneID]),
+                      exact = FALSE,
                       method=c("spearman"))
       corval <- round(cor$estimate,digits = 2)
-      pvalue <- signif(cor$p.value,digits = 10)
+      pvalue <- scales::scientific(cor$p.value, digits = 3)
       title <- paste0(title, "\n","Rho: ", corval," / P-value: ", pvalue)
       P <- P + labs(title = title)
       P <- P + annotate("text",
