@@ -281,7 +281,7 @@ scatter <- function(meth,
                         hjust = 0.0,
                         size = 2,
                         label = paste0("Rho: ",corval," / P-value: ",pvalue))
-      print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
+      #print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
     }
   } else {
     df <- data.frame(meth = meth,exp = exp,category = factor(category))
