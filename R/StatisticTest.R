@@ -75,6 +75,7 @@ Stat.diff.meth <- function(meth,
 Stat.nonpara.permu <- function(Probe,
                                Gene,
                                Top = 0.2,
+                               correlation = "negative",
                                unmethy = NULL,
                                methy  = NULL,
                                Meths = Meths,
@@ -90,7 +91,7 @@ Stat.nonpara.permu <- function(Probe,
                             tryCatch({
                               wilcox.test(x[unmethy],
                                           x[methy],
-                                          alternative = "greater",
+                                          alternative = ifelse(correlation == "negative","greater","less"),
                                           exact = FALSE)$p.value
                             }, error = function(e){
                               NA
@@ -120,6 +121,7 @@ Stat.nonpara.permu <- function(Probe,
 Stat.nonpara <- function(Probe,
                          NearGenes,
                          Top = NULL,
+                         correlation = "negative",
                          unmethy = NULL,
                          methy  = NULL,
                          Meths = Meths,
@@ -141,7 +143,7 @@ Stat.nonpara <- function(Probe,
                             tryCatch({
                               wilcox.test(x[unmethy],
                                           x[methy],
-                                          alternative = "greater",
+                                          alternative = ifelse(correlation == "negative","greater","less"),
                                           exact = FALSE)$p.value},
                               error = function(x){
                                 NA
