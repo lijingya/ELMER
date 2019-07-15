@@ -197,9 +197,9 @@ createMAE <- function (exp,
     }
     if(!missing(sampleMap)) { 
       if(is.character(sampleMap)) sampleMap <- read_tsv(sampleMap)
+      if (!all(c("assay","colname","primary") %in% colnames(sampleMap))) 
+        stop("All assay, primary and colnamecolumns should be in sampleMap input")
     }
-    if (!all(c("assay","colname","primary") %in% colnames(sampleMap))) 
-      stop("All assay, primary and colnamecolumns should be in sampleMap input")
   })  
   
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
