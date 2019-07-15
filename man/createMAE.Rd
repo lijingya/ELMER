@@ -15,12 +15,13 @@ either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 
 \item{met}{A Summaerized Experiment, a matrix or path of rda file only containing the data.}
 
-\item{colData}{A DataFrame or data.frame of the phenotype data for all participants}
+\item{colData}{A DataFrame or data.frame of the phenotype data for all participants. Must have column primary (sample ID).}
 
 \item{sampleMap}{A DataFrame or data.frame of the matching samples and colnames
 of the gene expression and DNA methylation matrix. This should be used if your matrix
 have different columns names. 
-This object must have columns primary (sample ID) and colname (names of the columns of the matrix).}
+This object must have following columns: 
+assay ("DNA methylation" and "Gene expression"), primary (sample ID) and colname (names of the columns of the matrix).}
 
 \item{linearize.exp}{Take log2(exp + 1) in order to linearize relation between methylation and expression}
 
@@ -52,16 +53,17 @@ This function will receive a gene expression and DNA methylation data objects
 and create a Multi Assay Experiment.
 }
 \examples{
-# NON TCGA example: matrices has diffetrent column names
+# NON TCGA example: matrices has different column names
 gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
 dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
 sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
                                     sample.type = c("Normal", "Tumor"))
-sampleMap <- S4Vectors::DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
-                                  colname = c("sample1.exp","sample1.met",
-                                              "sample2.exp","sample2.met"))
+sampleMap <- S4Vectors::DataFrame(
+                 assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+                 primary = c("sample1","sample1","sample2","sample2"), 
+                 colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 mae <- createMAE(exp = gene.exp, 
                  met = dna.met, 
                  sampleMap = sampleMap, 
@@ -77,6 +79,25 @@ mae <- createMAE(exp = gene.exp,
                  sampleMap = "sampleMap.tsv", 
                  met.platform ="450K",
                  colData = "sample.info.tsv", 
+                 genome = "hg38") 
+                 
+# NON TCGA example: matrices has same column names
+gene.exp <- S4Vectors::DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                  sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
+dna.met <- S4Vectors::DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+                       sample2=  c("cg14324200"=0.3,"cg23867494"=0.9))
+sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
+                                    sample.type = c("Normal", "Tumor"))
+sampleMap <- S4Vectors::DataFrame(
+                 assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+                 primary = c("sample1","sample1","sample2","sample2"), 
+                 colname = c("sample1","sample1","sample2","sample2")
+)
+mae <- createMAE(exp = gene.exp, 
+                 met = dna.met, 
+                 sampleMap = sampleMap, 
+                 met.platform ="450K",
+                 colData = sample.info, 
                  genome = "hg38") 
 
 \dontrun{

@@ -152,7 +152,7 @@ table(colnames(not.tcga.met) %in% colnames(not.tcga.exp))
 
 # Our sample information must have as row names the samples information
 phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
-                             samples = colnames(not.tcga.exp), 
+                             primary = colnames(not.tcga.exp), 
                              group = c(rep("group1", ncol(GeneExp)/2),
                                        rep("group2", ncol(GeneExp)/2)))
 
@@ -166,7 +166,7 @@ data.hg19
 
 # The samples that does not have data for both DNA methylation and Gene exprssion will be removed even for the phenotype data
 phenotype.data <- data.frame(row.names = colnames(not.tcga.met), 
-                             samples = colnames(not.tcga.met), 
+                             primary = colnames(not.tcga.met), 
                              group = c(rep("group1", ncol(Meth)/4),
                                        rep("group2", ncol(Meth)/4),
                                        rep("group3", ncol(Meth)/4),
@@ -239,10 +239,10 @@ You can also use your own data and annotations to create  Multi Assay Experiment
 
 ```{r, message=FALSE}
 # NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-                      sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-dna.met <- DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
-                     sample2 =  c("cg14324200"=0.3,"cg23867494"=0.9))
+gene.exp <- DataFrame(sample1 = c("ENSG00000141510" = 2.3,"ENSG00000171862" = 5.4),
+                      sample2 = c("ENSG00000141510" = 1.6,"ENSG00000171862" = 2.3))
+dna.met <- DataFrame(sample1 = c("cg14324200" = 0.5,"cg23867494" = 0.1),
+                     sample2 =  c("cg14324200" = 0.3,"cg23867494" = 0.9))
 sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
 rownames(sample.info) <- colnames(gene.exp)
 
