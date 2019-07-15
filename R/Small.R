@@ -198,7 +198,7 @@ createMAE <- function (exp,
     if(!missing(sampleMap)) { 
       if(is.character(sampleMap)) sampleMap <- read_tsv(sampleMap)
       if (!all(c("assay","colname","primary") %in% colnames(sampleMap))) 
-        stop("All assay, primary and colnamecolumns should be in sampleMap input")
+        stop("All assay, primary and colname columns should be in sampleMap input")
     }
   })  
   

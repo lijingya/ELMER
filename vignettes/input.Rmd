@@ -238,34 +238,54 @@ as.data.frame(sampleMap(data)) %>% datatable(options = list(scrollX = TRUE))
 You can also use your own data and annotations to create  Multi Assay Experiment object. 
 
 ```{r, message=FALSE}
-# NON TCGA example: matrices has diffetrent column names
-gene.exp <- DataFrame(sample1 = c("ENSG00000141510" = 2.3,"ENSG00000171862" = 5.4),
-                      sample2 = c("ENSG00000141510" = 1.6,"ENSG00000171862" = 2.3))
-dna.met <- DataFrame(sample1 = c("cg14324200" = 0.5,"cg23867494" = 0.1),
-                     sample2 =  c("cg14324200" = 0.3,"cg23867494" = 0.9))
-sample.info <- DataFrame(sample.type = c("Normal", "Tumor"))
-rownames(sample.info) <- colnames(gene.exp)
-
-mae <- createMAE(exp = gene.exp,
-                 met = dna.met,
-                 save = FALSE,
-                 met.platform = "450K",
-                 colData = sample.info, 
-                 genome = "hg38") 
-
-# NON TCGA example: matrices has diffetrent column names
-rownames(sample.info) <- c("sample1","sample2")
-
-sampleMap <- DataFrame(primary = c("sample1","sample1","sample2","sample2"), 
-                       colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-
+# NON TCGA example: matrices has different column names
+gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                                 sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
+dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+                                sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
+sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
+                                    sample.type = c("Normal", "Tumor"))
+sampleMap <- S4Vectors::DataFrame(
+  assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+  primary = c("sample1","sample1","sample2","sample2"), 
+  colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
 mae <- createMAE(exp = gene.exp, 
                  met = dna.met, 
                  sampleMap = sampleMap, 
+                 met.platform ="450K",
                  colData = sample.info, 
-                 save = FALSE,
-                 met.platform = "450K",
                  genome = "hg38") 
+# You can also use sample Mapping and Sample information tables from a tsv file
+# You can use the createTSVTemplates function to create the tsv files
+readr::write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
+readr::write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
+mae <- createMAE(exp = gene.exp, 
+                 met = dna.met, 
+                 sampleMap = "sampleMap.tsv", 
+                 met.platform ="450K",
+                 colData = "sample.info.tsv", 
+                 genome = "hg38") 
+mae
+
+# NON TCGA example: matrices has same column names
+gene.exp <- S4Vectors::DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+                                 sample2 = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
+dna.met <- S4Vectors::DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
+                                sample2=  c("cg14324200"=0.3,"cg23867494"=0.9))
+sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
+                                    sample.type = c("Normal", "Tumor"))
+sampleMap <- S4Vectors::DataFrame(
+  assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+  primary = c("sample1","sample1","sample2","sample2"), 
+  colname = c("sample1","sample1","sample2","sample2")
+)
+mae <- createMAE(exp = gene.exp, 
+                 met = dna.met, 
+                 sampleMap = sampleMap, 
+                 met.platform ="450K",
+                 colData = sample.info, 
+                 genome = "hg38") 
+mae
 ```
 
 # Bibliography

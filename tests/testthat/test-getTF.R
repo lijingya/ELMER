@@ -27,7 +27,7 @@ test_that("Correclty shows TF if top5 TFs cotinas any member of the motif TF fam
                   group.col = "shortLetterCode",
                   group1 = "TP",
                   group2 = "NT",
-                  label="hypo")
+                  label = "hypo")
   })
 
   tf.family <- createMotifRelevantTfs()  
