@@ -375,7 +375,7 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
     aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
     aux <- aux[!duplicated(aux$ensembl_gene_id),]
     rownames(aux) <- aux$ensembl_gene_id
-    aux$entrezgene <- NULL
+    aux$entrezgene_id <- NULL
     exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id",colnames(aux))],    
                                                  start.field="start_position",
                                                  end.field=c("end_position"))

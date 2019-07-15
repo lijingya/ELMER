@@ -54,42 +54,42 @@ get.feature.probe <- function(feature = NULL,
                               TSS.range = list(upstream = 2000, downstream = 2000),
                               promoter = FALSE,
                               rm.chr = NULL){
-    probe <- getInfiniumAnnotation(toupper(met.platform),genome)
-    # We will remove the rs probes, as they should not be used in the analysis
-    probe <- probe[!grepl("rs",names(probe)),]
-    probe <- probe[!probe$MASK_general,] # remove masked probes
-    if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
-
-    if(missing(TSS)){
-        # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
-        TSS <- getTSS(genome = genome)
+  probe <- getInfiniumAnnotation(toupper(met.platform),genome)
+  # We will remove the rs probes, as they should not be used in the analysis
+  probe <- probe[!grepl("rs",names(probe)),]
+  probe <- probe[!probe$MASK_general,] # remove masked probes
+  if(!is.null(rm.chr)) probe <- probe[!as.character(seqnames(probe)) %in% rm.chr]
+  
+  if(missing(TSS)){
+    # The function getTSS gets the transcription coordinantes from Ensemble (GENCODE)
+    TSS <- getTSS(genome = genome)
+  }
+  suppressWarnings({
+    promoters <- promoters(TSS,
+                           upstream = TSS.range[["upstream"]],
+                           downstream = TSS.range[["downstream"]])
+  })
+  
+  if(!promoter){
+    probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE))))]
+    
+    
+    if(is.null(feature)) {
+      message("Returning distal probes: ", length(probe))
+      return(probe)
     }
-    suppressWarnings({
-        promoters <- promoters(TSS,
-                               upstream = TSS.range[["upstream"]],
-                               downstream = TSS.range[["downstream"]])
-    })
-
-    if(!promoter){
-        probe <- probe[setdiff(1:length(probe),unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE))))]
-
-
-        if(is.null(feature)) {
-            message("Returning distal probes: ", length(probe))
-            return(probe)
-        }
-        if(is(feature,"GRanges")) {
-            probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
-            message("Returning distal probes overlapping with features: ", length(probe))
-
-        } else {
-            stop("feature is not GRanges object.")
-        }
+    if(is(feature,"GRanges")) {
+      probe <- probe[unique(queryHits(findOverlaps(probe,feature)))]
+      message("Returning distal probes overlapping with features: ", length(probe))
+      
     } else {
-        probe <- probe[unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE)))]
-        message("Returning promoter probes: ", length(probe))
+      stop("feature is not GRanges object.")
     }
-    return(probe)
+  } else {
+    probe <- probe[unique(queryHits(findOverlaps(probe,promoters,ignore.strand=TRUE)))]
+    message("Returning promoter probes: ", length(probe))
+  }
+  return(probe)
 }
 
 
@@ -190,139 +190,139 @@ get.diff.meth <- function(data,
                           sig.dif = 0.3,
                           dir.out = "./",
                           save = TRUE){
-
-    if(is.null(getMet(data)))
-        stop("Cannot identify differential DNA methylation region without DNA methylation data.")
-    if(nrow(colData(data))==0){
-        stop("Sample information data to do differential analysis.")
-    } else if (missing(group.col)){
-        stop("Please colData.col should be specified, labeling two group of sample for comparison. See colnames(colData(data)) for possibilities")
-    } else if (!group.col %in% colnames(colData(data))){
-        stop("Group column not found in phenotypic data and meta-data of the object. See values with colData(data)")
-    } else if (missing(group1) | missing(group2)) {
-        if(length(unique(colData(data)[,group.col])) < 2){
-            stop("Group column should have at least 2 distinct group labels for comparison.")
-        } else if (length(unique(colData(data)[,group.col])) > 2){
-            stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
-        } else {
-            # TO be changed
-            groups <- colData(data)[,group.col]
-            group1 <- unique(groups)[1]
-            group2 <- unique(groups)[2]
-            message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
-        }
-    } else if(!group1 %in% unique(colData(data)[,group.col])){
-        stop(group1," not found in ", group.col)
-    } else if(!group2 %in% unique(colData(data)[,group.col])){
-        stop(group2," not found in ", group.col)
-    }
-    if(!diff.dir %in% c("hypo","hyper","both")) stop("diff.dir optiosn are hypo, hyper or both")
-    if(diff.dir %in% c("both")) diff.dir <- NA
-
-
-    parallel <- FALSE
-    if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
-    }
-    Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
-    if(is.na(Top.m) & minSubgroupFrac < 1) {
-        message("Two tailed test should be performed with all samples")
-        minSubgroupFrac <- 1
-    }
-    if(mode == "supervised" & minSubgroupFrac < 1) {
-        message("Supervised mode will use all samples from boths groups. Setting argument minSubgroupFrac to 1")
-        minSubgroupFrac <- 1
-    }
-
-    counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
-    message(paste0("ELMER will search for probes ", ifelse(is.na(diff.dir),"differently ",diff.dir),
-                   "methylated in group ",
-                   group1, " (n:",subset(counts,counts$x == group1)$freq,")",
-                   " compared to ",
-                   group2, " (n:",subset(counts,counts$x == group2)$freq,")"))
-
-    message(paste0("ooo Arguments ooo"))
-    message(paste0("o Number of probes: ",nrow(getMet(data))))
-    message(paste0("o Beta value difference cut-off: ",sig.dif))
-    message(paste0("o FDR cut-off: ", pvalue))
-    message(paste0("o Mode: ", mode))
-    message(paste0("o % of samples per group in each comparison: ", minSubgroupFrac))
-    message(paste0("o Min number of samples per group in each comparison: ", min.samples))
-    message(paste0("o Nb of samples group1 in each comparison: ",
-                   ifelse(round(subset(counts,counts$x == group1)$freq * minSubgroupFrac) > min.samples,
-                          round(subset(counts,counts$x == group1)$freq * minSubgroupFrac),
-                          min(min.samples,subset(counts,counts$x == group1)$freq))))
-    message(paste0("o Nb of samples group2 in each comparison: ",
-                   ifelse(round(subset(counts,counts$x == group2)$freq * minSubgroupFrac) > min.samples,
-                          round(subset(counts,counts$x == group2)$freq * minSubgroupFrac),
-                          min(min.samples,subset(counts,counts$x == group2)$freq))))
-    message(paste0("Output direction: ", dir.out))
-    message(paste0("ooooooooooooooooo"))
-
-
-    groups.info <- colData(data)[getMetSamples(data),group.col]
-    met <- assay(getMet(data))
-    probes <- rownames(met)
-    out <- alply(.data = met, .margins = 1,
-                 .fun = function(x) {
-                     Stat.diff.meth(percentage = minSubgroupFrac,
-                                    meth = x,
-                                    min.samples = min.samples,
-                                    groups = groups.info,
-                                    group1 = group1,
-                                    test = test,
-                                    group2 = group2,
-                                    Top.m = Top.m)},
-                 .progress = "time",
-                 .parallel = parallel,
-                 .paropts = list(.errorhandling = 'pass')
-    )
-    out <- do.call(rbind,out)
-    out <- as.data.frame(out,stringsAsFactors = FALSE)
-    out$probe <- probes
-    diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
-    out$adjust.p <- p.adjust(as.numeric(out$PP),method = "BH")
-    out <- out[,c("probe","PP","MeanDiff","adjust.p")]
-    colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
-    rownames(out) <- out$probe
-
-    if(save){
-        message("Saving results")
-        dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
-        ylab <- ifelse(is.na(diff.dir),
-                       " (FDR corrected P-values) [two tailed test]",
-                       " (FDR corrected P-values) [one tailed test]")
-        TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
-                              y = out$adjust.p,
-                              title =  paste0("Volcano plot - Probes ",
-                                              ifelse(is.na(diff.dir),"differently ",diff.dir),
-                                              "methylated in ", group1, " vs ", group2,"\n"),
-                              filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
-                              label =  c("Not Significant",
-                                         paste0("Hypermethylated in ",group1),
-                                         paste0("Hypomethylated in ",group1)),
-                              ylab =  bquote(-Log[10] ~ .(ylab)),
-                              xlab =  expression(paste(
-                                  "DNA Methylation difference (",beta,"-values)")
-                              ),
-                              x.cut = sig.dif,
-                              y.cut = pvalue)
-        write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
-        write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
-                  path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
-
-
-    }
-
-    result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]
-    if(nrow(result) == 0 ) {
-        message("No relevant probes found")
+  
+  if(is.null(getMet(data)))
+    stop("Cannot identify differential DNA methylation region without DNA methylation data.")
+  if(nrow(colData(data))==0){
+    stop("Sample information data to do differential analysis.")
+  } else if (missing(group.col)){
+    stop("Please colData.col should be specified, labeling two group of sample for comparison. See colnames(colData(data)) for possibilities")
+  } else if (!group.col %in% colnames(colData(data))){
+    stop("Group column not found in phenotypic data and meta-data of the object. See values with colData(data)")
+  } else if (missing(group1) | missing(group2)) {
+    if(length(unique(colData(data)[,group.col])) < 2){
+      stop("Group column should have at least 2 distinct group labels for comparison.")
+    } else if (length(unique(colData(data)[,group.col])) > 2){
+      stop("Please your object must have only two groups. We found more than two and this might impact the next analysis steps.")
     } else {
-        message(paste0("Number of relevant probes found: ", nrow(result)))
+      # TO be changed
+      groups <- colData(data)[,group.col]
+      group1 <- unique(groups)[1]
+      group2 <- unique(groups)[2]
+      message(paste0("Group 1: ", group1, "\nGroup 2: ", group2))
     }
-    return(result)
+  } else if(!group1 %in% unique(colData(data)[,group.col])){
+    stop(group1," not found in ", group.col)
+  } else if(!group2 %in% unique(colData(data)[,group.col])){
+    stop(group2," not found in ", group.col)
+  }
+  if(!diff.dir %in% c("hypo","hyper","both")) stop("diff.dir optiosn are hypo, hyper or both")
+  if(diff.dir %in% c("both")) diff.dir <- NA
+  
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  Top.m <- ifelse(diff.dir == "hyper",TRUE,FALSE)
+  if(is.na(Top.m) & minSubgroupFrac < 1) {
+    message("Two tailed test should be performed with all samples")
+    minSubgroupFrac <- 1
+  }
+  if(mode == "supervised" & minSubgroupFrac < 1) {
+    message("Supervised mode will use all samples from boths groups. Setting argument minSubgroupFrac to 1")
+    minSubgroupFrac <- 1
+  }
+  
+  counts <- plyr::count(MultiAssayExperiment::colData(data)[,group.col])
+  message(paste0("ELMER will search for probes ", ifelse(is.na(diff.dir),"differently ",diff.dir),
+                 "methylated in group ",
+                 group1, " (n:",subset(counts,counts$x == group1)$freq,")",
+                 " compared to ",
+                 group2, " (n:",subset(counts,counts$x == group2)$freq,")"))
+  
+  message(paste0("ooo Arguments ooo"))
+  message(paste0("o Number of probes: ",nrow(getMet(data))))
+  message(paste0("o Beta value difference cut-off: ",sig.dif))
+  message(paste0("o FDR cut-off: ", pvalue))
+  message(paste0("o Mode: ", mode))
+  message(paste0("o % of samples per group in each comparison: ", minSubgroupFrac))
+  message(paste0("o Min number of samples per group in each comparison: ", min.samples))
+  message(paste0("o Nb of samples group1 in each comparison: ",
+                 ifelse(round(subset(counts,counts$x == group1)$freq * minSubgroupFrac) > min.samples,
+                        round(subset(counts,counts$x == group1)$freq * minSubgroupFrac),
+                        min(min.samples,subset(counts,counts$x == group1)$freq))))
+  message(paste0("o Nb of samples group2 in each comparison: ",
+                 ifelse(round(subset(counts,counts$x == group2)$freq * minSubgroupFrac) > min.samples,
+                        round(subset(counts,counts$x == group2)$freq * minSubgroupFrac),
+                        min(min.samples,subset(counts,counts$x == group2)$freq))))
+  message(paste0("Output direction: ", dir.out))
+  message(paste0("ooooooooooooooooo"))
+  
+  
+  groups.info <- colData(data)[getMetSamples(data),group.col]
+  met <- assay(getMet(data))
+  probes <- rownames(met)
+  out <- alply(.data = met, .margins = 1,
+               .fun = function(x) {
+                 Stat.diff.meth(percentage = minSubgroupFrac,
+                                meth = x,
+                                min.samples = min.samples,
+                                groups = groups.info,
+                                group1 = group1,
+                                test = test,
+                                group2 = group2,
+                                Top.m = Top.m)},
+               .progress = "time",
+               .parallel = parallel,
+               .paropts = list(.errorhandling = 'pass')
+  )
+  out <- do.call(rbind,out)
+  out <- as.data.frame(out,stringsAsFactors = FALSE)
+  out$probe <- probes
+  diffCol <- paste0(gsub("[[:punct:]]| ", ".", group1),"_Minus_",gsub("[[:punct:]]| ", ".", group2))
+  out$adjust.p <- p.adjust(as.numeric(out$PP),method = "BH")
+  out <- out[,c("probe","PP","MeanDiff","adjust.p")]
+  colnames(out) <- c("probe","pvalue", diffCol, "adjust.p")
+  rownames(out) <- out$probe
+  
+  if(save){
+    message("Saving results")
+    dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
+    ylab <- ifelse(is.na(diff.dir),
+                   " (FDR corrected P-values) [two tailed test]",
+                   " (FDR corrected P-values) [one tailed test]")
+    TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
+                          y = out$adjust.p,
+                          title =  paste0("Volcano plot - Probes ",
+                                          ifelse(is.na(diff.dir),"differently ",diff.dir),
+                                          "methylated in ", group1, " vs ", group2,"\n"),
+                          filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
+                          label =  c("Not Significant",
+                                     paste0("Hypermethylated in ",group1),
+                                     paste0("Hypomethylated in ",group1)),
+                          ylab =  bquote(-Log[10] ~ .(ylab)),
+                          xlab =  expression(paste(
+                            "DNA Methylation difference (",beta,"-values)")
+                          ),
+                          x.cut = sig.dif,
+                          y.cut = pvalue)
+    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
+    write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
+              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
+    
+    
+  }
+  
+  result <- out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),]
+  if(nrow(result) == 0 ) {
+    message("No relevant probes found")
+  } else {
+    message(paste0("Number of relevant probes found: ", nrow(result)))
+  }
+  return(result)
 }
 
 ## TCGA pipe don't specify dir.out
@@ -460,159 +460,162 @@ get.pair <- function(data,
                      group1 = NULL,
                      group2 = NULL,
                      cores = 1,
+                     correlation = "negative",
                      filter.probes = TRUE,
                      filter.portion = 0.3,
                      filter.percentage = 0.05,
                      label = NULL,
                      addDistNearestTSS = FALSE,
                      save = TRUE){
-
-    if(is.character(nearGenes)){
-        nearGenes <- get(load(nearGenes))
-    }
-    if(diffExp & missing(group.col))
-        stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
-
-    if(missing(group.col)) stop("Please set group.col argument")
-    if(missing(group1)) stop("Please set group1 argument")
-    if(missing(group2)) stop("Please set group2 argument")
-    data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
-
-    # Supervised groups
-    unmethylated <- methylated <- NULL
-    if(mode == "supervised"){
-        if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
-        if(diff.dir == "hypo"){
-            message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
-            unmethylated <-  which(colData(data)[,group.col]  == group1)
-            methylated <-  which(colData(data)[,group.col]  == group2)
-        } else {
-            message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
-            unmethylated <-  which(colData(data)[,group.col]  == group2)
-            methylated <-  which(colData(data)[,group.col]  == group1)
-        }
+  
+  if(is.character(nearGenes)){
+    nearGenes <- get(load(nearGenes))
+  }
+  if(diffExp & missing(group.col))
+    stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
+  
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  
+  # Supervised groups
+  unmethylated <- methylated <- NULL
+  if(mode == "supervised"){
+    if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
+    if(diff.dir == "hypo"){
+      message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
+      unmethylated <-  which(colData(data)[,group.col]  == group1)
+      methylated <-  which(colData(data)[,group.col]  == group2)
     } else {
-        message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+      message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
+      unmethylated <-  which(colData(data)[,group.col]  == group2)
+      methylated <-  which(colData(data)[,group.col]  == group1)
     }
-    # Paralellization code
-    parallel <- FALSE
-    if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
-    }
-
-    if(filter.probes) data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
-
-    met <- assay(getMet(data))
-    # Probes that were removed from the last steps cannot be verified
-    nearGenes <- nearGenes[nearGenes$ID %in% rownames(met),]
-
-    if(nrow(nearGenes) == 0) {
-        message("No probes passed the preAssociationProbeFiltering filter")
-        return(NULL)
-    }
-    exp <- assay(getExp(data))
-    message("Calculating Pp (probe - gene) for all nearby genes")
-    Probe.gene <- adply(.data = unique(nearGenes$ID),
-                        .margins = 1,
-                        .fun = function(x) {
-                            Stat.nonpara(Probe = x,
-                                         Meths = met[x,],
-                                         methy = methylated,
-                                         NearGenes = as.data.frame(nearGenes),
-                                         unmethy = unmethylated,
-                                         Top = minSubgroupFrac/2, # Each group will have half of the samples
-                                         Exps = exp
-                            )
-                        },
-                        .progress = "time",
-                        .parallel = parallel,
-                        .id = NULL,
-                        .paropts = list(.errorhandling = 'pass')
-    )
-
-    rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
-    Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
-
-    if(save) {
-        dir.create(dir.out, showWarnings = FALSE)
-        file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, ifelse(is.null(label),"",label))
-        write_csv(Probe.gene,path=file)
-        message(paste("File created:", file))
-    }
-
-    Probe.gene <- Probe.gene[Probe.gene$Raw.p < raw.pvalue,]
-    Probe.gene <- Probe.gene[order(Probe.gene$Raw.p),]
-    selected <- Probe.gene
-    if(nrow(selected) == 0) {
-        message(paste("No significant pairs were found for pvalue =", raw.pvalue))
-        return(selected)
-    }
-
-
-    #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
-    if(mode == "unsupervised"){
-        GeneID <- unique(Probe.gene[,"GeneID"])
-        message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
-        # get permutation
-        permu <- get.permu(data,
-                           geneID     = GeneID,
-                           percentage = minSubgroupFrac / 2,
-                           rm.probes  = unique(nearGenes$ID),
-                           methy      = methylated,
-                           unmethy    = unmethylated,
-                           permu.size = permu.size,
-                           permu.dir  = permu.dir,
-                           cores      = cores)
-        # Get empirical p-value
-        Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
-
-        if(save) write_csv(Probe.gene.Pe,
-                           path = sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
-                                          ifelse(is.null(label),"",label)))
-        # Pe will always be 1 for the supervised mode. As the test exp(U) > exp(M) will always be doing the same comparison.
-        selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
-    } else {
-        Probe.gene$FDR <- p.adjust(Probe.gene$Raw.p,method = "BH")
-        if(save) write_csv(Probe.gene,
-                           path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
-                                        ifelse(is.null(label),"",label)))
-        selected <-  Probe.gene[Probe.gene$FDR < Pe,]
-    }
-
-    # Change distance from gene to nearest TSS
-    if(addDistNearestTSS) {
-        selected$Distance <- NULL
-        selected <- addDistNearestTSS(data, NearGenes = selected)
-    }
-    if(diffExp){
-        message("Calculating differential expression between two groups")
-        Exp <- assay(getExp(data)[unique(selected$GeneID),])
-        groups <- unique(colData(data)[,group.col])
-        prefix <- paste(gsub("[[:punct:]]| ", ".", groups),collapse =  ".vs.")
-        log.col <- paste0("log2FC_",prefix)
-        diff.col <- paste0(prefix,".diff.pvalue")
-        idx1 <- colData(data)[,group.col] == groups[1]
-        idx2 <- colData(data)[,group.col] == groups[2]
-        out <- adply(.data = split(Exp,rownames(Exp)), .margins = 1,
-                     .fun = function(x) {
-                         test <- t.test(x = x[idx1],y = x[idx2])
-                         out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
-                                           "diff.pvalue" = test$p.value)
-                     },
-                     .progress = "time",
-                     .parallel = parallel,
-                     .id = "GeneID",
-                     .paropts = list(.errorhandling = 'pass')
-        )
-        add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
-        colnames(add) <- c(log.col,diff.col)
-        selected <- cbind(selected, add)
-    }
-    if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))
-    invisible(gc())
+  } else {
+    message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+  }
+  # Paralellization code
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
+  if(filter.probes) data <- preAssociationProbeFiltering(data, K = filter.portion, percentage = filter.percentage)
+  
+  met <- assay(getMet(data))
+  # Probes that were removed from the last steps cannot be verified
+  nearGenes <- nearGenes[nearGenes$ID %in% rownames(met),]
+  
+  if(nrow(nearGenes) == 0) {
+    message("No probes passed the preAssociationProbeFiltering filter")
+    return(NULL)
+  }
+  exp <- assay(getExp(data))
+  message("Calculating Pp (probe - gene) for all nearby genes")
+  Probe.gene <- adply(.data = unique(nearGenes$ID),
+                      .margins = 1,
+                      .fun = function(x) {
+                        Stat.nonpara(Probe = x,
+                                     Meths = met[x,],
+                                     methy = methylated,
+                                     unmethy = unmethylated,
+                                     NearGenes = as.data.frame(nearGenes),
+                                     correlation = correlation,
+                                     Top = minSubgroupFrac/2, # Each group will have half of the samples
+                                     Exps = exp
+                        )
+                      },
+                      .progress = "time",
+                      .parallel = parallel,
+                      .id = NULL,
+                      .paropts = list(.errorhandling = 'pass')
+  )
+  
+  rownames(Probe.gene) <- paste0(Probe.gene$Probe,".",Probe.gene$GeneID)
+  Probe.gene <- Probe.gene[!is.na(Probe.gene$Raw.p),]
+  
+  if(save) {
+    dir.create(dir.out, showWarnings = FALSE)
+    file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, ifelse(is.null(label),"",label))
+    write_csv(Probe.gene,path=file)
+    message(paste("File created:", file))
+  }
+  
+  Probe.gene <- Probe.gene[Probe.gene$Raw.p < raw.pvalue,]
+  Probe.gene <- Probe.gene[order(Probe.gene$Raw.p),]
+  selected <- Probe.gene
+  if(nrow(selected) == 0) {
+    message(paste("No significant pairs were found for pvalue =", raw.pvalue))
     return(selected)
+  }
+  
+  
+  #   Probe.gene$logRaw.p <- -log10(Probe.gene$Raw.p)
+  if(mode == "unsupervised"){
+    GeneID <- unique(Probe.gene[,"GeneID"])
+    message(paste("Calculating Pr (random probe - gene). Permutating ", permu.size, "probes for",  length(GeneID), "genes"))
+    # get permutation
+    permu <- get.permu(data,
+                       geneID     = GeneID,
+                       percentage = minSubgroupFrac / 2,
+                       rm.probes  = unique(nearGenes$ID),
+                       methy      = methylated,
+                       unmethy    = unmethylated,
+                       correlation = correlation,
+                       permu.size = permu.size,
+                       permu.dir  = permu.dir,
+                       cores      = cores)
+    # Get empirical p-value
+    Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
+    
+    if(save) write_csv(Probe.gene.Pe,
+                       path = sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
+                                      ifelse(is.null(label),"",label)))
+    # Pe will always be 1 for the supervised mode. As the test exp(U) > exp(M) will always be doing the same comparison.
+    selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
+  } else {
+    Probe.gene$FDR <- p.adjust(Probe.gene$Raw.p,method = "BH")
+    if(save) write_csv(Probe.gene,
+                       path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
+                                    ifelse(is.null(label),"",label)))
+    selected <-  Probe.gene[Probe.gene$FDR < Pe,]
+  }
+  
+  # Change distance from gene to nearest TSS
+  if(addDistNearestTSS) {
+    selected$Distance <- NULL
+    selected <- addDistNearestTSS(data, NearGenes = selected)
+  }
+  if(diffExp){
+    message("Calculating differential expression between two groups")
+    Exp <- assay(getExp(data)[unique(selected$GeneID),])
+    groups <- unique(colData(data)[,group.col])
+    prefix <- paste(gsub("[[:punct:]]| ", ".", groups),collapse =  ".vs.")
+    log.col <- paste0("log2FC_",prefix)
+    diff.col <- paste0(prefix,".diff.pvalue")
+    idx1 <- colData(data)[,group.col] == groups[1]
+    idx2 <- colData(data)[,group.col] == groups[2]
+    out <- adply(.data = split(Exp,rownames(Exp)), .margins = 1,
+                 .fun = function(x) {
+                   test <- t.test(x = x[idx1],y = x[idx2])
+                   out <- data.frame("log2FC" = test$estimate[1] - test$estimate[2],
+                                     "diff.pvalue" = test$p.value)
+                 },
+                 .progress = "time",
+                 .parallel = parallel,
+                 .id = "GeneID",
+                 .paropts = list(.errorhandling = 'pass')
+    )
+    add <- out[match(selected$GeneID, out$GeneID),c("log2FC","diff.pvalue")]
+    colnames(add) <- c(log.col,diff.col)
+    selected <- cbind(selected, add)
+  }
+  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))
+  invisible(gc())
+  return(selected)
 }
 
 ### permutation
@@ -670,144 +673,146 @@ get.permu <- function(data,
                       unmethy = NULL,
                       percentage = 0.2,
                       rm.probes = NULL,
+                      correlation = "negative",
                       permu.size = 10000,
                       permu.dir = NULL,
                       cores = 1){
-
-    ## get usable probes
-    usable.probes <- names(getMet(data))
-    usable.probes <- usable.probes[!usable.probes %in% rm.probes]
-    if(length(usable.probes) < permu.size)
-        stop(sprintf("There is no enough usable probes (%s) to perform %s time permutation,
+  
+  ## get usable probes
+  usable.probes <- names(getMet(data))
+  usable.probes <- usable.probes[!usable.probes %in% rm.probes]
+  if(length(usable.probes) < permu.size)
+    stop(sprintf("There is no enough usable probes (%s) to perform %s time permutation,
                  set a smaller permu.size.",length(usable.probes),permu.size))
-    if(!is.numeric(permu.size)) permu.size <- length(usable.probes)
-
-    # Desire for reproducible results
-    set.seed(200)
-    probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
-
-    parallel <- FALSE
-    if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
+  if(!is.numeric(permu.size)) permu.size <- length(usable.probes)
+  
+  # Desire for reproducible results
+  set.seed(200)
+  probes.permu <- sample(usable.probes, size = permu.size, replace = FALSE)
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
+  
+  # We have two cases to consider:
+  # 1) Permutation was not done before
+  # 2) It was done before
+  # 2.a) We have more probes to evaluate
+  # 2.b) We have more genes to evaluate
+  # 2.c) More genes and more probes
+  # 2.d) No more genes or probes
+  # For 1) just do for all genes and probes
+  # For 2 a-c do it for new probes, then do for new genes for all probes
+  # For 2.d just subset
+  permu <- NULL
+  tmp.probes <- probes.permu
+  tmp.genes <- geneID
+  missing.genes <- NULL
+  # Check if it isCase 2: Permutation already done
+  file <- file.path(permu.dir,"permu.rda")
+  if (!is.null(permu.dir)) {
+    if (file.exists(file)) {
+      temp.space <- new.env()
+      permu.file <- get(load(file, temp.space), temp.space)
+      rm(temp.space)
+      # Does the probe really exists ?
+      permu.file <- permu.file[,colnames(permu.file) %in% rownames(getMet(data))]
+      tmp.probes <- probes.permu[!probes.permu %in%  colnames(permu.file)]
+      if(!all(geneID %in% rownames(permu.file))) {
+        tmp.genes <- rownames(permu.file)
+        missing.genes <- geneID[!geneID %in% tmp.genes]
+      }
     }
-
-
-    # We have two cases to consider:
-    # 1) Permutation was not done before
-    # 2) It was done before
-    # 2.a) We have more probes to evaluate
-    # 2.b) We have more genes to evaluate
-    # 2.c) More genes and more probes
-    # 2.d) No more genes or probes
-    # For 1) just do for all genes and probes
-    # For 2 a-c do it for new probes, then do for new genes for all probes
-    # For 2.d just subset
-    permu <- NULL
-    tmp.probes <- probes.permu
-    tmp.genes <- geneID
-    missing.genes <- NULL
-    # Check if it isCase 2: Permutation already done
-    file <- file.path(permu.dir,"permu.rda")
-    if (!is.null(permu.dir)) {
-        if (file.exists(file)) {
-            temp.space <- new.env()
-            permu.file <- get(load(file, temp.space), temp.space)
-            rm(temp.space)
-            # Does the probe really exists ?
-            permu.file <- permu.file[,colnames(permu.file) %in% rownames(getMet(data))]
-            tmp.probes <- probes.permu[!probes.permu %in%  colnames(permu.file)]
-            if(!all(geneID %in% rownames(permu.file))) {
-                tmp.genes <- rownames(permu.file)
-                missing.genes <- geneID[!geneID %in% tmp.genes]
-            }
-        }
+  }
+  permu.meth <- assay(getMet(data)[tmp.probes,,drop=FALSE] )
+  exp.data <- assay(getExp(data))
+  
+  # Should Exps=exp.data[geneID,] to improve performance ?
+  # in that case For a second run we will need to look if gene is in the matrix and also probe
+  if(length(tmp.probes) > 0) {
+    exps <- exp.data[tmp.genes,,drop=FALSE]
+    permu <- alply(.data = tmp.probes, .margins = 1,
+                   .fun = function(x) {
+                     Stat.nonpara.permu(
+                       Probe = x,
+                       Meths = permu.meth[x,],
+                       Gene  = tmp.genes,
+                       methy = methy,
+                       correlation = correlation,
+                       unmethy = unmethy,
+                       Top   = percentage,
+                       Exps  = exps)},
+                   .progress = "time",
+                   .parallel = parallel,
+                   .paropts = list(.errorhandling = 'pass')
+    )
+    
+    permu <- sapply(permu,
+                    function(x,geneID){
+                      x <- x[match(geneID,x[,1]),2]
+                    },
+                    geneID=tmp.genes,simplify=FALSE)
+    
+    permu <- do.call(cbind,permu)
+    rownames(permu) <- tmp.genes
+    colnames(permu) <- tmp.probes
+  }
+  
+  if(!is.null(permu) & length(file) > 0) {
+    if(file.exists(file)){
+      # Put genes in the same order before rbind it
+      permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=FALSE]
+      permu <- cbind(permu, permu.file)
     }
-    permu.meth <- assay(getMet(data)[tmp.probes,,drop=FALSE] )
-    exp.data <- assay(getExp(data))
-
-    # Should Exps=exp.data[geneID,] to improve performance ?
-    # in that case For a second run we will need to look if gene is in the matrix and also probe
-    if(length(tmp.probes) > 0) {
-        exps <- exp.data[tmp.genes,,drop=FALSE]
-        permu <- alply(.data = tmp.probes, .margins = 1,
-                       .fun = function(x) {
+  } else if(is.null(permu) & length(file) > 0) {
+    permu <- permu.file
+  }
+  
+  # For the missing genes calculate for all probes
+  if(length(missing.genes) > 0) {
+    # Get all probes
+    permu.meth <- assay(getMet(data)[colnames(permu),] )
+    exps <- exp.data[missing.genes,,drop=FALSE]
+    permu.genes <- alply(.data = colnames(permu), .margins = 1,
+                         .fun = function(x) {
                            Stat.nonpara.permu(
-                               Probe = x,
-                               Meths = permu.meth[x,],
-                               Gene  = tmp.genes,
-                               methy = methy,
-                               unmethy = unmethy,
-                               Top   = percentage,
-                               Exps  = exps)},
-                       .progress = "time",
-                       .parallel = parallel,
-                       .paropts = list(.errorhandling = 'pass')
-        )
-
-        permu <- sapply(permu,
-                        function(x,geneID){
+                             Probe = x,
+                             Meths = permu.meth[x,],
+                             Gene  = missing.genes,
+                             Top   = percentage,
+                             methy = methy,
+                             unmethy = unmethy,
+                             Exps  = exps)},
+                         .progress = "time",
+                         .parallel = parallel,
+                         .paropts = list(.errorhandling = 'pass')
+    )
+    
+    permu.genes <- sapply(permu.genes,
+                          function(x,geneID){
                             x <- x[match(geneID,x[,1]),2]
-                        },
-                        geneID=tmp.genes,simplify=FALSE)
-
-        permu <- do.call(cbind,permu)
-        rownames(permu) <- tmp.genes
-        colnames(permu) <- tmp.probes
-    }
-
-    if(!is.null(permu) & length(file) > 0) {
-        if(file.exists(file)){
-            # Put genes in the same order before rbind it
-            permu.file <- permu.file[match(rownames(permu),rownames(permu.file)),,drop=FALSE]
-            permu <- cbind(permu, permu.file)
-        }
-    } else if(is.null(permu) & length(file) > 0) {
-        permu <- permu.file
-    }
-
-    # For the missing genes calculate for all probes
-    if(length(missing.genes) > 0) {
-        # Get all probes
-        permu.meth <- assay(getMet(data)[colnames(permu),] )
-        exps <- exp.data[missing.genes,,drop=FALSE]
-        permu.genes <- alply(.data = colnames(permu), .margins = 1,
-                             .fun = function(x) {
-                                 Stat.nonpara.permu(
-                                     Probe = x,
-                                     Meths = permu.meth[x,],
-                                     Gene  = missing.genes,
-                                     Top   = percentage,
-                                     methy = methy,
-                                     unmethy = unmethy,
-                                     Exps  = exps)},
-                             .progress = "time",
-                             .parallel = parallel,
-                             .paropts = list(.errorhandling = 'pass')
-        )
-
-        permu.genes <- sapply(permu.genes,
-                              function(x,geneID){
-                                  x <- x[match(geneID,x[,1]),2]
-                              },
-                              geneID=missing.genes,simplify=FALSE)
-
-        permu.genes <- do.call(cbind,permu.genes)
-        rownames(permu.genes) <- missing.genes
-        colnames(permu.genes) <- colnames(permu)
-        # Adding new genes
-        # Make sure probes are in the same order
-        permu.genes <- permu.genes[,match(colnames(permu.genes),colnames(permu))]
-        permu <- rbind(permu,permu.genes)
-    }
-
-    if(!is.null(permu.dir) & !is.null(permu)) {
-        dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
-        save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
-    }
-    permu <- permu[geneID,probes.permu, drop = FALSE]
-    return(permu)
+                          },
+                          geneID=missing.genes,simplify=FALSE)
+    
+    permu.genes <- do.call(cbind,permu.genes)
+    rownames(permu.genes) <- missing.genes
+    colnames(permu.genes) <- colnames(permu)
+    # Adding new genes
+    # Make sure probes are in the same order
+    permu.genes <- permu.genes[,match(colnames(permu.genes),colnames(permu))]
+    permu <- rbind(permu,permu.genes)
+  }
+  
+  if(!is.null(permu.dir) & !is.null(permu)) {
+    dir.create(permu.dir, showWarnings = FALSE, recursive = TRUE)
+    save(permu,file = file.path(permu.dir,"permu.rda"), compress = "xz")
+  }
+  permu <- permu[geneID,probes.permu, drop = FALSE]
+  return(permu)
 }
 
 #'promoterMeth
@@ -850,83 +855,83 @@ promoterMeth <- function(data,
                          downstream = 2000,
                          save = TRUE,
                          cores = 1){
-    # stop("For the moment, this function was depreciated.")
-    parallel <- FALSE
-    if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
-    }
-
-    message("Calculating associations of gene expression with DNA methylation at promoter regions")
+  # stop("For the moment, this function was depreciated.")
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
+  message("Calculating associations of gene expression with DNA methylation at promoter regions")
+  
+  # get +-2KB around TSS
+  TSS_2K <- promoters(rowRanges(getExp(data)), upstream = upstream, downstream = downstream)
+  
+  # get probes overlapping those promoter regions
+  probes <- rowRanges(getMet(data))
+  overlap <- findOverlaps(probes, TSS_2K)
+  
+  # make data frame with probe and gene
+  df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]),
+                   GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
+  
+  # no results ?
+  if(nrow(df)==0){
+    out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
+  } else {
+    df <- unique(df)
+    ProbeInTSS <- split(df$Probe,df$GeneID)
     
-    # get +-2KB around TSS
-    TSS_2K <- promoters(rowRanges(getExp(data)), upstream = upstream, downstream = downstream)
+    message("Calculating average DNA methylation for probes near the same TSS")
     
-    # get probes overlapping those promoter regions
-    probes <- rowRanges(getMet(data))
-    overlap <- findOverlaps(probes, TSS_2K)
+    # calculate average methylation of promoter (if promoter has several probes)
+    met <- assay(getMet(data))
+    Gene.promoter <- lapply(ProbeInTSS,
+                            function(x, METH){
+                              meth <- METH[x,]
+                              if(length(x)>1){
+                                meth <- colMeans(meth,na.rm=TRUE)
+                              }
+                              return(meth)
+                            },
+                            METH = met)
     
-    # make data frame with probe and gene
-    df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]),
-                     GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
+    Gene.promoter <- do.call(rbind, Gene.promoter)
     
-    # no results ?
-    if(nrow(df)==0){
-        out <- data.frame(GeneID=c(), Symbol=c(), Raw.p= c())
-    } else {
-        df <- unique(df)
-        ProbeInTSS <- split(df$Probe,df$GeneID)
-        
-        message("Calculating average DNA methylation for probes near the same TSS")
-        
-        # calculate average methylation of promoter (if promoter has several probes)
-        met <- assay(getMet(data))
-        Gene.promoter <- lapply(ProbeInTSS,
-                                function(x, METH){
-                                    meth <- METH[x,]
-                                    if(length(x)>1){
-                                        meth <- colMeans(meth,na.rm=TRUE)
-                                    }
-                                    return(meth)
-                                },
-                                METH = met)
-
-        Gene.promoter <- do.call(rbind, Gene.promoter)
-        
-        ## make fake NearGene
-        Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
-                           GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
-                           Distance = 1,
-                           Side = 1, stringsAsFactors=FALSE)
-        Fake <- split(Fake, Fake$GeneID)
-        exps <- assay(getExp(data))
-
-        message("Calculating Pp (probe - gene) for all nearby genes")
-        out <- adply(.data = rownames(Gene.promoter), .margins = 1,
-                     .fun = function(x) {
-                         Stat.nonpara(Probe = x,
-                                      Meths = Gene.promoter[x,,drop = FALSE],
-                                      NearGenes = as.data.frame(Fake),
-                                      Top = minSubgroupFrac/2,
-                                      Exps = exps)},
-                     .progress = "time",
-                     .parallel = parallel,
-                     .id = NULL,
-                     .paropts = list(.errorhandling = 'pass')
-        )
-
-        out <- out[,c("GeneID","Symbol","Raw.p")]
-        if(save) write.csv(out,
-                           file = "Genes_all_anticorrelated_promoter_methylation.csv",
-                           row.names = FALSE)
-        out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
-    }
-    if(nrow(out) == 0) message("No assossiation was found")
+    ## make fake NearGene
+    Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
+                       GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
+                       Distance = 1,
+                       Side = 1, stringsAsFactors=FALSE)
+    Fake <- split(Fake, Fake$GeneID)
+    exps <- assay(getExp(data))
+    
+    message("Calculating Pp (probe - gene) for all nearby genes")
+    out <- adply(.data = rownames(Gene.promoter), .margins = 1,
+                 .fun = function(x) {
+                   Stat.nonpara(Probe = x,
+                                Meths = Gene.promoter[x,,drop = FALSE],
+                                NearGenes = as.data.frame(Fake),
+                                Top = minSubgroupFrac/2,
+                                Exps = exps)},
+                 .progress = "time",
+                 .parallel = parallel,
+                 .id = NULL,
+                 .paropts = list(.errorhandling = 'pass')
+    )
+    
+    out <- out[,c("GeneID","Symbol","Raw.p")]
     if(save) write.csv(out,
-                       file = "Genes_significant_anticorrelated_promoter_methylation.csv",
+                       file = "Genes_all_anticorrelated_promoter_methylation.csv",
                        row.names = FALSE)
-    return(out)
+    out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
+  }
+  if(nrow(out) == 0) message("No assossiation was found")
+  if(save) write.csv(out,
+                     file = "Genes_significant_anticorrelated_promoter_methylation.csv",
+                     row.names = FALSE)
+  return(out)
 }
 #' get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.
 #' @description
@@ -1038,133 +1043,150 @@ get.enriched.motif <- function(data,
                                label = NULL,
                                save = TRUE,
                                plot.title = ""){
-    if(missing(probes.motif)){
-        if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
-        file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
-        message("Loading object: ",file)
-        if(file == "Probes.motif.hg38.450K") probes.motif <- getdata("Probes.motif.hg38.450K")
-        if(file == "Probes.motif.hg19.450K") probes.motif <- getdata("Probes.motif.hg19.450K")
-        if(file == "Probes.motif.hg38.EPIC") probes.motif <- getdata("Probes.motif.hg38.EPIC")
-        if(file == "Probes.motif.hg19.EPIC") probes.motif <- getdata("Probes.motif.hg19.EPIC")
+  if(missing(probes.motif)){
+    if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
+    file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
+    message("Loading object: ",file)
+    if(file == "Probes.motif.hg38.450K") probes.motif <- getdata("Probes.motif.hg38.450K")
+    if(file == "Probes.motif.hg19.450K") probes.motif <- getdata("Probes.motif.hg19.450K")
+    if(file == "Probes.motif.hg38.EPIC") probes.motif <- getdata("Probes.motif.hg38.EPIC")
+    if(file == "Probes.motif.hg19.EPIC") probes.motif <- getdata("Probes.motif.hg19.EPIC")
+  }
+  all.probes.TF <- probes.motif
+  ## here need to be add motif search part.
+  if(missing(probes)) stop("probes option should be specified.")
+  if(missing(background.probes)){
+    if(!missing(data)) {
+      background.probes <- as.character(names(getMet(data)))
+    } else if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
+      background.probes <- get(load(sprintf("%s/probeInfo_feature_distal.rda",dir.out)))
+      background.probes <- as.character(names(background.probes))
+    } else {
+      message("backaground.probes argument is missing. We will use all probes as background, ",
+              "but for enhancer study, it is better to use probes within distal enhancer probes as background.probes.")
+      background.probes <- rownames(all.probes.TF)
     }
-    all.probes.TF <- probes.motif
-    ## here need to be add motif search part.
-    if(missing(probes)) stop("probes option should be specified.")
-    if(missing(background.probes)){
-        if(!missing(data)) {
-            background.probes <- as.character(names(getMet(data)))
-        } else if(file.exists(sprintf("%s/probeInfo_feature_distal.rda",dir.out))){
-            background.probes <- get(load(sprintf("%s/probeInfo_feature_distal.rda",dir.out)))
-            background.probes <- as.character(names(background.probes))
-        } else {
-            message("backaground.probes argument is missing. We will use all probes as background, ",
-                    "but for enhancer study, it is better to use probes within distal enhancer probes as background.probes.")
-            background.probes <- rownames(all.probes.TF)
-        }
+  }
+  probes <- unique(probes) # A probe should not be considered more than one time
+  if(length(probes) < min.incidence) stop("Number of unique prober is smaller than the min.incidence required")
+  background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
+  bg.probes.TF <- all.probes.TF[background.probes,]
+  bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
+  
+  ## load probes for enriched motif ----------------------------------------------
+  probes.TF <- all.probes.TF[rownames(all.probes.TF) %in% probes,]
+  probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
+  # a is the number of probes within the selected probe set that contain one or more motif occurrences;
+  # b is the number of probes within the selected probe set that do not contain a motif occurrence;
+  # c and d are the same counts within the entire enhancer probe set (background)
+  # lower boundary of 95% conf idence interval = exp (ln OR - SD)
+  a <- Matrix::colSums(probes.TF)
+  b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
+  c <- Matrix::colSums(bg.probes.TF )
+  d <- nrow(bg.probes.TF) - Matrix::colSums(bg.probes.TF)
+  fisher <- plyr::adply(seq_len(length(a)),.margins = 1, .fun = function(i)  {
+    x <- fisher.test(matrix(c(a[i],b[i],c[i],d[i]),nrow = 2,ncol = 2))
+    ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
+    colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
+    ret
+  },.id = NULL,
+  .progress = "time")
+  rownames(fisher) <- names(a)
+  Summary <- data.frame(motif  =  names(a),
+                        NumOfProbes = probes.TF.num,
+                        PercentageOfProbes = probes.TF.num/length(probes),
+                        fisher,
+                        FDR = p.adjust(fisher$p.value,method = "BH"),
+                        stringsAsFactors = FALSE)
+  hocomoco <- getHocomocoTable()
+  family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
+  Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
+  Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
+  
+  if(save) write_csv(Summary,
+                     path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
+                                    dir.out,ifelse(is.null(label),"",label)))
+  
+  ## enriched motif and probes
+  en.motifs <- as.character(Summary[Summary$lowerOR > lower.OR & Summary$NumOfProbes > min.incidence & Summary$FDR <= pvalue,"motif"])
+  
+  # Subset by quality
+  print.header("Filtering motifs based on quality", "subsection")
+  message("Number of enriched motifs with quality:")
+  message("-----------")
+  for(q in c("A","B","C","D","S"))  message(paste0(" => ",q,": ", length(grep(paste0("\\.",q),en.motifs))))
+  message("-----------")
+  
+  en.motifs <- grep(paste0("\\.[A-",toupper(min.motif.quality),"]"), en.motifs, value = T)
+  message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
+  enriched.motif <- alply(en.motifs,
+                          function(x, probes.TF) {
+                            rownames(probes.TF[probes.TF[,x] == 1,x,drop = FALSE])
+                          },
+                          probes.TF = probes.TF,.margins = 1, .dims = FALSE)
+  attributes(enriched.motif) <- NULL
+  names(enriched.motif) <- en.motifs
+  
+  if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,ifelse(is.null(label),"",label)))
+  
+  ## make plot
+  if(length(enriched.motif) > 1){
+    suppressWarnings({
+      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
+                                 significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR),
+                                 dir.out = dir.out,
+                                 label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
+                                 save=TRUE)
+      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
+                                 significant = list(lowerOR = lower.OR),
+                                 dir.out = dir.out,
+                                 summary = TRUE,
+                                 label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
+                                 title = plot.title,
+                                 save = TRUE)
+    })
+  }
+  ## add information to siginificant pairs
+  sig.pair.file <- sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label))
+  if(file.exists(sig.pair.file)){
+    print.header("Adding enriched motifs to significant pairs file")
+    sig.Pairs <- read.csv(sig.pair.file, stringsAsFactors = FALSE)
+    sig.Pairs <- sig.Pairs[sig.Pairs$Probe %in% rownames(probes.TF),]
+    if(all(unique(sig.Pairs$Probe) %in% rownames(probes.TF))){
+      motif.Info <- sapply(sig.Pairs$Probe,
+                           function(x, probes.TF,en.motifs){
+                             TFs <- names(probes.TF[x,probes.TF[x,]==1])
+                             non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
+                             en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
+                             out <- data.frame(non_enriched_motifs=non.en.motif,
+                                               enriched_motifs=en.motif,
+                                               stringsAsFactors = FALSE)
+                             return(out)
+                           },
+                           probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
+      motif.Info <- do.call(rbind,motif.Info)
+      sig.Pairs <- cbind(sig.Pairs, motif.Info)
+      
+      if(!missing(data)){
+        message("Adding coordinates for probes and genes from the provided data")
+        met.coord <- tibble::as_tibble(ranges(getMet(data)))
+        met.coord$width <- NULL
+        genes.coord <- tibble::as_tibble(ranges(getExp(data)))
+        genes.coord$width <- NULL
+        colnames(met.coord) <- paste0("probe_",colnames(met.coord))
+        colnames(met.coord)[3] <- "Probe"
+        colnames(genes.coord) <- paste0("gene_",colnames(met.coord))
+        colnames(genes.coord)[3] <- "GeneID"
+        sig.Pairs <- left_join(sig.Pairs,genes.coord) %>% left_join(met.coord)
+      }
+      
+      out.file <- sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, ifelse(is.null(label),"",label))
+      message("Saving file: ", out.file)
+      write_csv(sig.Pairs, path = out.file)
     }
-    probes <- unique(probes) # A probe should not be considered more than one time
-    if(length(probes) < min.incidence) stop("Number of unique prober is smaller than the min.incidence required")
-    background.probes <- background.probes[background.probes %in% rownames(all.probes.TF)]
-    bg.probes.TF <- all.probes.TF[background.probes,]
-    bg.Probes.TF.percent <- Matrix::colMeans(bg.probes.TF) # This is equal to: c/(c+d)
-
-    ## load probes for enriched motif ----------------------------------------------
-    probes.TF <- all.probes.TF[rownames(all.probes.TF) %in% probes,]
-    probes.TF.num <- Matrix::colSums(probes.TF, na.rm=TRUE)
-    # a is the number of probes within the selected probe set that contain one or more motif occurrences;
-    # b is the number of probes within the selected probe set that do not contain a motif occurrence;
-    # c and d are the same counts within the entire enhancer probe set (background)
-    # lower boundary of 95% conf idence interval = exp (ln OR - SD)
-    a <- Matrix::colSums(probes.TF)
-    b <- nrow(probes.TF) - Matrix::colSums(probes.TF)
-    c <- Matrix::colSums(bg.probes.TF )
-    d <- nrow(bg.probes.TF) - Matrix::colSums(bg.probes.TF)
-    fisher <- plyr::adply(seq_len(length(a)),.margins = 1, .fun = function(i)  {
-        x <- fisher.test(matrix(c(a[i],b[i],c[i],d[i]),nrow = 2,ncol = 2))
-        ret <- data.frame(x$conf.int[1],x$conf.int[2],x$estimate,x$p.value)
-        colnames(ret) <- c("lowerOR","upperOR","OR","p.value")
-        ret
-    },.id = NULL,
-    .progress = "time")
-    rownames(fisher) <- names(a)
-    Summary <- data.frame(motif  =  names(a),
-                          NumOfProbes = probes.TF.num,
-                          PercentageOfProbes = probes.TF.num/length(probes),
-                          fisher,
-                          FDR = p.adjust(fisher$p.value,method = "BH"),
-                          stringsAsFactors = FALSE)
-    hocomoco <- getHocomocoTable()
-    family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
-    Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
-    Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
-
-    if(save) write_csv(Summary,
-                       path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                                      dir.out,ifelse(is.null(label),"",label)))
-
-    ## enriched motif and probes
-    en.motifs <- as.character(Summary[Summary$lowerOR > lower.OR & Summary$NumOfProbes > min.incidence & Summary$FDR <= pvalue,"motif"])
-
-    # Subset by quality
-    print.header("Filtering motifs based on quality", "subsection")
-    message("Number of enriched motifs with quality:")
-    message("-----------")
-    for(q in c("A","B","C","D","S"))  message(paste0(" => ",q,": ", length(grep(paste0("\\.",q),en.motifs))))
-    message("-----------")
-
-    en.motifs <- grep(paste0("\\.[A-",toupper(min.motif.quality),"]"), en.motifs, value = T)
-    message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
-    enriched.motif <- alply(en.motifs,
-                            function(x, probes.TF) {
-                                rownames(probes.TF[probes.TF[,x] == 1,x,drop = FALSE])
-                            },
-                            probes.TF = probes.TF,.margins = 1, .dims = FALSE)
-    attributes(enriched.motif) <- NULL
-    names(enriched.motif) <- en.motifs
-
-    if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,ifelse(is.null(label),"",label)))
-
-    ## make plot
-    if(length(enriched.motif) > 1){
-        suppressWarnings({
-            P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
-                                       significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR),
-                                       dir.out = dir.out,
-                                       label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
-                                       save=TRUE)
-            P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
-                                       significant = list(lowerOR = lower.OR),
-                                       dir.out = dir.out,
-                                       summary = TRUE,
-                                       label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
-                                       title = plot.title,
-                                       save = TRUE)
-        })
-    }
-    ## add information to siginificant pairs
-    if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))){
-        sig.Pairs <- read.csv(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)),
-                              stringsAsFactors=FALSE)
-        if(all(sig.Pairs$Probe %in% rownames(probes.TF))){
-            motif.Info <- sapply(sig.Pairs$Probe,
-                                 function(x, probes.TF,en.motifs){
-                                     TFs <- names(probes.TF[x,probes.TF[x,]==1])
-                                     non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
-                                     en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                                     out <- data.frame(non_enriched_motifs=non.en.motif,
-                                                       enriched_motifs=en.motif,
-                                                       stringsAsFactors = FALSE)
-                                     return(out)
-                                 },
-                                 probes.TF=probes.TF, en.motifs=en.motifs,simplify=FALSE)
-            motif.Info <- do.call(rbind,motif.Info)
-            sig.Pairs <- cbind(sig.Pairs, motif.Info)
-            write_csv(sig.Pairs,
-                      path=sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, ifelse(is.null(label),"",label)))
-        }
-    }
-
-    return(enriched.motif)
+  }
+  
+  return(enriched.motif)
 }
 
 #' get.TFs to identify regulatory TFs.
@@ -1299,193 +1321,193 @@ get.TFs <- function(data,
                     save.plots = FALSE,
                     cores = 1,
                     save = TRUE){
-    if(missing(data)){
-        stop("data argument is empty")
-    }
-    if(missing(enriched.motif)){
-        stop("enriched.motif is empty.")
-    }else if(is.character(enriched.motif)){
-        enriched.motif <- get(load(enriched.motif)) # The data is in the one and only variable
-    } else if(!is.list(enriched.motif)){
-        stop("enriched.motif option should be a list object.")
-    }
-    if(length(enriched.motif) == 0) {
-        message("No enriched motifs were found in the last step")
-        return(NULL)
-    }
-
-    if(missing(group.col)) stop("Please set group.col argument")
-    if(missing(group1)) stop("Please set group1 argument")
-    if(missing(group2)) stop("Please set group2 argument")
-    data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
-
-    # Supervised groups
-    unmethylated <- methylated <- NULL
-    if(mode == "supervised"){
-        if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
-        if(diff.dir == "hypo"){
-            message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
-            unmethylated <-  which(colData(data)[,group.col]  == group1)
-            methylated <-  which(colData(data)[,group.col]  == group2)
-        } else {
-            message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
-            unmethylated <-  which(colData(data)[,group.col]  == group2)
-            methylated <-  which(colData(data)[,group.col]  == group1)
-        }
+  if(missing(data)){
+    stop("data argument is empty")
+  }
+  if(missing(enriched.motif)){
+    stop("enriched.motif is empty.")
+  }else if(is.character(enriched.motif)){
+    enriched.motif <- get(load(enriched.motif)) # The data is in the one and only variable
+  } else if(!is.list(enriched.motif)){
+    stop("enriched.motif option should be a list object.")
+  }
+  if(length(enriched.motif) == 0) {
+    message("No enriched motifs were found in the last step")
+    return(NULL)
+  }
+  
+  if(missing(group.col)) stop("Please set group.col argument")
+  if(missing(group1)) stop("Please set group1 argument")
+  if(missing(group2)) stop("Please set group2 argument")
+  data <- data[,colData(data)[,group.col] %in% c(group1, group2)]
+  
+  # Supervised groups
+  unmethylated <- methylated <- NULL
+  if(mode == "supervised"){
+    if(is.null(diff.dir)) stop("For supervised mode please set diff.dir argument (same from the get.diff.meth)")
+    if(diff.dir == "hypo"){
+      message("Using pre-defined groups. U (unmethylated): ",group1,", M (methylated): ", group2)
+      unmethylated <-  which(colData(data)[,group.col]  == group1)
+      methylated <-  which(colData(data)[,group.col]  == group2)
     } else {
-        message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+      message("Using pre-defined groups. U (unmethylated): ",group2,", M (methylated): ", group1)
+      unmethylated <-  which(colData(data)[,group.col]  == group2)
+      methylated <-  which(colData(data)[,group.col]  == group1)
     }
-
-
-    if(missing(TFs)){
-        # Here we will make some assumptions:
-        # TFs has a column Symbol
-        # data has the field external_gene_name which should be created by
-        # createMultAssayExperiment function
-        # external_gene_name is the default for hg38 in biomart
-        # external_gene_id is the default for hg19 in biomart
-        TFs <- getTF()
-    } else if(is.character(TFs)){
-        TFs <- read.csv(TFs, stringsAsFactors=FALSE)
-    }
-
-    if(missing(motif.relevant.TFs)){
-        message("Accessing TF families from TFClass database to indentify known potential TF")
-        TF.family <-  createMotifRelevantTfs()
-        TF.subfamily <-  createMotifRelevantTfs("subfamily")
-    } else if(is.character(motif.relevant.TFs)){
-        TF.family <- get(load(motif.relevant.TFs)) # The data is in the one and only variable
-        TF.subfamily <-  TF.family
-    }
-
-    parallel <- FALSE
-    if (cores > 1){
-        if (cores > detectCores()) cores <- detectCores()
-        registerDoParallel(cores)
-        parallel = TRUE
-    }
-
-    # This will calculate the average methylation at all motif-adjacent probes
-    message("Calculating the average methylation at all motif-adjacent probes ")
-
-    motif.meth <- ldply(enriched.motif,
-                        function(x,meth){
-                            if(length(x)<2) {
-                                return(meth[x,])
-                            } else {
-                                return(colMeans(meth[x,],na.rm = TRUE))
-                            }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
-                        .progress = "time",
-                        .parallel = parallel,
-                        .id = "rownames",
-                        .paropts=list(.errorhandling='pass')
-    )
-    rownames(motif.meth) <- motif.meth$rownames
-    motif.meth$rownames <- NULL
-
-    # motif.meth matrix
-    # - rows: average methylation at all motif-adjacent probes (rownames will be the motif)
-    # - cols: each patient
-
-    # rownames are ensemble gene id
-    TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
-    gene <- TFs$ensembl_gene_id
-    gene.name <- TFs$external_gene_name # For plotting purposes
-
-    # Definition:
-    # M group: 20% of samples with the highest average methylation at all motif-adjacent probes
-    # U group: 20% of samples with the lowest
-
-    # The Mann-Whitney U test was used to test
-    # the null hypothesis that overall gene expression in group M was greater or equal
-    # than that in group U.
-    message("Performing Mann-Whitney U test")
-
-    # For each motif (x) split the Meths object into U and M and evaluate the expression
-    # of all TF Exps (obj)
-    exps <- assay(getExp(data))[gene,]
-    TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
-                         .fun = function(x) {
-                             Stat.nonpara.permu(
-                                 Probe = x,
-                                 Meths = motif.meth[x,],
-                                 Gene  = gene,
-                                 unmethy = unmethylated,
-                                 methy = methylated,
-                                 Top   = minSubgroupFrac/2,
-                                 Exps  = exps)},
-                         .progress = "time",
-                         .parallel = parallel,
-                         .paropts = list(.errorhandling='pass')
-    )
-    # We are going to make a multiple hypothesis correction
-    TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
-    TF.meth.cor <- do.call(cbind,TF.meth.cor)
-    ## check row and col names
-    rownames(TF.meth.cor) <- gene.name
-    colnames(TF.meth.cor) <- names(enriched.motif)
-    TF.meth.cor <- na.omit(TF.meth.cor)
-
-    # TF.meth.cor matrix with corrected p-value (Pr)
-    # - rows: TFs
-    # - cols: motifs
-    # lower corrected p-value means that TF expression in M group is lower than in
-    # U group. That means, the Unmethylated with more TF expression
-    # have a higher correlation.
-
-    message("Finding potential TF and known potential TF")
-
-    # For each motif evaluate TF
-    cor.summary <- adply(colnames(TF.meth.cor),
-                         function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){
-                             cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
-                             top <- cor[1:floor(0.05 * nrow(TF.meth.cor))]
-                             if (any(top %in% motif.relavent.TFs.family[[x]])) {
-                                 potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
-                             } else {
-                                 potential.TF.family <- NA
-                             }
-                             if (any(top %in% motif.relavent.TFs.subfamily[[x]])) {
-                                 potential.TF.subfamily <- top[top %in% motif.relavent.TFs.subfamily[[x]]]
-                             } else {
-                                 potential.TF.subfamily <- NA
-                             }
-                             out <- data.frame("motif" = x,
-                                               "top.potential.TF.family" = ifelse(!is.na(potential.TF.family[1]),potential.TF.family[1],NA),
-                                               "top.potential.TF.subfamily" = ifelse(!is.na(potential.TF.subfamily[1]),potential.TF.subfamily[1],NA),
-                                               "potential.TF.family" = ifelse(!any(sapply(potential.TF.family,is.na)),paste(potential.TF.family, collapse = ";"),NA),
-                                               "potential.TF.subfamily" = ifelse(!any(sapply(potential.TF.subfamily,is.na)),paste(potential.TF.subfamily, collapse = ";"),NA),
-                                               "top_5percent_TFs" = paste(top,collapse = ";"),
-                                               stringsAsFactors = FALSE)
-                             return(out)
-                         },
-                         TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily,
-                         .progress = "time",
-                         .parallel = parallel,
-                         .margins = 1,
-                         .id = NULL,
-                         .paropts=list(.errorhandling='pass'))
-    rownames(cor.summary) <- cor.summary$motif
-
-    if(save){
-        save(TF.meth.cor,
-             file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label)))
-        write_csv(cor.summary,
-                  path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                               dir.out=dir.out, label=ifelse(is.null(label),"",label)))
-    }
-
-    if(save.plots){
-        print.header("Creating plots", "subsection")
-        message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
-        dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
-        TF.rank.plot(motif.pvalue  = TF.meth.cor,
-                     motif         = colnames(TF.meth.cor),
-                     dir.out       = sprintf("%s/TFrankPlot",dir.out),
-                     cores        = cores,
-                     save         = TRUE)
-    }
-    return(cor.summary)
+  } else {
+    message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
+  }
+  
+  
+  if(missing(TFs)){
+    # Here we will make some assumptions:
+    # TFs has a column Symbol
+    # data has the field external_gene_name which should be created by
+    # createMultAssayExperiment function
+    # external_gene_name is the default for hg38 in biomart
+    # external_gene_id is the default for hg19 in biomart
+    TFs <- getTF()
+  } else if(is.character(TFs)){
+    TFs <- read.csv(TFs, stringsAsFactors=FALSE)
+  }
+  
+  if(missing(motif.relevant.TFs)){
+    message("Accessing TF families from TFClass database to indentify known potential TF")
+    TF.family <-  createMotifRelevantTfs()
+    TF.subfamily <-  createMotifRelevantTfs("subfamily")
+  } else if(is.character(motif.relevant.TFs)){
+    TF.family <- get(load(motif.relevant.TFs)) # The data is in the one and only variable
+    TF.subfamily <-  TF.family
+  }
+  
+  parallel <- FALSE
+  if (cores > 1){
+    if (cores > detectCores()) cores <- detectCores()
+    registerDoParallel(cores)
+    parallel = TRUE
+  }
+  
+  # This will calculate the average methylation at all motif-adjacent probes
+  message("Calculating the average methylation at all motif-adjacent probes ")
+  
+  motif.meth <- ldply(enriched.motif,
+                      function(x,meth){
+                        if(length(x)<2) {
+                          return(meth[x,])
+                        } else {
+                          return(colMeans(meth[x,],na.rm = TRUE))
+                        }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
+                      .progress = "time",
+                      .parallel = parallel,
+                      .id = "rownames",
+                      .paropts=list(.errorhandling='pass')
+  )
+  rownames(motif.meth) <- motif.meth$rownames
+  motif.meth$rownames <- NULL
+  
+  # motif.meth matrix
+  # - rows: average methylation at all motif-adjacent probes (rownames will be the motif)
+  # - cols: each patient
+  
+  # rownames are ensemble gene id
+  TFs <- TFs[TFs$ensembl_gene_id %in% rownames(getExp(data)),]
+  gene <- TFs$ensembl_gene_id
+  gene.name <- TFs$external_gene_name # For plotting purposes
+  
+  # Definition:
+  # M group: 20% of samples with the highest average methylation at all motif-adjacent probes
+  # U group: 20% of samples with the lowest
+  
+  # The Mann-Whitney U test was used to test
+  # the null hypothesis that overall gene expression in group M was greater or equal
+  # than that in group U.
+  message("Performing Mann-Whitney U test")
+  
+  # For each motif (x) split the Meths object into U and M and evaluate the expression
+  # of all TF Exps (obj)
+  exps <- assay(getExp(data))[gene,]
+  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
+                       .fun = function(x) {
+                         Stat.nonpara.permu(
+                           Probe = x,
+                           Meths = motif.meth[x,],
+                           Gene  = gene,
+                           unmethy = unmethylated,
+                           methy = methylated,
+                           Top   = minSubgroupFrac/2,
+                           Exps  = exps)},
+                       .progress = "time",
+                       .parallel = parallel,
+                       .paropts = list(.errorhandling='pass')
+  )
+  # We are going to make a multiple hypothesis correction
+  TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
+  TF.meth.cor <- do.call(cbind,TF.meth.cor)
+  ## check row and col names
+  rownames(TF.meth.cor) <- gene.name
+  colnames(TF.meth.cor) <- names(enriched.motif)
+  TF.meth.cor <- na.omit(TF.meth.cor)
+  
+  # TF.meth.cor matrix with corrected p-value (Pr)
+  # - rows: TFs
+  # - cols: motifs
+  # lower corrected p-value means that TF expression in M group is lower than in
+  # U group. That means, the Unmethylated with more TF expression
+  # have a higher correlation.
+  
+  message("Finding potential TF and known potential TF")
+  
+  # For each motif evaluate TF
+  cor.summary <- adply(colnames(TF.meth.cor),
+                       function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){
+                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
+                         top <- cor[1:floor(0.05 * nrow(TF.meth.cor))]
+                         if (any(top %in% motif.relavent.TFs.family[[x]])) {
+                           potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
+                         } else {
+                           potential.TF.family <- NA
+                         }
+                         if (any(top %in% motif.relavent.TFs.subfamily[[x]])) {
+                           potential.TF.subfamily <- top[top %in% motif.relavent.TFs.subfamily[[x]]]
+                         } else {
+                           potential.TF.subfamily <- NA
+                         }
+                         out <- data.frame("motif" = x,
+                                           "top.potential.TF.family" = ifelse(!is.na(potential.TF.family[1]),potential.TF.family[1],NA),
+                                           "top.potential.TF.subfamily" = ifelse(!is.na(potential.TF.subfamily[1]),potential.TF.subfamily[1],NA),
+                                           "potential.TF.family" = ifelse(!any(sapply(potential.TF.family,is.na)),paste(potential.TF.family, collapse = ";"),NA),
+                                           "potential.TF.subfamily" = ifelse(!any(sapply(potential.TF.subfamily,is.na)),paste(potential.TF.subfamily, collapse = ";"),NA),
+                                           "top_5percent_TFs" = paste(top,collapse = ";"),
+                                           stringsAsFactors = FALSE)
+                         return(out)
+                       },
+                       TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily,
+                       .progress = "time",
+                       .parallel = parallel,
+                       .margins = 1,
+                       .id = NULL,
+                       .paropts=list(.errorhandling='pass'))
+  rownames(cor.summary) <- cor.summary$motif
+  
+  if(save){
+    save(TF.meth.cor,
+         file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+    write_csv(cor.summary,
+              path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+  }
+  
+  if(save.plots){
+    print.header("Creating plots", "subsection")
+    message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
+    dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
+    TF.rank.plot(motif.pvalue  = TF.meth.cor,
+                 motif         = colnames(TF.meth.cor),
+                 dir.out       = sprintf("%s/TFrankPlot",dir.out),
+                 cores        = cores,
+                 save         = TRUE)
+  }
+  return(cor.summary)
 }
 
 #' @title Get TF target genes
@@ -1528,163 +1550,163 @@ getTFtargets <- function(pairs,
                          cores = 1,
                          label = NULL)
 {
-    if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
-    if(is.character(enriched.motif)) load(enriched.motif)
-    if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
-
-    # 1 - For each enriched motif we will select the known TF that binds
-    #     to the region (using TF.table input)
-    # 2 - For each enriched region get the probes (using motif.probes input)
-    # 3 - the associates target genes (using the pairs input)
-    df.all <- NULL
-    for(m in TF.result$motif){
-        targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
-        if(classification == "family"){
-            x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
-        } else {
-            x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.subfamily
-        }
-
-        if(is.na(x)) next
-
-        x <- strsplit(as.character(x),";") %>% unlist
-        df <- expand.grid(x,targets)
-        colnames(df) <- c("TF","Target")
-        df.all <- rbind(df.all,df)
+  if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
+  if(is.character(enriched.motif)) load(enriched.motif)
+  if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
+  
+  # 1 - For each enriched motif we will select the known TF that binds
+  #     to the region (using TF.table input)
+  # 2 - For each enriched region get the probes (using motif.probes input)
+  # 3 - the associates target genes (using the pairs input)
+  df.all <- NULL
+  for(m in TF.result$motif){
+    targets <- as.character(pairs[pairs$Probe %in% enriched.motif[[m]],]$Symbol)
+    if(classification == "family"){
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.family
+    } else {
+      x <- TF.result[TF.result$motif == m,,drop = FALSE]$potential.TF.subfamily
     }
-    if(is.null(df.all)) return(NULL)
-    df.all <- df.all[!duplicated(df.all),,drop = FALSE]
-    df.all <- df.all[order(df.all$TF),,drop = FALSE]
-
-    if(save) readr::write_csv(df.all,
-                              path=sprintf("%s/getTFtargets.%s.%s.csv",
+    
+    if(is.na(x)) next
+    
+    x <- strsplit(as.character(x),";") %>% unlist
+    df <- expand.grid(x,targets)
+    colnames(df) <- c("TF","Target")
+    df.all <- rbind(df.all,df)
+  }
+  if(is.null(df.all)) return(NULL)
+  df.all <- df.all[!duplicated(df.all),,drop = FALSE]
+  df.all <- df.all[order(df.all$TF),,drop = FALSE]
+  
+  if(save) readr::write_csv(df.all,
+                            path=sprintf("%s/getTFtargets.%s.%s.csv",
+                                         dir.out=dir.out,
+                                         label=ifelse(is.null(label),"",label),
+                                         classification = classification
+                            )
+  )
+  
+  if(!missing(dmc.analysis)) {
+    if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
+    colnames(dmc.analysis) <- paste0("DMC_analysis_",colnames(dmc.analysis))
+    colnames(dmc.analysis)[1] <- "Probe"
+    pairs <- merge(pairs,dmc.analysis,by = "Probe")
+  }
+  if(!missing(mae)){
+    if(is.character(mae)) mae <- get(load(mae))
+    # add genomic info to pairs
+    metadata <- as.data.frame(rowRanges(getMet(mae)[unique(pairs$Probe),]))
+    colnames(metadata) <- paste0("probe_", colnames(metadata))
+    metadata$Probe <- rownames(metadata)
+    pairs <- merge(pairs, metadata, by = "Probe")
+    metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
+    pairs <- merge(pairs, metadata, by.x = "GeneID", by.y = "ensembl_gene_id")
+    
+    pairs$TF <- NA
+    
+    # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
+    if(classification == "family"){
+      names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
+    } else {
+      names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.subfamily
+    }
+    
+    # remove enriched motifs without any MR TFs
+    enriched.motif <- enriched.motif[!is.na(names(enriched.motif))]
+    
+    
+    parallel <- FALSE
+    if (cores > 1){
+      if (cores > detectCores()) cores <- detectCores()
+      registerDoParallel(cores)
+      parallel = TRUE
+    }
+    
+    # For each paired probe get the enriched motifs in which it appears
+    aux <- plyr::adply(unique(pairs$Probe),1, function(x) {
+      y <- paste(unique(names(enriched.motif)[grep(x,enriched.motif)]),collapse = ";")
+      y <- paste(
+        unique(na.omit(unlist(
+          stringr::str_split(y,";")
+        ))),
+        collapse = ";")
+      return(y)
+    },.progress = "time",
+    .parallel = parallel,
+    .paropts = list(.errorhandling = 'pass'))
+    aux$X1 <- unique(pairs$Probe)
+    
+    # For each enriched motif the the potencial TF family members
+    pairs[,"TF"] <- aux[match(pairs$Probe,aux$X1),]$V1
+    if(save) readr::write_csv(pairs,
+                              path=sprintf("%s/getTFtargets_genomic_coordinates.%s.%s.csv",
                                            dir.out=dir.out,
                                            label=ifelse(is.null(label),"",label),
                                            classification = classification
                               )
     )
-
-    if(!missing(dmc.analysis)) {
-        if(is.character(dmc.analysis)) dmc.analysis <- readr::read_csv(dmc.analysis, col_types = readr::cols())
-        colnames(dmc.analysis) <- paste0("DMC_analysis_",colnames(dmc.analysis))
-        colnames(dmc.analysis)[1] <- "Probe"
-        pairs <- merge(pairs,dmc.analysis,by = "Probe")
-    }
-    if(!missing(mae)){
-        if(is.character(mae)) mae <- get(load(mae))
-        # add genomic info to pairs
-        metadata <- as.data.frame(rowRanges(getMet(mae)[unique(pairs$Probe),]))
-        colnames(metadata) <- paste0("probe_", colnames(metadata))
-        metadata$Probe <- rownames(metadata)
-        pairs <- merge(pairs, metadata, by = "Probe")
-        metadata <- as.data.frame(rowRanges(getExp(mae)[unique(pairs$GeneID),]))
-        pairs <- merge(pairs, metadata, by.x = "GeneID", by.y = "ensembl_gene_id")
-
-        pairs$TF <- NA
-
-        # to make it faster we will change the name of the enriched motifs to the mr TF binding to it
-        if(classification == "family"){
-            names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.family
-        } else {
-            names(enriched.motif) <- TF[which(TF$motif ==  names(enriched.motif)),]$potential.TF.subfamily
-        }
-
-        # remove enriched motifs without any MR TFs
-        enriched.motif <- enriched.motif[!is.na(names(enriched.motif))]
-
-
-        parallel <- FALSE
-        if (cores > 1){
-            if (cores > detectCores()) cores <- detectCores()
-            registerDoParallel(cores)
-            parallel = TRUE
-        }
-
-        # For each paired probe get the enriched motifs in which it appears
-        aux <- plyr::adply(unique(pairs$Probe),1, function(x) {
-            y <- paste(unique(names(enriched.motif)[grep(x,enriched.motif)]),collapse = ";")
-            y <- paste(
-                unique(na.omit(unlist(
-                    stringr::str_split(y,";")
-                ))),
-                collapse = ";")
-            return(y)
-        },.progress = "time",
-        .parallel = parallel,
-        .paropts = list(.errorhandling = 'pass'))
-        aux$X1 <- unique(pairs$Probe)
-
-        # For each enriched motif the the potencial TF family members
-        pairs[,"TF"] <- aux[match(pairs$Probe,aux$X1),]$V1
-        if(save) readr::write_csv(pairs,
-                                  path=sprintf("%s/getTFtargets_genomic_coordinates.%s.%s.csv",
-                                               dir.out=dir.out,
-                                               label=ifelse(is.null(label),"",label),
-                                               classification = classification
-                                  )
-        )
-    }
-    return(df.all)
+  }
+  return(df.all)
 }
 
 maphg38tohg19 <- function(file,
                           TF,
                           dir.out = "./",
                           label = NULL){
-
-    if (!requireNamespace("rtracklayer", quietly = TRUE)) {
-        stop("rtracklayer package is needed for this function to work. Please install it.",
-             call. = FALSE)
+  
+  if (!requireNamespace("rtracklayer", quietly = TRUE)) {
+    stop("rtracklayer package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
+  if (!requireNamespace("R.utils", quietly = TRUE)) {
+    stop("R.utils package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+  
+  chain.file <- "http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver/hg38ToHg19.over.chain.gz"
+  if(!file.exists(gsub(".gz","",basename(chain.file)))){
+    downloader::download(chain.file,basename(chain.file))
+    R.utils::gunzip(basename(chain.file))
+  }
+  ch <- rtracklayer::import.chain(gsub(".gz","",basename(chain.file)))
+  
+  ret <- readr::read_csv(file)
+  if(!missing(TF)){
+    ret <- ret[grep(TF,ret$TF),]
+    if(nrow(ret) == 0) {
+      message("No targets for that TF")
+      return(NULL)
     }
-
-    if (!requireNamespace("R.utils", quietly = TRUE)) {
-        stop("R.utils package is needed for this function to work. Please install it.",
-             call. = FALSE)
-    }
-
-    chain.file <- "http://hgdownload.cse.ucsc.edu/gbdb/hg38/liftOver/hg38ToHg19.over.chain.gz"
-    if(!file.exists(gsub(".gz","",basename(chain.file)))){
-        downloader::download(chain.file,basename(chain.file))
-        R.utils::gunzip(basename(chain.file))
-    }
-    ch <- rtracklayer::import.chain(gsub(".gz","",basename(chain.file)))
-
-    ret <- readr::read_csv(file)
-    if(!missing(TF)){
-        ret <- ret[grep(TF,ret$TF),]
-        if(nrow(ret) == 0) {
-            message("No targets for that TF")
-            return(NULL)
-        }
-        label <- paste0(label,"_",TF)
-    }
-
-    gr <- makeGRangesFromDataFrame(ret, seqnames.field = "probe_seqnames",
-                                   start.field = "probe_start",
-                                   end.field = "probe_end",
-                                   strand.field = "probe_strand")
-    gr$Probe  <- ret$Probe
-    gr <- unique(gr)
-    x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
-    colnames(x) <- paste0("probe_hg19_",colnames(x))
-    ret[,grep("probe_",colnames(ret))] <- NULL
-    ret.hg19 <- merge(ret,x, by.x = "Probe",by.y = "probe_hg19_Probe")
-
-    # remap gene
-    gr <- makeGRangesFromDataFrame(ret,
-                                   seqnames.field = "seqnames",
-                                   start.field = "start",
-                                   end.field =  "end",
-                                   strand.field = "strand")
-    gr$GeneID  <- ret$GeneID
-    gr <- unique(gr)
-    x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
-    colnames(x) <- paste0("gene_hg19_",colnames(x))
-    ret.hg19[,c("seqnames","start","end","strand")] <- NULL
-    ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
-    readr::write_csv(ret.hg19,
-                     path = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
-    )
+    label <- paste0(label,"_",TF)
+  }
+  
+  gr <- makeGRangesFromDataFrame(ret, seqnames.field = "probe_seqnames",
+                                 start.field = "probe_start",
+                                 end.field = "probe_end",
+                                 strand.field = "probe_strand")
+  gr$Probe  <- ret$Probe
+  gr <- unique(gr)
+  x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
+  colnames(x) <- paste0("probe_hg19_",colnames(x))
+  ret[,grep("probe_",colnames(ret))] <- NULL
+  ret.hg19 <- merge(ret,x, by.x = "Probe",by.y = "probe_hg19_Probe")
+  
+  # remap gene
+  gr <- makeGRangesFromDataFrame(ret,
+                                 seqnames.field = "seqnames",
+                                 start.field = "start",
+                                 end.field =  "end",
+                                 strand.field = "strand")
+  gr$GeneID  <- ret$GeneID
+  gr <- unique(gr)
+  x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
+  colnames(x) <- paste0("gene_hg19_",colnames(x))
+  ret.hg19[,c("seqnames","start","end","strand")] <- NULL
+  ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
+  readr::write_csv(ret.hg19,
+                   path = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
+  )
 }
 
 
@@ -1701,44 +1723,44 @@ summarizeTF <- function(files = NULL,
                         path = NULL,
                         classification = "family",
                         top = FALSE){
-
-    top <- ifelse(top, "top.", "")
-    col <- ifelse(classification == "family",
-                  paste0(top, "potential.TF.family"),
-                  paste0(top, "potential.TF.subfamily")
-    )
-
-    if(!is.null(path)) {
-        files <- dir(path = path,
-                     pattern = "TF.*with.motif.summary.csv",
-                     recursive = T,
-                     full.names = TRUE)
-    }
-    aux <- list()
-    for(f in files){
-        TF <- readr::read_csv(f,col_types = readr::cols())
-        aux[[f]] <- sort(na.omit(unique(unlist(stringr::str_split(TF[[col]],";")))))
-    }
-    TF <- sort(unique(unlist(unique(aux))))
-    if(length(TF) == 0) return(NULL)
-    df <- data.frame(TF)
-
-    for(f in files){
-        TF <- readr::read_csv(f,col_types = readr::cols())
-        df$analysis <- NA
-        df$analysis[df$TF %in% sort(na.omit(unique(unlist(stringr::str_split(TF[[col]],";")))))] <- "x"
-        colnames(df)[which(colnames(df) == "analysis")] <- paste0(basename(dirname(f)), " in ", basename(dirname(dirname(f))))
-    }
-
-    return(df)
+  
+  top <- ifelse(top, "top.", "")
+  col <- ifelse(classification == "family",
+                paste0(top, "potential.TF.family"),
+                paste0(top, "potential.TF.subfamily")
+  )
+  
+  if(!is.null(path)) {
+    files <- dir(path = path,
+                 pattern = "TF.*with.motif.summary.csv",
+                 recursive = T,
+                 full.names = TRUE)
+  }
+  aux <- list()
+  for(f in files){
+    TF <- readr::read_csv(f,col_types = readr::cols())
+    aux[[f]] <- sort(na.omit(unique(unlist(stringr::str_split(TF[[col]],";")))))
+  }
+  TF <- sort(unique(unlist(unique(aux))))
+  if(length(TF) == 0) return(NULL)
+  df <- data.frame(TF)
+  
+  for(f in files){
+    TF <- readr::read_csv(f,col_types = readr::cols())
+    df$analysis <- NA
+    df$analysis[df$TF %in% sort(na.omit(unique(unlist(stringr::str_split(TF[[col]],";")))))] <- "x"
+    colnames(df)[which(colnames(df) == "analysis")] <- paste0(basename(dirname(f)), " in ", basename(dirname(dirname(f))))
+  }
+  
+  return(df)
 }
 
 getTopFamily <- function(motif,
                          TF.meth.cor,
                          n = 3){
-    TF.family <-  createMotifRelevantTfs()
-    TF <-  stringr::str_trim(unlist(stringr::str_split(TF.family[[motif]],";")))
-    TF <- TF[TF %in% rownames(TF.meth.cor)]
-    topfamily <- names(sort(TF.meth.cor[TF,motif]))[1:n]
-    return(topfamily)
+  TF.family <-  createMotifRelevantTfs()
+  TF <-  stringr::str_trim(unlist(stringr::str_split(TF.family[[motif]],";")))
+  TF <- TF[TF %in% rownames(TF.meth.cor)]
+  topfamily <- names(sort(TF.meth.cor[TF,motif]))[1:n]
+  return(topfamily)
 }
