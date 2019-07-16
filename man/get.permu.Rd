@@ -11,6 +11,7 @@ get.permu(data,
           unmethy = NULL,
           percentage = 0.2,
           rm.probes = NULL,
+          correlation = "negative",
           permu.size = 10000,
           permu.dir = NULL,
           cores = 1)
@@ -28,6 +29,8 @@ get.permu(data,
 groups used to link probes to genes. Default is 0.2.}
 
 \item{rm.probes}{A vector lists the probes name.}
+
+\item{correlation}{Type of correlation to identify. Default is negative: look for hypomethylation and increase target expression.}
 
 \item{permu.size}{A number specify the times of permuation. Default is 10000.}
 

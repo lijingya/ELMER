@@ -633,12 +633,14 @@ get.pair <- function(data,
 #'           unmethy = NULL,
 #'           percentage = 0.2,
 #'           rm.probes = NULL,
+#'           correlation = "negative",
 #'           permu.size = 10000,
 #'           permu.dir = NULL,
 #'           cores = 1)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param geneID A vector lists the genes' ID.
 #' @param rm.probes A vector lists the probes name.
+#' @param correlation Type of correlation to identify. Default is negative: look for hypomethylation and increase target expression.
 #' @param cores A interger which defines number of core to be used in parallel process.
 #'  Default is 1: don't use parallel process.
 #' @param percentage A number ranges from 0 to 1 specifying the percentage of samples of group 1 and group 2
