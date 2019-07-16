@@ -47,6 +47,8 @@ Otherwise U group and M group will set as the samples of group1 or group2 as des
 If diff.dir is "hypo, U will be the group 1 and M the group2.
 If diff.dir is "hyper" M group will be the group1 and U the group2.}
 
+\item{correlation}{Type of correlation to identify. Default is negative: look for hypomethylation and increase target expression.}
+
 \item{diff.dir}{A character can be "hypo" or "hyper", showing differential
 methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1;
 "hyper" which means the probes are hypermethylated in group1;
