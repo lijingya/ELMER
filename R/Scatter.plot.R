@@ -279,7 +279,7 @@ scatter <- function(meth,
                         x = 0.2,
                         y = ifelse(is.null(ylim),max(as.numeric(exp[,GeneID])) + 1, max(ylim) - 1),
                         hjust = 0.0,
-                        size = 2,
+                        size = 4,
                         label = paste0("Rho: ",corval," / P-value: ",pvalue))
       #print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
     }
