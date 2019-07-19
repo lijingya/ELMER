@@ -191,9 +191,9 @@ createMAE <- function (exp,
     if(!missing(colData)) { 
       if(is.character(colData)) { 
         colData <- as.data.frame(read_tsv(colData))
-        if (!"primary" %in% colnames(colData)) stop("No primary column in colData input")
-        rownames(colData) <- colData$primary
       }
+      if (!"primary" %in% colnames(colData)) stop("No primary column in colData input")
+      rownames(colData) <- colData$primary
     }
     if(!missing(sampleMap)) { 
       if(is.character(sampleMap)) sampleMap <- read_tsv(sampleMap)
