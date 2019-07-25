@@ -21,13 +21,15 @@ environment:
       GCC_PATH: mingw_64
       USE_RTOOLS: true
       WARNINGS_ARE_ERRORS: 0
+      DOWNLOAD_FILE_METHOD: wininet
       
 
 build_script:
   - travis-tool.sh install_bioc BiocVersion
-  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_deps
   - travis-tool.sh install_bioc_deps
+  - travis-tool.sh install_bioc ALL
+  - travis-tool.sh install_bioc GenomeInfoDbData
   - travis-tool.sh install_bioc BiocStyle
   - travis-tool.sh install_bioc GenomicRanges
   - travis-tool.sh install_bioc Biobase
@@ -50,7 +52,6 @@ build_script:
   - travis-tool.sh install_bioc pathview
   - travis-tool.sh install_bioc clusterProfiler
   - travis-tool.sh install_bioc GenomicInteractions
-  - travis-tool.sh install_bioc ELMER.data
   - travis-tool.sh install_github BioinformaticsFMRP/TCGAbiolinks tiagochst/ELMER.data
   
 test_script:
