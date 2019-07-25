@@ -16,7 +16,7 @@ cache:
 
 environment:
   matrix:
-    - R_VERSION: devel
+    - R_VERSION: release
       R_ARCH: x64
       GCC_PATH: mingw_64
       USE_RTOOLS: true
