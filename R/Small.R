@@ -703,7 +703,8 @@ createMotifRelevantTfs <- function(classification = "family"){
 #'  colnames(met) <- paste("sample",1:100)
 #'  exp <- met
 #'  rownames(exp) <- c("ENSG00000141510","ENSG00000171862","ENSG00000171863")
-#'  sample.info <- S4Vectors::DataFrame(sample.type = rep(c("Normal", "Tumor"),50))
+#'  sample.info <- S4Vectors::DataFrame(primary = paste("sample",1:100),
+#'                                      sample.type = rep(c("Normal", "Tumor"),50))
 #'  rownames(sample.info) <- colnames(exp)
 #'  mae <- createMAE(exp = exp, met = met, colData = sample.info, genome = "hg38") 
 #'  mae <- preAssociationProbeFiltering(mae,  K = 0.3, percentage = 0.05)
