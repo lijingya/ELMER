@@ -55,6 +55,7 @@ Imports:
     lattice, 
     magrittr, 
     readr, 
+    scales,
     rvest,
     xml2,
     plotly,
