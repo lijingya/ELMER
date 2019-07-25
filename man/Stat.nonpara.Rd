@@ -16,6 +16,9 @@ Stat.nonpara(Probe, NearGenes, Top = NULL, correlation = "negative",
 \item{Top}{A number determines the percentage of top methylated/unmethylated samples. 
 Only used if unmethy and methy are not set.}
 
+\item{correlation}{Type of correlation to evaluate (negative or positive).
+Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.}
+
 \item{unmethy}{Index of U (unmethylated) group.}
 
 \item{methy}{Index of M (methylated) group.}

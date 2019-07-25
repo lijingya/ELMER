@@ -11,6 +11,7 @@ get.TFs(data,
           group1,
           group2,
           mode = "unsupervised",
+          correlation = "negative",
           diff.dir = NULL,
           motif.relevant.TFs,
           minSubgroupFrac = 0.4,
@@ -47,7 +48,8 @@ Otherwise U group and M group will set as the samples of group1 or group2 as des
 If diff.dir is "hypo, U will be the group 1 and M the group2.
 If diff.dir is "hyper" M group will be the group1 and U the group2.}
 
-\item{correlation}{Type of correlation to identify. Default is negative: look for hypomethylation and increase target expression.}
+\item{correlation}{Type of correlation to evaluate (negative or positive).
+Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.}
 
 \item{diff.dir}{A character can be "hypo" or "hyper", showing differential
 methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1;

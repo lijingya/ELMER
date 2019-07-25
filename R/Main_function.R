@@ -348,6 +348,7 @@ get.diff.meth <- function(data,
 #'          group1 = NULL,
 #'          group2 = NULL,
 #'          cores = 1,
+#'          correlation = "negative",
 #'          filter.probes = TRUE,
 #'          filter.portion = 0.3,
 #'          filter.percentage = 0.05,
@@ -1204,6 +1205,7 @@ get.enriched.motif <- function(data,
 #'           group1,
 #'           group2,
 #'           mode = "unsupervised",
+#'           correlation = "negative",
 #'           diff.dir = NULL,
 #'           motif.relevant.TFs,
 #'           minSubgroupFrac = 0.4,
@@ -1250,7 +1252,8 @@ get.enriched.motif <- function(data,
 #' "hyper" which means the probes are hypermethylated in group1;
 #' This argument is used only when mode is supervised nad
 #' it should be the same value from get.diff.meth function.
-#' @param correlation Type of correlation to identify. Default is negative: look for hypomethylation and increase target expression.
+#' @param correlation Type of correlation to evaluate (negative or positive).
+#' Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.
 #' @param save.plots Create TF ranking plots ?
 #' @export
 #' @details
