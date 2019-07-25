@@ -208,6 +208,7 @@ scatter.plot <- function(data,
 
 #'scatter
 #'@importFrom reshape melt.data.frame
+#' @importFrom scales scientific
 #'@import ggplot2
 #'@param meth A vector of number.
 #'@param exp A vector of number or matrix with sample in column and gene in rows.
@@ -272,7 +273,7 @@ scatter <- function(meth,
                       exact = FALSE,
                       method = c("spearman"))
       corval <- round(cor$estimate,digits = 2)
-      pvalue <- scales::scientific(cor$p.value, digits = 3)
+      pvalue <- scientific(cor$p.value, digits = 3)
       title <- paste0(title, "\n","Rho: ", corval," / P-value: ", pvalue)
       P <- P + labs(title = title)
       P <- P + annotate("text",

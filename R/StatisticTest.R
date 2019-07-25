@@ -68,7 +68,8 @@ Stat.diff.meth <- function(meth,
 #' @param Top A number determines the percentage of top methylated/unmethylated samples.
 #' Only used if unmethy and methy are not set.
 #' @param correlation Type of correlation to evaluate (negative or positive).
-#' Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.
+#' Negative (default) checks if hypomethylated region has a upregulated target gene. 
+#' Positive checks if region hypermethylated has a upregulated target gene. 
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @param methy Index of M (methylated) group.
@@ -115,7 +116,8 @@ Stat.nonpara.permu <- function(Probe,
 #' @param Top A number determines the percentage of top methylated/unmethylated samples. 
 #' Only used if unmethy and methy are not set.
 #' @param correlation Type of correlation to evaluate (negative or positive).
-#' Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.
+#' Negative (default) checks if hypomethylated region has a upregulated target gene. 
+#' Positive checks if region hypermethylated has a upregulated target gene. 
 #' @param Meths A matrix contains methylation for each probe (row) and each sample (column).
 #' @param Exps A matrix contains Expression for each gene (row) and each sample (column).
 #' @param methy Index of M (methylated) group.

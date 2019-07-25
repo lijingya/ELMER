@@ -84,6 +84,10 @@ hypermethylated in group 1 compared to group 2.}
 \item{cores}{A interger which defines number of core to be used in parallel process.
 Default is 1: don't use parallel process.}
 
+\item{correlation}{Type of correlation to evaluate (negative or positive).
+Negative (default) checks if hypomethylated region has a upregulated target gene. 
+Positive checks if region hypermethylated has a upregulated target gene.}
+
 \item{filter.probes}{Should filter probes by selecting only probes that have at least
 a certain number of samples below and above a certain cut-off.
 See \code{\link{preAssociationProbeFiltering}} function.}

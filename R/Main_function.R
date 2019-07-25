@@ -401,6 +401,9 @@ get.diff.meth <- function(data,
 #' Otherwise U group and M group will set as the samples of group1 or group2 as described below:
 #' If diff.dir is "hypo, U will be the group 1 and M the group2.
 #' If diff.dir is "hyper" M group will be the group1 and U the group2.
+#' @param correlation Type of correlation to evaluate (negative or positive).
+#' Negative (default) checks if hypomethylated region has a upregulated target gene. 
+#' Positive checks if region hypermethylated has a upregulated target gene. 
 #' @param diff.dir A character can be "hypo" or "hyper", showing differential
 #' methylation direction in group 1.  It can be "hypo" which means the probes are hypomethylated in group1;
 #' "hyper" which means the probes are hypermethylated in group1;

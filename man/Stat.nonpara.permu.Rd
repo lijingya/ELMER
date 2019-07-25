@@ -16,7 +16,8 @@ Stat.nonpara.permu(Probe, Gene, Top = 0.2, correlation = "negative",
 Only used if unmethy and methy are not set.}
 
 \item{correlation}{Type of correlation to evaluate (negative or positive).
-Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.}
+Negative (default) checks if hypomethylated region has a upregulated target gene. 
+Positive checks if region hypermethylated has a upregulated target gene.}
 
 \item{unmethy}{Index of U (unmethylated) group.}
 
