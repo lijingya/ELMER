@@ -597,7 +597,8 @@ heatmapGene <- function(data,
       p <- ggscatter(as.data.frame(df), 
                      x = "Methylation", 
                      y = "Expression",
-                     size = 0.4,
+                     size = 0.7,
+                     palette = "uchicago",
                      facet.by = "probe",
                      color = "definition"
                      #shape = 21, size = 3, # Points color, shape and size
@@ -609,8 +610,8 @@ heatmapGene <- function(data,
       )  + stat_cor(method =  correlation.method, label.x = 0) + 
         labs(x = expression(paste("DNA methylation - ",beta, "-value")), 
              y = expression(paste("Gene Expression - ",Log[2],"(FPKM + 1)"))) +
-        geom_smooth(method = "lm")
-      file.name <- paste0(dir.out,"/pearson_correlation_",GeneSymbol,"_vs_near_probes.pdf")
+        geom_smooth(method = "lm") + guides(colour = guide_legend(override.aes = list(size=5)))
+      file.name <- paste0(dir.out,"/scatter_plot_pearson_correlation_",GeneSymbol,"_vs_near_probes.pdf")
       ggsave(file.name,plot = p,
              width = scatter.plot.width,
              height = scatter.plot.height)
