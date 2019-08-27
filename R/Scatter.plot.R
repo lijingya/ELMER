@@ -66,7 +66,7 @@ scatter.plot <- function(data,
                                         numFlankingGenes = 20),
                          byTF = list(TF = c(),
                                      probe = c()), 
-                         category=NULL, 
+                         category = NULL, 
                          ylim = NULL,
                          dots.size = 0.9,
                          correlation = FALSE,
@@ -123,11 +123,14 @@ scatter.plot <- function(data,
                    ylab     = sprintf("%s gene expression",symbol), 
                    title    = sprintf("%s_%s",probe,symbol),
                    ...)
-      if(save) ggsave(filename = sprintf("%s/%s_%s_bypair.pdf", dir.out, probe, symbol),
-                      plot = P,
-                      useDingbats = FALSE, 
-                      width = width, 
-                      height = height)
+      if(save) {
+        filename <- sprintf("%s/%s_%s_bypair.pdf", dir.out, probe, symbol)
+        ggsave(filename = filename,
+               plot = P,
+               useDingbats = FALSE, 
+               width = width, 
+               height = height)
+      }
     }
     close(pb)  
     
@@ -262,26 +265,27 @@ scatter <- function(meth,
                                    nrow = ceiling(sum(stringr::str_length(unique(category))) / 100),
                                    title.hjust = 0.5)) 
     if(!is.null(color.value)) {
-    
+      
       P <- P + scale_colour_manual(values = color.value)
     }
     if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
     if(lm_line) P <- P + geom_smooth(method = "lm", se = TRUE, color = "black", formula = y ~ x,data = df)
     if(correlation){
+      
       cor <- cor.test(x = as.numeric(meth), 
                       y = as.numeric(exp[,GeneID]),
                       exact = FALSE,
-                      method = c("spearman"))
+                      method = c("pearson"))
       corval <- round(cor$estimate,digits = 2)
       pvalue <- scientific(cor$p.value, digits = 3)
-      title <- paste0(title, "\n","Rho: ", corval," / P-value: ", pvalue)
+      title <- paste0(title, "\n","Pearson Cor: ", corval," / P-value: ", pvalue)
       P <- P + labs(title = title)
       P <- P + annotate("text",
-                        x = 0.2,
+                        x = 0.01,
                         y = ifelse(is.null(ylim),max(as.numeric(exp[,GeneID])) + 1, max(ylim) - 1),
                         hjust = 0.0,
                         size = 4,
-                        label = paste0("Rho: ",corval," / P-value: ",pvalue))
+                        label = paste0("Cor: ",corval," / P-value: ",pvalue))
       #print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
     }
   } else {

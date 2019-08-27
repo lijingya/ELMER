@@ -436,6 +436,9 @@ heatmapPairs <- function(data,
 #' @param met.metadata A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap. 
 #' @param exp.metadata A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.
 #' @param scatter.plot Plot scatter plots
+#' @param correlation.table save table with spearman correlation analysis ?
+#' @param numFlankingGenes numFlankingGenes to plot.
+#' @param filter.by.probe.annotation Filter probes to plot based on probes annotation
 #' @param dir.out Where to save the plots
 #' @param width Figure width
 #' @param height Figure height
@@ -447,6 +450,7 @@ heatmapPairs <- function(data,
 #' @importFrom plyr ddply .
 #' @importFrom GenomicRanges distanceToNearest
 #' @importFrom grDevices png
+#' @importFrom ggpubr ggscatter
 #' @importFrom IRanges subsetByOverlaps
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
@@ -488,12 +492,18 @@ heatmapGene <- function(data,
                         pairs, 
                         GeneSymbol,
                         scatter.plot = FALSE,
+                        correlation.method = "pearson",
+                        correlation.table = FALSE,
                         annotation.col = NULL, 
                         met.metadata = NULL,
                         exp.metadata = NULL,
                         dir.out = ".",
+                        filter.by.probe.annotation = TRUE,
+                        numFlankingGenes = 10,
                         width = 10,
                         height = 10,
+                        scatter.plot.width = 10,
+                        scatter.plot.height = 10,
                         filename = NULL) {
   
   if(missing(data)) stop("Please set data argument")
@@ -531,22 +541,92 @@ heatmapGene <- function(data,
     
     pairs <- ELMER::GetNearGenes(probes = p,
                                  data = data,
-                                 numFlankingGenes = 10) 
+                                 numFlankingGenes = numFlankingGenes) 
     pairs <- pairs[pairs$Symbol %in% GeneSymbol,]
     pairs <- addDistNearestTSS(data, pairs)  %>% na.omit
     p <- rev(names(sort(probes.info[p], ignore.strand=TRUE)))
     pairs <- pairs[match(p,pairs$ID),] %>% na.omit
-    if(scatter.plot){
-      for(p in pairs$ID){
-        scatter.plot(data = data,
-                     byPair = list(probe = p, 
-                                   gene = gene.location$ensembl_gene_id), 
-                     category = group.col, 
-                     dir.out = dir.out, 
-                     save = TRUE, 
-                     correlation = TRUE,
-                     lm_line = TRUE)
+    
+    if(filter.by.probe.annotation){
+      probes.annotation <- unique(names(getMet(data))[grep(GeneSymbol,values(getMet(data))$gene)])
+      pairs <- pairs[pairs$ID %in% probes.annotation,]
+    }
+    
+    if(correlation.table  == T){
+      if(correlation.method == "spearman"){
+        corretlation.tab <- plyr::adply(pairs$ID,1,function(x){
+          met <- assay(getMet(data)[x,])
+          exp <- assay(getExp(data)[gene.location$ensembl_gene_id,])
+          ret <- cor.test(x = met[which(!is.na(met))],
+                          y = exp[which(!is.na(met))],
+                          method = "spearman",
+                          exact = TRUE)
+          tibble::tibble("rho" = ret$estimate, "p.value" = ret$p.value)
+        },.id = NULL)
+        corretlation.tab$FDR <- p.adjust(corretlation.tab$p.value, method = "fdr")
+        file.name.table <- paste0(dir.out,"spearman_correlation_",GeneSymbol,"_vs_near_probes.tsv")
+        message("Saving spearman correlation table as: ", file.name.table)
+        write_tsv(cbind(as.data.frame(pairs)[,c(1:3,6)],corretlation.tab),path = file.name.table)
+      } else if(correlation.method  == "pearson"){
+        corretlation.tab <- plyr::adply(pairs$ID,1,function(x){
+          met <- assay(getMet(data)[x,])
+          exp <- assay(getExp(data)[gene.location$ensembl_gene_id,])
+          ret <- cor.test(x = met[which(!is.na(met))],
+                          y = exp[which(!is.na(met))],
+                          method = "pearson",
+                          exact = TRUE)
+          tibble::tibble("cor" = ret$estimate, "p.value" = ret$p.value)
+        },.id = NULL)
+        corretlation.tab$FDR <- p.adjust(corretlation.tab$p.value, method = "fdr")
+        file.name.table <- paste0(dir.out,"/pearson_correlation_",GeneSymbol,"_vs_near_probes.tsv")
+        message("Saving pearson correlation table as: ", file.name.table)
+        write_tsv(cbind(as.data.frame(pairs)[,c(1:3,6)],corretlation.tab),path = file.name.table)
       }
+    }
+    # Save probe gene scatter plot
+    if(!isFALSE(scatter.plot)){
+      probes <- unique(pairs$ID)
+      gene <- gene.location$ensembl_gene_id
+      met <- melt(t(assay(getMet(mae)[probes,])))
+      met$Var1 <- substr(met$Var1,1,16)
+      met <- merge(met,colData(mae)[,c("sample","definition")], by.x="Var1",by.y = "sample")
+      exp <- melt(t(assay(getExp(mae)[gene,])))
+      exp$Var1 <- substr(exp$Var1,1,16)
+      df <- merge(met,exp,by = "Var1")
+      colnames(df) <- c("Patient","probe","Methylation","definition","Gene","Expression")
+      p <- ggscatter(as.data.frame(df), 
+                     x = "Methylation", 
+                     y = "Expression",
+                     size = 0.4,
+                     facet.by = "probe",
+                     color = "definition"
+                     #shape = 21, size = 3, # Points color, shape and size
+                     #add = "reg.line",  # Add regressin line 
+                     #add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
+                     #conf.int = TRUE, # Add confidence interval
+                     #cor.coef = TRUE, # Add correlation coefficient. see ?stat_cor
+                     #cor.coeff.args = list(method = "pearson", label.x = 0, label.sep = "\n")
+      )  + stat_cor(method =  correlation.method, label.x = 0) + 
+        labs(x = expression(paste("DNA methylation - ",beta, "-value")), 
+             y = expression(paste("Gene Expression - ",Log[2],"(FPKM + 1)"))) +
+        geom_smooth(method = "lm")
+      file.name <- paste0(dir.out,"/pearson_correlation_",GeneSymbol,"_vs_near_probes.pdf")
+      ggsave(file.name,plot = p,
+             width = scatter.plot.width,
+             height = scatter.plot.height)
+      
+      #for(p in pairs$ID){
+      #  scatter.plot(data = data,
+      #               byPair = list(probe = p, 
+      #                             gene = gene.location$ensembl_gene_id), 
+      #               category = group.col, 
+      #               dir.out = dir.out, 
+      #               width = 5,
+      #               height = 4,
+      #               save = TRUE, 
+      #               correlation = TRUE,
+      #               lm_line = TRUE)
+      #}
     }
   }
   if(!GeneSymbol %in%  unique(pairs$Symbol)) stop("GeneID not in the pairs")
@@ -657,7 +737,7 @@ heatmapGene <- function(data,
             cluster_columns = F,
             row_names_side = "left",
             cluster_rows = F,
-            row_names_gp = gpar(fontsize = 2),
+            row_names_gp = gpar(fontsize = 8),
             top_annotation = ha,
             column_title_gp = gpar(fontsize = 10), 
             row_title_gp = gpar(fontsize = 10)) 
