@@ -5,9 +5,12 @@
 \title{Heatmap for correlation between probes DNA methylation and a single gene expression.}
 \usage{
 heatmapGene(data, group.col, group1, group2, pairs, GeneSymbol,
-  scatter.plot = FALSE, annotation.col = NULL, met.metadata = NULL,
-  exp.metadata = NULL, dir.out = ".", width = 10, height = 10,
-  filename = NULL)
+  scatter.plot = FALSE, correlation.method = "pearson",
+  correlation.table = FALSE, annotation.col = NULL,
+  met.metadata = NULL, exp.metadata = NULL, dir.out = ".",
+  filter.by.probe.annotation = TRUE, numFlankingGenes = 10,
+  width = 10, height = 10, scatter.plot.width = 10,
+  scatter.plot.height = 10, filename = NULL)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.}
@@ -28,6 +31,8 @@ hypermethylated in group 1 compared to group 2.}
 
 \item{scatter.plot}{Plot scatter plots}
 
+\item{correlation.table}{save table with spearman correlation analysis ?}
+
 \item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
 to be added as annotation to the heatmap}
 
@@ -36,6 +41,10 @@ to be added as annotation to the heatmap}
 \item{exp.metadata}{A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.}
 
 \item{dir.out}{Where to save the plots}
+
+\item{filter.by.probe.annotation}{Filter probes to plot based on probes annotation}
+
+\item{numFlankingGenes}{numFlankingGenes to plot.}
 
 \item{width}{Figure width}
 
