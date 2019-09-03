@@ -1110,11 +1110,11 @@ getTFBindingSites <- function(tf = NULL,
     if(classification == "family"){
       tf.tab <- tf.tab %>% 
         mutate(tf.target = strsplit(as.character(tf.tab$potential.TF.family), ";")) %>% 
-        unnest() 
+        unnest(cols = "tf.target") 
     } else {
       tf.tab <- tf.tab %>% 
         mutate(tf.target = strsplit(as.character(tf.tab$potential.TF.subfamily), ";")) %>% 
-        unnest() 
+        unnest(cols = "tf.target") 
     }
     
     if( !tf %in% tf.tab$tf.target) stop("TF not found")
@@ -1123,7 +1123,7 @@ getTFBindingSites <- function(tf = NULL,
     # For each enriched motif find in each paired probes it appers
     pair.tab <- pair.tab %>% 
       mutate(motif.target = strsplit(as.character(pair.tab$enriched_motifs), ";")) %>% 
-      unnest() 
+      unnest(cols = "motif.target") 
     probes <- pair.tab %>% filter(pair.tab$motif.target %in% motif) %>% pull('Probe') %>% unique
     
     # for each probe get region and write bed file
