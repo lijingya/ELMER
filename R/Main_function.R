@@ -1049,6 +1049,9 @@ get.enriched.motif <- function(data,
                                label = NULL,
                                save = TRUE,
                                plot.title = ""){
+  # create output directory if it does not exists
+  dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)  
+  
   if(missing(probes.motif)){
     if(missing(data)) stop("Please set probes.motif argument. See ELMER data")
     file <- paste0("Probes.motif.",metadata(data)$genome,".",metadata(data)$met.platform)
@@ -1109,9 +1112,11 @@ get.enriched.motif <- function(data,
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   
-  if(save) write_csv(Summary,
-                     path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                                    dir.out,ifelse(is.null(label),"",label)))
+  if(save) {
+    write_csv(Summary,
+              path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
+                             dir.out,ifelse(is.null(label),"",label)))
+  }
   
   ## enriched motif and probes
   en.motifs <- as.character(Summary[Summary$lowerOR > lower.OR & Summary$NumOfProbes > min.incidence & Summary$FDR <= pvalue,"motif"])
@@ -1133,7 +1138,12 @@ get.enriched.motif <- function(data,
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
   
-  if(save) save(enriched.motif, file = sprintf("%s/getMotif.%s.enriched.motifs.rda",dir.out,ifelse(is.null(label),"",label)))
+  if(save) {
+    save(enriched.motif, 
+         file = sprintf("%s/getMotif.%s.enriched.motifs.rda",
+                        dir.out,
+                        ifelse(is.null(label),"",label)))
+  }
   
   ## make plot
   if(length(enriched.motif) > 1){
@@ -1396,7 +1406,7 @@ get.TFs <- function(data,
     registerDoParallel(cores)
     parallel = TRUE
   }
-  
+  dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)  
   # This will calculate the average methylation at all motif-adjacent probes
   message("Calculating the average methylation at all motif-adjacent probes ")
   
