@@ -335,10 +335,9 @@ for(g in 1:nrow(groups)) {
                        permu.size = 10000,
                        raw.pvalue = 0.001)
       
-      Sig.probes.paired <- read.csv(paste0(dir.out,
+      Sig.probes.paired <- readr::read_csv(paste0(dir.out,
                                            "/getPair.",j,
-                                           ".pairs.significant.csv"),
-                                    stringsAsFactors=FALSE)[,1]
+                                           ".pairs.significant.csv"))[,1, drop = TRUE]
       
       
       #-------------------------------------------------------------
@@ -355,10 +354,9 @@ for(g in 1:nrow(groups)) {
                                              plot.title =  paste0("BRCA: OR for paired probes ",
                                                                   j, "methylated in ",
                                                                   group1, " vs ",group2))
-        motif.enrichment <- read.csv(paste0(dir.out,
+        motif.enrichment <- readr::read_csv(paste0(dir.out,
                                             "/getMotif.",j,
-                                            ".motif.enrichment.csv"),
-                                     stringsAsFactors=FALSE)
+                                            ".motif.enrichment.csv"))
         if(length(enriched.motif) > 0){
           #-------------------------------------------------------------
           # Step 3.4: Identifying regulatory TFs                        |
@@ -381,7 +379,7 @@ for(g in 1:nrow(groups)) {
           save(mae,TF, enriched.motif, Sig.probes.paired,
                pair, nearGenes, Sig.probes, motif.enrichment,
                TF.meth.cor,
-               file=paste0(dir.out,"/ELMER_results_",j,".rda"))
+               file = paste0(dir.out,"/ELMER_results_",j,".rda"))
         }
       }
     }, error = function(e){

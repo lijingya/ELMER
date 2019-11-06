@@ -268,9 +268,8 @@ TCGA.pipe <- function(disease,
       mae <- args$data
     }
     
-    Sig.probes <- read.csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
-                                   dir.out,diff.dir),
-                           stringsAsFactors=FALSE)[,1]
+    Sig.probes <- read_csv(sprintf("%s/getMethdiff.%s.probes.significant.csv",
+                                   dir.out,diff.dir))[,1,drop = T]
     if(length(Sig.probes) == 0) {
       message("No significant probes were found")
       return(NULL)
@@ -280,7 +279,7 @@ TCGA.pipe <- function(disease,
     file <- sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir)
     
     nearGenes.file <- args[names(args) %in% "nearGenes"]
-    if(length(nearGenes.file)==0){
+    if(length(nearGenes.file) == 0){
       nearGenes.file <- sprintf("%s/%s.probes_nearGenes.rda",dir.out,diff.dir)
       params <- args[names(args) %in% c("numFlankingGenes")]
       nearGenes <- do.call(GetNearGenes,

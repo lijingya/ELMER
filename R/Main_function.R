@@ -879,8 +879,9 @@ promoterMeth <- function(data,
   overlap <- findOverlaps(probes, TSS_2K)
   
   # make data frame with probe and gene
-  df <- data.frame(Probe=as.character(names(probes)[queryHits(overlap)]),
-                   GeneID=TSS_2K$ensembl_gene_id[subjectHits(overlap)], stringsAsFactors=FALSE)
+  df <- data.frame(Probe = as.character(names(probes)[queryHits(overlap)]),
+                   GeneID = TSS_2K$ensembl_gene_id[subjectHits(overlap)], 
+                   stringsAsFactors=FALSE)
   
   # no results ?
   if(nrow(df)==0){
@@ -909,7 +910,8 @@ promoterMeth <- function(data,
     Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
                        GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
                        Distance = 1,
-                       Side = 1, stringsAsFactors=FALSE)
+                       Side = 1, 
+                       stringsAsFactors = FALSE)
     Fake <- split(Fake, Fake$GeneID)
     exps <- assay(getExp(data))
     
@@ -1187,9 +1189,9 @@ get.enriched.motif <- function(data,
       
       if(!missing(data)){
         message("Adding coordinates for probes and genes from the provided data")
-        met.coord <- tibble::as_tibble(ranges(getMet(data)))
+        met.coord <- as.data.frame(ranges(getMet(data)))
         met.coord$width <- NULL
-        genes.coord <- tibble::as_tibble(ranges(getExp(data)))
+        genes.coord <- as.data.frame(ranges(getExp(data)))
         genes.coord$width <- NULL
         colnames(met.coord) <- paste0("probe_",colnames(met.coord))
         colnames(met.coord)[3] <- "Probe"
@@ -1390,7 +1392,7 @@ get.TFs <- function(data,
     # external_gene_id is the default for hg19 in biomart
     TFs <- getTF()
   } else if(is.character(TFs)){
-    TFs <- read.csv(TFs, stringsAsFactors=FALSE)
+    TFs <- read_csv(TFs)
   }
   
   if(missing(motif.relevant.TFs)){
