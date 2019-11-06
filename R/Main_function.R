@@ -1166,7 +1166,7 @@ get.enriched.motif <- function(data,
   sig.pair.file <- sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label))
   if(file.exists(sig.pair.file)){
     print.header("Adding enriched motifs to significant pairs file")
-    sig.Pairs <- radr::read_csv(file = sig.pair.file, col_types = readr::cols())
+    sig.Pairs <- readr::read_csv(file = sig.pair.file, col_types = readr::cols())
     sig.Pairs <- sig.Pairs[sig.Pairs$Probe %in% rownames(probes.TF),]
     if(all(unique(sig.Pairs$Probe) %in% rownames(probes.TF))){
       motif.Info <- sapply(sig.Pairs$Probe,
