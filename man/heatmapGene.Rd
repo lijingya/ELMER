@@ -31,6 +31,8 @@ hypermethylated in group 1 compared to group 2.}
 
 \item{scatter.plot}{Plot scatter plots}
 
+\item{correlation.method}{Correlation method: Pearson or sperman}
+
 \item{correlation.table}{save table with spearman correlation analysis ?}
 
 \item{annotation.col}{A vector of columns from the sample matrix from the MultiAssayExperiment object. Accessed with colData(mae) 
@@ -49,6 +51,10 @@ to be added as annotation to the heatmap}
 \item{width}{Figure width}
 
 \item{height}{Figure height}
+
+\item{scatter.plot.width}{Scatter plot width}
+
+\item{scatter.plot.height}{Scatter plot height}
 
 \item{filename}{File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.}
 }

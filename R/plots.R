@@ -436,12 +436,15 @@ heatmapPairs <- function(data,
 #' @param met.metadata A vector of metdatada columns available in the DNA methylation GRanges to should be added to the heatmap. 
 #' @param exp.metadata A vector of metdatada columns available in the Gene expression GRanges to should be added to the heatmap.
 #' @param scatter.plot Plot scatter plots
+#' @param correlation.method Correlation method: Pearson or sperman 
 #' @param correlation.table save table with spearman correlation analysis ?
 #' @param numFlankingGenes numFlankingGenes to plot.
 #' @param filter.by.probe.annotation Filter probes to plot based on probes annotation
 #' @param dir.out Where to save the plots
 #' @param width Figure width
 #' @param height Figure height
+#' @param scatter.plot.width Scatter plot width
+#' @param scatter.plot.height  Scatter plot height
 #' @param filename File names (.pdf) to save the file (i.e. "plot.pdf"). If NULL return plot.
 #' @return A heatmap
 #' @import ComplexHeatmap circlize
