@@ -259,7 +259,7 @@ createMAE <- function (exp,
     
     # Get clinical information
     if(missing(colData)) {
-      colData <- TCGAbiolinks::colDataPrepare(c(colnames(met), colnames(exp)))
+      colData <- TCGAbiolinks::colDataPrepare(colnames(met))
       # This will keep the same strategy the old ELMER version used:
       # Every type of tumor samples (starts with T) will be set to tumor and
       # every type of normal samples   (starts with N) will be set to normal 
