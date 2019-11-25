@@ -4,13 +4,28 @@
 \alias{heatmapGene}
 \title{Heatmap for correlation between probes DNA methylation and a single gene expression.}
 \usage{
-heatmapGene(data, group.col, group1, group2, pairs, GeneSymbol,
-  scatter.plot = FALSE, correlation.method = "pearson",
-  correlation.table = FALSE, annotation.col = NULL,
-  met.metadata = NULL, exp.metadata = NULL, dir.out = ".",
-  filter.by.probe.annotation = TRUE, numFlankingGenes = 10,
-  width = 10, height = 10, scatter.plot.width = 10,
-  scatter.plot.height = 10, filename = NULL)
+heatmapGene(
+  data,
+  group.col,
+  group1,
+  group2,
+  pairs,
+  GeneSymbol,
+  scatter.plot = FALSE,
+  correlation.method = "pearson",
+  correlation.table = FALSE,
+  annotation.col = NULL,
+  met.metadata = NULL,
+  exp.metadata = NULL,
+  dir.out = ".",
+  filter.by.probe.annotation = TRUE,
+  numFlankingGenes = 10,
+  width = 10,
+  height = 10,
+  scatter.plot.width = 10,
+  scatter.plot.height = 10,
+  filename = NULL
+)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.}

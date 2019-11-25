@@ -4,9 +4,20 @@
 \alias{metBoxPlot}
 \title{scatter.plot to plot scatter plots between gene expression and DNA methylation.}
 \usage{
-metBoxPlot(data, group.col, group1, group2, probe, min.samples = 5,
-  minSubgroupFrac = 0.2, diff.dir = "hypo", legend.col = NULL,
-  title = NULL, filename = NULL, save = TRUE)
+metBoxPlot(
+  data,
+  group.col,
+  group1,
+  group2,
+  probe,
+  min.samples = 5,
+  minSubgroupFrac = 0.2,
+  diff.dir = "hypo",
+  legend.col = NULL,
+  title = NULL,
+  filename = NULL,
+  save = TRUE
+)
 }
 \arguments{
 \item{data}{A multiAssayExperiment with DNA methylation and Gene Expression data. 

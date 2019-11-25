@@ -4,8 +4,12 @@
 \alias{getTFBindingSites}
 \title{Get MR TF binding regions infered by ELMER}
 \usage{
-getTFBindingSites(tf = NULL, results.dir = NULL, genome = "hg38",
-  met.platform = "450K")
+getTFBindingSites(
+  tf = NULL,
+  results.dir = NULL,
+  genome = "hg38",
+  met.platform = "450K"
+)
 }
 \arguments{
 \item{tf}{TF name}

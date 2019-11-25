@@ -4,8 +4,12 @@
 \alias{getRegionNearGenes}
 \title{Identifies nearest genes to a region}
 \usage{
-getRegionNearGenes(TRange = NULL, numFlankingGenes = 20,
-  geneAnnot = NULL, tssAnnot = NULL)
+getRegionNearGenes(
+  TRange = NULL,
+  numFlankingGenes = 20,
+  geneAnnot = NULL,
+  tssAnnot = NULL
+)
 }
 \arguments{
 \item{TRange}{A GRange object contains coordinate of targets.}

@@ -4,8 +4,14 @@
 \alias{findMotifRegion}
 \title{Use Hocomoco motif and homer to identify motifs in a given region}
 \usage{
-findMotifRegion(regions, output.filename = "mapped_motifs_regions.txt",
-  region.size = NULL, genome = "hg38", nstep = 10000, cores = 1)
+findMotifRegion(
+  regions,
+  output.filename = "mapped_motifs_regions.txt",
+  region.size = NULL,
+  genome = "hg38",
+  nstep = 10000,
+  cores = 1
+)
 }
 \arguments{
 \item{regions}{A GRanges object. Names will be used as the identifier.}

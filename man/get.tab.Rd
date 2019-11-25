@@ -5,7 +5,7 @@
 \title{summarize MR TF as a binary table with 1 if TF 
 was found in the analysis, 0 if not}
 \usage{
-get.tab(dir, classification)
+get.tab(dir, classification, top = TRUE)
 }
 \arguments{
 \item{dir}{Directory with ELMER  results}

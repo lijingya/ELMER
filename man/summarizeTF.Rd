@@ -4,8 +4,7 @@
 \alias{summarizeTF}
 \title{Make MR TF binary table}
 \usage{
-summarizeTF(files = NULL, path = NULL, classification = "family",
-  top = FALSE)
+summarizeTF(files = NULL, path = NULL, classification = "family", top = FALSE)
 }
 \arguments{
 \item{files}{Output of get.pairs function: dataframe or file path}

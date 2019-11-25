@@ -4,9 +4,15 @@
 \alias{get.feature.probe}
 \title{get.feature.probe to select probes within promoter regions or distal regions.}
 \usage{
-get.feature.probe(feature = NULL, TSS, genome = "hg38",
-  met.platform = "450K", TSS.range = list(upstream = 2000, downstream =
-  2000), promoter = FALSE, rm.chr = NULL)
+get.feature.probe(
+  feature = NULL,
+  TSS,
+  genome = "hg38",
+  met.platform = "450K",
+  TSS.range = list(upstream = 2000, downstream = 2000),
+  promoter = FALSE,
+  rm.chr = NULL
+)
 }
 \arguments{
 \item{feature}{A GRange object containing biofeature coordinate such as

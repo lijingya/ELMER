@@ -4,10 +4,14 @@
 \alias{addMutCol}
 \title{Adds mutation information to MAE}
 \usage{
-addMutCol(data, disease, genes,
+addMutCol(
+  data,
+  disease,
+  genes,
   mutant_variant_classification = c("Frame_Shift_Del", "Frame_Shift_Ins",
-  "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
-  "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation"))
+    "Missense_Mutation", "Nonsense_Mutation", "Splice_Site", "In_Frame_Del",
+    "In_Frame_Ins", "Translation_Start_Site", "Nonstop_Mutation")
+)
 }
 \arguments{
 \item{data}{MAE object}

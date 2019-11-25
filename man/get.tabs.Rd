@@ -4,7 +4,7 @@
 \alias{get.tabs}
 \title{Creating matrix for MR TF heatmap}
 \usage{
-get.tabs(dir, classification = "family")
+get.tabs(dir, classification = "family", top = TRUE)
 }
 \arguments{
 \item{dir}{Vector ofr directory with results}

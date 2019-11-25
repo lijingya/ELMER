@@ -955,11 +955,11 @@ createBigWigDNAmetArray <- function(data = NULL,
 #'    all.files = T))
 #' tabs <- get.tabs(dir = elmer.results, classification = "subfamily")
 #' }
-get.tabs <- function(dir, classification = "family"){
-  tab <- get.tab(dir,classification)
-  tab.pval <- get.tab.pval(dir,classification,tab)
-  tab.or <- get.tab.or(dir,classification,tab)
-  tf.or.table <- get.tf.or.table(dir,classification,tab)
+get.tabs <- function(dir, classification = "family", top = TRUE){
+  tab <- get.tab(dir,classification,top = top)
+  tab.pval <- get.tab.pval(dir,classification,tab,top = top)
+  tab.or <- get.tab.or(dir,classification,tab,top = top)
+  tf.or.table <- get.tf.or.table(dir,classification,tab,top = top)
   return(list("tab" = tab,
               "tab.pval" = tab.pval,
               "tab.or" = tab.or,
@@ -1017,13 +1017,13 @@ get.tabs <- function(dir, classification = "family"){
 #'  unlink("out")         
 #'  unlink("out2")         
 #' }
-get.tab <- function(dir,classification){
+get.tab <- function(dir,classification, top = TRUE){
   message("o Creating TF binary matrix")
   tab <- lapply(dir, 
                 function(x) {
                   ret <- summarizeTF(path = x,
                                      classification = classification,
-                                     top = TRUE)
+                                     top = top)
                   if(is.null(ret)) return(NULL)
                   colnames(ret)[2] <- x
                   return(ret)
@@ -1049,8 +1049,9 @@ get.tab <- function(dir,classification){
 }    
 
 #' @importFrom tidyr separate_rows gather
-get.tab.or <- function(dir, classification, tab){
-  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+get.tab.or <- function(dir, classification, tab, top = TRUE){
+  col <- ifelse(classification == "family","potential.TF.family", "potential.TF.subfamily")
+  if(top) col <- paste0("top.",col)
   message("o Creating TF OR matrix")
   # For each of those analysis get the enriched motifs and the MR TFs.
   tab.or <- plyr::adply(dir,
@@ -1073,8 +1074,10 @@ get.tab.or <- function(dir, classification, tab){
 }
 
 #' @importFrom tidyr separate_rows gather
-get.tab.pval <- function(dir,classification,tab){ 
-  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+get.tab.pval <- function(dir,classification,tab, top = TRUE){ 
+  col <- ifelse(classification == "family","potential.TF.family", "potential.TF.subfamily")
+  if(top) col <- paste0("top.",col)
+    
   message("o Creating TF FDR matrix")
   # For each of those analysis get the correlation pvalue of MR TFs exp  vs Avg DNA met. of inferred TFBS.
   tab.pval <- plyr::adply(dir,
@@ -1129,8 +1132,9 @@ get.top.tf.by.pval <- function(tab.pval,top = 5){
 }
 
 
-get.tf.or.table <-function(dir,classification,tab){ 
-  col <- ifelse(classification == "family","top.potential.TF.family", "top.potential.TF.subfamily")
+get.tf.or.table <-function(dir,classification,tab, top = TRUE){ 
+  col <- ifelse(classification == "family","potential.TF.family", "potential.TF.subfamily")
+  if(top) col <- paste0("top.",col)
   tf.or.table <- plyr::adply(dir,
                              .margins = 1,
                              function(path){

@@ -4,10 +4,22 @@
 \alias{heatmapPairs}
 \title{Heatmap of pairs gene and probes anti-correlated}
 \usage{
-heatmapPairs(data, group.col, group1, group2, pairs, subset = FALSE,
-  cluster.within.groups = TRUE, plot.distNearestTSS = FALSE,
-  annotation.col = NULL, met.metadata = NULL, exp.metadata = NULL,
-  width = 10, height = 7, filename = NULL)
+heatmapPairs(
+  data,
+  group.col,
+  group1,
+  group2,
+  pairs,
+  subset = FALSE,
+  cluster.within.groups = TRUE,
+  plot.distNearestTSS = FALSE,
+  annotation.col = NULL,
+  met.metadata = NULL,
+  exp.metadata = NULL,
+  width = 10,
+  height = 7,
+  filename = NULL
+)
 }
 \arguments{
 \item{data}{A MultiAssayExperiment with a DNA methylation SummarizedExperiment (all probes) and a gene Expression SummarizedExperiment.}

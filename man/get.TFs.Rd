@@ -76,6 +76,8 @@ U group and the highest quintile of all samples in the M group).}
 
 \item{cores}{A interger which defines the number of cores to be used in parallel process. Default is 1: no parallel process.}
 
+\item{topTFper}{Top ranked TF to be retrieved (default "0.05" -  5%)}
+
 \item{save}{A logic. If save is ture, two files will be saved: getTF.XX.significant.TFs.with.motif.summary.csv and
 getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data frame contains the same content with the first file.}
 }

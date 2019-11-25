@@ -1153,8 +1153,8 @@ get.enriched.motif <- function(data,
       P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
                                  significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR),
                                  dir.out = dir.out,
-                                 label=paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
-                                 save=TRUE)
+                                 label = paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
+                                 save = TRUE)
       P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
                                  significant = list(lowerOR = lower.OR),
                                  dir.out = dir.out,
@@ -1269,6 +1269,7 @@ get.enriched.motif <- function(data,
 #' "hyper" which means the probes are hypermethylated in group1;
 #' This argument is used only when mode is supervised nad
 #' it should be the same value from get.diff.meth function.
+#' @param topTFper Top ranked TF to be retrieved (default "0.05" -  5%)
 #' @param correlation Type of correlation to evaluate (negative or positive).
 #' Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.
 #' @param save.plots Create TF ranking plots ?
@@ -1344,6 +1345,7 @@ get.TFs <- function(data,
                     label = NULL,
                     save.plots = FALSE,
                     cores = 1,
+                    topTFper = 0.05,
                     save = TRUE){
   if(missing(data)){
     stop("data argument is empty")
@@ -1486,7 +1488,7 @@ get.TFs <- function(data,
   cor.summary <- adply(colnames(TF.meth.cor),
                        function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){
                          cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
-                         top <- cor[1:floor(0.05 * nrow(TF.meth.cor))]
+                         top <- cor[1:floor(topTFper * nrow(TF.meth.cor))]
                          if (any(top %in% motif.relavent.TFs.family[[x]])) {
                            potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
                          } else {

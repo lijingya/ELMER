@@ -4,8 +4,13 @@
 \alias{createBigWigDNAmetArray}
 \title{Create a bigwig file for IGV visualization of DNA methylation data (Array)}
 \usage{
-createBigWigDNAmetArray(data = NULL, genome = "hg38",
-  met.platform = "450K", track.names = NULL, dir = "IGV_tracks")
+createBigWigDNAmetArray(
+  data = NULL,
+  genome = "hg38",
+  met.platform = "450K",
+  track.names = NULL,
+  dir = "IGV_tracks"
+)
 }
 \arguments{
 \item{data}{A matrix}

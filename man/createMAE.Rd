@@ -4,10 +4,21 @@
 \alias{createMAE}
 \title{Construct a Multi Assay Experiment for ELMER analysis}
 \usage{
-createMAE(exp, met, colData, sampleMap, linearize.exp = FALSE,
-  filter.probes = NULL, met.na.cut = 0.2, filter.genes = NULL,
-  met.platform = "450K", genome = NULL, save = TRUE, save.filename,
-  TCGA = FALSE)
+createMAE(
+  exp,
+  met,
+  colData,
+  sampleMap,
+  linearize.exp = FALSE,
+  filter.probes = NULL,
+  met.na.cut = 0.2,
+  filter.genes = NULL,
+  met.platform = "450K",
+  genome = NULL,
+  save = TRUE,
+  save.filename,
+  TCGA = FALSE
+)
 }
 \arguments{
 \item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 

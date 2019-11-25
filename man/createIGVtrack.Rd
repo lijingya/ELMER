@@ -4,9 +4,16 @@
 \alias{createIGVtrack}
 \title{Create a junction track for IGV visualization of interection}
 \usage{
-createIGVtrack(pairs, met.platform = "450K", genome = "hg38",
-  filename = "ELMER_interactions.bed", color.track = "black",
-  track.name = "junctions", gene.symbol = NULL, all.tss = TRUE)
+createIGVtrack(
+  pairs,
+  met.platform = "450K",
+  genome = "hg38",
+  filename = "ELMER_interactions.bed",
+  color.track = "black",
+  track.name = "junctions",
+  gene.symbol = NULL,
+  all.tss = TRUE
+)
 }
 \arguments{
 \item{pairs}{A data frame output from getPairs function}
