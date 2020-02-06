@@ -84,12 +84,12 @@ getTF.hypo.TFs.with.motif.pvalue.rda (see detail). If save is false, a data fram
 \value{
 Potential responsible TFs will be reported in a dataframe with 4 columns:
  \itemize{
-   \item{motif: the names of motif.}
-   \item{top.potential.TF.family: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.family}
-   \item{top.potential.TF.subfamily: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.subfamily}
-   \item{potential.TFs.family: TFs which are within top 5\% list and are known recognized the motif  (considering family classification).}
-   \item{potential.TFs.subfamily: TFs which are within top 5\% list and are known recognized the motif (considering subfamily classification).}
-   \item{top_5percent: all TFs which are within top 5\% list.}
+   \item motif: the names of motif.
+   \item top.potential.TF.family: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.family
+   \item top.potential.TF.subfamily: the highest ranking upstream TFs which are known recognized the motif. First item in potential.TFs.subfamily
+   \item potential.TFs.family: TFs which are within top 5\% list and are known recognized the motif  (considering family classification).
+   \item potential.TFs.subfamily: TFs which are within top 5\% list and are known recognized the motif (considering subfamily classification).
+   \item top_5percent: all TFs which are within top 5\% list.
  }
 }
 \description{
