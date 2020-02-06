@@ -1269,7 +1269,7 @@ get.enriched.motif <- function(data,
 #' "hyper" which means the probes are hypermethylated in group1;
 #' This argument is used only when mode is supervised nad
 #' it should be the same value from get.diff.meth function.
-#' @param topTFper Top ranked TF to be retrieved (default "0.05" -  5%)
+#' @param topTFper Top ranked TF to be retrieved (default "0.05" -  5 percent)
 #' @param correlation Type of correlation to evaluate (negative or positive).
 #' Negative checks if hypomethylated is upregulated. Positive if hypermethylated is upregulated.
 #' @param save.plots Create TF ranking plots ?
