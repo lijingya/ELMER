@@ -453,8 +453,9 @@ heatmapPairs <- function(data,
 #' @importFrom plyr ddply .
 #' @importFrom GenomicRanges distanceToNearest
 #' @importFrom grDevices png
-#' @importFrom ggpubr ggscatter
+#' @importFrom ggpubr ggscatter stat_cor
 #' @importFrom IRanges subsetByOverlaps
+#' @importFrom reshape2 melt
 #' @export
 #' @author Tiago Chedraoui Silva (tiagochst at gmail.com)
 #' @examples
@@ -551,7 +552,8 @@ heatmapGene <- function(data,
     pairs <- pairs[match(p,pairs$ID),] %>% na.omit
     
     if(filter.by.probe.annotation){
-      probes.annotation <- unique(names(getMet(data))[grep(GeneSymbol,values(getMet(data))$gene)])
+      metadata <- sesameData::sesameDataGet("HM450.hg19.manifest")
+      probes.annotation <- names(metadata[grep(GeneSymbol,metadata$gene_HGNC),])
       pairs <- pairs[pairs$ID %in% probes.annotation,]
     }
     
@@ -590,20 +592,20 @@ heatmapGene <- function(data,
     if(!isFALSE(scatter.plot)){
       probes <- unique(pairs$ID)
       gene <- gene.location$ensembl_gene_id
-      met <- melt(t(assay(getMet(mae)[probes,])))
+      met <- melt(t(assay(getMet(data)[probes,])))
       met$Var1 <- substr(met$Var1,1,16)
-      met <- merge(met,colData(mae)[,c("sample","definition")], by.x="Var1",by.y = "sample")
-      exp <- melt(t(assay(getExp(mae)[gene,])))
+      met <- merge(met,colData(data)[,c("sample",group.col)], by.x = "Var1",by.y = "sample")
+      exp <- melt(t(assay(getExp(data)[gene,])))
       exp$Var1 <- substr(exp$Var1,1,16)
       df <- merge(met,exp,by = "Var1")
-      colnames(df) <- c("Patient","probe","Methylation","definition","Gene","Expression")
+      colnames(df) <- c("Patient","probe","Methylation",group.col,"Gene","Expression")
       p <- ggscatter(as.data.frame(df), 
                      x = "Methylation", 
                      y = "Expression",
                      size = 0.7,
-                     palette = "uchicago",
+                     #palette = "uchicago",
                      facet.by = "probe",
-                     color = "definition"
+                     color = group.col
                      #shape = 21, size = 3, # Points color, shape and size
                      #add = "reg.line",  # Add regressin line 
                      #add.params = list(color = "blue", fill = "lightgray"), # Customize reg. line
@@ -619,18 +621,18 @@ heatmapGene <- function(data,
              width = scatter.plot.width,
              height = scatter.plot.height)
       
-      #for(p in pairs$ID){
-      #  scatter.plot(data = data,
-      #               byPair = list(probe = p, 
-      #                             gene = gene.location$ensembl_gene_id), 
-      #               category = group.col, 
-      #               dir.out = dir.out, 
-      #               width = 5,
-      #               height = 4,
-      #               save = TRUE, 
-      #               correlation = TRUE,
-      #               lm_line = TRUE)
-      #}
+      for(p in pairs$ID){
+        scatter.plot(data = data,
+                     byPair = list(probe = p, 
+                                   gene = gene.location$ensembl_gene_id), 
+                     category = group.col, 
+                     dir.out = dir.out, 
+                     width = 5,
+                     height = 4,
+                     save = TRUE, 
+                     correlation = TRUE,
+                     lm_line = TRUE)
+      }
     }
   }
   if(!GeneSymbol %in%  unique(pairs$Symbol)) stop("GeneID not in the pairs")
