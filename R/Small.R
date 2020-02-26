@@ -729,7 +729,7 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   } else {
     message("There were no probes to be removed")
   }
-  if(class(data) == class(MultiAssayExperiment())) {
+  if(is(data,"MultiAssayExperiment")) {
     experiments(data)["DNA methylation"][[1]] <- experiments(data)["DNA methylation"][[1]][keep,]
   } else {
     data <- data[keep,,drop = FALSE]
