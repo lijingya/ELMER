@@ -293,7 +293,7 @@ addDistNearestTSS <- function(data,
 #'   NearbyGenes <- GetNearGenes(data = data, 
 #'                               probes = c("cg15924102", "cg24741609"),  
 #'                               numFlankingGenes = 20)
-#'   NearbyGenes <- calcDistNearestTSS(
+#'   NearbyGenes <- ELMER:::calcDistNearestTSS(
 #'        links = NearbyGenes,
 #'        tssAnnot =  getTSS(genome = "hg38"),
 #'        TRange = rowRanges(getMet(data))
