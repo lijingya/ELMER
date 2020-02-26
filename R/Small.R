@@ -154,7 +154,8 @@
 #'    not.tcga.met <- met 
 #'    colnames(not.tcga.met) <- substr(colnames(not.tcga.met),1,15)
 #'    
-#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
+#'    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp),
+#'                                 primary = colnames(not.tcga.exp),
 #'                                 samples = colnames(not.tcga.exp), 
 #'                                 group = c(rep("group1",4),rep("group2",4)))
 #'    distal.enhancer <- get.feature.probe(genome = "hg19",met.platform = "450k")
