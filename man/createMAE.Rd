@@ -157,7 +157,7 @@ mae <- createMAE(exp = gene.exp,
    GDCdownload(query.met)
    met <- GDCprepare(query = query.met)
    
-   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
+   distal.enhancer <- get.feature.probe(genome = "hg19",met.platform = "450k")
    
    # Consisering it is TCGA and SE
    mae.hg19 <- createMAE(exp = exp.hg19, 
@@ -192,7 +192,7 @@ mae <- createMAE(exp = gene.exp,
    phenotype.data <- data.frame(row.names = colnames(not.tcga.exp), 
                                 samples = colnames(not.tcga.exp), 
                                 group = c(rep("group1",4),rep("group2",4)))
-   distal.enhancer <- get.feature.probe(genome = "hg19",platform = "450k")
+   distal.enhancer <- get.feature.probe(genome = "hg19",met.platform = "450k")
    mae.hg19 <- createMAE(exp = not.tcga.exp, 
                          met =  not.tcga.met, 
                          TCGA = FALSE, 
