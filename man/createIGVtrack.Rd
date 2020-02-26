@@ -51,7 +51,7 @@ Hypo.pair <- get.pair(data=data,
                        Pe = 0.2,
                        dir.out="./",
                        label= "hypo")
- createIGVtrack(Hypo.pair,platform = "450K", genome = "hg38")
+ createIGVtrack(Hypo.pair,met.platform = "450K", genome = "hg38")
  }
 }
 \author{
