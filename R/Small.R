@@ -205,14 +205,14 @@ createMAE <- function (exp,
   # Expression data must have the ensembl_gene_id (Ensemble ID) and external_gene_name (Gene Symbol)
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   # If my input is a data frame we will need to add metadata information for the ELMER analysis steps
-  if(class(exp) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+  if(!is(exp,"RangedSummarizedExperiment")){
     exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome)
   }
   # Add this here ?
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
   
   
-  if(class(met) != class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+  if(!is(met,"RangedSummarizedExperiment")){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
   }
   met <- met[rowMeans(is.na(assay(met))) < met.na.cut, ]
@@ -232,7 +232,7 @@ createMAE <- function (exp,
   
   # We will need to check if the fields that we need exists.
   # Otherwise we will need to create them
-  if(class(exp) == class(as(SummarizedExperiment(),"RangedSummarizedExperiment"))){
+  if(!is(exp,"RangedSummarizedExperiment")){
     required.cols <- required.cols[!required.cols %in% colnames(values(exp))]
     if(length(required.cols) > 0) {
       gene.info <- get.GRCh(genome)
@@ -712,7 +712,7 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
   print.header("Filtering probes", type = "section")
   message("For more information see function preAssociationProbeFiltering")
   
-  if(class(data) == class(MultiAssayExperiment())) { 
+  if(is(data,"MultiAssayExperiment")) { 
     met <- assay(getMet(data))
   } else {
     met <- data
@@ -988,7 +988,7 @@ findMotifRegion <- function(regions,
                             nstep = 10000,
                             cores = 1){
   
-  if(!is(regions, class(GRanges()))) stop("Regions must be a Genomic Ranges object")
+  if(!is(regions, "GRanges")) stop("Regions must be a Genomic Ranges object")
   # get all hocomoco 11 motifs
   TFBS.motif <- "http://hocomoco11.autosome.ru/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
