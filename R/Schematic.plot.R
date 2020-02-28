@@ -100,7 +100,8 @@ schematic.plot <- function(data,
                            byCoordinate=list(chr=c(), start=c(), end=c()),
                            statehub.tracks = NULL,
                            dir.out="./",
-                           save=TRUE,...){
+                           save = TRUE,
+                           ...){
   # Begin of new schematic plot
   # For a probe get nearby genes
   args <- list(...)
@@ -206,7 +207,7 @@ schematic <- function(data,
                       group1 = NULL,
                       group2 = NULL,
                       extra.tracks = NULL){
-  options(ucscChromosomeNames=FALSE)
+  options(ucscChromosomeNames = FALSE)
   
   chr <- as.character(seqnames(probe.gr))
   

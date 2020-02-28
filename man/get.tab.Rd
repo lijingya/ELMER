@@ -11,6 +11,8 @@ get.tab(dir, classification, top = TRUE)
 \item{dir}{Directory with ELMER  results}
 
 \item{classification}{Which columns to retrieve family or subfamily}
+
+\item{top}{Consider only top 1 within each (sub)family}
 }
 \description{
 summarize MR TF as a binary table with 1 if TF 

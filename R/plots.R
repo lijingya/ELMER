@@ -552,7 +552,14 @@ heatmapGene <- function(data,
     pairs <- pairs[match(p,pairs$ID),] %>% na.omit
     
     if(filter.by.probe.annotation){
-      metadata <- sesameData::sesameDataGet("HM450.hg19.manifest")
+      
+      if (!requireNamespace("sesameData", quietly = TRUE)) {
+        stop("sesameData is needed. Please install it.",
+             call. = FALSE)
+      }
+      
+      
+      metadata <- sesameDataGet("HM450.hg19.manifest")
       probes.annotation <- names(metadata[grep(GeneSymbol,metadata$gene_HGNC),])
       pairs <- pairs[pairs$ID %in% probes.annotation,]
     }
@@ -947,6 +954,7 @@ createBigWigDNAmetArray <- function(data = NULL,
 #' @description Code used to create matrix for MR TF heatmap    
 #' @param dir Vector ofr directory with results
 #' @param classification Consider family or subfamily
+#' @param top Consider only top 1 within each (sub)family 
 #' @examples 
 #' \dontrun{
 #' elmer.results <- dirname(
@@ -972,6 +980,7 @@ get.tabs <- function(dir, classification = "family", top = TRUE){
 #' was found in the analysis, 0 if not
 #' @param dir Directory with ELMER  results
 #' @param classification Which columns to retrieve family or subfamily 
+#' @param top Consider only top 1 within each (sub)family 
 #' @importFrom dplyr full_join as_data_frame
 #' @importFrom purrr reduce
 #' @examples 

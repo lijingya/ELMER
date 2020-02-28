@@ -19,6 +19,7 @@ get.TFs(data,
           label = NULL,
           save.plots = FALSE,
           cores = 1,
+          topTFper = 0.05, 
           save = TRUE)
 }
 \arguments{
