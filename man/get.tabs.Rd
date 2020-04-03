@@ -10,6 +10,8 @@ get.tabs(dir, classification = "family", top = TRUE)
 \item{dir}{Vector ofr directory with results}
 
 \item{classification}{Consider family or subfamily}
+
+\item{top}{Consider only top 1 within each (sub)family}
 }
 \description{
 Code used to create matrix for MR TF heatmap

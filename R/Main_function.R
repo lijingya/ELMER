@@ -1230,6 +1230,7 @@ get.enriched.motif <- function(data,
 #'           label = NULL,
 #'           save.plots = FALSE,
 #'           cores = 1,
+#'           topTFper = 0.05, 
 #'           save = TRUE)
 #' @param data A multiAssayExperiment with DNA methylation and Gene Expression data. See \code{\link{createMAE}} function.
 #' @param enriched.motif A list containing output of get.enriched.motif function or a path of XX.rda file containing output of get.enriched.motif function.
