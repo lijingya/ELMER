@@ -79,7 +79,8 @@ Suggests:
     GenomicInteractions,
     webshot,
     R.utils,
-    covr
+    covr,
+    sesameData
 biocViews:
     DNAMethylation, 
     GeneExpression, 
