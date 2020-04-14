@@ -1,4 +1,5 @@
 ---
+title: "3.2 - Identifying differentially methylated probes"
 output: 
   html_document:
     self_contained: true

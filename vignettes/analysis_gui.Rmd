@@ -1,4 +1,5 @@
 ---
+title: "5 - Integrative analysis workshop with TCGAbiolinks and ELMER - Analysis GUI"
 output: 
   html_document:
     self_contained: true

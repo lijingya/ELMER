@@ -1,4 +1,5 @@
 ---
+title: "4.1 - Scatter plots"
 output: 
   html_document:
     self_contained: true

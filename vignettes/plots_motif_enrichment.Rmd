@@ -1,4 +1,5 @@
 ---
+title: "4.3 - Motif enrichment plots"
 output: 
   html_document:
     self_contained: true

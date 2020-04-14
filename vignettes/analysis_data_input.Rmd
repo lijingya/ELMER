@@ -1,4 +1,5 @@
 ---
+title: "3.1 - Data input - Creating MAE object"
 output: 
   html_document:
     self_contained: true

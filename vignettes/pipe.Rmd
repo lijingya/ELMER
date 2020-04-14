@@ -1,4 +1,5 @@
 ---
+title: "3.6 - TCGA.pipe: Running ELMER for TCGA data in a compact way"
 output: 
   html_document:
     self_contained: true
