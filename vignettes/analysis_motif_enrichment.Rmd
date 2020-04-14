@@ -19,6 +19,14 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
+
+```{r, echo = FALSE,hide=TRUE, message=FALSE, warning=FALSE}
+library(ELMER)
+library(DT)
+library(dplyr)
+library(BiocStyle)
+```
+
 <br>
 
 # Motif enrichment analysis on the selected probes

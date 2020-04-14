@@ -21,6 +21,12 @@ vignette: >
 
 <br>
 
+```{r, echo = FALSE,hide=TRUE, message=FALSE, warning=FALSE}
+library(ELMER)
+library(DT)
+library(dplyr)
+library(BiocStyle)
+```
 # Loading required data for plot
 ```{r,eval=TRUE, message=FALSE, warning = FALSE, results = "hide"}
 # Load results from previous sections
