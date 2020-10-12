@@ -134,7 +134,8 @@ Stat.nonpara <- function(Probe,
                          Exps = Exps){
   if(!length(Probe)==1) stop("Number of  Probe should be 1")
   
-  Gene <- NearGenes[NearGenes$ID == Probe,2]
+  NearGenes.set <- NearGenes[NearGenes$ID == Probe,]
+  Gene <- NearGenes.set[,2]
   Exp <- Exps[Gene,,drop = FALSE]
   Meth <- Meths
   if(is.null(methy) & is.null(unmethy)){
@@ -161,11 +162,15 @@ Stat.nonpara <- function(Probe,
   } else {
     Raw.p <- test.p[match(Gene, names(test.p))]
   }
+  
+  # In case Symbol is not in the input file
+  if(!"Symbol" %in% colnames(NearGenes.set)) NearGenes.set$Symbol <- NA
+  
   out <- data.frame(Probe    = rep(Probe,length(Gene)),
                     GeneID   = Gene,
-                    Symbol   = NearGenes[NearGenes$ID == Probe,]$Symbol, 
-                    Distance = NearGenes[NearGenes$ID == Probe,]$Distance, 
-                    Sides    = NearGenes[NearGenes$ID == Probe,]$Side,
+                    Symbol   = NearGenes.set$Symbol, 
+                    Distance = NearGenes.set$Distance, 
+                    Sides    = NearGenes.set$Side,
                     Raw.p    = Raw.p, 
                     stringsAsFactors = FALSE)
   

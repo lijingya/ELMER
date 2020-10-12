@@ -46,7 +46,6 @@ NearGenes <- function (Target = NULL,
   strand(Gene) <- "*"
   # We will get only genes in the same same chromossome
   Gene <- Gene[as.character(seqnames(Gene)) %in% as.character(seqnames(regionInfo))]
-  #print(Gene)
   if(length(Gene)==0){
     warning(paste0(Target," don't have any nearby gene in the given gene list."))
     Final <- NA
@@ -223,16 +222,20 @@ GetNearGenes <- function(data = NULL,
 #' @examples 
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
-#'   NearbyGenes <- GetNearGenes(data = data, 
-#'                               probes = c("cg15924102", "cg24741609"),  
-#'                               numFlankingGenes = 20)
-#'   NearbyGenes <- addDistNearestTSS(data,NearbyGenes)
+#'  NearbyGenes <- GetNearGenes(
+#'   data = data, 
+#'   probes = c("cg15924102", "cg24741609"),  
+#'   numFlankingGenes = 20
+#'  )
+#'  NearbyGenes <- addDistNearestTSS(data = data, NearGenes = NearbyGenes)
 #' }
-addDistNearestTSS <- function(data,
-                              NearGenes,
-                              genome,
-                              met.platform,
-                              cores = 1) {
+addDistNearestTSS <- function(
+  data,
+  NearGenes,
+  genome,
+  met.platform,
+  cores = 1
+) {
   
   if(missing(NearGenes)) stop("Please set NearGenes argument")
   
@@ -269,8 +272,6 @@ addDistNearestTSS <- function(data,
   return(NearGenes)
 }
 
-
-
 #' @title Calculate distance from region to nearest TSS
 #' @description 
 #' Idea 
@@ -290,23 +291,30 @@ addDistNearestTSS <- function(data,
 #' @examples 
 #' \dontrun{
 #'  data <- ELMER:::getdata("elmer.data.example")
-#'   NearbyGenes <- GetNearGenes(data = data, 
-#'                               probes = c("cg15924102", "cg24741609"),  
-#'                               numFlankingGenes = 20)
+#'   NearbyGenes <- GetNearGenes(
+#'     data = data, 
+#'     probes = c("cg15924102", "cg24741609"),  
+#'     numFlankingGenes = 20
+#'  )
+#'  
 #'   NearbyGenes <- ELMER:::calcDistNearestTSS(
 #'        links = NearbyGenes,
 #'        tssAnnot =  getTSS(genome = "hg38"),
 #'        TRange = rowRanges(getMet(data))
-#'        )
+#'   )
 #' }
 #' @author Tiago C. Silva
-calcDistNearestTSS <- function(links,
-                               TRange,
-                               tssAnnot){
+calcDistNearestTSS <- function(
+  links,
+  TRange,
+  tssAnnot
+){
+  
   message("calculating Distance to nearest TSS")
   if(!is(tssAnnot,"GenomicRanges")){
     stop("tssAnnot is not a GenomicRanges")
   }
+  
   if(!is(TRange,"GenomicRanges")){
     stop("tssAnnot is not a GenomicRanges")
   }
@@ -314,37 +322,50 @@ calcDistNearestTSS <- function(links,
   if(!"ID" %in% colnames(values(TRange))){
     TRange$ID <- names(TRange)
   }
+  
   if(!"ensembl_gene_id" %in% colnames(links)){
     colnames(links)[grep("GeneID", colnames(links))] <- "ensembl_gene_id"
   }
-  merged <- dplyr::left_join(links,
-                             suppressWarnings(tibble::as_tibble(tssAnnot)),
-                             by = c("ensembl_gene_id"))
-  merged <- dplyr::left_join(merged,
-                             suppressWarnings(tibble::as_tibble(TRange)),
-                             by = c("ID"))
+  
+  merged <- dplyr::left_join(
+    links,
+    suppressWarnings(tibble::as_tibble(tssAnnot)),
+    by = c("ensembl_gene_id")
+  )
+  
+  merged <- dplyr::left_join(
+    merged,
+    suppressWarnings(tibble::as_tibble(TRange)),
+    by = c("ID")
+  )
   
   # In case a gene was removed from newer versions and not mapped
   merged <- merged[!is.na(merged$transcription_start_site),]
   
-  left <- makeGRangesFromDataFrame(merged,
-                                   start.field = "transcription_start_site",
-                                   end.field = "transcription_start_site",
-                                   seqnames.field = "seqnames.x",
-                                   strand.field = "strand.x",
-                                   ignore.strand = F)
+  left <- makeGRangesFromDataFrame(
+    merged,
+    start.field = "transcription_start_site",
+    end.field = "transcription_start_site",
+    seqnames.field = "seqnames.x",
+    strand.field = "strand.x",
+    ignore.strand = FALSE
+  )
   
-  right <- makeGRangesFromDataFrame(merged,
-                                    start.field = "start.y",
-                                    end.field = "end.y",
-                                    strand.field = "strand.y",
-                                    seqnames.field = "seqnames.y",
-                                    ignore.strand = F)
+  right <- makeGRangesFromDataFrame(
+    merged,
+    start.field = "start.y",
+    end.field = "end.y",
+    strand.field = "strand.y",
+    seqnames.field = "seqnames.y",
+    ignore.strand = FALSE
+  )
   
   merged$DistanceTSS <- distance(left,right,ignore.strand = TRUE)
   merged <- unique(merged[,c("ID","ensembl_gene_id","DistanceTSS")])
+  
   ret <- merged %>% 
-    dplyr::group_by_(~ID,~ensembl_gene_id) %>% dplyr::slice(which.min(DistanceTSS))
+    dplyr::group_by(.data$ID,.data$ensembl_gene_id) %>% 
+    dplyr::slice(which.min(DistanceTSS))
   
   #ret <- ret[match(links %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID),
   #          ret %>% tidyr::unite(ID,Target,GeneID) %>% pull(ID)),]
@@ -520,9 +541,10 @@ getRegionNearGenes <- function(TRange = NULL,
   ret <- ret[!duplicated(ret[,c("ensembl_gene_id","ID")]),]
   ret <- ret[order(ret$Distance),]
   
-  ret <- ret[,c("ID","ensembl_gene_id", 
-                grep("external_gene_", colnames(ret), value = TRUE),
-                "Distance")]
+  ret <- ret[, c("ID",
+                 "ensembl_gene_id", 
+                 grep("external_gene_", colnames(ret), value = TRUE),
+                 "Distance")]
   
   message("Identifying gene position for each probe") 
   f <- function(x) {
@@ -552,11 +574,18 @@ getRegionNearGenes <- function(TRange = NULL,
   
   if (!is.null(tssAnnot)) {
     message("Calculating distance to nearest TSS")
-    ret <- calcDistNearestTSS(links = ret,
-                              TRange = TRange,
-                              tssAnnot = tssAnnot)
+    ret <- calcDistNearestTSS(
+      links = ret,
+      TRange = TRange,
+      tssAnnot = tssAnnot
+    )
   }
-  colnames(ret)[1:3] <- c("ID", "GeneID", "Symbol")
+  
+  if(any(grepl("external_gene_", colnames(ret)))){
+    colnames(ret)[1:3] <- c("ID", "GeneID", "Symbol")
+  } else {
+    colnames(ret)[1:2] <- c("ID", "GeneID")
+  }
   pb$terminate()
   return(ret)
 }

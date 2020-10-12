@@ -519,7 +519,7 @@ heatmapGene <- function(data,
   probes.info <- rowRanges(getMet(data)) # 450K and hg38
   gene.info <- rowRanges(getExp(data))
   gene.location <- gene.info[gene.info$external_gene_name == GeneSymbol,]
-  
+  print(gene.location)
   if(length(gene.location) == 0) {
     message("Gene not found: ", GeneSymbol)
     return(NULL)
@@ -534,12 +534,13 @@ heatmapGene <- function(data,
     gene.precede <- gene.info[precede(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
     gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
     
+  
     # Get the regions of the 2 nearest genes, we will get all probes on those regions
-    regions <- range(gene.gr)
-    df <- data.frame(chrom = unique(as.character(seqnames(regions))), 
-                     start = min(start(regions)), 
-                     end = max(end(regions)))
-    regions <- as(df, "GRanges")
+    regions <- data.frame(
+      chrom = unique(as.character(seqnames(gene.gr))), 
+                     start = min(start(gene.gr)), 
+                     end = max(end(gene.gr))) %>% 
+      makeGRangesFromDataFrame
     p <- names(sort(subsetByOverlaps(probes.info, regions, ignore.strand = TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
     
@@ -559,7 +560,7 @@ heatmapGene <- function(data,
       }
       
       
-      metadata <- sesameDataGet("HM450.hg19.manifest")
+      metadata <- sesameData::sesameDataGet("HM450.hg19.manifest")
       probes.annotation <- names(metadata[grep(GeneSymbol,metadata$gene_HGNC),])
       pairs <- pairs[pairs$ID %in% probes.annotation,]
     }
@@ -736,20 +737,20 @@ heatmapGene <- function(data,
   
   bottom_annotation_height = unit(3, "cm")
   
-  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
-                          show_legend = F,
+  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = FALSE], 
+                          show_legend = FALSE,
                           col = col.list)
   ht_list = 
     Heatmap(meth, 
             name = "DNA methylation level", 
             col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
             column_names_gp = gpar(fontsize = 5),
-            show_column_names = F,
+            show_column_names = FALSE,
             column_order = order, 
             show_row_names = TRUE,
-            cluster_columns = F,
+            cluster_columns = FALSE,
             row_names_side = "left",
-            cluster_rows = F,
+            cluster_rows = FALSE,
             row_names_gp = gpar(fontsize = 8),
             top_annotation = ha,
             column_title_gp = gpar(fontsize = 10), 
@@ -762,7 +763,7 @@ heatmapGene <- function(data,
                 name = i, 
                 width = unit(5, "mm"),
                 column_title = "", 
-                show_column_names = F
+                show_column_names = FALSE
         ) 
   }
   if(!is.null(exp.metadata)) {

@@ -20,6 +20,8 @@ vignette: >
 ---
 
 ```{r, fig.height=6,echo=FALSE, message=FALSE, warning=FALSE, include=TRUE}
+library(ELMER.data)
+library(ELMER)
 data(elmer.data.example)
 data(LUSC_meth_refined)
 data(LUSC_RNA_refined)

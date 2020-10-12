@@ -22,6 +22,7 @@ vignette: >
 <br>
 
 ```{r, echo = FALSE,hide=TRUE, message=FALSE, warning=FALSE}
+library(ELMER.data)
 library(ELMER)
 library(DT)
 library(dplyr)

@@ -425,7 +425,7 @@ get.diff.meth <- function(data,
 #' factor networks from cancer methylomes." Genome biology 16.1 (2015): 1.
 #' @examples
 #' data <- ELMER:::getdata("elmer.data.example")
-#' nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+#' nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
 #'                          geneAnnot=getExp(data))
 #' Hypo.pair <- get.pair(data=data,
 #'                        nearGenes=nearGenes,
@@ -475,6 +475,10 @@ get.pair <- function(data,
   if(is.character(nearGenes)){
     nearGenes <- get(load(nearGenes))
   }
+  
+  # if(!all(c("ID", "GeneID", "Symbol" ) %in% colnames(nearGenes)))
+  #   stop("nearGenes does not have one of the expected columns: ID, GeneID, Symbol")
+  
   if(diffExp & missing(group.col))
     stop("Please set group.col argument to test whether putative target gene are differentially expressed between two groups.")
   
