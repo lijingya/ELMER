@@ -407,18 +407,28 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
   met <- met[rownames(met) %in% names(rowRanges),,drop = FALSE]
   met <- met[names(rowRanges),,drop = FALSE]
   assay <- data.matrix(met)
-  met <- SummarizedExperiment(assays=assay,
-                              rowRanges=rowRanges,
-                              colData=colData)
+  met <- SummarizedExperiment(
+    assays = assay,
+    rowRanges = rowRanges,
+    colData = colData
+  )
   return(met)
 }
 
+
 getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.hg19.manifest"))
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg19.manifest"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.hg38.manifest"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg38.manifest"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg19.manifest"))
+  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg38.manifest"))
+  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
 }
+
+#getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
+#  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.hg19.manifest"))
+#  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg19.manifest"))
+#  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.hg38.manifest"))
+#  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg38.manifest"))
+#}
 
 getdata <- function(...)
 {

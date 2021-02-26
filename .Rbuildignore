@@ -5,3 +5,5 @@ ELMER.example.tar.xz
 ^appveyor\.yml$
 ^\.travis\.yml$
 ^codecov\.yml$
+^doc$
+^Meta$

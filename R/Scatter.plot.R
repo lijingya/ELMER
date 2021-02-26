@@ -222,7 +222,8 @@ scatter.plot <- function(data,
 #'@param ylim y-axis limit i.e. c(0,25)
 #'@param dots.size Control dots size
 #'@param title A character specify the figure title.
-#'@param correlation Show person correlation values 
+#'@param correlation Show spearman correlation values 
+#'@param correlation.text.size Correlation values
 #'@param color.value A vector specify the color of each category, such as 
 #color.value=c("Experiment"="red","Control"="darkgreen")
 #'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
@@ -237,6 +238,7 @@ scatter <- function(meth,
                     dots.size = 0.9,
                     title = NULL,
                     correlation = FALSE,
+                    correlation.text.size = 3,
                     color.value = NULL,
                     lm_line = FALSE){
   
@@ -278,14 +280,16 @@ scatter <- function(meth,
                       method = c("pearson"))
       corval <- round(cor$estimate,digits = 2)
       pvalue <- scientific(cor$p.value, digits = 3)
-      title <- paste0(title, "\n","Pearson Cor: ", corval," / P-value: ", pvalue)
+      title <- paste0(title, "\n","Spearman Cor: ", corval," / P-value: ", pvalue)
       P <- P + labs(title = title)
-      P <- P + annotate("text",
-                        x = 0.01,
-                        y = ifelse(is.null(ylim),max(as.numeric(exp[,GeneID])) + 1, max(ylim) - 1),
-                        hjust = 0.0,
-                        size = 4,
-                        label = paste0("Cor: ",corval," / P-value: ",pvalue))
+      P <- P + annotate(
+        "text",
+        x = 0.01,
+        y = ifelse(is.null(ylim),max(as.numeric(exp[,GeneID])) + 1, max(ylim) - 1),
+        hjust = 0.0,
+        size = correlation.text.size,
+        label = bquote(italic(rho)~":"~.(corval)~"/P-value: "~.(pvalue))
+      )
       #print(paste0(title, "\n","Rho: ", corval," / P-value: ", cor$p.value))
     }
   } else {
