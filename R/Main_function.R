@@ -526,14 +526,15 @@ get.pair <- function(data,
   Probe.gene <- adply(.data = unique(nearGenes$ID),
                       .margins = 1,
                       .fun = function(x) {
-                        Stat.nonpara(Probe = x,
-                                     Meths = met[x,],
-                                     methy = methylated,
-                                     unmethy = unmethylated,
-                                     NearGenes = as.data.frame(nearGenes),
-                                     correlation = correlation,
-                                     Top = minSubgroupFrac/2, # Each group will have half of the samples
-                                     Exps = exp
+                        Stat.nonpara(
+                          Probe = x,
+                          Meths = met[x,],
+                          methy = methylated,
+                          unmethy = unmethylated,
+                          NearGenes = as.data.frame(nearGenes),
+                          correlation = correlation,
+                          Top = minSubgroupFrac/2, # Each group will have half of the samples
+                          Exps = exp
                         )
                       },
                       .progress = "time",
