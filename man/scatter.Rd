@@ -15,6 +15,7 @@ scatter(
   dots.size = 0.9,
   title = NULL,
   correlation = FALSE,
+  correlation.text.size = 3,
   color.value = NULL,
   lm_line = FALSE
 )
@@ -38,7 +39,9 @@ scatter(
 
 \item{title}{A character specify the figure title.}
 
-\item{correlation}{Show person correlation values}
+\item{correlation}{Show spearman correlation values}
+
+\item{correlation.text.size}{Correlation values}
 
 \item{color.value}{A vector specify the color of each category, such as}
 
