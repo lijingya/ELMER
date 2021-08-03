@@ -293,25 +293,33 @@ get.diff.meth <- function(data,
     dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)
     ylab <- ifelse(is.na(diff.dir),
                    " (FDR corrected P-values) [two tailed test]",
-                   " (FDR corrected P-values) [one tailed test]")
-    TCGAVisualize_volcano(x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
-                          y = out$adjust.p,
-                          title =  paste0("Volcano plot - Probes ",
-                                          ifelse(is.na(diff.dir),"differently ",diff.dir),
-                                          "methylated in ", group1, " vs ", group2,"\n"),
-                          filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
-                          label =  c("Not Significant",
-                                     paste0("Hypermethylated in ",group1),
-                                     paste0("Hypomethylated in ",group1)),
-                          ylab =  bquote(-Log[10] ~ .(ylab)),
-                          xlab =  expression(paste(
-                            "DNA Methylation difference (",beta,"-values)")
-                          ),
-                          x.cut = sig.dif,
-                          y.cut = pvalue)
-    write_csv(out,path=sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
-    write_csv(out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
-              path=sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir)))
+                   " (FDR corrected P-values) [one tailed test]"
+    )
+    TCGAVisualize_volcano(
+      x = as.data.frame(out)[,grep("Minus",colnames(out),value = T)],
+      y = out$adjust.p,
+      title =  paste0("Volcano plot - Probes ",
+                      ifelse(is.na(diff.dir),"differently ",diff.dir),
+                      "methylated in ", group1, " vs ", group2,"\n"),
+      filename = sprintf("%s/volcanoPlot.probes.%s.png",dir.out, ifelse(is.na(diff.dir),"two_tailed",diff.dir)),
+      label =  c("Not Significant",
+                 paste0("Hypermethylated in ",group1),
+                 paste0("Hypomethylated in ",group1)),
+      ylab =  bquote(-Log[10] ~ .(ylab)),
+      xlab =  expression(paste(
+        "DNA Methylation difference (",beta,"-values)")
+      ),
+      x.cut = sig.dif,
+      y.cut = pvalue
+    )
+    write_csv(
+      x = out,
+      file = sprintf("%s/getMethdiff.%s.probes.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir))
+    )
+    write_csv(
+      x = out[out$adjust.p < pvalue & abs(out[,diffCol]) > sig.dif & !is.na(out$adjust.p),],
+      file = sprintf("%s/getMethdiff.%s.probes.significant.csv",dir.out,ifelse(is.na(diff.dir),"both",diff.dir))
+    )
     
     
   }
@@ -549,7 +557,7 @@ get.pair <- function(data,
   if(save) {
     dir.create(dir.out, showWarnings = FALSE)
     file <- sprintf("%s/getPair.%s.all.pairs.statistic.csv",dir.out, ifelse(is.null(label),"",label))
-    write_csv(Probe.gene,path=file)
+    write_csv(Probe.gene,file = file)
     message(paste("File created:", file))
   }
   
@@ -581,14 +589,14 @@ get.pair <- function(data,
     Probe.gene.Pe <- Get.Pvalue.p(Probe.gene,permu)
     
     if(save) write_csv(Probe.gene.Pe,
-                       path = sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
+                       file = sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
                                       ifelse(is.null(label),"",label)))
     # Pe will always be 1 for the supervised mode. As the test exp(U) > exp(M) will always be doing the same comparison.
     selected <- Probe.gene.Pe[Probe.gene.Pe$Pe < Pe & !is.na(Probe.gene.Pe$Pe),]
   } else {
     Probe.gene$FDR <- p.adjust(Probe.gene$Raw.p,method = "BH")
     if(save) write_csv(Probe.gene,
-                       path=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
+                       file=sprintf("%s/getPair.%s.pairs.statistic.with.empirical.pvalue.csv",dir.out,
                                     ifelse(is.null(label),"",label)))
     selected <-  Probe.gene[Probe.gene$FDR < Pe,]
   }
@@ -622,7 +630,7 @@ get.pair <- function(data,
     colnames(add) <- c(log.col,diff.col)
     selected <- cbind(selected, add)
   }
-  if(save) write_csv(selected,path=sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))
+  if(save) write_csv(selected,file = sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, ifelse(is.null(label),"",label)))
   invisible(gc())
   return(selected)
 }
@@ -1120,9 +1128,11 @@ get.enriched.motif <- function(data,
   Summary <- Summary[order(Summary$lowerOR, decreasing = TRUE),]
   
   if(save) {
-    write_csv(Summary,
-              path = sprintf("%s/getMotif.%s.motif.enrichment.csv",
-                             dir.out,ifelse(is.null(label),"",label)))
+    write_csv(
+      x = Summary,
+      file = sprintf("%s/getMotif.%s.motif.enrichment.csv",
+                     dir.out,ifelse(is.null(label),"",label))
+    )
   }
   
   ## enriched motif and probes
@@ -1207,7 +1217,7 @@ get.enriched.motif <- function(data,
       
       out.file <- sprintf("%s/getPair.%s.pairs.significant.withmotif.csv",dir.out, ifelse(is.null(label),"",label))
       message("Saving file: ", out.file)
-      write_csv(sig.Pairs, path = out.file)
+      write_csv(sig.Pairs, file = out.file)
     }
   }
   
@@ -1526,7 +1536,7 @@ get.TFs <- function(data,
     save(TF.meth.cor,
          file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label)))
     write_csv(cor.summary,
-              path=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+              file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
                            dir.out=dir.out, label=ifelse(is.null(label),"",label)))
   }
   
@@ -1611,12 +1621,14 @@ getTFtargets <- function(pairs,
   df.all <- df.all[!duplicated(df.all),,drop = FALSE]
   df.all <- df.all[order(df.all$TF),,drop = FALSE]
   
-  if(save) readr::write_csv(df.all,
-                            path=sprintf("%s/getTFtargets.%s.%s.csv",
-                                         dir.out=dir.out,
-                                         label=ifelse(is.null(label),"",label),
-                                         classification = classification
-                            )
+  if(save) readr::write_csv(
+    x = df.all,
+    file = sprintf(
+      "%s/getTFtargets.%s.%s.csv",
+      dir.out=dir.out,
+      label=ifelse(is.null(label),"",label),
+      classification = classification
+    )
   )
   
   if(!missing(dmc.analysis)) {
@@ -1671,12 +1683,14 @@ getTFtargets <- function(pairs,
     
     # For each enriched motif the the potencial TF family members
     pairs[,"TF"] <- aux[match(pairs$Probe,aux$X1),]$V1
-    if(save) readr::write_csv(pairs,
-                              path=sprintf("%s/getTFtargets_genomic_coordinates.%s.%s.csv",
-                                           dir.out=dir.out,
-                                           label=ifelse(is.null(label),"",label),
-                                           classification = classification
-                              )
+    if(save) readr::write_csv(
+      x = pairs,
+      file = sprintf(
+        "%s/getTFtargets_genomic_coordinates.%s.%s.csv",
+        dir.out=dir.out,
+        label=ifelse(is.null(label),"",label),
+        classification = classification
+      )
     )
   }
   return(df.all)
@@ -1737,8 +1751,9 @@ maphg38tohg19 <- function(file,
   colnames(x) <- paste0("gene_hg19_",colnames(x))
   ret.hg19[,c("seqnames","start","end","strand")] <- NULL
   ret.hg19 <- merge(ret.hg19,x, by.x = "GeneID",by.y = "gene_hg19_GeneID")
-  readr::write_csv(ret.hg19,
-                   path = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
+  readr::write_csv(
+    ret.hg19,
+    file = gsub("genomic_coordinates","genomic_coordinates_mapped_to_hg19",file)
   )
 }
 
