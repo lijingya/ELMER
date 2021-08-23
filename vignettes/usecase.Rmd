@@ -28,7 +28,7 @@ This section contains the complete ELMER code for the following analysis:
 * Vignette example
 * BRCA Supervised analysis
 * BRCA Unsupervised analysis
-  
+
 # Vignette example
 
 Below is the complete code that was explained in the other sections.
@@ -38,21 +38,25 @@ library(MultiAssayExperiment)
 library(ELMER.data)
 library(ELMER)
 # get distal probes that are 2kb away from TSS on chromosome 1
-distal.probes <- get.feature.probe(genome = "hg19", 
-                                   met.platform = "450K", 
-                                   rm.chr = paste0("chr",c(2:22,"X","Y")))
+distal.probes <- get.feature.probe(
+  genome = "hg19", 
+  met.platform = "450K", 
+  rm.chr = paste0("chr",c(2:22,"X","Y"))
+)
 data(LUSC_RNA_refined,package = "ELMER.data") # GeneExp
 data(LUSC_meth_refined,package = "ELMER.data") # Meth
 
-mae <- createMAE(exp = GeneExp, 
-                 met = Meth,
-                 save = TRUE,
-                 linearize.exp = TRUE,
-                 save.filename = "mae.rda",
-                 filter.probes = distal.probes,
-                 met.platform = "450K",
-                 genome = "hg19",
-                 TCGA = TRUE)
+mae <- createMAE(
+  exp = GeneExp, 
+  met = Meth,
+  save = TRUE,
+  linearize.exp = TRUE,
+  save.filename = "mae.rda",
+  filter.probes = distal.probes,
+  met.platform = "450K",
+  genome = "hg19",
+  TCGA = TRUE
+)
 
 group.col <- "definition"
 group1 <-  "Primary solid Tumor"
@@ -60,64 +64,74 @@ group2 <- "Solid Tissue Normal"
 dir.out <- "result"
 diff.dir <-  "hypo" # Search for hypomethylated probes in group 1
 
-sig.diff <- get.diff.meth(data = mae, 
-                          group.col = group.col,
-                          group1 = group1,
-                          group2 = group2,
-                          minSubgroupFrac = 0.2,
-                          sig.dif = 0.3,
-                          diff.dir = diff.dir,
-                          cores = 1, 
-                          dir.out = dir.out,
-                          pvalue = 0.01)
+sig.diff <- get.diff.meth(
+  data = mae, 
+  group.col = group.col,
+  group1 = group1,
+  group2 = group2,
+  minSubgroupFrac = 0.2,
+  sig.dif = 0.3,
+  diff.dir = diff.dir,
+  cores = 1, 
+  dir.out = dir.out,
+  pvalue = 0.01
+)
 
 
-nearGenes <- GetNearGenes(data = mae, 
-                          probes = sig.diff$probe, 
-                          numFlankingGenes = 20) # 10 upstream and 10 dowstream genes
+nearGenes <- GetNearGenes(
+  data = mae, 
+  probes = sig.diff$probe, 
+  numFlankingGenes = 20
+) # 10 upstream and 10 dowstream genes
 
-pair <- get.pair(data = mae,
-                 group.col = group.col,
-                 group1 = group1,
-                 mode = "unsupervised",
-                 group2 = group2,
-                 nearGenes = nearGenes,
-                 diff.dir = diff.dir,
-                 minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
-                 permu.dir = file.path(dir.out,"permu"),
-                 permu.size = 100, # Please set to 100000 to get significant results
-                 raw.pvalue = 0.05,   
-                 Pe = 0.01, # Please set to 0.001 to get significant results
-                 filter.probes = TRUE, # See preAssociationProbeFiltering function
-                 filter.percentage = 0.05,
-                 filter.portion = 0.3,
-                 dir.out = dir.out,
-                 cores = 1,
-                 label = diff.dir)
+pair <- get.pair(
+  data = mae,
+  group.col = group.col,
+  group1 = group1,
+  mode = "unsupervised",
+  group2 = group2,
+  nearGenes = nearGenes,
+  diff.dir = diff.dir,
+  minSubgroupFrac = 0.4, # % of samples to use in to create groups U/M
+  permu.dir = file.path(dir.out,"permu"),
+  permu.size = 100, # Please set to 100000 to get significant results
+  raw.pvalue = 0.05,   
+  Pe = 0.01, # Please set to 0.001 to get significant results
+  filter.probes = TRUE, # See preAssociationProbeFiltering function
+  filter.percentage = 0.05,
+  filter.portion = 0.3,
+  dir.out = dir.out,
+  cores = 1,
+  label = diff.dir
+)
 
 # Identify enriched motif for significantly hypomethylated probes which 
 # have putative target genes.
-enriched.motif <- get.enriched.motif(data = mae,
-                                     probes = pair$Probe, 
-                                     dir.out = dir.out, 
-                                     label = diff.dir,
-                                     min.incidence = 10,
-                                     lower.OR = 1.1)
+enriched.motif <- get.enriched.motif(
+  data = mae,
+  probes = pair$Probe, 
+  dir.out = dir.out, 
+  label = diff.dir,
+  min.incidence = 10,
+  lower.OR = 1.1
+)
 
-TF <- get.TFs(data = mae, 
-              mode = "unsupervised",
-              group.col = group.col,
-              group1 = group1,
-              group2 = group2,
-              enriched.motif = enriched.motif,
-              dir.out = dir.out,
-              cores = 1, 
-              label = diff.dir)
+TF <- get.TFs(
+  data = mae, 
+  mode = "unsupervised",
+  group.col = group.col,
+  group1 = group1,
+  group2 = group2,
+  enriched.motif = enriched.motif,
+  dir.out = dir.out,
+  cores = 1, 
+  label = diff.dir
+)
 
 
 ```
 
-# BRCA Supervised analysis
+# BRCA Unsupervised analysis
 
 ```{r, eval=FALSE}
 library(stringr)
@@ -134,23 +148,30 @@ file <- "mae_BRCA_hg38_450K_no_ffpe.rda"
 if(file.exists(file)) {
   mae <- get(load(file))
 } else {
-  getTCGA(disease = "BRCA", # TCGA disease abbreviation (BRCA,BLCA,GBM, LGG, etc)
-          basedir = "DATA", # Where data will be downloaded
-          genome  = "hg38") # Genome of refenrece "hg38" or "hg19"
+  getTCGA(
+    disease = "BRCA", # TCGA disease abbreviation (BRCA,BLCA,GBM, LGG, etc)
+    basedir = "DATA", # Where data will be downloaded
+    genome  = "hg38"
+  ) # Genome of refenrece "hg38" or "hg19"
   
-  distal.probes <- get.feature.probe(feature = NULL,
-                                     genome = "hg38", 
-                                     met.platform = "450K") 
+  distal.probes <- get.feature.probe(
+    feature = NULL,
+    genome = "hg38", 
+    met.platform = "450K"
+  )
   
-  mae <- createMAE(exp = "~/paper_elmer/Data/BRCA/BRCA_RNA_hg38.rda", 
-                   met = "~/paper_elmer/Data/BRCA/BRCA_meth_hg38.rda", 
-                   met.platform = "450K",
-                   genome = "hg38",
-                   linearize.exp = TRUE,
-                   filter.probes = distal.probes,
-                   met.na.cut = 0.2,
-                   save = FALSE,
-                   TCGA = TRUE) 
+  
+  mae <- createMAE(
+    exp = "~/paper_elmer/Data/BRCA/BRCA_RNA_hg38.rda", 
+    met = "~/paper_elmer/Data/BRCA/BRCA_meth_hg38.rda", 
+    met.platform = "450K",
+    genome = "hg38",
+    linearize.exp = TRUE,
+    filter.probes = distal.probes,
+    met.na.cut = 0.2,
+    save = FALSE,
+    TCGA = TRUE
+  ) 
   # Remove FFPE samples from the analysis
   mae <- mae[,!mae$is_ffpe]
   
@@ -171,66 +192,76 @@ if(file.exists(file)) {
 }
 dir.out <- "BRCA_unsupervised_hg38/hypo"
 cores <- 10
-diff.probes <- get.diff.meth(data = mae, 
-                             group.col = "definition",
-                             group1 = "Primary solid Tumor",
-                             group2 = "Solid Tissue Normal",
-                             diff.dir = "hypo", # Get probes hypometh. in group 1 
-                             cores = cores,
-                             minSubgroupFrac = 0.2, # % group samples  used. 
-                             pvalue = 0.01, 
-                             sig.dif = 0.3,
-                             dir.out = dir.out,
-                             save = TRUE)
+diff.probes <- get.diff.meth(
+  data = mae, 
+  group.col = "definition",
+  group1 = "Primary solid Tumor",
+  group2 = "Solid Tissue Normal",
+  diff.dir = "hypo", # Get probes hypometh. in group 1 
+  cores = cores,
+  minSubgroupFrac = 0.2, # % group samples  used. 
+  pvalue = 0.01, 
+  sig.dif = 0.3,
+  dir.out = dir.out,
+  save = TRUE
+)
 
 # For each differently methylated probes we will get the 
 # 20 nearby genes (10 downstream and 10 upstream)
-nearGenes <- GetNearGenes(data = mae, 
-                          probes =  diff.probes$probe, 
-                          numFlankingGenes = 20)
+nearGenes <- GetNearGenes(
+  data = mae, 
+  probes =  diff.probes$probe, 
+  numFlankingGenes = 20
+)
 
 # This step is the most time consuming. Depending on the size of the groups
 # and the number of probes found previously it migh take hours
-Hypo.pair <- get.pair(data = mae,
-                      nearGenes = nearGenes,
-                      group.col = "definition",
-                      group1 = "Primary solid Tumor",
-                      group2 = "Solid Tissue Normal",
-                      permu.dir = paste0(dir.out,"/permu"),
-                      permu.size = 10000, 
-                      mode = "unsupervised",
-                      minSubgroupFrac = 0.4, # 40% of samples to create U and M
-                      raw.pvalue = 0.001,   
-                      Pe = 0.001, 
-                      filter.probes = TRUE,
-                      filter.percentage = 0.05,
-                      filter.portion = 0.3,
-                      dir.out = dir.out,
-                      cores = cores,
-                      label = "hypo")
+Hypo.pair <- get.pair(
+  data = mae,
+  nearGenes = nearGenes,
+  group.col = "definition",
+  group1 = "Primary solid Tumor",
+  group2 = "Solid Tissue Normal",
+  permu.dir = paste0(dir.out,"/permu"),
+  permu.size = 10000, 
+  mode = "unsupervised",
+  minSubgroupFrac = 0.4, # 40% of samples to create U and M
+  raw.pvalue = 0.001,   
+  Pe = 0.001, 
+  filter.probes = TRUE,
+  filter.percentage = 0.05,
+  filter.portion = 0.3,
+  dir.out = dir.out,
+  cores = cores,
+  label = "hypo"
+)
 # Number of pairs: 2950 
 
 
-enriched.motif <- get.enriched.motif(data = mae,
-                                     min.motif.quality = "DS",
-                                     probes = unique(Hypo.pair$Probe), 
-                                     dir.out = dir.out, 
-                                     label = "hypo",
-                                     min.incidence = 10,
-                                     lower.OR = 1.1)
-TF <- get.TFs(data = mae, 
-              group.col = "definition",
-              group1 = "Primary solid Tumor",
-              group2 = "Solid Tissue Normal",
-              minSubgroupFrac = 0.4, # Set to 1 if supervised mode
-              enriched.motif = enriched.motif,
-              dir.out = dir.out, 
-              cores = cores, 
-              label = "hypo")
+enriched.motif <- get.enriched.motif(
+  data = mae,
+  min.motif.quality = "DS",
+  probes = unique(Hypo.pair$Probe), 
+  dir.out = dir.out, 
+  label = "hypo",
+  min.incidence = 10,
+  lower.OR = 1.1
+)
+TF <- get.TFs(
+  data = mae, 
+  group.col = "definition",
+  group1 = "Primary solid Tumor",
+  group2 = "Solid Tissue Normal",
+  minSubgroupFrac = 0.4, # Set to 1 if supervised mode
+  enriched.motif = enriched.motif,
+  dir.out = dir.out, 
+  cores = cores, 
+  label = "hypo"
+)
 
 ```
 
-# BRCA Unsupervised analysis
+# BRCA Supervised analysis
 
 ```{r, eval=FALSE}
 library(stringr)
@@ -250,23 +281,29 @@ file <- "mae_BRCA_hg38_450K_no_ffpe.rda"
 if(file.exists(file)) {
   mae <- get(load(file))
 } else {
-  getTCGA(disease = "BRCA", # TCGA disease abbreviation (BRCA,BLCA,GBM, LGG, etc)
-          basedir = "DATA", # Where data will be downloaded
-          genome  = "hg38") # Genome of refenrece "hg38" or "hg19"
+  getTCGA(
+    disease = "BRCA", # TCGA disease abbreviation (BRCA,BLCA,GBM, LGG, etc)
+    basedir = "DATA", # Where data will be downloaded
+    genome  = "hg38"
+  ) # Genome of refenrece "hg38" or "hg19"
   
-  distal.probes <- get.feature.probe(feature = NULL,
-                                     genome = "hg38", 
-                                     met.platform = "450K") 
+  distal.probes <- get.feature.probe(
+    feature = NULL,
+    genome = "hg38", 
+    met.platform = "450K"
+  ) 
   
-  mae <- createMAE(exp = "DATA/BRCA/BRCA_RNA_hg38.rda", 
-                   met = "DATA/BRCA/BRCA_meth_hg38.rda", 
-                   met.platform = "450K",
-                   genome = "hg38",
-                   linearize.exp = TRUE,
-                   filter.probes = distal.probes,
-                   met.na.cut = 0.2,
-                   save = FALSE,
-                   TCGA = TRUE) 
+  mae <- createMAE(
+    exp = "DATA/BRCA/BRCA_RNA_hg38.rda", 
+    met = "DATA/BRCA/BRCA_meth_hg38.rda", 
+    met.platform = "450K",
+    genome = "hg38",
+    linearize.exp = TRUE,
+    filter.probes = distal.probes,
+    met.na.cut = 0.2,
+    save = FALSE,
+    TCGA = TRUE
+  ) 
   # Remove FFPE samples from the analysis
   mae <- mae[,!mae$is_ffpe]
   
@@ -304,41 +341,49 @@ for(g in 1:nrow(groups)) {
       #--------------------------------------
       # Step 3.1: Get diff methylated probes |
       #--------------------------------------
-      Sig.probes <- get.diff.meth(data       = mae,
-                                  group.col  = group.col,
-                                  group1     = group1,
-                                  group2     = group2,
-                                  sig.dif    = 0.3,
-                                  minSubgroupFrac = 1,
-                                  cores      = cores,
-                                  dir.out    = dir.out,
-                                  diff.dir   = j,
-                                  pvalue     = 0.01)
+      Sig.probes <- get.diff.meth(
+        data       = mae,
+        group.col  = group.col,
+        group1     = group1,
+        group2     = group2,
+        sig.dif    = 0.3,
+        minSubgroupFrac = 1,
+        cores      = cores,
+        dir.out    = dir.out,
+        diff.dir   = j,
+        pvalue     = 0.01
+      )
       if(nrow(Sig.probes) == 0) next
       #-------------------------------------------------------------
       # Step 3.2: Identify significant probe-gene pairs            |
       #-------------------------------------------------------------
       # Collect nearby 20 genes for Sig.probes
-      nearGenes <- GetNearGenes(data  = mae,
-                                probe = Sig.probes$probe)
+      nearGenes <- GetNearGenes(
+        data  = mae,
+        probe = Sig.probes$probe
+      )
       
-      pair <- get.pair(data       = mae,
-                       nearGenes  = nearGenes,
-                       group.col  = group.col,
-                       group1     = group1,
-                       group2     = group2,
-                       permu.dir  = paste0(dir.out,"/permu"),
-                       dir.out    = dir.out,
-                       mode       = "supervised", 
-                       diff.dir   = j,
-                       cores      = cores,
-                       label      = j,
-                       permu.size = 10000,
-                       raw.pvalue = 0.001)
+      pair <- get.pair(
+        data       = mae,
+        nearGenes  = nearGenes,
+        group.col  = group.col,
+        group1     = group1,
+        group2     = group2,
+        permu.dir  = paste0(dir.out,"/permu"),
+        dir.out    = dir.out,
+        mode       = "supervised", 
+        diff.dir   = j,
+        cores      = cores,
+        label      = j,
+        permu.size = 10000,
+        raw.pvalue = 0.001
+      )
       
-      Sig.probes.paired <- readr::read_csv(paste0(dir.out,
-                                           "/getPair.",j,
-                                           ".pairs.significant.csv"))[,1, drop = TRUE]
+      Sig.probes.paired <- readr::read_csv(
+        paste0(dir.out,
+               "/getPair.",j,
+               ".pairs.significant.csv")
+      )[,1, drop = TRUE]
       
       
       #-------------------------------------------------------------
@@ -348,39 +393,47 @@ for(g in 1:nrow(groups)) {
         #-------------------------------------------------------------
         # Step 3.3: Motif enrichment analysis on the selected probes |
         #-------------------------------------------------------------
-        enriched.motif <- get.enriched.motif(probes  = Sig.probes.paired,
-                                             dir.out = dir.out,
-                                             data    = mae,
-                                             label   = j,
-                                             plot.title =  paste0("BRCA: OR for paired probes ",
-                                                                  j, "methylated in ",
-                                                                  group1, " vs ",group2))
-        motif.enrichment <- readr::read_csv(paste0(dir.out,
-                                            "/getMotif.",j,
-                                            ".motif.enrichment.csv"))
+        enriched.motif <- get.enriched.motif(
+          probes  = Sig.probes.paired,
+          dir.out = dir.out,
+          data    = mae,
+          label   = j,
+          plot.title =  paste0("BRCA: OR for paired probes ",
+                               j, "methylated in ",
+                               group1, " vs ",group2)
+        )
+        motif.enrichment <- readr::read_csv(
+          paste0(dir.out,
+                 "/getMotif.",j,
+                 ".motif.enrichment.csv")
+        )
         if(length(enriched.motif) > 0){
           #-------------------------------------------------------------
           # Step 3.4: Identifying regulatory TFs                        |
           #-------------------------------------------------------------
           print("get.TFs")
           
-          TF <- get.TFs(data           = mae,
-                        enriched.motif = enriched.motif,
-                        dir.out        = dir.out,
-                        mode           = "supervised",
-                        group.col      = group.col,
-                        group1         = group1,
-                        diff.dir       = j,
-                        group2         = group2,
-                        cores          = cores,
-                        label          = j)
-          TF.meth.cor <- get(load(paste0(dir.out,
-                                         "/getTF.",j,
-                                         ".TFs.with.motif.pvalue.rda")))
-          save(mae,TF, enriched.motif, Sig.probes.paired,
-               pair, nearGenes, Sig.probes, motif.enrichment,
-               TF.meth.cor,
-               file = paste0(dir.out,"/ELMER_results_",j,".rda"))
+          TF <- get.TFs(
+            data           = mae,
+            enriched.motif = enriched.motif,
+            dir.out        = dir.out,
+            mode           = "supervised",
+            group.col      = group.col,
+            group1         = group1,
+            diff.dir       = j,
+            group2         = group2,
+            cores          = cores,
+            label          = j
+          )
+          TF.meth.cor <- get(
+            load(paste0(dir.out, "/getTF.",j, ".TFs.with.motif.pvalue.rda"))
+          )
+          save(
+            mae, TF, enriched.motif, Sig.probes.paired,
+            pair, nearGenes, Sig.probes, motif.enrichment,
+            TF.meth.cor,
+            file = paste0(dir.out,"/ELMER_results_",j,".rda")
+          )
         }
       }
     }, error = function(e){
