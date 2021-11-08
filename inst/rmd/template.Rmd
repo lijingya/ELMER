@@ -51,7 +51,7 @@ library(dplyr)
 
 ```{r, echo=FALSE, warning=FALSE,message=FALSE, cols.print=20}
 file <- params$mae
-if(grep("\\.rds",file,ignore.case = T)){
+if(grepl("\\.rds",file,ignore.case = T)){
   mae <- readRDS(file)
 } else {
   mae <- get(load(file))
