@@ -21,7 +21,7 @@ params:
     group2: 
     direction:
     dir.out: 
-    funcivar : FALSE
+    funcivar: FALSE
 output: 
   html_document:
     df_print: paged
