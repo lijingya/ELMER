@@ -28,14 +28,17 @@ collapse the results keeping min distance for equals values
 \examples{
 \dontrun{
  data <- ELMER:::getdata("elmer.data.example")
-  NearbyGenes <- GetNearGenes(data = data, 
-                              probes = c("cg15924102", "cg24741609"),  
-                              numFlankingGenes = 20)
+  NearbyGenes <- GetNearGenes(
+    data = data, 
+    probes = c("cg15924102", "cg24741609"),  
+    numFlankingGenes = 20
+ )
+ 
   NearbyGenes <- ELMER:::calcDistNearestTSS(
        links = NearbyGenes,
        tssAnnot =  getTSS(genome = "hg38"),
        TRange = rowRanges(getMet(data))
-       )
+  )
 }
 }
 \author{

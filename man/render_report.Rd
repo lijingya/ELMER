@@ -22,7 +22,8 @@ render_report(
   pe = "0.01",
   nprobes = "10",
   lower.OR = "1.1",
-  out_file = file.path(getwd(), "report.html")
+  out_file = file.path(getwd(), "report.html"),
+  funcivar = FALSE
 )
 }
 \arguments{
@@ -61,6 +62,8 @@ render_report(
 \item{lower.OR}{lower.OR used in the analysis}
 
 \item{out_file}{Output file name (i.e report.html)}
+
+\item{funcivar}{Include funcivar analysis?}
 }
 \description{
 Build HTML report

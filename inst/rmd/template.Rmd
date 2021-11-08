@@ -21,6 +21,7 @@ params:
     group2: 
     direction:
     dir.out: 
+    funcivar : FALSE
 output: 
   html_document:
     df_print: paged
@@ -50,7 +51,11 @@ library(dplyr)
 
 ```{r, echo=FALSE, warning=FALSE,message=FALSE, cols.print=20}
 file <- params$mae
-mae <- get(load(file))
+if(grep("\\.rds",file,ignore.case = T)){
+  mae <- readRDS(file)
+} else {
+  mae <- get(load(file))
+}
 ```
 
 
@@ -60,21 +65,23 @@ opts_chunk$set(warning=FALSE, message=FALSE, echo=FALSE)
 ## this function is basically creating chunks within chunks, and then
 ## I use results='asis' so that the html image code is rendered 
 kexpand <- function(ht, cap) {
-  cat(knit(text = knit_expand(text = 
-                                sprintf("```{r %s, fig.height=%s, fig.cap='%s'}\n.motif.plot\n```", cap, ht, cap)
-  )))}
+  cat(knit(text = knit_expand(text = sprintf("```{r %s, fig.height=%s, fig.cap='%s'}\n.motif.plot\n```", cap, ht, cap)
+  )))
+}
 kexpand.plot <- function(ht = 10, cap,width = 15) {
   cat(knit(text = knit_expand(text = 
                                 sprintf("```{r %s, fig.height=%s, fig.width = %s, fig.cap='%s'}\n ##### %s\n plot(.pl)\n```", cap, ht, width,cap,cap)
-  )))}
+  )))
+}
 
 kexpand.df <- function(cap) {
   cat(knit(text = knit_expand(text = 
                                 sprintf("```{r %s}\n.df\n```",cap)
-  )))}
+  )))
+}
 kexpand.dt <- function(cap,format=NULL) {
-  cat(knit(text = knit_expand(text = 
-                                sprintf("```{r %s}\n
+  cat(knit(
+    text = knit_expand(text =  sprintf("```{r %s}\n
                                         .df <- DT::datatable(.df,
                                                       filter = 'top',
                                                       class = 'cell-border stripe',  
@@ -83,7 +90,8 @@ kexpand.dt <- function(cap,format=NULL) {
                                                       options = list(scrollX=TRUE, 
                                                                      dom = 'Bfrtip',
                                                                      buttons = c('copy', 'csv', 'excel', 'pdf', 'print',I('colvis'))))\nif(!is.null(format)){.df <- DT::formatSignif(.df,format,3)}\n.df\n```",cap)
-  )))}
+    )))
+}
 
 kexpand.plotHeatmap <- function(ht = 10, cap, width = 10) {
   cat(knit(text = knit_expand(text = 
@@ -91,7 +99,8 @@ kexpand.plotHeatmap <- function(ht = 10, cap, width = 10) {
                                     column_title = 'Correspondence between probe DNA methylation and distal gene expression', 
                                     column_title_gp = gpar(fontsize = 12, fontface = 'bold'), 
                                     annotation_legend_side = 'bottom')\n```", cap, ht, width, cap,cap)
-  )))}
+  )))
+}
 ```
 
 ```{r, include=FALSE}
@@ -123,8 +132,9 @@ genome <- params$genome
 # Load DNA methylation platform 450K manifest (hg38) and select only probes paired
 distal.probes <- ELMER::get.feature.probe(feature = NULL,genome = genome, met.platform = "450K") 
 
-esegs.file <- paste0("esegs",genome,".rda")
-if(!file.exists(esegs.file)) {
+if(params$funcivar){
+  esegs.file <- paste0("esegs",genome,".rda")
+  if(!file.exists(esegs.file)) {
     # Download state for breast cancer cell line (mcf-7)
     base <- paste0("http://s3-us-west-2.amazonaws.com/statehub-trackhub/tracks/5813b67f46e0fb06b493ceb0/",genome,"/ENCODE/")
     # download tracks (search used: "encode hg38 h3k27ac h3k4me1 h3k4me3 ctcf")
@@ -147,14 +157,15 @@ if(!file.exists(esegs.file)) {
     bed <- paste0(base,state)
     dir.create("state_tracks", showWarnings = FALSE)
     for( i in bed) {
-        if(!file.exists(file.path("state_tracks",basename(i)))) {
-            tryCatch({downloader::download(i,file.path("state_tracks",basename(i)))},error = function(e){})
-        }
+      if(!file.exists(file.path("state_tracks",basename(i)))) {
+        tryCatch({downloader::download(i,file.path("state_tracks",basename(i)))},error = function(e){})
+      }
     }
     esegs <- GetSegmentations(files =  dir("state_tracks",full.names = T)) %>% unlist
     save(esegs, file = esegs.file)
-} else {
+  } else {
     load(esegs.file)
+  }
 }
 ```
 # Summary
@@ -230,22 +241,24 @@ if(params$title == "ELMER") {
 }
 cat("\n## Probes",   paste0(dir,"methylated in ", g1, " vs ", g2,"\n"))
 p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"),col_types = readr::cols())
-.pl <- TCGAbiolinks:::TCGAVisualize_volcano(x = as.data.frame(p)[,grep("Minus",colnames(p),value = T)],
-                                            y = p$adjust.p, 
-                                            title =  paste0("Volcano plot - Probes ",
-                                                            dir, " methylated in ", 
-                                                            g1, " vs ", g2,"\n"),
-                                            filename = NULL,
-                                            label =  c("Not Significant",
-                                                       paste0("Hypermethylated in ",g1),
-                                                       paste0("Hypomethylated in ",g1)),
-                                            ylab =  expression(paste(-Log[10],
-                                                                     " (FDR corrected P-values) [one tailed test]")),
-                                            xlab =  expression(paste(
-                                              "DNA Methylation difference (",beta,"-values)")
-                                            ),
-                                            x.cut = 0.3, 
-                                            y.cut = 0.01)
+.pl <- TCGAbiolinks:::TCGAVisualize_volcano(
+  x = as.data.frame(p)[,grep("Minus",colnames(p),value = T)],
+  y = p$adjust.p, 
+  title =  paste0("Volcano plot - Probes ",
+                  dir, " methylated in ", 
+                  g1, " vs ", g2,"\n"),
+  filename = NULL,
+  label =  c("Not Significant",
+             paste0("Hypermethylated in ",g1),
+             paste0("Hypomethylated in ",g1)),
+  ylab =  expression(paste(-Log[10],
+                           " (FDR corrected P-values) [one tailed test]")),
+  xlab =  expression(paste(
+    "DNA Methylation difference (",beta,"-values)")
+  ),
+  x.cut = 0.3, 
+  y.cut = 0.01
+)
 kexpand.plot(5, paste0("Volcano plot - Probes ",dir,"methylated in ", g1, " vs ", g2))
 
 file <- paste0(root,"/getPair.",dir, ".pairs.significant.csv")
@@ -256,48 +269,53 @@ if(file.exists(file)) {
     .df <- .df[order(.df$Raw.p),]
   })
   kexpand.df(paste0(root,"/getPair.",dir, ".pairs.significant.csv"))
-  .pl <- heatmapPairs(data = mae, 
-                      group.col = group.col,
-                      group1 = g1, 
-                      group2 = g2,
-                      pairs = .df,
-                      filename = NULL)
+  .pl <- heatmapPairs(
+    data = mae, 
+    group.col = group.col,
+    group1 = g1, 
+    group2 = g2,
+    pairs = .df,
+    filename = NULL
+    
+  )
   
   cap <- paste0("Heatmap: hypomethylated paired probes")
   kexpand.plotHeatmap(8,cap, 10)
   
-  cat("\n#### Statehub: Chromatin state evaluation\n")
-  text_funcivar()
-  paired.probes <- unique(.df$Probe)
-  paired.probes <- distal.probes[names(distal.probes) %in% paired.probes]
-  enrichmet <- CalculateEnrichment(variants = list(bg = distal.probes, fg = paired.probes),
-                                   features = esegs,
-                                   feature.type = "segmentations",
-                                   prior = c(a=0.5, b=0.5))
-  
-  .pl <- PlotEnrichment(variant.enrichment = enrichmet, 
-                        value = "difference", 
-                        block1 = "state", 
-                        color.by = "sample", 
-                        ncol = 6)
-  cap <- paste0("Funcivar: ", paste0(dir,"methylated paired probes. Produced with funciVar tool (https://github.com/Simon-Coetzee/funcivar) and statehub.org data."))
-  kexpand.plot(10,cap, 15)
-  
-  funcivar.code <- data.frame("Abbreviation" = c("AR","EAR","EWR","EPR","PAR","PWR","PPR","PPWR","CTCF","TRS","HET","SCR"),
-                              "Chromatin state" = c("Active region", 
-                                                    "active enhancer", 
-                                                    "Weak Enhancer",
-                                                    "poised enhancer", 
-                                                    "active promoter", 
-                                                    "Weak Promoter", 
-                                                    "poised promoter", 
-                                                    "Weak Poised Promoter", 
-                                                    "architectural complex", 
-                                                    "transcribed", 
-                                                    "heterochromatin", 
-                                                    "Polycomb Repressed Silenced."))
-  .df <- funcivar.code
-  kexpand.df("funcivar abbreviations")
+  if(params$funcivar){
+    cat("\n#### Statehub: Chromatin state evaluation\n")
+    text_funcivar()
+    paired.probes <- unique(.df$Probe)
+    paired.probes <- distal.probes[names(distal.probes) %in% paired.probes]
+    enrichmet <- CalculateEnrichment(variants = list(bg = distal.probes, fg = paired.probes),
+                                     features = esegs,
+                                     feature.type = "segmentations",
+                                     prior = c(a=0.5, b=0.5))
+    
+    .pl <- PlotEnrichment(variant.enrichment = enrichmet, 
+                          value = "difference", 
+                          block1 = "state", 
+                          color.by = "sample", 
+                          ncol = 6)
+    cap <- paste0("Funcivar: ", paste0(dir,"methylated paired probes. Produced with funciVar tool (https://github.com/Simon-Coetzee/funcivar) and statehub.org data."))
+    kexpand.plot(10,cap, 15)
+    
+    funcivar.code <- data.frame("Abbreviation" = c("AR","EAR","EWR","EPR","PAR","PWR","PPR","PPWR","CTCF","TRS","HET","SCR"),
+                                "Chromatin state" = c("Active region", 
+                                                      "active enhancer", 
+                                                      "Weak Enhancer",
+                                                      "poised enhancer", 
+                                                      "active promoter", 
+                                                      "Weak Promoter", 
+                                                      "poised promoter", 
+                                                      "Weak Poised Promoter", 
+                                                      "architectural complex", 
+                                                      "transcribed", 
+                                                      "heterochromatin", 
+                                                      "Polycomb Repressed Silenced."))
+    .df <- funcivar.code
+    kexpand.df("funcivar abbreviations")
+  }
   
   file <- paste0(root,"/getMotif.",dir,".motif.enrichment.csv")
   if(file.exists(file)) {
@@ -308,15 +326,17 @@ if(file.exists(file)) {
     
     motifs.enriched <- get(load(paste0(root, "/getMotif.",dir,".enriched.motifs.rda")))
     if(length(names(motifs.enriched)) > 0) {
-      .motif.plot <- motif.enrichment.plot(motif.enrichment = motifs,
-                                           summary = FALSE,
-                                           title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
-                                           significant = list(lowerOR = 1.3, NumOfProbes = 10),
-                                           save = F)
+      .motif.plot <- motif.enrichment.plot(
+        motif.enrichment = motifs,
+        summary = FALSE,
+        title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
+        significant = list(lowerOR = 1.3, NumOfProbes = 10),
+        save = FALSE
+      )
       kexpand(round(sum(motifs$lowerOR > 1.3)/5), paste0("Probes ",dir,"methylated in ", g1, " vs ", g2))
       
       cat("\n### TF analysis\n")
-        TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"),col_types = readr::cols())
+      TF <- readr::read_csv(paste0(root,"/getTF.",dir,".significant.TFs.with.motif.summary.csv"),col_types = readr::cols())
       load(paste0(root,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
       #.df <- TF[na.omit(match(motifs$motif,TF$motif)),]
       #kexpand.dt(paste0(root,g,"/",dir,"/getTF.",dir,".TFs.with.motif.pvalue.rda"))
@@ -335,7 +355,7 @@ if(file.exists(file)) {
       top.subfamily  <- merge(.df,pval)[,c("motif","OR","top.potential.TF.subfamily","pvalue.TF.subfamily")]
       .df <- merge(top.family,top.subfamily,all = TRUE)
       .df <- .df[order(-.df$pvalue.TF.subfamily),]
-
+      
       kexpand.dt(paste0(root,"/getTF.",dir,"aux"),c("pvalue.TF.subfamily",'pvalue.TF.family',"OR"))
       
       .df.aux <- merge(TF,motifs, by = "motif")
@@ -355,10 +375,12 @@ if(file.exists(file)) {
         kexpand.dt(paste0(root,"/",dir,"getTF.",dir,"aux",i),c('pvalue',"OR"))
       }
       
-      x <- TF.rank.plot(motif.pvalue = TF.meth.cor,  
-                        motif = topmotifs$motif, 
-                        title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
-                        save = FALSE)
+      x <- TF.rank.plot(
+        motif.pvalue = TF.meth.cor,  
+        motif = topmotifs$motif, 
+        title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
+        save = FALSE
+      )
       
       cat("\n\n#### TF plots\n")
       cat("\n##### TF plots {.tabset .tabset-dropdown}\n")
@@ -379,15 +401,20 @@ if(file.exists(file)) {
                               "top 3 expression vs avg DNA methylation of paired enriched probes for ",
                               gsub("_HUMAN.H11MO.*","",.df[i,]$motif)," \n"))
         top3 <- unlist(stringr::str_split(subset(TF,TF$motif ==  .df[i,]$motif)$top_5percent_TFs,";"))[1:3]
-        .pl <- scatter.plot(data = mae,
-                            byTF = list(TF = c(.df[i,"top.potential.TF.family"],.df[i,"top.potential.TF.subfamily"],top3),
-                                        probe = motifs.enriched[[.df[i,]$motif]]), 
-                            category = group.col,
-                            save = FALSE, 
-                            lm_line = TRUE)
-        kexpand.plot(6,paste0(text,
-                              "top3 TF expression vs avg DNA methylation of paired enriched probes for ",
-                              .df[i,]$motif," - Probes ",dir,"methylated in ", g1, " vs ", g2))
+        .pl <- scatter.plot(
+          data = mae,
+          byTF = list(TF = c(.df[i,"top.potential.TF.family"],.df[i,"top.potential.TF.subfamily"],top3),
+                      probe = motifs.enriched[[.df[i,]$motif]]), 
+          category = group.col,
+          save = FALSE, 
+          lm_line = TRUE
+        )
+        
+        kexpand.plot(6,
+                     paste0(text, "top3 TF expression vs avg DNA methylation of paired enriched probes for ",
+                            .df[i,]$motif," - Probes ",dir,"methylated in ", g1, " vs ", g2
+                     )
+        )
       }
     }
   }

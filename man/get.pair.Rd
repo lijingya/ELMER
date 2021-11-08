@@ -121,7 +121,7 @@ and getPair.XX.pairs.significant.csv (see detail).
 }
 \examples{
 data <- ELMER:::getdata("elmer.data.example")
-nearGenes <-GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
+nearGenes <- GetNearGenes(TRange=getMet(data)[c("cg00329272","cg10097755"),],
                          geneAnnot=getExp(data))
 Hypo.pair <- get.pair(data=data,
                        nearGenes=nearGenes,

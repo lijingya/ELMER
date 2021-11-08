@@ -381,7 +381,7 @@ TCGA.pipe <- function(disease,
     } else {
       mae <- args$data
     }
-
+    
     message(sprintf("Identify enriched motif for %smethylated probes",diff.dir))
     if(file.exists(sprintf("%s/getPair.%s.pairs.significant.csv",dir.out, diff.dir))){
       Sig.probes <- readr::read_csv(sprintf("%s/getPair.%s.pairs.significant.csv", dir.out, diff.dir), 
@@ -590,6 +590,7 @@ createSummaryDocument <- function(analysis = "all",
 #' @param nprobes nprobes used in the analysis
 #' @param lower.OR lower.OR used in the analysis
 #' @param out_file Output file name (i.e report.html)
+#' @param funcivar Include funcivar analysis? 
 #' @export
 #' @importFrom rmarkdown render
 #' @examples 
@@ -601,24 +602,26 @@ createSummaryDocument <- function(analysis = "all",
 #'               direction = "hypo",
 #'               mae = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda")
 #' }
-render_report <- function(title = "Report",
-                          mae,
-                          group.col,
-                          group1,
-                          group2,
-                          direction,
-                          dir.out,
-                          genome = "hg38",
-                          mode = "supervised",
-                          minSubgroupFrac = "20%",
-                          minMetdiff = "0.3",
-                          metfdr = "0.01",
-                          permu = "10000",
-                          rawpval = "0.01",
-                          pe = "0.01",
-                          nprobes = "10",
-                          lower.OR = "1.1",
-                          out_file = file.path(getwd(),"report.html")
+render_report <- function(
+  title = "Report",
+  mae,
+  group.col,
+  group1,
+  group2,
+  direction,
+  dir.out,
+  genome = "hg38",
+  mode = "supervised",
+  minSubgroupFrac = "20%",
+  minMetdiff = "0.3",
+  metfdr = "0.01",
+  permu = "10000",
+  rawpval = "0.01",
+  pe = "0.01",
+  nprobes = "10",
+  lower.OR = "1.1",
+  out_file = file.path(getwd(),"report.html"),
+  funcivar = FALSE
 ) {
   if(missing(dir.out)) stop("Please, set dir.out value")
   if(missing(mae)) stop("Please, set mae value")
@@ -628,27 +631,32 @@ render_report <- function(title = "Report",
   template <- system.file("rmd", "template.Rmd", package="ELMER")
   
   message("Compiling report")
-  parameters <- list(title = title,
-                     genome = genome,
-                     mode = mae,
-                     minSubgroupFrac = minSubgroupFrac,
-                     minMetdiff = minMetdiff,
-                     metfdr = metfdr,
-                     permu = permu,
-                     rawpval = rawpval,
-                     pe = pe,
-                     nprobes = nprobes,
-                     lower.OR = lower.OR,
-                     groupCol =  group.col,
-                     mae = mae,
-                     group1 = group1,
-                     group2 = group2,
-                     direction = direction,
-                     dir.out = dir.out)
+  parameters <- list(
+    title = title,
+    genome = genome,
+    mode = mae,
+    minSubgroupFrac = minSubgroupFrac,
+    minMetdiff = minMetdiff,
+    metfdr = metfdr,
+    permu = permu,
+    rawpval = rawpval,
+    pe = pe,
+    nprobes = nprobes,
+    lower.OR = lower.OR,
+    groupCol =  group.col,
+    mae = mae,
+    group1 = group1,
+    group2 = group2,
+    direction = direction,
+    dir.out = dir.out,
+    funcivar
+  )
   message("Saving report: ", out_file)
-  rmarkdown::render(template,
-                    intermediates_dir = dirname(out_file),
-                    output_file = out_file,
-                    params = parameters)
+  rmarkdown::render(
+    template,
+    intermediates_dir = dirname(out_file),
+    output_file = out_file,
+    params = parameters
+  )
   invisible(TRUE)
 }
