@@ -425,9 +425,10 @@ if(file.exists(file)) {
 # Complete code
 
 ## ELMER analysis
-```{r, code=readLines(params$code), eval=FALSE}
+```{R}
+# ```{r, code=readLines(params$code), eval=FALSE}
+# ```
 ```
-
 
 # Session Info
 ```{r, echo=FALSE, warning=FALSE,message=FALSE, cols.print=20}
