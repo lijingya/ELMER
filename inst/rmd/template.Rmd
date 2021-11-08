@@ -214,8 +214,8 @@ group.col <- params$groupCol
 
 suppressWarnings({
   summary <- data.frame(
-    nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv")),col_types = readr::cols()),
-    nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv")),col_types = readr::cols()),
+    nrow(readr::read_csv(paste0(root, "/getMethdiff.",direction,".probes.significant.csv"),col_types = readr::cols())),
+    nrow(readr::read_csv(paste0(root,"/getPair.",direction, ".pairs.significant.csv"),col_types = readr::cols())),
     length(get(load(paste0(root, "/getMotif.",direction,".enriched.motifs.rda"))))
   )
 })
