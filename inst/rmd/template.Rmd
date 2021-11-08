@@ -44,7 +44,7 @@ library(ELMER)
 library(knitr)
 library(ComplexHeatmap)
 library(ggplot2)
-library(funciVar)
+if(params$funcivar) library(funciVar)
 library(GenomicRanges)
 library(dplyr)
 ```

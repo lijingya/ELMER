@@ -649,7 +649,7 @@ render_report <- function(
     group2 = group2,
     direction = direction,
     dir.out = dir.out,
-    funcivar
+    funcivar = funcivar
   )
   message("Saving report: ", out_file)
   rmarkdown::render(
