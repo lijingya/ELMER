@@ -287,10 +287,12 @@ if(file.exists(file)) {
     text_funcivar()
     paired.probes <- unique(.df$Probe)
     paired.probes <- distal.probes[names(distal.probes) %in% paired.probes]
-    enrichmet <- CalculateEnrichment(variants = list(bg = distal.probes, fg = paired.probes),
-                                     features = esegs,
-                                     feature.type = "segmentations",
-                                     prior = c(a=0.5, b=0.5))
+    enrichmet <- CalculateEnrichment(
+      variants = list(bg = distal.probes, fg = paired.probes),
+      features = esegs,
+      feature.type = "segmentations",
+      prior = c(a=0.5, b=0.5)
+    )
     
     .pl <- PlotEnrichment(variant.enrichment = enrichmet, 
                           value = "difference", 
@@ -375,13 +377,15 @@ if(file.exists(file)) {
         kexpand.dt(paste0(root,"/",dir,"getTF.",dir,"aux",i),c('pvalue',"OR"))
       }
       
+      sink('/dev/null')
       x <- TF.rank.plot(
         motif.pvalue = TF.meth.cor,  
         motif = topmotifs$motif, 
         title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
         save = FALSE
       )
-      
+      sink()
+          
       cat("\n\n#### TF plots\n")
       cat("\n##### TF plots {.tabset .tabset-dropdown}\n")
       text_TF_plot()
