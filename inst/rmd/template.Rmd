@@ -229,7 +229,7 @@ summary
 ```
 
 
-```{r ,echo=FALSE, message=FALSE, warning=FALSE,results="asis",fig.height=10}
+```{r ,echo=FALSE, message=FALSE, warning=FALSE,results="asis",fig.height=8,fig.width=8}
 g1 <- params$group1
 g2 <- params$group2
 group.col <- params$groupCol
@@ -256,8 +256,8 @@ p <- readr::read_csv(paste0(root,"/getMethdiff.",dir,".probes.csv"),col_types = 
   xlab =  expression(paste(
     "DNA Methylation difference (",beta,"-values)")
   ),
-  x.cut = 0.3, 
-  y.cut = 0.01
+  x.cut = params$minMetdiff, 
+  y.cut = params$metfdr
 )
 kexpand.plot(5, paste0("Volcano plot - Probes ",dir,"methylated in ", g1, " vs ", g2))
 
@@ -276,7 +276,6 @@ if(file.exists(file)) {
     group2 = g2,
     pairs = .df,
     filename = NULL
-    
   )
   
   cap <- paste0("Heatmap: hypomethylated paired probes")
