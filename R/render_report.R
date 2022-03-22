@@ -1,7 +1,7 @@
 #' @title Build report for TCGA.pipe function
 #' @description Build HTML report 
 #' @param title HTML report title
-#' @param mae.file  Absolute path to the mae used in the analysis
+#' @param mae.file  Absolute path to the mae used in the analysis (.rda or .rds)
 #' @param group.col Group col
 #' @param group1 Group 1 
 #' @param group2 Group 2 
@@ -23,12 +23,14 @@
 #' @importFrom rmarkdown render
 #' @examples 
 #' \dontrun{
-#' render_report(group.col = "TN",
-#'               group1 = "Tumor",
-#'               group2 = "Normal",
-#'               dir.out = "~/paper_elmer/Result/BRCA/TN_Tumor_vs_Normal/hypo/",
-#'               direction = "hypo",
-#'               mae.file = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda")
+#' render_report(
+#'  group.col = "TN",
+#'  group1 = "Tumor",
+#'  group2 = "Normal",
+#'  dir.out = "~/paper_elmer/Result/BRCA/TN_Tumor_vs_Normal/hypo/",
+#'  direction = "hypo",
+#'  mae.file = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda"
+#')
 #' }
 render_report <- function(
   title = "Report",
@@ -52,7 +54,7 @@ render_report <- function(
   funcivar = FALSE
 ) {
   if(missing(dir.out)) stop("Please, set dir.out value")
-  if(missing(mae)) stop("Please, set mae value")
+  if(missing(mae.file)) stop("Please, set mae.file value")
   if(missing(group.col)) stop("Please, set mae value")
   if(missing(group1)) stop("Please, set mae value")
   if(missing(group2)) stop("Please, set mae value")

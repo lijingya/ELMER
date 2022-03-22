@@ -29,7 +29,7 @@ render_report(
 \arguments{
 \item{title}{HTML report title}
 
-\item{mae.file}{Absolute path to the mae used in the analysis}
+\item{mae.file}{Absolute path to the mae used in the analysis (.rda or .rds)}
 
 \item{group.col}{Group col}
 
@@ -70,11 +70,13 @@ Build HTML report
 }
 \examples{
 \dontrun{
-render_report(group.col = "TN",
-              group1 = "Tumor",
-              group2 = "Normal",
-              dir.out = "~/paper_elmer/Result/BRCA/TN_Tumor_vs_Normal/hypo/",
-              direction = "hypo",
-              mae.file = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda")
+render_report(
+ group.col = "TN",
+ group1 = "Tumor",
+ group2 = "Normal",
+ dir.out = "~/paper_elmer/Result/BRCA/TN_Tumor_vs_Normal/hypo/",
+ direction = "hypo",
+ mae.file = "~/paper_elmer/Result/BRCA/BRCA_mae_hg38.rda"
+)
 }
 }

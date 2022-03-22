@@ -442,17 +442,18 @@ TCGA.pipe <- function(disease,
     
     params <- args[names(args) %in% c("TFs", "motif.relavent.TFs","percentage")]
     TFs <- do.call(get.TFs, 
-                   c(list(data           = mae, 
-                          group.col      = group.col, 
-                          group1         = group1,
-                          group2         = group2,
-                          mode      = mode,
-                          diff.dir  = diff.dir,
-                          minSubgroupFrac =  min(1,minSubgroupFrac * 2),
-                          enriched.motif = enriched.motif,
-                          dir.out        = dir.out, 
-                          cores          = cores, 
-                          label          = diff.dir),
+                   c(list(
+                     data           = mae, 
+                     group.col      = group.col, 
+                     group1         = group1,
+                     group2         = group2,
+                     mode      = mode,
+                     diff.dir  = diff.dir,
+                     minSubgroupFrac =  min(1,minSubgroupFrac * 2),
+                     enriched.motif = enriched.motif,
+                     dir.out        = dir.out, 
+                     cores          = cores, 
+                     label          = diff.dir),
                      params))
     if(length(analysis) == 1) return(TFs)
   }
@@ -469,16 +470,16 @@ TCGA.pipe <- function(disease,
     mae.path <- trimws(unlist(stringr::str_split(lines[grep("mae.path",lines)[1]], ":"))[2])    
     render_report(
       genome = genome, 
-                  mode = mode, 
-                  title = paste0(disease, " report"),
-                  minSubgroupFrac = ifelse(mode =="supervised",1,0.2),
-                  mae = mae.path,
-                  direction = direction,
-                  group.col = group.col, 
-                  group1 = group1, 
-                  group2 = group2, 
-                  dir.out = results.path,
-                  out_file = file.path(results.path,paste0(disease,"_report.html")))
+      mode = mode, 
+      title = paste0(disease, " report"),
+      minSubgroupFrac = ifelse(mode =="supervised",1,0.2),
+      mae = mae.path,
+      direction = direction,
+      group.col = group.col, 
+      group1 = group1, 
+      group2 = group2, 
+      dir.out = results.path,
+      out_file = file.path(results.path,paste0(disease,"_report.html")))
   }
   
 }
