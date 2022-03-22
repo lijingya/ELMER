@@ -16,7 +16,7 @@ params:
     nprobes: 10
     lower.OR: 1.1
     groupCol:
-    mae:
+    mae.file:
     group1:
     group2: 
     direction:
@@ -50,7 +50,7 @@ library(dplyr)
 ```
 
 ```{r, echo=FALSE, warning=FALSE,message=FALSE, cols.print=20}
-file <- params$mae
+file <- params$mae.file
 if(grepl("\\.rds",file,ignore.case = T)){
   mae <- readRDS(file)
 } else {
