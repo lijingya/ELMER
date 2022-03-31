@@ -79,41 +79,51 @@
 #'             diff.dir = c("hypo"),
 #'             dir.out = "LUSC_NFE2L2_MutvsWT")
 #' }
-TCGA.pipe <- function(disease,
-                      genome = "hg38",
-                      analysis = "all",
-                      wd = getwd(),
-                      cores = 1,
-                      mode = "unsupervised",
-                      Data = NULL, 
-                      diff.dir = "hypo",
-                      genes = NULL,
-                      mutant_variant_classification = c("Frame_Shift_Del",
-                                                        "Frame_Shift_Ins",
-                                                        "Missense_Mutation",
-                                                        "Nonsense_Mutation",
-                                                        "Splice_Site",
-                                                        "In_Frame_Del",
-                                                        "In_Frame_Ins",
-                                                        "Translation_Start_Site",
-                                                        "Nonstop_Mutation"),
-                      group.col = "TN", 
-                      group1 = "Tumor",
-                      group2 = "Normal",
-                      ...){
+TCGA.pipe <- function(
+  disease,
+  genome = "hg38",
+  analysis = "all",
+  wd = getwd(),
+  cores = 1,
+  mode = "unsupervised",
+  Data = NULL, 
+  diff.dir = "hypo",
+  genes = NULL,
+  mutant_variant_classification = c(
+    "Frame_Shift_Del",
+    "Frame_Shift_Ins",
+    "Missense_Mutation",
+    "Nonsense_Mutation",
+    "Splice_Site",
+    "In_Frame_Del",
+    "In_Frame_Ins",
+    "Translation_Start_Site",
+    "Nonstop_Mutation"
+  ),
+  group.col = "TN", 
+  group1 = "Tumor",
+  group2 = "Normal",
+  ...
+){
+  
   if (missing(disease)) 
     stop("Disease should be specified.\nDisease short name (such as LAML) 
          please check https://gdc-portal.nci.nih.gov")
   
-  available.analysis <- c("download","distal.probes",
-                          "createMAE","diffMeth","pair",
-                          "motif","TF.search","report","all")
+  available.analysis <- c(
+    "download","distal.probes",
+    "createMAE","diffMeth","pair",
+    "motif","TF.search","report","all"
+  )
   # Replace all by all the other values
   if("all" %in% analysis[1] ) analysis <- grep("all", available.analysis, value = TRUE, invert = TRUE)
   
   if(any(!tolower(analysis) %in% tolower(analysis))) 
-    stop(paste0("Availbale options for analysis argument are: ",
-                paste(c("",available.analysis), collapse = "\n=> ")))
+    stop(
+      paste0("Availbale options for analysis argument are: ",
+             paste(c("",available.analysis), collapse = "\n=> ")
+      )
+    )
   
   disease <- toupper(disease)
   
@@ -184,14 +194,16 @@ TCGA.pipe <- function(disease,
         distal.probe <- suppressWarnings(do.call(get.feature.probe,params))
       }
       
-      mae <- createMAE(met           = meth.file, 
-                       exp           = exp.file, 
-                       filter.probes = distal.probe,
-                       genome        = genome,
-                       met.platform  = "450K",
-                       save          = FALSE,
-                       linearize.exp = TRUE,
-                       TCGA          = TRUE)
+      mae <- createMAE(
+        met           = meth.file, 
+        exp           = exp.file, 
+        filter.probes = distal.probe,
+        genome        = genome,
+        met.platform  = "450K",
+        save          = FALSE,
+        linearize.exp = TRUE,
+        TCGA          = TRUE
+      )
       # Remove FFPE samples
       if("is_ffpe" %in% colnames(colData(mae))) mae <- mae[,!mae$is_ffpe]
       
@@ -204,22 +216,26 @@ TCGA.pipe <- function(disease,
     }
     save(mae,file = file)
     message("File saved as: ", file)
-    readr::write_tsv(as.data.frame(colData(mae)), path = sprintf("%s/%s_samples_info_%s.tsv",dir.out.root,disease,genome))
+    readr::write_tsv(
+      x = as.data.frame(colData(mae)), 
+      path = sprintf("%s/%s_samples_info_%s.tsv",dir.out.root,disease,genome)
+    )
   }
   
   # Creates a record of the analysis and arguments called
-  if(any(tolower(c("diffMeth","pair",
-                   "motif","TF.search")) %in% tolower(analysis))){
-    createSummaryDocument(analysis = analysis, 
-                          argument.values = args,
-                          mae.path = sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome),
-                          genome = genome,
-                          mode = mode,
-                          direction = diff.dir,
-                          group.col = group.col,
-                          group1 = group1,
-                          group2 = group2,
-                          results.path = dir.out)
+  if(any(tolower(c("diffMeth","pair", "motif","TF.search")) %in% tolower(analysis))){
+    createSummaryDocument(
+      analysis = analysis, 
+      argument.values = args,
+      mae.path = sprintf("%s/%s_mae_%s.rda",dir.out.root,disease,genome),
+      genome = genome,
+      mode = mode,
+      direction = diff.dir,
+      group.col = group.col,
+      group1 = group1,
+      group2 = group2,
+      results.path = dir.out
+    )
   }  
   # get differential DNA methylation
   if(tolower("diffMeth") %in% tolower(analysis)){
@@ -240,10 +256,15 @@ TCGA.pipe <- function(disease,
                             cores = cores, 
                             minSubgroupFrac = minSubgroupFrac))
     diff.meth <- tryCatch({
-      diff.meth <- do.call(get.diff.meth,c(params,list(data = mae,
-                                                       group.col = group.col, 
-                                                       group1 = group1,
-                                                       group2 = group2)))
+      diff.meth <- do.call(
+        get.diff.meth,
+        c(params,
+          list(data = mae,
+               group.col = group.col, 
+               group1 = group1,
+               group2 = group2)
+        )
+      )
       diff.meth
     }, error = function(e) {
       message(e)
@@ -251,7 +272,7 @@ TCGA.pipe <- function(disease,
     })
     if(is.null(diff.meth)) return(NULL)
     
-    if(length(analysis)==1) return(diff.meth)
+    if(length(analysis) == 1) return(diff.meth)
   }
   
   # predict pair
@@ -495,18 +516,22 @@ TCGA.pipe <- function(disease,
 #'  data <- ELMER:::getdata("elmer.data.example") # Get data from ELMER.data
 #'  data <- ELMER:::addMutCol(data, "LUSC","TP53")
 #' }
-addMutCol <- function(data, 
-                      disease, 
-                      genes, 
-                      mutant_variant_classification = c("Frame_Shift_Del",
-                                                        "Frame_Shift_Ins",
-                                                        "Missense_Mutation",
-                                                        "Nonsense_Mutation",
-                                                        "Splice_Site",
-                                                        "In_Frame_Del",
-                                                        "In_Frame_Ins",
-                                                        "Translation_Start_Site",
-                                                        "Nonstop_Mutation")){
+addMutCol <- function(
+  data, 
+  disease, 
+  genes, 
+  mutant_variant_classification = c(
+    "Frame_Shift_Del",
+    "Frame_Shift_Ins",
+    "Missense_Mutation",
+    "Nonsense_Mutation",
+    "Splice_Site",
+    "In_Frame_Del",
+    "In_Frame_Ins",
+    "Translation_Start_Site",
+    "Nonstop_Mutation"
+  )
+){
   maf <- TCGAbiolinks::GDCquery_Maf(disease, pipeline = "mutect2")
   for(gene in genes) {
     if(gene %in% maf$Hugo_Symbol) {

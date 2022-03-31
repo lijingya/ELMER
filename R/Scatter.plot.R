@@ -228,19 +228,21 @@ scatter.plot <- function(data,
 #color.value=c("Experiment"="red","Control"="darkgreen")
 #'@param lm_line A logic. If it is TRUE, regression line will be added to the graph.
 #'@return A ggplot figure object
-scatter <- function(meth, 
-                    exp, 
-                    legend.title = "Legend",
-                    category = NULL, 
-                    xlab = NULL, 
-                    ylab = NULL,
-                    ylim = NULL,
-                    dots.size = 0.9,
-                    title = NULL,
-                    correlation = FALSE,
-                    correlation.text.size = 3,
-                    color.value = NULL,
-                    lm_line = FALSE){
+scatter <- function(
+  meth, 
+  exp, 
+  legend.title = "Legend",
+  category = NULL, 
+  xlab = NULL, 
+  ylab = NULL,
+  ylim = NULL,
+  dots.size = 0.9,
+  title = NULL,
+  correlation = FALSE,
+  correlation.text.size = 3,
+  color.value = NULL,
+  lm_line = FALSE
+){
   
   if(is.null(category)) category <- rep(1,length(meth))
   
@@ -251,33 +253,52 @@ scatter <- function(meth,
     exp$category <- category
     df <- melt.data.frame(exp, measure.vars = GeneID)
     df$category <- factor(df$category)
+    
     P <- ggplot(df, aes_string(x = 'meth', y = 'value', color = 'category')) +
       geom_point(size = dots.size) +
       facet_wrap(facets = ~ variable, ncol = 5) +
       scale_x_continuous(limits = c(0,1), breaks = c(0, 0.25, 0.5, 0.75, 1)) +
       theme_bw() +
-      theme(panel.grid.major = element_blank(),  
-            legend.position="bottom",
-            legend.key = element_rect(colour = 'white'), 
-            axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)) +
+      theme(
+        panel.grid.major = element_blank(),  
+        legend.position = "bottom",
+        legend.key = element_rect(colour = 'white'), 
+        axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.5)
+      ) +
       labs(x = xlab, y = ylab, title = title) + 
       scale_colour_discrete(name = legend.title) + 
-      guides(colour = guide_legend(override.aes = list(size = 4),
-                                   title.position = "top", 
-                                   nrow = ceiling(sum(stringr::str_length(unique(category))) / 100),
-                                   title.hjust = 0.5)) 
+      guides(
+        colour = guide_legend(
+          override.aes = list(size = 4),
+          title.position = "top", 
+          nrow = ceiling(sum(stringr::str_length(unique(category))) / 100),
+          title.hjust = 0.5
+        )
+      ) 
+    
     if(!is.null(color.value)) {
-      
       P <- P + scale_colour_manual(values = color.value)
     }
-    if(!is.null(ylim)) P <- P + coord_cartesian(ylim = ylim) 
-    if(lm_line) P <- P + geom_smooth(method = "lm", se = TRUE, color = "black", formula = y ~ x,data = df)
-    if(correlation){
+    
+    if(!is.null(ylim)) {
+      P <- P + coord_cartesian(ylim = ylim) 
+    }
+    
+    if(lm_line) {
+      P <- P + geom_smooth(method = "lm", se = TRUE, color = "black", formula = y ~ x,data = df)
+    }
+    
+    if(correlation && length(GeneID)> 1){
+      message("Sorry no option to add correlation with more than one gene")
+    }
+    if(correlation && length(GeneID) == 1){
       
-      cor <- cor.test(x = as.numeric(meth), 
-                      y = as.numeric(exp[,GeneID]),
-                      exact = FALSE,
-                      method = c("pearson"))
+      cor <- cor.test(
+        x = as.numeric(meth), 
+        y = as.numeric(exp[,GeneID,drop = TRUE]),
+        exact = FALSE,
+        method = c("pearson")
+      )
       corval <- round(cor$estimate,digits = 2)
       pvalue <- scientific(cor$p.value, digits = 3)
       title <- paste0(title, "\n","Spearman Cor: ", corval," / P-value: ", pvalue)
@@ -317,15 +338,18 @@ scatter <- function(meth,
                                    title.hjust = 0.5))  +
       scale_fill_discrete(guide = FALSE) + 
       guides(fill=FALSE) 
+    
     if(lm_line){
       #       P <- P+ geom_text(aes(x =0.8 , y = max(exp)-0.5, label = lm_eqn(df)),
       #parse = TRUE,colour = "black")+
-      P <- P + geom_smooth(method = "lm", 
-                           span = 1, 
-                           se=TRUE, 
-                           color="black", 
-                           formula = y ~ x,
-                           data = df)
+      P <- P + geom_smooth(
+        method = "lm", 
+        span = 1, 
+        se = TRUE, 
+        color = "black", 
+        formula = y ~ x,
+        data = df
+      )
     }
     
     
