@@ -79,19 +79,21 @@ Every steps' results are saved.
 }
 \examples{
   data <- ELMER:::getdata("elmer.data.example")
-  TCGA.pipe(disease = "LUSC",
-            data = data,
-            analysis = c("diffMeth","pair", "motif","TF.search"), 
-            mode = "supervised",
-            group.col = "definition",
-            group1 = "Primary solid Tumor", 
-            group2 = "Solid Tissue Normal",
-            diff.dir = c("hypo"),
-            dir.out = "pipe",
-            sig.dif = 0.0001,
-            pvalue = 1.0,
-            min.incidence = 0,
-            lower.OR = 0.0)
+  TCGA.pipe(
+    disease = "LUSC",
+    data = data,
+    analysis = c("diffMeth","pair", "motif","TF.search"), 
+    mode = "supervised",
+    group.col = "definition",
+    group1 = "Primary solid Tumor", 
+    group2 = "Solid Tissue Normal",
+    diff.dir = c("hypo"),
+    dir.out = "pipe",
+    sig.dif = 0.0001,
+    pvalue = 1.0,
+    min.incidence = 0,
+    lower.OR = 0.0
+  )
 \dontrun{
   distal.probe <- TCGA.pipe(disease = "LUSC", analysis="distal.enhancer", wd="~/")
   TCGA.pipe(disease = "LUSC",analysis = "all", genome = "hg19", cores = 1, permu.size=300, Pe=0.01)
@@ -112,10 +114,12 @@ Every steps' results are saved.
 
   # Evaluation mutation
   TCGA.pipe(disease = "LUSC",analysis = "createMAE",gene = "NFE2L2")
-  TCGA.pipe(disease = "LUSC",analysis = c("diffMeth","pair", "motif","TF.search"), 
-            mode = "supervised",
-            group.col = "NFE2L2", group1 = "Mutant", group2 = "WT",
-            diff.dir = c("hypo"),
-            dir.out = "LUSC_NFE2L2_MutvsWT")
+  TCGA.pipe(
+     disease = "LUSC",analysis = c("diffMeth","pair", "motif","TF.search"), 
+     mode = "supervised",
+     group.col = "NFE2L2", group1 = "Mutant", group2 = "WT",
+     diff.dir = c("hypo"),
+     dir.out = "LUSC_NFE2L2_MutvsWT"
+   )
 }
 }

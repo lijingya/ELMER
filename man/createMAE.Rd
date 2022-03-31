@@ -65,32 +65,48 @@ and create a Multi Assay Experiment.
 }
 \examples{
 # NON TCGA example: matrices has different column names
-gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-                  sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
-                       sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
-                                    sample.type = c("Normal", "Tumor"))
+gene.exp <- S4Vectors::DataFrame(
+   sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3)
+)
+                  
+dna.met <- S4Vectors::DataFrame(
+   sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+   sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+)
+sample.info <- S4Vectors::DataFrame(
+  primary =  c("sample1","sample2"), 
+  sample.type = c("Normal", "Tumor")
+ )
+ 
 sampleMap <- S4Vectors::DataFrame(
-                 assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
-                 primary = c("sample1","sample1","sample2","sample2"), 
-                 colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-mae <- createMAE(exp = gene.exp, 
-                 met = dna.met, 
-                 sampleMap = sampleMap, 
-                 met.platform ="450K",
-                 colData = sample.info, 
-                 genome = "hg38") 
+    assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+    primary = c("sample1","sample1","sample2","sample2"), 
+    colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met")
+)
+
+mae <- createMAE(
+    exp = gene.exp, 
+    met = dna.met, 
+    sampleMap = sampleMap, 
+    met.platform ="450K",
+    colData = sample.info, 
+    genome = "hg38"
+) 
+                 
 # You can also use sample Mapping and Sample information tables from a tsv file
 # You can use the createTSVTemplates function to create the tsv files
 readr::write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
 readr::write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
-mae <- createMAE(exp = gene.exp, 
-                 met = dna.met, 
-                 sampleMap = "sampleMap.tsv", 
-                 met.platform ="450K",
-                 colData = "sample.info.tsv", 
-                 genome = "hg38") 
+
+mae <- createMAE(
+   exp = gene.exp, 
+   met = dna.met, 
+   sampleMap = "sampleMap.tsv", 
+   met.platform ="450K",
+   colData = "sample.info.tsv", 
+   genome = "hg38"
+) 
                  
 # NON TCGA example: matrices has same column names
 gene.exp <- S4Vectors::DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
@@ -100,16 +116,18 @@ dna.met <- S4Vectors::DataFrame(sample1 = c("cg14324200"=0.5,"cg23867494"=0.1),
 sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
                                     sample.type = c("Normal", "Tumor"))
 sampleMap <- S4Vectors::DataFrame(
-                 assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
-                 primary = c("sample1","sample1","sample2","sample2"), 
-                 colname = c("sample1","sample1","sample2","sample2")
+     assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+    primary = c("sample1","sample1","sample2","sample2"), 
+    colname = c("sample1","sample1","sample2","sample2")
 )
-mae <- createMAE(exp = gene.exp, 
-                 met = dna.met, 
-                 sampleMap = sampleMap, 
-                 met.platform ="450K",
-                 colData = sample.info, 
-                 genome = "hg38") 
+mae <- createMAE(
+  exp = gene.exp, 
+  met = dna.met, 
+  sampleMap = sampleMap, 
+  met.platform ="450K",
+  colData = sample.info, 
+  genome = "hg38"
+) 
 
 \dontrun{
    # TCGA example using TCGAbiolinks
@@ -118,29 +136,34 @@ mae <- createMAE(exp = gene.exp,
    library(TCGAbiolinks)
    library(SummarizedExperiment)
    
-   samples <- c("TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
-                "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV")
+   samples <- c(
+      "TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
+       "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV"
+   )
    
    #1) Get gene expression matrix
-   query.exp <- GDCquery(project = "TCGA-HNSC", 
-                         data.category = "Transcriptome Profiling", 
-                         data.type = "Gene Expression Quantification", 
-                         workflow.type = "HTSeq - FPKM-UQ",
-                         barcode = samples)
+   query.exp <- GDCquery(
+       project = "TCGA-HNSC", 
+       data.category = "Transcriptome Profiling", 
+       data.type = "Gene Expression Quantification", 
+       workflow.type = "STAR - Counts",
+       barcode = samples
+   )
    
    GDCdownload(query.exp)
    exp.hg38 <- GDCprepare(query = query.exp)
    
-   
    # Aligned against Hg19
-   query.exp.hg19 <- GDCquery(project = "TCGA-HNSC", 
-                              data.category = "Gene expression",
-                              data.type = "Gene expression quantification",
-                              platform = "Illumina HiSeq", 
-                              file.type  = "normalized_results",
-                              experimental.strategy = "RNA-Seq",
-                              barcode = samples,
-                              legacy = TRUE)
+   query.exp.hg19 <- GDCquery(
+       project = "TCGA-HNSC", 
+       data.category = "Gene expression",
+       data.type = "Gene expression quantification",
+       platform = "Illumina HiSeq", 
+       file.type  = "normalized_results",
+       experimental.strategy = "RNA-Seq",
+       barcode = samples,
+       legacy = TRUE
+   )
    GDCdownload(query.exp.hg19)
    exp.hg19 <- GDCprepare(query.exp.hg19)
    
@@ -148,11 +171,14 @@ mae <- createMAE(exp = gene.exp,
    rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
    
    # DNA Methylation
-   query.met <- GDCquery(project = "TCGA-HNSC",
-                         legacy = TRUE,
-                         data.category = "DNA methylation",
-                         barcode = samples,
-                         platform = "Illumina Human Methylation 450")
+   query.met <- GDCquery(
+      project = "TCGA-HNSC",
+      legacy = FALSE,
+      data.category = "DNA Methylation", 
+      data.type = "Methylation Beta Value",
+      barcode = samples,
+      platform = "Illumina Human Methylation 450"
+   )
    
    GDCdownload(query.met)
    met <- GDCprepare(query = query.met)
@@ -160,26 +186,34 @@ mae <- createMAE(exp = gene.exp,
    distal.enhancer <- get.feature.probe(genome = "hg19",met.platform = "450k")
    
    # Consisering it is TCGA and SE
-   mae.hg19 <- createMAE(exp = exp.hg19, 
-                         met =  met, 
-                         TCGA = TRUE, 
-                         genome = "hg19",  
-                         filter.probes = distal.enhancer)
+   mae.hg19 <- createMAE(
+      exp = exp.hg19, 
+      met =  met, 
+      TCGA = TRUE, 
+      genome = "hg19",  
+      filter.probes = distal.enhancer
+     )
    values(getExp(mae.hg19))
    
-   mae.hg38 <- createMAE(exp = exp.hg38, met = met, 
-                        TCGA = TRUE, genome = "hg38",  
-                        filter.probes = distal.enhancer)
+   mae.hg38 <- createMAE(
+     exp = exp.hg38, met = met, 
+     TCGA = TRUE, genome = "hg38",  
+     filter.probes = distal.enhancer
+   )
    values(getExp(mae.hg38))
    
    # Consisering it is TCGA and not SE
-   mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), 
-                              TCGA = TRUE, genome = "hg19",  
-                              filter.probes = distal.enhancer)
+   mae.hg19.test <- createMAE(
+     exp = assay(exp.hg19), met =  assay(met), 
+     TCGA = TRUE, genome = "hg19",  
+     filter.probes = distal.enhancer
+   )
    
-   mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), 
-                         TCGA = TRUE, genome = "hg38",  
-                         filter.probes = distal.enhancer)
+   mae.hg38 <- createMAE(
+     exp = assay(exp.hg38), met = assay(met), 
+     TCGA = TRUE, genome = "hg38",  
+     filter.probes = distal.enhancer
+   )
    values(getExp(mae.hg38))
    
    # Consisering it is not TCGA and SE

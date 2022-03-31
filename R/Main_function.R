@@ -32,10 +32,12 @@
 #'  probe selection.
 #'  @return A GRanges object contains the coordinate of probes which locate
 #'  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
-#'  @usage get.feature.probe(feature,
-#'                           TSS,
-#'                           TSS.range = list(upstream = 2000, downstream = 2000),
-#'                           promoter = FALSE, rm.chr = NULL)
+#'  @usage get.feature.probe(
+#'     feature,
+#'     TSS,
+#'     TSS.range = list(upstream = 2000, downstream = 2000),
+#'     promoter = FALSE, rm.chr = NULL
+#'  )
 #' @examples
 #' # get distal enhancer probe
 #' \dontrun{
@@ -47,14 +49,17 @@
 #' }
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
-get.feature.probe <- function(feature = NULL,
-                              TSS,
-                              genome = "hg38",
-                              met.platform = "450K",
-                              TSS.range = list(upstream = 2000, downstream = 2000),
-                              promoter = FALSE,
-                              rm.chr = NULL){
-  probe <- getInfiniumAnnotation(toupper(met.platform),genome)
+get.feature.probe <- function(
+  feature = NULL,
+  TSS,
+  genome = "hg38",
+  met.platform = "450K",
+  TSS.range = list(upstream = 2000, downstream = 2000),
+  promoter = FALSE,
+  rm.chr = NULL
+){
+  
+  probe <- getInfiniumAnnotation(plat =  toupper(met.platform),genome = genome)
   # We will remove the rs probes, as they should not be used in the analysis
   probe <- probe[!grepl("rs",names(probe)),]
   probe <- probe[!probe$MASK_general,] # remove masked probes

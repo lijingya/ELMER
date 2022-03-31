@@ -2,8 +2,10 @@
 #' @description 
 #' This function will receive a gene expression and DNA methylation data objects 
 #' and create a Multi Assay Experiment.
-#' @param met A Summaerized Experiment, a matrix or path of rda file only containing the data.
-#' @param exp A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
+#' @param met A Summarized Experiment with one assay containing beta-values, 
+#' a matrix or path of rda file only containing the data.
+#' @param exp A Summarized Experiment with one assay, or
+#' a matrix or path of rda file only containing the data. Rownames should be 
 #' either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)
 #' @param genome Which is the default genome to make gene information. Options hg19 and hg38
 #' @param colData A DataFrame or data.frame of the phenotype data for all participants. Must have column primary (sample ID).
@@ -30,32 +32,48 @@
 #' @importFrom SummarizedExperiment SummarizedExperiment makeSummarizedExperimentFromDataFrame assay assay<-
 #' @examples
 #' # NON TCGA example: matrices has different column names
-#' gene.exp <- S4Vectors::DataFrame(sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
-#'                   sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3))
-#' dna.met <- S4Vectors::DataFrame(sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
-#'                        sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9))
-#' sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
-#'                                     sample.type = c("Normal", "Tumor"))
+#' gene.exp <- S4Vectors::DataFrame(
+#'    sample1.exp = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
+#'    sample2.exp = c("ENSG00000141510"=1.6,"ENSG00000171862"=2.3)
+#' )
+#'                   
+#' dna.met <- S4Vectors::DataFrame(
+#'    sample1.met = c("cg14324200"=0.5,"cg23867494"=0.1),
+#'    sample2.met =  c("cg14324200"=0.3,"cg23867494"=0.9)
+#' )
+#' sample.info <- S4Vectors::DataFrame(
+#'   primary =  c("sample1","sample2"), 
+#'   sample.type = c("Normal", "Tumor")
+#'  )
+#'  
 #' sampleMap <- S4Vectors::DataFrame(
-#'                  assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
-#'                  primary = c("sample1","sample1","sample2","sample2"), 
-#'                  colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met"))
-#' mae <- createMAE(exp = gene.exp, 
-#'                  met = dna.met, 
-#'                  sampleMap = sampleMap, 
-#'                  met.platform ="450K",
-#'                  colData = sample.info, 
-#'                  genome = "hg38") 
+#'     assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+#'     primary = c("sample1","sample1","sample2","sample2"), 
+#'     colname = c("sample1.exp","sample1.met","sample2.exp","sample2.met")
+#' )
+#' 
+#' mae <- createMAE(
+#'     exp = gene.exp, 
+#'     met = dna.met, 
+#'     sampleMap = sampleMap, 
+#'     met.platform ="450K",
+#'     colData = sample.info, 
+#'     genome = "hg38"
+#' ) 
+#'                  
 #' # You can also use sample Mapping and Sample information tables from a tsv file
 #' # You can use the createTSVTemplates function to create the tsv files
 #' readr::write_tsv(as.data.frame(sampleMap), path = "sampleMap.tsv")
 #' readr::write_tsv(as.data.frame(sample.info), path = "sample.info.tsv")
-#' mae <- createMAE(exp = gene.exp, 
-#'                  met = dna.met, 
-#'                  sampleMap = "sampleMap.tsv", 
-#'                  met.platform ="450K",
-#'                  colData = "sample.info.tsv", 
-#'                  genome = "hg38") 
+#' 
+#' mae <- createMAE(
+#'    exp = gene.exp, 
+#'    met = dna.met, 
+#'    sampleMap = "sampleMap.tsv", 
+#'    met.platform ="450K",
+#'    colData = "sample.info.tsv", 
+#'    genome = "hg38"
+#' ) 
 #'                  
 #' # NON TCGA example: matrices has same column names
 #' gene.exp <- S4Vectors::DataFrame(sample1 = c("ENSG00000141510"=2.3,"ENSG00000171862"=5.4),
@@ -65,16 +83,18 @@
 #' sample.info <- S4Vectors::DataFrame(primary =  c("sample1","sample2"), 
 #'                                     sample.type = c("Normal", "Tumor"))
 #' sampleMap <- S4Vectors::DataFrame(
-#'                  assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
-#'                  primary = c("sample1","sample1","sample2","sample2"), 
-#'                  colname = c("sample1","sample1","sample2","sample2")
+#'      assay = c("Gene expression","DNA methylation","Gene expression","DNA methylation"),
+#'     primary = c("sample1","sample1","sample2","sample2"), 
+#'     colname = c("sample1","sample1","sample2","sample2")
 #' )
-#' mae <- createMAE(exp = gene.exp, 
-#'                  met = dna.met, 
-#'                  sampleMap = sampleMap, 
-#'                  met.platform ="450K",
-#'                  colData = sample.info, 
-#'                  genome = "hg38") 
+#' mae <- createMAE(
+#'   exp = gene.exp, 
+#'   met = dna.met, 
+#'   sampleMap = sampleMap, 
+#'   met.platform ="450K",
+#'   colData = sample.info, 
+#'   genome = "hg38"
+#' ) 
 #' 
 #' \dontrun{
 #'    # TCGA example using TCGAbiolinks
@@ -83,29 +103,34 @@
 #'    library(TCGAbiolinks)
 #'    library(SummarizedExperiment)
 #'    
-#'    samples <- c("TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
-#'                 "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV")
+#'    samples <- c(
+#'       "TCGA-BA-4074", "TCGA-BA-4075", "TCGA-BA-4077", "TCGA-BA-5149",
+#'        "TCGA-UF-A7JK", "TCGA-UF-A7JS", "TCGA-UF-A7JT", "TCGA-UF-A7JV"
+#'    )
 #'    
 #'    #1) Get gene expression matrix
-#'    query.exp <- GDCquery(project = "TCGA-HNSC", 
-#'                          data.category = "Transcriptome Profiling", 
-#'                          data.type = "Gene Expression Quantification", 
-#'                          workflow.type = "HTSeq - FPKM-UQ",
-#'                          barcode = samples)
+#'    query.exp <- GDCquery(
+#'        project = "TCGA-HNSC", 
+#'        data.category = "Transcriptome Profiling", 
+#'        data.type = "Gene Expression Quantification", 
+#'        workflow.type = "STAR - Counts",
+#'        barcode = samples
+#'    )
 #'    
 #'    GDCdownload(query.exp)
 #'    exp.hg38 <- GDCprepare(query = query.exp)
 #'    
-#'    
 #'    # Aligned against Hg19
-#'    query.exp.hg19 <- GDCquery(project = "TCGA-HNSC", 
-#'                               data.category = "Gene expression",
-#'                               data.type = "Gene expression quantification",
-#'                               platform = "Illumina HiSeq", 
-#'                               file.type  = "normalized_results",
-#'                               experimental.strategy = "RNA-Seq",
-#'                               barcode = samples,
-#'                               legacy = TRUE)
+#'    query.exp.hg19 <- GDCquery(
+#'        project = "TCGA-HNSC", 
+#'        data.category = "Gene expression",
+#'        data.type = "Gene expression quantification",
+#'        platform = "Illumina HiSeq", 
+#'        file.type  = "normalized_results",
+#'        experimental.strategy = "RNA-Seq",
+#'        barcode = samples,
+#'        legacy = TRUE
+#'    )
 #'    GDCdownload(query.exp.hg19)
 #'    exp.hg19 <- GDCprepare(query.exp.hg19)
 #'    
@@ -113,11 +138,14 @@
 #'    rownames(exp.hg19) <- values(exp.hg19)$ensembl_gene_id
 #'    
 #'    # DNA Methylation
-#'    query.met <- GDCquery(project = "TCGA-HNSC",
-#'                          legacy = TRUE,
-#'                          data.category = "DNA methylation",
-#'                          barcode = samples,
-#'                          platform = "Illumina Human Methylation 450")
+#'    query.met <- GDCquery(
+#'       project = "TCGA-HNSC",
+#'       legacy = FALSE,
+#'       data.category = "DNA Methylation", 
+#'       data.type = "Methylation Beta Value",
+#'       barcode = samples,
+#'       platform = "Illumina Human Methylation 450"
+#'    )
 #'    
 #'    GDCdownload(query.met)
 #'    met <- GDCprepare(query = query.met)
@@ -125,26 +153,34 @@
 #'    distal.enhancer <- get.feature.probe(genome = "hg19",met.platform = "450k")
 #'    
 #'    # Consisering it is TCGA and SE
-#'    mae.hg19 <- createMAE(exp = exp.hg19, 
-#'                          met =  met, 
-#'                          TCGA = TRUE, 
-#'                          genome = "hg19",  
-#'                          filter.probes = distal.enhancer)
+#'    mae.hg19 <- createMAE(
+#'       exp = exp.hg19, 
+#'       met =  met, 
+#'       TCGA = TRUE, 
+#'       genome = "hg19",  
+#'       filter.probes = distal.enhancer
+#'      )
 #'    values(getExp(mae.hg19))
 #'    
-#'    mae.hg38 <- createMAE(exp = exp.hg38, met = met, 
-#'                         TCGA = TRUE, genome = "hg38",  
-#'                         filter.probes = distal.enhancer)
+#'    mae.hg38 <- createMAE(
+#'      exp = exp.hg38, met = met, 
+#'      TCGA = TRUE, genome = "hg38",  
+#'      filter.probes = distal.enhancer
+#'    )
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is TCGA and not SE
-#'    mae.hg19.test <- createMAE(exp = assay(exp.hg19), met =  assay(met), 
-#'                               TCGA = TRUE, genome = "hg19",  
-#'                               filter.probes = distal.enhancer)
+#'    mae.hg19.test <- createMAE(
+#'      exp = assay(exp.hg19), met =  assay(met), 
+#'      TCGA = TRUE, genome = "hg19",  
+#'      filter.probes = distal.enhancer
+#'    )
 #'    
-#'    mae.hg38 <- createMAE(exp = assay(exp.hg38), met = assay(met), 
-#'                          TCGA = TRUE, genome = "hg38",  
-#'                          filter.probes = distal.enhancer)
+#'    mae.hg38 <- createMAE(
+#'      exp = assay(exp.hg38), met = assay(met), 
+#'      TCGA = TRUE, genome = "hg38",  
+#'      filter.probes = distal.enhancer
+#'    )
 #'    values(getExp(mae.hg38))
 #'    
 #'    # Consisering it is not TCGA and SE
@@ -167,25 +203,41 @@
 #'                          colData = phenotype.data)
 #' }
 #' createMAE
-createMAE <- function (exp, 
-                       met, 
-                       colData, 
-                       sampleMap,
-                       linearize.exp = FALSE,
-                       filter.probes = NULL,
-                       met.na.cut = 0.2,
-                       filter.genes = NULL,
-                       met.platform = "450K",
-                       genome = NULL,
-                       save = TRUE,
-                       save.filename,
-                       TCGA = FALSE) {
+createMAE <- function (
+  exp, 
+  met, 
+  colData, 
+  sampleMap,
+  linearize.exp = FALSE,
+  filter.probes = NULL,
+  met.na.cut = 0.2,
+  filter.genes = NULL,
+  met.platform = "450K",
+  genome = NULL,
+  save = TRUE,
+  save.filename,
+  TCGA = FALSE
+) {
   
   if(missing(genome)) stop("Please specify the genome (hg38, hg19)")
+  
   
   # Check if input are path to rda files
   if(is.character(exp)) exp <- get(load(exp))
   if(is.character(met)) met <- get(load(met))
+  
+  if(is(exp,"RangedSummarizedExperiment")){
+    
+    
+    if(length(SummarizedExperiment::assays(exp)) > 1) {
+      if("tpm_unstrand" %in% names(SummarizedExperiment::assays(exp))){
+        message("Multiple assay found. Selecting tpm_unstrand")
+        exp <- SummarizedExperiment::assays(exp)$tpm_unstrand
+      } else {
+        stop("RNA-seq object has more than one assay. Please make sure it is only")
+      }
+    }
+  }
   
   suppressMessages({
     
@@ -211,7 +263,6 @@ createMAE <- function (exp,
   }
   # Add this here ?
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
-  
   
   if(!is(met,"RangedSummarizedExperiment")){
     met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
@@ -280,19 +331,22 @@ createMAE <- function (exp,
     }
     
     message("Creating MultiAssayExperiment")
-    mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
-                                                 "Gene expression" = exp),
-                                colData = colData,   
-                                sampleMap = sampleMap,
-                                metadata = list(TCGA= TRUE, genome = genome, met.platform = met.platform ))
+    mae <- MultiAssayExperiment(
+      experiments=list("DNA methylation" = met,"Gene expression" = exp),
+      colData = colData,   
+      sampleMap = sampleMap,
+      metadata = list(TCGA= TRUE, genome = genome, met.platform = met.platform )
+    )
   } else {
     
     if(missing(colData)){
-      message <- paste("Please set colData argument. A data frame with samples", 
-                       "information. All rownames should be colnames of DNA",
-                       "methylation and gene expression. An example is showed",
-                       "in MultiAssayExperiment documentation",
-                       "(access it with ?MultiAssayExperiment)")
+      message <- paste(
+        "Please set colData argument. A data frame with samples", 
+        "information. All rownames should be colnames of DNA",
+        "methylation and gene expression. An example is showed",
+        "in MultiAssayExperiment documentation",
+        "(access it with ?MultiAssayExperiment)"
+      )
       stop(message)
     }
     
@@ -307,15 +361,18 @@ createMAE <- function (exp,
         stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
       colData <- colData[match(ID,rownames(colData)),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
-                                      rep("Gene expression", length(colnames(exp)))),
-                             primary = c(colnames(met),colnames(exp)),
-                             colname=c(colnames(met),colnames(exp)))
-      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
-                                                   "Gene expression" = exp),
-                                  colData = colData,
-                                  sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
+      sampleMap <- DataFrame(
+        assay = c(rep("DNA methylation", length(colnames(met))), 
+                  rep("Gene expression", length(colnames(exp)))),
+        primary = c(colnames(met),colnames(exp)),
+        colname = c(colnames(met),colnames(exp))
+      )
+      mae <- MultiAssayExperiment(
+        experiments = list("DNA methylation" = met,"Gene expression" = exp),
+        colData = colData,
+        sampleMap = sampleMap,
+        metadata = list(TCGA = FALSE, genome = genome, met.platform = met.platform )
+      )
     } else {
       # Check that we have the same number of samples
       if(!all(c("primary","colname") %in% colnames(sampleMap))) 
@@ -341,15 +398,19 @@ createMAE <- function (exp,
         stop("Error DNA methylation matrix and gene expression matrix are not in the same order")
       
       colData <- colData[match(commun.samples,colData$primary),,drop = FALSE]
-      sampleMap <- DataFrame(assay= c(rep("DNA methylation", length(colnames(met))), 
-                                      rep("Gene expression", length(colnames(exp)))),
-                             primary = commun.samples,
-                             colname=c(colnames(met),colnames(exp)))
-      mae <- MultiAssayExperiment(experiments=list("DNA methylation" = met,
-                                                   "Gene expression" = exp),
-                                  colData = colData,
-                                  sampleMap = sampleMap,
-                                  metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform ))
+      sampleMap <- DataFrame(
+        assay = c(rep("DNA methylation", length(colnames(met))), 
+                  rep("Gene expression", length(colnames(exp)))),
+        primary = commun.samples,
+        colname = c(colnames(met),colnames(exp))
+      )
+      mae <- MultiAssayExperiment(
+        experiments=list("DNA methylation" = met,
+                         "Gene expression" = exp),
+        colData = colData,
+        sampleMap = sampleMap,
+        metadata = list(TCGA=FALSE, genome = genome, met.platform = met.platform )
+      )
     }
   }
   if(save) {
@@ -372,14 +433,16 @@ makeSummarizedExperimentFromGeneMatrix <- function(exp, genome = genome){
   required.cols <- c("external_gene_name", "ensembl_gene_id")
   
   if(all(grepl("ENSG",rownames(exp)))) {
-    exp$ensembl_gene_id <- rownames(exp)
+    exp$ensembl_gene_id <- gsub("\\.[0-9]*$","",rownames(exp))
     aux <- merge(exp, gene.info, by = "ensembl_gene_id", sort = FALSE)
     aux <- aux[!duplicated(aux$ensembl_gene_id),]
     rownames(aux) <- aux$ensembl_gene_id
     aux[,grep("entrezgene",colnames(aux))] <- NULL
-    exp <- makeSummarizedExperimentFromDataFrame(aux[,!grepl("external_gene_name|ensembl_gene_id|entrezgene",colnames(aux))],    
-                                                 start.field = "start_position",
-                                                 end.field = c("end_position"))
+    exp <- makeSummarizedExperimentFromDataFrame(
+      aux[,!grepl("external_gene_name|ensembl_gene_id|entrezgene",colnames(aux))],    
+      start.field = "start_position",
+      end.field = c("end_position")
+    )
     extra <- as.data.frame(gene.info[match(rownames(exp),gene.info$ensembl_gene_id),required.cols])
     colnames(extra) <- required.cols
     values(exp) <- cbind(values(exp),extra)
@@ -416,19 +479,50 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
 }
 
 
-getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg19.manifest"))
-  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg38.manifest"))
-  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
+# getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
+#   if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg19.manifest"))
+#   if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
+#   if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(sesameData::sesameDataGet("HM450.hg38.manifest"))
+#   if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(sesameData::sesameDataGet("EPIC.hg19.manifest"))
+# }
+
+#' @title Get DNA methylation array metadata from SesameData
+#' @noRd
+#' @importFrom stringr str_c
+#' @importFrom ExperimentHub ExperimentHub
+#' @importFrom AnnotationHub query
+getInfiniumAnnotation <- function(
+  genome = c("hg38","hg19"),
+  plat = c("450K","EPIC")
+){
+  genome <- match.arg(genome)
+  arrayType <- match.arg(plat)
+  
+  check_package("sesameData")
+  
+  message("Accessing DNAm annotation from sesame package for: ", genome, " - ",arrayType)
+  manifest <-  str_c(
+    ifelse(plat == "450K","HM450","EPIC"),
+    ".",
+    genome,
+    ".manifest"
+  )
+  ehub <- ExperimentHub()
+  query <- query(ehub, c("sesameData",manifest))
+  query <- query[query$title == manifest,]
+  ah_id <- query$ah_id[query$rdatadateadded == max(as.Date(query$rdatadateadded))]
+  ExperimentHub()[[ah_id]]
 }
 
-#getInfiniumAnnotation <- function(plat = "450K", genome = "hg38"){
-#  if(tolower(genome) == "hg19" & toupper(plat) == "450K" ) return(getdata("hm450.hg19.manifest"))
-#  if(tolower(genome) == "hg19" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg19.manifest"))
-#  if(tolower(genome) == "hg38" & toupper(plat) == "450K" ) return(getdata("hm450.hg38.manifest"))
-#  if(tolower(genome) == "hg38" & toupper(plat) == "EPIC" ) return(getdata("EPIC.hg38.manifest"))
-#}
+#' @title register cores
+#' @param package Package name
+#' @noRd
+check_package <- function(package){
+  if (!requireNamespace(package, quietly = TRUE)) {
+    stop(package, " package is needed for this function to work. Please install it.",
+         call. = FALSE)
+  }
+}
 
 getdata <- function(...)
 {
@@ -839,9 +933,11 @@ getRandomPairs <- function(pairs,
   colnames(probes.ranges) <- paste0("probe_",colnames(probes.ranges))
   
   # Get distal probes not in the pairs
-  distal.probe <- get.feature.probe(genome = genome,
-                                    met.platform = met.platform,
-                                    feature = NULL) # get distal probes
+  distal.probe <- get.feature.probe(
+    genome = genome,
+    met.platform = met.platform,
+    feature = NULL
+  ) # get distal probes
   distal.probe <- distal.probe[!names(distal.probe) %in% pairs$Probe,] # Select probes were not used
   
   nb.pairs <- nrow(pairs)

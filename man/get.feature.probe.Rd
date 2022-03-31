@@ -56,10 +56,12 @@ In order to get real distal probes, we use more comprehensive annotated TSS by b
  probe selection.
  @return A GRanges object contains the coordinate of probes which locate
  within promoter regions or distal feature regions such as union enhancer from REMC and FANTOM5.
- @usage get.feature.probe(feature,
-                          TSS,
-                          TSS.range = list(upstream = 2000, downstream = 2000),
-                          promoter = FALSE, rm.chr = NULL)
+ @usage get.feature.probe(
+    feature,
+    TSS,
+    TSS.range = list(upstream = 2000, downstream = 2000),
+    promoter = FALSE, rm.chr = NULL
+ )
 }
 \examples{
 # get distal enhancer probe
