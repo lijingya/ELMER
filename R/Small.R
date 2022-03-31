@@ -502,7 +502,7 @@ getInfiniumAnnotation <- function(
   
   message("Accessing DNAm annotation from sesame package for: ", genome, " - ",arrayType)
   manifest <-  str_c(
-    ifelse(plat == "450K","HM450","EPIC"),
+    ifelse(arrayType == "450K","HM450","EPIC"),
     ".",
     genome,
     ".manifest"

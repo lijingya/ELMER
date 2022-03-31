@@ -3,12 +3,14 @@ context("Get GetNearGenes")
 test_that("It maps correctly to hg38", {
   tssAnnot <- getTSS(genome = "hg38")
   geneAnnot <- tssAnnot
-
+  
   probe <- getInfiniumAnnotation(genome = "hg19")["cg18108049"]
-
-  NearbyGenes <- getRegionNearGenes(TRange = probe,
-                                    geneAnnot = geneAnnot,
-                                    numFlankingGenes = 4)
+  
+  NearbyGenes <- getRegionNearGenes(
+    TRange = probe,
+    geneAnnot = geneAnnot,
+    numFlankingGenes = 4
+  )
   
   expect_equal(NearbyGenes[NearbyGenes$Side == "L2",]$GeneID , "ENSG00000184908")
   expect_equal(NearbyGenes[NearbyGenes$Side == "L1",]$GeneID, "ENSG00000185519")
