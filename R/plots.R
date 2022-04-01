@@ -187,25 +187,30 @@ metBoxPlot <- function(data,
 #'                       Distance = c(6017,168499,0),
 #'                       Raw.p = c(0.001,0.00001,0.001),
 #'                       Pe = c(0.001,0.00001,0.001))
-#'  heatmapPairs(data = data, group.col = group.col,
+#'  heatmapPairs(
+#'    data = data, group.col = group.col,
 #'               group1 = group1, group2 = group2,
 #'               annotation.col = c("ethnicity","vital_status","age_at_diagnosis"),
-#'               pairs, filename = "heatmap.pdf")
+#'               pairs, filename = "heatmap.pdf",
+#'               height = 4, width = 11
+#'   )
 #'   }
-heatmapPairs <- function(data, 
-                         group.col, 
-                         group1, 
-                         group2, 
-                         pairs, 
-                         subset = FALSE,
-                         cluster.within.groups = TRUE,
-                         plot.distNearestTSS = FALSE,
-                         annotation.col = NULL, 
-                         met.metadata = NULL,
-                         exp.metadata = NULL,
-                         width = 10,
-                         height = 7,
-                         filename = NULL) {
+heatmapPairs <- function(
+  data, 
+  group.col, 
+  group1, 
+  group2, 
+  pairs, 
+  subset = FALSE,
+  cluster.within.groups = TRUE,
+  plot.distNearestTSS = FALSE,
+  annotation.col = NULL, 
+  met.metadata = NULL,
+  exp.metadata = NULL,
+  width = 10,
+  height = 7,
+  filename = NULL
+) {
   
   if(missing(data)) stop("Please set data argument")
   if(missing(group.col)) stop("Please set group.col argument")
@@ -286,13 +291,19 @@ heatmapPairs <- function(data,
         nb <- as.numeric(colData(data)[,c(i)])
         colData(data)[,c(i)] <- nb
         if(!all(na.omit(nb) >=0)){
-          col <- circlize::colorRamp2(c(min(nb,na.rm = T),
-                                        (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
-                                        max(nb,na.rm = T)), c(colors[(l.all+1)],"white", colors[(l.all + 2)]))
+          col <- circlize::colorRamp2(
+            c(min(nb,na.rm = T),
+              (max(nb,na.rm = T) + min(nb,na.rm = T))/2,
+              max(nb,na.rm = T)), c(colors[(l.all+1)],"white", colors[(l.all + 2)])
+          )
           l.all <- l.all + 2
         } else {
           col.list[[i]] <- col
-          col <- circlize::colorRamp2(c(min(nb,na.rm = T),max(nb,na.rm = T)), c("white", colors[(l.all+1):(l.all + 1)]))
+          col <- circlize::colorRamp2(
+            c(min(nb,na.rm = T),
+              max(nb,na.rm = T)), 
+            c("white", colors[(l.all+1):(l.all + 1)])
+          )
           l.all <- l.all + 1
         }
         col.list[[i]] <- col
@@ -301,98 +312,116 @@ heatmapPairs <- function(data,
     }
   }
   # Annotation track
-  ha = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
-                         col = col.list,
-                         show_annotation_name = TRUE,
-                         border = TRUE,
-                         annotation_name_side = "left",
-                         annotation_name_gp = gpar(fontsize = 6))
-  ha2 = HeatmapAnnotation(df = colData(data)[,c(group.col,annotation.col),drop = F], 
-                          show_legend = F,
-                          border = TRUE,
-                          col = col.list)
-  ht_list <- 
-    Heatmap(meth, 
-            name = "DNA methylation level", 
-            col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
-            column_names_gp = gpar(fontsize = 8),
-            show_column_names = FALSE,
-            column_order = order, 
-            show_row_names = TRUE,
-            use_raster = TRUE,
-            raster_device = c("png"),
-            raster_quality = 2,
-            cluster_columns = cluster_columns,
-            cluster_rows = TRUE,
-            row_names_gp = gpar(fontsize = 2),
-            top_annotation = ha,
-            column_title = "DNA methylation", 
-            column_title_gp = gpar(fontsize = 10), 
-            row_title_gp = gpar(fontsize = 10)) 
+  ha = HeatmapAnnotation(
+    df = colData(data)[,c(group.col,annotation.col),drop = F], 
+    col = col.list,
+    show_annotation_name = TRUE,
+    border = TRUE,
+    annotation_name_side = "left",
+    annotation_name_gp = gpar(fontsize = 6)
+  )
+  ha2 = HeatmapAnnotation(
+    df = colData(data)[,c(group.col,annotation.col),drop = F], 
+    show_legend = F,
+    show_annotation_name = F,
+    border = TRUE,
+    col = col.list
+  )
+  ht_list <- Heatmap(
+    meth, 
+    name = "DNA methylation beta level", 
+    col = colorRamp2(c(0, 0.5, 1), c("darkblue", "white", "gold")),
+    column_names_gp = gpar(fontsize = 8),
+    show_column_names = FALSE,
+    column_order = order, 
+    show_row_names = TRUE,
+    use_raster = TRUE,
+    raster_device = c("png"),
+    raster_quality = 2,
+    cluster_columns = cluster_columns,
+    cluster_rows = TRUE,
+    row_names_gp = gpar(fontsize = 2),
+    top_annotation = ha,
+    column_title = "DNA methylation", 
+    column_title_gp = gpar(fontsize = 10), 
+    row_title_gp = gpar(fontsize = 10)
+  ) 
   
   if(!is.null(met.metadata)) {
     for(i in met.metadata)
       ht_list <- ht_list + 
-        Heatmap(values(getMet(data)[pairs$Probe,])[i],
-                name = i, 
-                use_raster = TRUE,
-                raster_device = c("png"),
-                raster_quality = 2,
-                width = unit(5, "mm"),
-                column_title = "", 
-                show_column_names = F
+        Heatmap(
+          values(getMet(data)[pairs$Probe,])[i],
+          name = i, 
+          use_raster = TRUE,
+          raster_device = c("png"),
+          raster_quality = 2,
+          width = unit(5, "mm"),
+          column_title = "", 
+          show_column_names = F
         ) 
   }
   
   ht_list <-  ht_list +
-    Heatmap(t(apply(exp, 1, scale)), 
-            name = "Expression (z-score)", 
-            col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
-            top_annotation = ha2,
-            show_row_names = FALSE,
-            use_raster = TRUE,
-            raster_device = c("png"),
-            raster_quality = 2,
-            column_order = order, 
-            cluster_columns = cluster_columns,
-            column_names_gp = gpar(fontsize = 8), 
-            show_column_names = FALSE,
-            column_title = "Expression", 
-            column_title_gp = gpar(fontsize = 10)) 
+    Heatmap(
+      t(apply(exp, 1, scale)), 
+      name = "Gene Expression (z-score)", 
+      col = colorRamp2(c(-2, 0, 2), c("blue", "white", "red")),
+      top_annotation = ha2,
+      show_row_names = FALSE,
+      use_raster = TRUE,
+      raster_device = c("png"),
+      raster_quality = 2,
+      column_order = order, 
+      cluster_columns = cluster_columns,
+      column_names_gp = gpar(fontsize = 8), 
+      show_column_names = FALSE,
+      column_title = "Gene expression", 
+      column_title_gp = gpar(fontsize = 10)
+    ) 
   
   if(!is.null(exp.metadata)) {
     for(i in exp.metadata)
       ht_list <- ht_list + 
-        Heatmap(values(getExp(data)[pairs$Probe,])[i],
-                name = i, 
-                use_raster = TRUE,
-                raster_device = c("png"),
-                raster_quality = 2,
-                width = unit(5, "mm"),
-                column_title = "", 
-                show_column_names = FALSE
+        Heatmap(
+          values(getExp(data)[pairs$Probe,])[i],
+          name = i, 
+          use_raster = TRUE,
+          raster_device = c("png"),
+          raster_quality = 2,
+          width = unit(5, "mm"),
+          column_title = "",
+          row_title =  paste0(nrow(pairs), "pairs of probes and genes"),
+          show_column_names = FALSE
         ) 
   }
   if(plot.distNearestTSS){
     ht_list <-  ht_list +
-      Heatmap(log10(pairs$distNearestTSS + 1),
-              name = "log10(distNearestTSS + 1)", 
-              width = unit(5, "mm"),
-              column_title = "", 
-              show_column_names = FALSE,
-              use_raster = TRUE,
-              raster_device = c("png"),
-              raster_quality = 2,
-              col = colorRamp2(c(0, 8), c("white", "orange")),
-              heatmap_legend_param = list(at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
-                                          labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))) 
+      Heatmap(
+        log10(pairs$distNearestTSS + 1),
+        name = "log10(distNearestTSS + 1)", 
+        width = unit(5, "mm"),
+        column_title = "", 
+        show_column_names = FALSE,
+        use_raster = TRUE,
+        raster_device = c("png"),
+        raster_quality = 2,
+        col = colorRamp2(c(0, 8), c("white", "orange")),
+        heatmap_legend_param = list(
+          at = log10(1 + c(0, 10, 100, 1000, 10000, 100000, 1000000,10000000,100000000)), 
+          labels = c("0", "10bp", "100bp", "1kb", "10kb", "100kb", "1mb","10mb","100mb"))
+      ) 
   }
   ht_list <- ht_list +
-    ht_global_opt(legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
-                  legend_labels_gp = gpar(fontsize = 10))
+    ht_global_opt(
+      legend_title_gp = gpar(fontsize = 10, fontface = "bold"), 
+      legend_labels_gp = gpar(fontsize = 10)
+    )
   if(is.null(filename)) return(ht_list)
-  padding = unit.c(unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.5), collapse = ""))) - unit(1, "cm"),
-                   unit(c(2, 2), "mm"))
+  padding = unit.c(
+    unit(2, "mm"), grobWidth(textGrob(paste(rep("a",max(nchar(c(group.col,annotation.col)))/1.5), collapse = ""))) - unit(1, "cm"),
+    unit(c(2, 2), "mm")
+  )
   if(grepl("\\.pdf",filename)) {
     message("Saving as PDF")
     pdf(filename, width = width, height = height)
@@ -403,12 +432,15 @@ heatmapPairs <- function(data,
     if(height < 100) height <- 1000
     png(filename, width = width, height = height)
   }
-  draw(ht_list, 
-       #padding = padding, 
-       newpage = TRUE, 
-       column_title = "Correspondence between probe DNA methylation and distal gene expression", 
-       column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
-       annotation_legend_side = "right")
+  draw(
+    ht_list, 
+    #padding = padding, 
+    newpage = TRUE, 
+    column_title = "Correspondence between probe DNA methylation and distal gene expression", 
+    column_title_gp = gpar(fontsize = 12, fontface = "bold"), 
+    annotation_legend_side = "right",
+    merge_legend = TRUE
+  )
   dev.off()
 }
 
@@ -534,12 +566,12 @@ heatmapGene <- function(data,
     gene.precede <- gene.info[precede(selected.gene.gr,gene.info,ignore.strand=T),]$external_gene_name %>% as.character
     gene.gr <- gene.info[gene.info$external_gene_name %in% c(gene.follow,gene.precede,GeneSymbol),]
     
-  
+    
     # Get the regions of the 2 nearest genes, we will get all probes on those regions
     regions <- data.frame(
       chrom = unique(as.character(seqnames(gene.gr))), 
-                     start = min(start(gene.gr)), 
-                     end = max(end(gene.gr))) %>% 
+      start = min(start(gene.gr)), 
+      end = max(end(gene.gr))) %>% 
       makeGRangesFromDataFrame
     p <- names(sort(subsetByOverlaps(probes.info, regions, ignore.strand = TRUE)))
     if(length(p) == 0) stop("No probes close to the gene were found")
@@ -1089,7 +1121,7 @@ get.tab.or <- function(dir, classification, tab, top = TRUE){
 get.tab.pval <- function(dir,classification,tab, top = TRUE){ 
   col <- ifelse(classification == "family","potential.TF.family", "potential.TF.subfamily")
   if(top) col <- paste0("top.",col)
-    
+  
   message("o Creating TF FDR matrix")
   # For each of those analysis get the correlation pvalue of MR TFs exp  vs Avg DNA met. of inferred TFBS.
   tab.pval <- plyr::adply(dir,

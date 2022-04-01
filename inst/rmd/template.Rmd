@@ -279,7 +279,7 @@ if(file.exists(file)) {
   )
   
   cap <- paste0("Heatmap: hypomethylated paired probes")
-  kexpand.plotHeatmap(8,cap, 10)
+  kexpand.plotHeatmap(ht = 6,cap,width =  10)
   
   if(params$funcivar){
     cat("\n#### Statehub: Chromatin state evaluation\n")
