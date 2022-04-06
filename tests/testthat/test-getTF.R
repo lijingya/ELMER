@@ -149,44 +149,52 @@ test_that("Test if the results is right", {
   # The case 4 is the potential TF
   
   # We have the 3 cases for 6 patients
-  exp <- t(data.frame("ENSG00000141510" = c(1,1,1,1,1,1), # No change in expression
-                      "ENSG00000073282" = c(0,0,0,1,1,1), # Change in the other direction
-                      "ENSG00000135776" = c(0.2,0.4,0.6,0.8,0.9,1), # raw p-value should be higher than the best case
-                      "ENSG00000078900" = c(1,1,1,0,0,0))) # Should be true
+  exp <- t(
+    data.frame(
+      "ENSG00000141510" = c(1,1,1,1,1,1), # No change in expression
+      "ENSG00000073282" = c(0,0,0,1,1,1), # Change in the other direction
+      "ENSG00000135776" = c(0.2,0.4,0.6,0.8,0.9,1), # raw p-value should be higher than the best case
+      "ENSG00000078900" = c(1,1,1,0,0,0))
+  ) # Should be true
   colnames(exp) <- c(as.character(1:6))
-  exp <- makeSummarizedExperimentFromGeneMatrix(exp, genome = "hg19")
+  exp <- makeSummarizedExperimentFromGeneMatrix(exp = exp, genome = "hg19")
   
   # First 3 patients are Unmethylated
   met <- t(data.frame("cg00329272" = c(0,0,0,1,1,1)))
   colnames(met) <- c(as.character(1:6))
-  met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
+  met <- makeSummarizedExperimentFromDNAMethylation(met = met, met.platform = "450K", genome = "hg19")  
   
-  colData <- data.frame(sample = as.character(1:6), 
-                        group = c(rep("g1",3),rep("g2",3)),
-                        primary =  as.character(1:6))
+  colData <- data.frame(
+    sample = as.character(1:6), 
+    group = c(rep("g1",3),rep("g2",3)),
+    primary =  as.character(1:6)
+  )
   # Create datas
-  data <- createMAE(exp,met, genome = "hg19", colData =  colData)
+  data <- createMAE(exp = exp,met = met, genome = "hg19", colData =  colData)
   
   enriched.motif <- list("P53_HUMAN.H11MO.0.A" = c("cg00329272"))
   
   
   suppressMessages({
-    TF <- get.TFs(data, 
-                  enriched.motif, 
+    TF <- get.TFs(data = data, 
+                  enriched.motif = enriched.motif, 
                   group.col = "group",
                   group1 = "g1",
                   group2 = "g2",  
                   mode = "supervised",
                   diff.dir = "hypo",
-                  TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
-                                   ensembl_gene_id= c("ENSG00000141510",
-                                                      "ENSG00000073282",
-                                                      "ENSG00000078900",
-                                                      "ENSG00000135776"),
-                                   stringsAsFactors = FALSE),
+                  TFs = data.frame(
+                    external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
+                    ensembl_gene_id= c(
+                      "ENSG00000141510",
+                      "ENSG00000073282",
+                      "ENSG00000078900",
+                      "ENSG00000135776"
+                    ),
+                    stringsAsFactors = FALSE
+                  ),
                   label = "hypo")
   })
-  
   
   expect_true(TF$potential.TF.family == "TP73")
   expect_true(TF$top.potential.TF.family == "TP73")
@@ -202,12 +210,14 @@ test_that("Test if the results is right", {
                   group.col = "group",
                   group1 = "g1",
                   group2 = "g2",
-                  TFs = data.frame(external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
-                                   ensembl_gene_id= c("ENSG00000141510",
-                                                      "ENSG00000073282",
-                                                      "ENSG00000078900",
-                                                      "ENSG00000135776"),
-                                   stringsAsFactors = FALSE),
+                  TFs = data.frame(
+                    external_gene_name=c("TP53", "TP63","TP73","ABCB10"),
+                    ensembl_gene_id= c("ENSG00000141510",
+                                       "ENSG00000073282",
+                                       "ENSG00000078900",
+                                       "ENSG00000135776"),
+                    stringsAsFactors = FALSE
+                  ),
                   label = "hypo")
   })
   

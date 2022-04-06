@@ -6,8 +6,10 @@ library(data.table)
 test_that("Links are as expected", {
   
   data <- ELMER:::getdata("elmer.data.example")
-  links <- GetNearGenes(TRange = rowRanges(getMet(data)),
-                        geneAnnot = rowRanges(getExp(data)))
+  links <- GetNearGenes(
+    TRange = rowRanges(getMet(data)),
+    geneAnnot = rowRanges(getExp(data))
+  )
   links <-  links[sample(1:nrow(links),250),] # get 250 random links
   random.pairs <- getRandomPairs(links)
   
@@ -15,11 +17,11 @@ test_that("Links are as expected", {
     group_by(Probe) %>%
     summarize(col1=paste(sort(Side),collapse = ",")) %>%
     data.frame() -> sig.pairs.links
+  
   links %>% 
     group_by(ID) %>%
     summarize(col1=paste(sort(Side),collapse = ",")) %>%
     data.frame() -> random.pairs.links
-  
   
   # Same nb of probes ? 
   expect_true(length(unique(links$ID)) == length(unique(random.pairs$Probe)))
