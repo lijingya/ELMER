@@ -73,10 +73,13 @@ Heatmp plot of pairs gene and probes anti-correlated
                       Distance = c(6017,168499,0),
                       Raw.p = c(0.001,0.00001,0.001),
                       Pe = c(0.001,0.00001,0.001))
- heatmapPairs(data = data, group.col = group.col,
+ heatmapPairs(
+   data = data, group.col = group.col,
               group1 = group1, group2 = group2,
               annotation.col = c("ethnicity","vital_status","age_at_diagnosis"),
-              pairs, filename = "heatmap.pdf")
+              pairs, filename = "heatmap.pdf",
+              height = 4, width = 11
+  )
   }
 }
 \author{

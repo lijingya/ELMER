@@ -21,10 +21,12 @@ createMAE(
 )
 }
 \arguments{
-\item{exp}{A Summaerized Experiment, a matrix or path of rda file only containing the data. Rownames should be 
+\item{exp}{A Summarized Experiment with one assay, or
+a matrix or path of rda file only containing the data. Rownames should be 
 either Ensembl gene id (ensembl_gene_id) or gene symbol (external_gene_name)}
 
-\item{met}{A Summaerized Experiment, a matrix or path of rda file only containing the data.}
+\item{met}{A Summarized Experiment with one assay containing beta-values, 
+a matrix or path of rda file only containing the data.}
 
 \item{colData}{A DataFrame or data.frame of the phenotype data for all participants. Must have column primary (sample ID).}
 

@@ -501,6 +501,8 @@ getInfiniumAnnotation <- function(
   arrayType <- match.arg(plat)
   
   check_package("sesameData")
+  check_package("ExperimentHub")
+  check_package("AnnotationHub")
   
   message("Accessing DNAm annotation from sesame package for: ", genome, " - ",arrayType)
   manifest <-  str_c(

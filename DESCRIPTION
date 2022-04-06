@@ -72,6 +72,8 @@ Imports:
     DelayedArray
 Suggests:
     BiocStyle,
+    AnnotationHub,
+    ExperimentHub,
     knitr,
     testthat,
     data.table, 
