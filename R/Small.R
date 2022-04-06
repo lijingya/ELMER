@@ -265,7 +265,9 @@ createMAE <- function (
   if(linearize.exp) assay(exp) <- log2(assay(exp) + 1)
   
   if(!is(met,"RangedSummarizedExperiment")){
-    met <- makeSummarizedExperimentFromDNAMethylation(met, genome, met.platform)
+    met <- makeSummarizedExperimentFromDNAMethylation(
+      met = met, genome = genome, met.platform = met.platform
+    )
   }
   met <- met[rowMeans(is.na(assay(met))) < met.na.cut, ]
   
@@ -459,7 +461,7 @@ makeSummarizedExperimentFromDNAMethylation <- function(met, genome, met.platform
   message("Creating a SummarizedExperiment from DNA methylation input")
   
   # Instead of looking on the size, it is better to set it as a argument as the annotation is different
-  annotation <-   getInfiniumAnnotation(met.platform, genome)
+  annotation <-   getInfiniumAnnotation(plat = met.platform, genome = genome)
   
   rowRanges <- annotation[names(annotation) %in% rownames(met),,drop=FALSE]
   

@@ -111,32 +111,34 @@ create the groups Tumor and Normal using the following samples to each group:
 
 Tumor samples are:   
 
-  *   Primary solid Tumor
-  *   Recurrent Solid Tumor
-  *   Primary Blood Derived Cancer - Peripheral Blood
-  *   Recurrent Blood Derived Cancer - Bone Marrow
-  *   Additional - New Primary
-  *   Metastatic
-  *   Additional Metastatic
-  *   Human Tumor Original Cells
-  *   Primary Blood Derived Cancer - Bone Marrow
-  
+*   Primary solid Tumor
+*   Recurrent Solid Tumor
+*   Primary Blood Derived Cancer - Peripheral Blood
+*   Recurrent Blood Derived Cancer - Bone Marrow
+*   Additional - New Primary
+*   Metastatic
+*   Additional Metastatic
+*   Human Tumor Original Cells
+*   Primary Blood Derived Cancer - Bone Marrow
+
 Normal samples:
 
-  * Blood Derived Normal
-  * Solid Tissue Normal
-  * Buccal Cell Normal
-  * EBV Immortalized Normal
-  * Bone Marrow Normal
+* Blood Derived Normal
+* Solid Tissue Normal
+* Buccal Cell Normal
+* EBV Immortalized Normal
+* Bone Marrow Normal
 
 ```{r, message=FALSE}
 library(MultiAssayExperiment)
-data <- createMAE(exp = GeneExp, 
-                  met = Meth,
-                  met.platform = "450K",
-                  genome = "hg19",
-                  save = FALSE,
-                  TCGA = TRUE)
+data <- createMAE(
+  exp = GeneExp, 
+  met = Meth,
+  met.platform = "450K",
+  genome = "hg19",
+  save = FALSE,
+  TCGA = TRUE
+)
 data
 as.data.frame(colData(data)[,c("patient","definition","TN")]) %>% 
   datatable(options = list(scrollX = TRUE,pageLength = 5)) 
@@ -233,7 +235,7 @@ all(substr(colnames(getExp(data)),1,15) == substr(colnames(getMet(data)),1,15))
 
 # See sample information for data
 as.data.frame(colData(data)) %>% datatable(options = list(scrollX = TRUE)) 
-          
+
 # See sample names for each experiment
 as.data.frame(sampleMap(data)) %>% datatable(options = list(scrollX = TRUE)) 
 ```
