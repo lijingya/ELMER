@@ -16,7 +16,7 @@ A list of TFs and its family members
 This will output a list each TF motif and TFs that binding the motis. Multiple TFs may
 recognize a same motif such as TF family.  
 The association between each motif famil and transcription factor was created using the 
-(HOCOMOCO)[http://hocomoco.autosome.ru/human/mono] which TF structural families 
+(HOCOMOCO)[https://hocomoco11.autosome.org/human/mono?full=true] which TF structural families 
 was created according to TFClass [@wingender2014tfclass]
 This data is stored as a list whose elements 
 are motifs and contents for each element are TFs which recognize the same motif that

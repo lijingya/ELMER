@@ -748,7 +748,7 @@ get.GRCh <- function(genome = "hg19", genes = NULL, as.granges = FALSE) {
 #' This will output a list each TF motif and TFs that binding the motis. Multiple TFs may
 #' recognize a same motif such as TF family.  
 #' The association between each motif famil and transcription factor was created using the 
-#' (HOCOMOCO)[http://hocomoco.autosome.ru/human/mono] which TF structural families 
+#' (HOCOMOCO)[https://hocomoco11.autosome.org/human/mono?full=true] which TF structural families 
 #' was created according to TFClass [@wingender2014tfclass]
 #' This data is stored as a list whose elements 
 #' are motifs and contents for each element are TFs which recognize the same motif that
@@ -848,7 +848,7 @@ preAssociationProbeFiltering <- function(data, K = 0.3, percentage = 0.05){
 #' @importFrom rvest html_table
 getHocomocoTable <- function(){
   hocomoco <- tryCatch({
-    hocomoco <- "http://hocomoco11.autosome.ru/human/mono?full=true" %>% read_html()  %>%  html_table()
+    hocomoco <- "https://hocomoco11.autosome.org/human/mono?full=true" %>% read_html()  %>%  html_table()
     hocomoco <- hocomoco[[1]]
   }, error = function(e) {
     getdata("hocomoco.table")
@@ -1099,7 +1099,7 @@ findMotifRegion <- function(regions,
   
   if(!is(regions, "GRanges")) stop("Regions must be a Genomic Ranges object")
   # get all hocomoco 11 motifs
-  TFBS.motif <- "http://hocomoco11.autosome.ru/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
+  TFBS.motif <- "http://hocomoco11.autosome.org/final_bundle/hocomoco11/full/HUMAN/mono/HOCOMOCOv11_full_HUMAN_mono_homer_format_0.0001.motif"
   if(!file.exists(basename(TFBS.motif))) downloader::download(TFBS.motif,basename(TFBS.motif))
   
   
