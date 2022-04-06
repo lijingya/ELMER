@@ -237,11 +237,13 @@ test_that("Test if the results is right", {
   # First 3 patients are Unmethylated
   met <- t(data.frame("cg00329272" = c(0,0,0,1,1,1)))
   colnames(met) <- c(as.character(1:6))
-  met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450k", genome = "hg19")  
+  met <- makeSummarizedExperimentFromDNAMethylation(met, met.platform = "450K", genome = "hg19")  
   
-  colData <- data.frame(sample = as.character(1:6), 
-                        group = c(rep("g2",3),rep("g1",3)),
-                        primary =  as.character(1:6))
+  colData <- data.frame(
+    sample = as.character(1:6), 
+    group = c(rep("g2",3),rep("g1",3)),
+    primary =  as.character(1:6)
+  )
   # Create datas
   data <- createMAE(exp,met, genome = "hg19", colData = colData)
   
