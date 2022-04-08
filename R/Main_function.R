@@ -897,9 +897,11 @@ promoterMeth <- function(data,
   overlap <- findOverlaps(probes, TSS_2K)
   
   # make data frame with probe and gene
-  df <- data.frame(Probe = as.character(names(probes)[queryHits(overlap)]),
-                   GeneID = TSS_2K$ensembl_gene_id[subjectHits(overlap)], 
-                   stringsAsFactors=FALSE)
+  df <- data.frame(
+    Probe = as.character(names(probes)[queryHits(overlap)]),
+    GeneID = TSS_2K$ensembl_gene_id[subjectHits(overlap)], 
+    stringsAsFactors = FALSE
+  )
   
   # no results ?
   if(nrow(df)==0){
@@ -912,51 +914,69 @@ promoterMeth <- function(data,
     
     # calculate average methylation of promoter (if promoter has several probes)
     met <- assay(getMet(data))
-    Gene.promoter <- lapply(ProbeInTSS,
-                            function(x, METH){
-                              meth <- METH[x,]
-                              if(length(x)>1){
-                                meth <- colMeans(meth,na.rm=TRUE)
-                              }
-                              return(meth)
-                            },
-                            METH = met)
+    Gene.promoter <- lapply(
+      ProbeInTSS,
+      function(x, METH){
+        meth <- METH[x,]
+        if(length(x)>1){
+          meth <- colMeans(meth,na.rm=TRUE)
+        }
+        return(meth)
+      },
+      METH = met
+    )
     
     Gene.promoter <- do.call(rbind, Gene.promoter)
     
     ## make fake NearGene
-    Fake <- data.frame(Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
-                       GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
-                       Distance = 1,
-                       Side = 1, 
-                       stringsAsFactors = FALSE)
+    Fake <- data.frame(
+      Symbol = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"external_gene_name"],
+      GeneID = values(getExp(data))[values(getExp(data))$ensembl_gene_id %in% rownames(Gene.promoter),"ensembl_gene_id"],
+      Distance = 1,
+      Side = 1, 
+      stringsAsFactors = FALSE
+    )
     Fake <- split(Fake, Fake$GeneID)
     exps <- assay(getExp(data))
     
     message("Calculating Pp (probe - gene) for all nearby genes")
-    out <- adply(.data = rownames(Gene.promoter), .margins = 1,
-                 .fun = function(x) {
-                   Stat.nonpara(Probe = x,
-                                Meths = Gene.promoter[x,,drop = FALSE],
-                                NearGenes = as.data.frame(Fake),
-                                Top = minSubgroupFrac/2,
-                                Exps = exps)},
-                 .progress = "time",
-                 .parallel = parallel,
-                 .id = NULL,
-                 .paropts = list(.errorhandling = 'pass')
+    out <- adply(
+      .data = rownames(Gene.promoter), .margins = 1,
+      .fun = function(x) {
+        Stat.nonpara(
+          Probe = x,
+          Meths = Gene.promoter[x,,drop = FALSE],
+          NearGenes = as.data.frame(Fake),
+          Top = minSubgroupFrac/2,
+          Exps = exps
+        )
+      },
+      .progress = "time",
+      .parallel = parallel,
+      .id = NULL,
+      .paropts = list(.errorhandling = 'pass')
     )
     
     out <- out[,c("GeneID","Symbol","Raw.p")]
-    if(save) write.csv(out,
-                       file = "Genes_all_anticorrelated_promoter_methylation.csv",
-                       row.names = FALSE)
+    
+    if(save) {
+      write.csv(
+        x = out,
+        file = "Genes_all_anticorrelated_promoter_methylation.csv",
+        row.names = FALSE
+      )
+    }
     out <- out[out$Raw.p < sig.pvalue & !is.na(out$Raw.p),]
   }
   if(nrow(out) == 0) message("No assossiation was found")
-  if(save) write.csv(out,
-                     file = "Genes_significant_anticorrelated_promoter_methylation.csv",
-                     row.names = FALSE)
+  
+  if(save) {
+    write.csv(
+      x = out,
+      file = "Genes_significant_anticorrelated_promoter_methylation.csv",
+      row.names = FALSE
+    )
+  }
   return(out)
 }
 #' get.enriched.motif to identify the overrepresented motifs in a set of probes (HM450K) regions.
@@ -1044,20 +1064,24 @@ promoterMeth <- function(data,
 #'   })
 #' bg <- rownames(getMet(data))
 #' data(Probes.motif.hg38.450K,package = "ELMER.data")
-#' enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
-#'                                      probes = probes,
-#'                                      background.probes = bg,
-#'                                      pvalue = 1,
-#'                                      min.incidence = 2,
-#'                                      label = "hypo")
+#' enriched.motif <- get.enriched.motif(
+#'    probes.motif = Probes.motif.hg38.450K,
+#'    probes = probes,
+#'    background.probes = bg,
+#'    pvalue = 1,
+#'    min.incidence = 2,
+#'    label = "hypo"
+#' )
 #' # If the MAE is set, the background and the probes.motif will
 #' # be automatically set
-#' enriched.motif <- get.enriched.motif(data = data,
-#'                                      min.motif.quality = "DS",
-#'                                      probes=probes,
-#'                                      pvalue = 1,
-#'                                      min.incidence=2,
-#'                                      label="hypo")
+#' enriched.motif <- get.enriched.motif(
+#'     data = data,
+#'     min.motif.quality = "DS",
+#'     probes=probes,
+#'     pvalue = 1,
+#'     min.incidence=2,
+#'     label="hypo"
+#' )
 get.enriched.motif <- function(
     data,
     probes.motif,
@@ -1124,12 +1148,14 @@ get.enriched.motif <- function(
   },.id = NULL,
   .progress = "time")
   rownames(fisher) <- names(a)
-  Summary <- data.frame(motif  =  names(a),
-                        NumOfProbes = probes.TF.num,
-                        PercentageOfProbes = probes.TF.num/length(probes),
-                        fisher,
-                        FDR = p.adjust(fisher$p.value,method = "BH"),
-                        stringsAsFactors = FALSE)
+  Summary <- data.frame(
+    motif  =  names(a),
+    NumOfProbes = probes.TF.num,
+    PercentageOfProbes = probes.TF.num/length(probes),
+    fisher,
+    FDR = p.adjust(fisher$p.value,method = "BH"),
+    stringsAsFactors = FALSE
+  )
   hocomoco <- getHocomocoTable()
   family.class <- hocomoco[,c("Model",grep("family",colnames(hocomoco),value = T))]
   Summary <- merge(Summary,family.class, by.x = "motif",by.y = "Model")
@@ -1364,33 +1390,37 @@ get.enriched.motif <- function(
 #'               group2 = "Solid Tissue Normal",
 #'               enriched.motif,
 #'               label="hypo")
-get.TFs <- function(data,
-                    enriched.motif,
-                    TFs,
-                    group.col,
-                    group1,
-                    group2,
-                    mode = "unsupervised",
-                    correlation = "negative",
-                    diff.dir = NULL,
-                    motif.relevant.TFs,
-                    minSubgroupFrac = 0.4,
-                    dir.out = "./",
-                    label = NULL,
-                    save.plots = FALSE,
-                    cores = 1,
-                    topTFper = 0.05,
-                    save = TRUE){
+get.TFs <- function(
+    data,
+    enriched.motif,
+    TFs,
+    group.col,
+    group1,
+    group2,
+    mode = "unsupervised",
+    correlation = "negative",
+    diff.dir = NULL,
+    motif.relevant.TFs,
+    minSubgroupFrac = 0.4,
+    dir.out = "./",
+    label = NULL,
+    save.plots = FALSE,
+    cores = 1,
+    topTFper = 0.05,
+    save = TRUE
+){
   if(missing(data)){
     stop("data argument is empty")
   }
+  
   if(missing(enriched.motif)){
     stop("enriched.motif is empty.")
-  }else if(is.character(enriched.motif)){
+  } else if(is.character(enriched.motif)) {
     enriched.motif <- get(load(enriched.motif)) # The data is in the one and only variable
-  } else if(!is.list(enriched.motif)){
+  } else if(!is.list(enriched.motif)) {
     stop("enriched.motif option should be a list object.")
   }
+  
   if(length(enriched.motif) == 0) {
     message("No enriched motifs were found in the last step")
     return(NULL)
@@ -1417,7 +1447,6 @@ get.TFs <- function(data,
   } else {
     message("Selecting U (unmethylated) and M (methylated) groups. Each groups has ", minSubgroupFrac * 50,"% of samples")
   }
-  
   
   if(missing(TFs)){
     # Here we will make some assumptions:
@@ -1450,17 +1479,18 @@ get.TFs <- function(data,
   # This will calculate the average methylation at all motif-adjacent probes
   message("Calculating the average methylation at all motif-adjacent probes ")
   
-  motif.meth <- ldply(enriched.motif,
-                      function(x,meth){
-                        if(length(x)<2) {
-                          return(meth[x,])
-                        } else {
-                          return(colMeans(meth[x,],na.rm = TRUE))
-                        }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
-                      .progress = "time",
-                      .parallel = parallel,
-                      .id = "rownames",
-                      .paropts=list(.errorhandling='pass')
+  motif.meth <- ldply(
+    enriched.motif,
+    function(x,meth){
+      if(length(x)<2) {
+        return(meth[x,])
+      } else {
+        return(colMeans(meth[x,],na.rm = TRUE))
+      }}, meth = assay(getMet(data))[unique(unlist(enriched.motif)),,drop = FALSE],
+    .progress = "time",
+    .parallel = parallel,
+    .id = "rownames",
+    .paropts=list(.errorhandling='pass')
   )
   rownames(motif.meth) <- motif.meth$rownames
   motif.meth$rownames <- NULL
@@ -1486,20 +1516,21 @@ get.TFs <- function(data,
   # For each motif (x) split the Meths object into U and M and evaluate the expression
   # of all TF Exps (obj)
   exps <- assay(getExp(data))[gene,]
-  TF.meth.cor <- alply(.data = names(enriched.motif), .margins = 1,
-                       .fun = function(x) {
-                         Stat.nonpara.permu(
-                           Probe = x,
-                           Meths = motif.meth[x,],
-                           Gene  = gene,
-                           correlation = correlation,
-                           unmethy = unmethylated,
-                           methy = methylated,
-                           Top   = minSubgroupFrac/2,
-                           Exps  = exps)},
-                       .progress = "time",
-                       .parallel = parallel,
-                       .paropts = list(.errorhandling = 'pass')
+  TF.meth.cor <- alply(
+    .data = names(enriched.motif), .margins = 1,
+    .fun = function(x) {
+      Stat.nonpara.permu(
+        Probe = x,
+        Meths = motif.meth[x,],
+        Gene  = gene,
+        correlation = correlation,
+        unmethy = unmethylated,
+        methy = methylated,
+        Top   = minSubgroupFrac/2,
+        Exps  = exps)},
+    .progress = "time",
+    .parallel = parallel,
+    .paropts = list(.errorhandling = 'pass')
   )
   # We are going to make a multiple hypothesis correction
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
@@ -1519,54 +1550,68 @@ get.TFs <- function(data,
   message("Finding potential TF and known potential TF")
   
   # For each motif evaluate TF
-  cor.summary <- adply(colnames(TF.meth.cor),
-                       function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){
-                         cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
-                         top <- cor[1:floor(topTFper * nrow(TF.meth.cor))]
-                         if (any(top %in% motif.relavent.TFs.family[[x]])) {
-                           potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
-                         } else {
-                           potential.TF.family <- NA
-                         }
-                         if (any(top %in% motif.relavent.TFs.subfamily[[x]])) {
-                           potential.TF.subfamily <- top[top %in% motif.relavent.TFs.subfamily[[x]]]
-                         } else {
-                           potential.TF.subfamily <- NA
-                         }
-                         out <- data.frame("motif" = x,
-                                           "top.potential.TF.family" = ifelse(!is.na(potential.TF.family[1]),potential.TF.family[1],NA),
-                                           "top.potential.TF.subfamily" = ifelse(!is.na(potential.TF.subfamily[1]),potential.TF.subfamily[1],NA),
-                                           "potential.TF.family" = ifelse(!any(sapply(potential.TF.family,is.na)),paste(potential.TF.family, collapse = ";"),NA),
-                                           "potential.TF.subfamily" = ifelse(!any(sapply(potential.TF.subfamily,is.na)),paste(potential.TF.subfamily, collapse = ";"),NA),
-                                           "top_5percent_TFs" = paste(top,collapse = ";"),
-                                           stringsAsFactors = FALSE)
-                         return(out)
-                       },
-                       TF.meth.cor=TF.meth.cor, motif.relavent.TFs.family=TF.family,motif.relavent.TFs.subfamily=TF.subfamily,
-                       .progress = "time",
-                       .parallel = parallel,
-                       .margins = 1,
-                       .id = NULL,
-                       .paropts = list(.errorhandling = 'pass'))
+  cor.summary <- adply(
+    colnames(TF.meth.cor),
+    function(x, TF.meth.cor, motif.relavent.TFs.family,motif.relavent.TFs.subfamily){
+      cor <- rownames(TF.meth.cor)[sort(TF.meth.cor[,x],index.return = TRUE)$ix]
+      top <- cor[1:floor(topTFper * nrow(TF.meth.cor))]
+      if (any(top %in% motif.relavent.TFs.family[[x]])) {
+        potential.TF.family <- top[top %in% motif.relavent.TFs.family[[x]]]
+      } else {
+        potential.TF.family <- NA
+      }
+      if (any(top %in% motif.relavent.TFs.subfamily[[x]])) {
+        potential.TF.subfamily <- top[top %in% motif.relavent.TFs.subfamily[[x]]]
+      } else {
+        potential.TF.subfamily <- NA
+      }
+      out <- data.frame(
+        "motif" = x,
+        "top.potential.TF.family" = ifelse(!is.na(potential.TF.family[1]),potential.TF.family[1],NA),
+        "top.potential.TF.subfamily" = ifelse(!is.na(potential.TF.subfamily[1]),potential.TF.subfamily[1],NA),
+        "potential.TF.family" = ifelse(!any(sapply(potential.TF.family,is.na)),paste(potential.TF.family, collapse = ";"),NA),
+        "potential.TF.subfamily" = ifelse(!any(sapply(potential.TF.subfamily,is.na)),paste(potential.TF.subfamily, collapse = ";"),NA),
+        "top_5percent_TFs" = paste(top,collapse = ";"),
+        stringsAsFactors = FALSE
+      )
+      return(out)
+    },
+    TF.meth.cor = TF.meth.cor, 
+    motif.relavent.TFs.family = TF.family,
+    motif.relavent.TFs.subfamily = TF.subfamily,
+    .progress = "time",
+    .parallel = parallel,
+    .margins = 1,
+    .id = NULL,
+    .paropts = list(.errorhandling = 'pass')
+  )
   rownames(cor.summary) <- cor.summary$motif
   
   if(save){
-    save(TF.meth.cor,
-         file=sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label)))
-    write_csv(cor.summary,
-              file=sprintf("%s/getTF.%s.significant.TFs.with.motif.summary.csv",
-                           dir.out=dir.out, label=ifelse(is.null(label),"",label)))
+    save(
+      TF.meth.cor,
+      file = sprintf("%s/getTF.%s.TFs.with.motif.pvalue.rda",dir.out=dir.out, label=ifelse(is.null(label),"",label))
+    )
+    write_csv(
+      x = cor.summary,
+      file = sprintf(
+        "%s/getTF.%s.significant.TFs.with.motif.summary.csv",
+        dir.out = dir.out, label=ifelse(is.null(label),"",label)
+      )
+    )
   }
   
   if(save.plots){
     print.header("Creating plots", "subsection")
     message("TF rank plot highlighting TF in the same family (folder: ", sprintf("%s/TFrankPlot",dir.out),")")
     dir.create(sprintf("%s/TFrankPlot",dir.out), showWarnings = FALSE, recursive = TRUE)
-    TF.rank.plot(motif.pvalue  = TF.meth.cor,
-                 motif         = colnames(TF.meth.cor),
-                 dir.out       = sprintf("%s/TFrankPlot",dir.out),
-                 cores        = cores,
-                 save         = TRUE)
+    TF.rank.plot(
+      motif.pvalue = TF.meth.cor,
+      motif        = colnames(TF.meth.cor),
+      dir.out      = sprintf("%s/TFrankPlot",dir.out),
+      cores        = cores,
+      save         = TRUE
+    )
   }
   return(cor.summary)
 }
@@ -1600,17 +1645,18 @@ get.TFs <- function(data,
 #' enriched.motif = "../LUAD_analysis_hg38/hyper/getMotif.hyper.enriched.motifs.rda",
 #' TF.result = "../LUAD_analysis_hg38/hyper/getTF.hyper.significant.TFs.with.motif.summary.csv")
 #' }
-getTFtargets <- function(pairs,
-                         enriched.motif,
-                         TF.result,
-                         dmc.analysis,
-                         mae,
-                         save = TRUE,
-                         dir.out = "./",
-                         classification = "family",
-                         cores = 1,
-                         label = NULL)
-{
+getTFtargets <- function(
+    pairs,
+    enriched.motif,
+    TF.result,
+    dmc.analysis,
+    mae,
+    save = TRUE,
+    dir.out = "./",
+    classification = "family",
+    cores = 1,
+    label = NULL
+){
   if(is.character(pairs)) pairs <- readr::read_csv(pairs, col_types = readr::cols())
   if(is.character(enriched.motif)) load(enriched.motif)
   if(is.character(TF.result)) TF.result <- readr::read_csv(TF.result, col_types = readr::cols())
@@ -1714,10 +1760,12 @@ getTFtargets <- function(pairs,
   return(df.all)
 }
 
-maphg38tohg19 <- function(file,
-                          TF,
-                          dir.out = "./",
-                          label = NULL){
+maphg38tohg19 <- function(
+    file,
+    TF,
+    dir.out = "./",
+    label = NULL
+){
   
   if (!requireNamespace("rtracklayer", quietly = TRUE)) {
     stop("rtracklayer package is needed for this function to work. Please install it.",
@@ -1746,10 +1794,12 @@ maphg38tohg19 <- function(file,
     label <- paste0(label,"_",TF)
   }
   
-  gr <- makeGRangesFromDataFrame(ret, seqnames.field = "probe_seqnames",
-                                 start.field = "probe_start",
-                                 end.field = "probe_end",
-                                 strand.field = "probe_strand")
+  gr <- makeGRangesFromDataFrame(
+    ret, seqnames.field = "probe_seqnames",
+    start.field = "probe_start",
+    end.field = "probe_end",
+    strand.field = "probe_strand"
+  )
   gr$Probe  <- ret$Probe
   gr <- unique(gr)
   x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
@@ -1758,11 +1808,13 @@ maphg38tohg19 <- function(file,
   ret.hg19 <- merge(ret,x, by.x = "Probe",by.y = "probe_hg19_Probe")
   
   # remap gene
-  gr <- makeGRangesFromDataFrame(ret,
-                                 seqnames.field = "seqnames",
-                                 start.field = "start",
-                                 end.field =  "end",
-                                 strand.field = "strand")
+  gr <- makeGRangesFromDataFrame(
+    ret,
+    seqnames.field = "seqnames",
+    start.field = "start",
+    end.field =  "end",
+    strand.field = "strand"
+  )
   gr$GeneID  <- ret$GeneID
   gr <- unique(gr)
   x <-data.frame(unlist(rtracklayer::liftOver(gr,ch)))
@@ -1785,22 +1837,27 @@ maphg38tohg19 <- function(file,
 #' @param classification Consider subfamily or family classifications
 #' @param top Get only the top potential (default) or all potentials
 #' @importFrom readr read_csv
-summarizeTF <- function(files = NULL,
-                        path = NULL,
-                        classification = "family",
-                        top = FALSE){
+summarizeTF <- function(
+    files = NULL,
+    path = NULL,
+    classification = "family",
+    top = FALSE
+){
   
   top <- ifelse(top, "top.", "")
-  col <- ifelse(classification == "family",
-                paste0(top, "potential.TF.family"),
-                paste0(top, "potential.TF.subfamily")
+  col <- ifelse(
+    classification == "family",
+    paste0(top, "potential.TF.family"),
+    paste0(top, "potential.TF.subfamily")
   )
   
   if(!is.null(path)) {
-    files <- dir(path = path,
-                 pattern = "TF.*with.motif.summary.csv",
-                 recursive = T,
-                 full.names = TRUE)
+    files <- dir(
+      path = path,
+      pattern = "TF.*with.motif.summary.csv",
+      recursive = T,
+      full.names = TRUE
+    )
   }
   aux <- list()
   for(f in files){
@@ -1821,9 +1878,11 @@ summarizeTF <- function(files = NULL,
   return(df)
 }
 
-getTopFamily <- function(motif,
-                         TF.meth.cor,
-                         n = 3){
+getTopFamily <- function(
+    motif,
+    TF.meth.cor,
+    n = 3
+){
   TF.family <-  createMotifRelevantTfs()
   TF <-  stringr::str_trim(unlist(stringr::str_split(TF.family[[motif]],";")))
   TF <- TF[TF %in% rownames(TF.meth.cor)]
