@@ -50,13 +50,13 @@
 #' # get distal enhancer probe remove chrX chrY
 #' Probe2 <- get.feature.probe(rm.chr=c("chrX", "chrY"))
 get.feature.probe <- function(
-  feature = NULL,
-  TSS,
-  genome = "hg38",
-  met.platform = "450K",
-  TSS.range = list(upstream = 2000, downstream = 2000),
-  promoter = FALSE,
-  rm.chr = NULL
+    feature = NULL,
+    TSS,
+    genome = "hg38",
+    met.platform = "450K",
+    TSS.range = list(upstream = 2000, downstream = 2000),
+    promoter = FALSE,
+    rm.chr = NULL
 ){
   
   probe <- getInfiniumAnnotation(plat =  toupper(met.platform),genome = genome)
@@ -1029,6 +1029,7 @@ promoterMeth <- function(data,
 #' @importFrom stats fisher.test cor.test
 #' @importFrom dplyr filter
 #' @importFrom Matrix colMeans colSums
+#' @importFrom IRanges ranges
 #' @import ELMER.data
 #' @references
 #' Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
@@ -1057,18 +1058,20 @@ promoterMeth <- function(data,
 #'                                      pvalue = 1,
 #'                                      min.incidence=2,
 #'                                      label="hypo")
-get.enriched.motif <- function(data,
-                               probes.motif,
-                               probes,
-                               min.motif.quality = "DS",
-                               background.probes,
-                               pvalue = 0.05,
-                               lower.OR = 1.1,
-                               min.incidence = 10,
-                               dir.out="./",
-                               label = NULL,
-                               save = TRUE,
-                               plot.title = ""){
+get.enriched.motif <- function(
+    data,
+    probes.motif,
+    probes,
+    min.motif.quality = "DS",
+    background.probes,
+    pvalue = 0.05,
+    lower.OR = 1.1,
+    min.incidence = 10,
+    dir.out="./",
+    label = NULL,
+    save = TRUE,
+    plot.title = ""
+){
   # create output directory if it does not exists
   dir.create(dir.out,showWarnings = FALSE, recursive = TRUE)  
   
@@ -1152,36 +1155,44 @@ get.enriched.motif <- function(data,
   
   en.motifs <- grep(paste0("\\.[A-",toupper(min.motif.quality),"]"), en.motifs, value = T)
   message("Considering only motifs with quality from A up to ", min.motif.quality,": ",length(en.motifs)," motifs are enriched.")
-  enriched.motif <- alply(en.motifs,
-                          function(x, probes.TF) {
-                            rownames(probes.TF[probes.TF[,x] == 1, x, drop = FALSE])
-                          },
-                          probes.TF = probes.TF,.margins = 1, .dims = FALSE)
+  enriched.motif <- alply(
+    en.motifs,
+    function(x, probes.TF) {
+      rownames(probes.TF[probes.TF[,x] == 1, x, drop = FALSE])
+    },
+    probes.TF = probes.TF,.margins = 1, .dims = FALSE
+  )
   attributes(enriched.motif) <- NULL
   names(enriched.motif) <- en.motifs
   
   if(save) {
     save(enriched.motif, 
-         file = sprintf("%s/getMotif.%s.enriched.motifs.rda",
-                        dir.out,
-                        ifelse(is.null(label),"",label)))
+         file = sprintf(
+           "%s/getMotif.%s.enriched.motifs.rda",
+           dir.out,
+           ifelse(is.null(label),"",label))
+    )
   }
   
   ## make plot
   if(length(enriched.motif) > 1){
     suppressWarnings({
-      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
-                                 significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR),
-                                 dir.out = dir.out,
-                                 label = paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
-                                 save = TRUE)
-      P <- motif.enrichment.plot(motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
-                                 significant = list(lowerOR = lower.OR),
-                                 dir.out = dir.out,
-                                 summary = TRUE,
-                                 label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
-                                 title = plot.title,
-                                 save = TRUE)
+      P <- motif.enrichment.plot(
+        motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
+        significant = list(NumOfProbes = min.incidence, lowerOR = lower.OR),
+        dir.out = dir.out,
+        label = paste0(ifelse(is.null(label),"",label),".quality.A-",toupper(min.motif.quality)),
+        save = TRUE
+      )
+      P <- motif.enrichment.plot(
+        motif.enrichment = filter(Summary,grepl(paste0("\\.[A-",toupper(min.motif.quality),"]"), Summary$motif)),
+        significant = list(lowerOR = lower.OR),
+        dir.out = dir.out,
+        summary = TRUE,
+        label = paste0(label,".quality.A-",toupper(min.motif.quality),"_with_summary"),
+        title = plot.title,
+        save = TRUE
+      )
     })
   }
   ## add information to siginificant pairs
@@ -1196,9 +1207,11 @@ get.enriched.motif <- function(data,
                              TFs <- names(probes.TF[x,probes.TF[x,] == 1])
                              non.en.motif <- paste(setdiff(TFs,en.motifs),collapse = ";")
                              en.motif <- paste(intersect(TFs,en.motifs), collapse = ";")
-                             out <- data.frame(non_enriched_motifs = non.en.motif,
-                                               enriched_motifs = en.motif,
-                                               stringsAsFactors = FALSE)
+                             out <- data.frame(
+                               non_enriched_motifs = non.en.motif,
+                               enriched_motifs = en.motif,
+                               stringsAsFactors = FALSE
+                             )
                              return(out)
                            },
                            probes.TF = probes.TF, 

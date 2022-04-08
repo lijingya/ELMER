@@ -14,14 +14,16 @@
 #' in the lower quintile, but then 5 will be used.
 #' @importFrom stats sd t.test wilcox.test
 #' @return Statistic test results to identify differentially methylated probes.
-Stat.diff.meth <- function(meth,
-                           groups,
-                           group1,
-                           group2,
-                           test = t.test,
-                           min.samples = 5,
-                           percentage = 0.2,
-                           Top.m = NULL){
+Stat.diff.meth <- function(
+    meth,
+    groups,
+    group1,
+    group2,
+    test = t.test,
+    min.samples = 5,
+    percentage = 0.2,
+    Top.m = NULL
+){
   
   if(percentage < 1){
     g1 <- meth[groups %in% group1]
