@@ -329,7 +329,7 @@ if(file.exists(file)) {
     if(length(names(motifs.enriched)) > 0) {
       .motif.plot <- motif.enrichment.plot(
         motif.enrichment = motifs,
-        summary = TRUE,
+        summary = FALSE,
         title = paste0("Probes ",dir,"methylated in ", g1, " vs ", g2),
         significant = list(lowerOR = params$lower.OR, NumOfProbes = params$nprobes),
         save = FALSE
