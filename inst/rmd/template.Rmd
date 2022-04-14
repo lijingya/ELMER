@@ -391,7 +391,7 @@ if(file.exists(file)) {
       for(i in names(x)) {
         cat("\n######",gsub("_HUMAN.H11MO.*","",i)," \n")
         .pl <- x[[i]]
-        kexpand.plot(8,paste0(gsub("_HUMAN.H11MO.*","",i)," - Probes ",dir,"methylated in ", g1, " vs ", g2),8)
+        kexpand.plot(6,paste0(gsub("_HUMAN.H11MO.*","",i)," - Probes ",dir,"methylated in ", g1, " vs ", g2),6)
       }
       
       .df <- TF[na.omit(match(motifs$motif,TF$motif)),]
