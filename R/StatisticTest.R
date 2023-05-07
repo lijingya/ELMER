@@ -77,37 +77,48 @@ Stat.diff.meth <- function(
 #' @param methy Index of M (methylated) group.
 #' @param unmethy Index of U (unmethylated) group.
 #' @return U test results
-Stat.nonpara.permu <- function(Probe,
-                               Gene,
-                               Top = 0.2,
-                               correlation = "negative",
-                               unmethy = NULL,
-                               methy  = NULL,
-                               Meths = Meths,
-                               Exps = Exps){
+Stat.nonpara.permu <- function(
+    Probe,
+    Gene,
+    Top = 0.2,
+    correlation = "negative",
+    unmethy = NULL,
+    methy  = NULL,
+    Meths = Meths,
+    Exps = Exps
+){
+  
+  
   if(is.null(methy) & is.null(unmethy)){
     idx <- order(Meths)
     nb <- round(length(Meths) * Top)
     unmethy <- head(idx, n = nb) 
     methy <- tail(idx, n = nb) 
   }
-  test.p <- unlist(lapply(splitmatrix(Exps),
-                          function(x) {
-                            tryCatch({
-                              wilcox.test(x[unmethy],
-                                          x[methy],
-                                          alternative = ifelse(correlation == "negative","greater","less"),
-                                          exact = FALSE)$p.value
-                            }, error = function(e){
-                              NA
-                            })                            
-                          }
-                          
-  ))
+  test.p <- unlist(
+    lapply(
+      splitmatrix(Exps),
+      function(x) {
+        tryCatch({
+          wilcox.test(
+            x[unmethy],
+            x[methy],
+            alternative = ifelse(correlation == "negative","greater","less"),
+            exact = FALSE
+          )$p.value
+        }, error = function(e){
+          NA
+        })                            
+      }
+      
+    ))
   
-  test.p <- data.frame(GeneID=Gene,
-                       Raw.p=test.p[match(Gene, names(test.p))], 
-                       stringsAsFactors = FALSE) 
+  test.p <- data.frame(
+    GeneID = Gene,
+    Raw.p = test.p[match(Gene, names(test.p))], 
+    stringsAsFactors = FALSE
+  ) 
+  
   return(test.p)
 }
 

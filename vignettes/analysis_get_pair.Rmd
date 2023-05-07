@@ -110,26 +110,30 @@ Notice that in the `Supervised` mode, no additional filtering is necessary to en
 mae <- get(load("mae.rda"))
 sig.diff <- read.csv("result/getMethdiff.hypo.probes.significant.csv")
 
-nearGenes <- GetNearGenes(data = mae, 
-                         probes = sig.diff$probe, 
-                         numFlankingGenes = 20) # 10 upstream and 10 dowstream genes
+nearGenes <- GetNearGenes(
+  data = mae, 
+  probes = sig.diff$probe, 
+  numFlankingGenes = 20
+) # 10 upstream and 10 dowstream genes
 
-Hypo.pair <- get.pair(data = mae,
-                      group.col = "definition",
-                      group1 =  "Primary solid Tumor",
-                      group2 = "Solid Tissue Normal",
-                      nearGenes = nearGenes,
-                      mode = "unsupervised",
-                      permu.dir = "result/permu",
-                      permu.size = 100, # Please set to 100000 to get significant results
-                      raw.pvalue = 0.05,   
-                      Pe = 0.01, # Please set to 0.001 to get significant results
-                      filter.probes = TRUE, # See preAssociationProbeFiltering function
-                      filter.percentage = 0.05,
-                      filter.portion = 0.3,
-                      dir.out = "result",
-                      cores = 1,
-                      label = "hypo")
+Hypo.pair <- get.pair(
+  data = mae,
+  group.col = "definition",
+  group1 =  "Primary solid Tumor",
+  group2 = "Solid Tissue Normal",
+  nearGenes = nearGenes,
+  mode = "unsupervised",
+  permu.dir = "result/permu",
+  permu.size = 100, # Please set to 100000 to get significant results
+  raw.pvalue = 0.05,   
+  Pe = 0.01, # Please set to 0.001 to get significant results
+  filter.probes = TRUE, # See preAssociationProbeFiltering function
+  filter.percentage = 0.05,
+  filter.portion = 0.3,
+  dir.out = "result",
+  cores = 1,
+  label = "hypo"
+)
 ```
 
 Observation: The distance column in the nearGenes object and in thable getPair.hypo.all.pairs.statistic.csv  are the distance to the gene. 

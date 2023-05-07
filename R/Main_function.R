@@ -1367,29 +1367,40 @@ get.enriched.motif <- function(
 #'     message(e)
 #'      data(elmer.data.example, envir = environment())
 #'   })
-#' enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
-#'                                  "cg17153775", "cg21156590", "cg19749688", "cg12590404",
-#'                                  "cg24517858", "cg00329272", "cg09010107", "cg15386853",
-#'                                  "cg10097755", "cg09247779", "cg09181054"))
-#' TF <- get.TFs(data,
-#'               enriched.motif,
-#'               group.col = "definition",
-#'               group1 = "Primary solid Tumor",
-#'               group2 = "Solid Tissue Normal",
-#'               TFs = data.frame(
-#'                      external_gene_name=c("TP53","TP63","TP73"),
-#'                      ensembl_gene_id= c("ENSG00000141510",
-#'                                         "ENSG00000073282",
-#'                                         "ENSG00000078900"),
-#'                      stringsAsFactors = FALSE),
-#'              label="hypo")
+#' enriched.motif <- list(
+#'    "P53_HUMAN.H11MO.1.A"= c(
+#'       "cg00329272", "cg10097755", "cg08928189",
+#'       "cg17153775", "cg21156590", "cg19749688", "cg12590404",
+#'       "cg24517858", "cg00329272", "cg09010107", "cg15386853",
+#'       "cg10097755", "cg09247779", "cg09181054"
+#'       )
+#' )
+#' TF <- get.TFs(
+#'    data,
+#'    enriched.motif,
+#'    group.col = "definition",
+#'    group1 = "Primary solid Tumor",
+#'    group2 = "Solid Tissue Normal",
+#'    TFs = data.frame(
+#'          external_gene_name=c("TP53","TP63","TP73"),
+#'          ensembl_gene_id= c(
+#'            "ENSG00000141510",
+#'            "ENSG00000073282",
+#'            "ENSG00000078900"
+#'            ),
+#'            stringsAsFactors = FALSE
+#'            ),
+#'  label = "hypo"
+#' )
 #' # This case will use Uniprot dabase to get list of Trasncription factors
-#' TF <- get.TFs(data,
-#'               group.col = "definition",
-#'               group1 = "Primary solid Tumor",
-#'               group2 = "Solid Tissue Normal",
-#'               enriched.motif,
-#'               label="hypo")
+#' TF <- get.TFs(
+#'   data,
+#'   group.col = "definition",
+#'   group1 = "Primary solid Tumor",
+#'   group2 = "Solid Tissue Normal",
+#'   enriched.motif,
+#'   label = "hypo"
+#')
 get.TFs <- function(
     data,
     enriched.motif,
@@ -1519,19 +1530,21 @@ get.TFs <- function(
   TF.meth.cor <- alply(
     .data = names(enriched.motif), .margins = 1,
     .fun = function(x) {
-      Stat.nonpara.permu(
+     Stat.nonpara.permu(
         Probe = x,
-        Meths = motif.meth[x,],
+        Meths = motif.meth[x,] %>% as.numeric(),
         Gene  = gene,
         correlation = correlation,
         unmethy = unmethylated,
         methy = methylated,
         Top   = minSubgroupFrac/2,
-        Exps  = exps)},
+        Exps  = exps
+      )},
     .progress = "time",
     .parallel = parallel,
     .paropts = list(.errorhandling = 'pass')
   )
+  
   # We are going to make a multiple hypothesis correction
   TF.meth.cor <- lapply(TF.meth.cor, function(x){return(p.adjust(x$Raw.p,method = "BH"))})
   TF.meth.cor <- do.call(cbind,TF.meth.cor)

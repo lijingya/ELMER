@@ -73,12 +73,14 @@ head(pair) # significantly hypomethylated probes with putative target genes
 
 # Identify enriched motif for significantly hypomethylated probes which 
 # have putative target genes.
-enriched.motif <- get.enriched.motif(data = mae,
-                                     probes = pair$Probe, 
-                                     dir.out = "result", 
-                                     label = "hypo",
-                                     min.incidence = 10,
-                                     lower.OR = 1.1)
+enriched.motif <- get.enriched.motif(
+  data = mae,
+  probes = pair$Probe, 
+  dir.out = "result", 
+  label = "hypo",
+  min.incidence = 10,
+  lower.OR = 1.1
+)
 ```
 
 ```{r,eval=TRUE, message=FALSE, warning = FALSE}

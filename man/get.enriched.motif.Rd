@@ -91,20 +91,24 @@ probes <- c("cg00329272","cg10097755","cg08928189", "cg17153775","cg21156590",
   })
 bg <- rownames(getMet(data))
 data(Probes.motif.hg38.450K,package = "ELMER.data")
-enriched.motif <- get.enriched.motif(probes.motif = Probes.motif.hg38.450K,
-                                     probes = probes,
-                                     background.probes = bg,
-                                     pvalue = 1,
-                                     min.incidence = 2,
-                                     label = "hypo")
+enriched.motif <- get.enriched.motif(
+   probes.motif = Probes.motif.hg38.450K,
+   probes = probes,
+   background.probes = bg,
+   pvalue = 1,
+   min.incidence = 2,
+   label = "hypo"
+)
 # If the MAE is set, the background and the probes.motif will
 # be automatically set
-enriched.motif <- get.enriched.motif(data = data,
-                                     min.motif.quality = "DS",
-                                     probes=probes,
-                                     pvalue = 1,
-                                     min.incidence=2,
-                                     label="hypo")
+enriched.motif <- get.enriched.motif(
+    data = data,
+    min.motif.quality = "DS",
+    probes=probes,
+    pvalue = 1,
+    min.incidence=2,
+    label="hypo"
+)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription

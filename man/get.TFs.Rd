@@ -112,29 +112,40 @@ data <- tryCatch(
     message(e)
      data(elmer.data.example, envir = environment())
   })
-enriched.motif <- list("P53_HUMAN.H11MO.1.A"= c("cg00329272", "cg10097755", "cg08928189",
-                                 "cg17153775", "cg21156590", "cg19749688", "cg12590404",
-                                 "cg24517858", "cg00329272", "cg09010107", "cg15386853",
-                                 "cg10097755", "cg09247779", "cg09181054"))
-TF <- get.TFs(data,
-              enriched.motif,
-              group.col = "definition",
-              group1 = "Primary solid Tumor",
-              group2 = "Solid Tissue Normal",
-              TFs = data.frame(
-                     external_gene_name=c("TP53","TP63","TP73"),
-                     ensembl_gene_id= c("ENSG00000141510",
-                                        "ENSG00000073282",
-                                        "ENSG00000078900"),
-                     stringsAsFactors = FALSE),
-             label="hypo")
+enriched.motif <- list(
+   "P53_HUMAN.H11MO.1.A"= c(
+      "cg00329272", "cg10097755", "cg08928189",
+      "cg17153775", "cg21156590", "cg19749688", "cg12590404",
+      "cg24517858", "cg00329272", "cg09010107", "cg15386853",
+      "cg10097755", "cg09247779", "cg09181054"
+      )
+)
+TF <- get.TFs(
+   data,
+   enriched.motif,
+   group.col = "definition",
+   group1 = "Primary solid Tumor",
+   group2 = "Solid Tissue Normal",
+   TFs = data.frame(
+         external_gene_name=c("TP53","TP63","TP73"),
+         ensembl_gene_id= c(
+           "ENSG00000141510",
+           "ENSG00000073282",
+           "ENSG00000078900"
+           ),
+           stringsAsFactors = FALSE
+           ),
+ label = "hypo"
+)
 # This case will use Uniprot dabase to get list of Trasncription factors
-TF <- get.TFs(data,
-              group.col = "definition",
-              group1 = "Primary solid Tumor",
-              group2 = "Solid Tissue Normal",
-              enriched.motif,
-              label="hypo")
+TF <- get.TFs(
+  data,
+  group.col = "definition",
+  group1 = "Primary solid Tumor",
+  group2 = "Solid Tissue Normal",
+  enriched.motif,
+  label = "hypo"
+)
 }
 \references{
 Yao, Lijing, et al. "Inferring regulatory element landscapes and transcription
